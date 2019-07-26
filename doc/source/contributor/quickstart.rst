@@ -10,7 +10,7 @@ OpenStack project.
 
 .. seealso::
 
-   http://docs.openstack.org/infra/manual/developers.html
+   https://docs.openstack.org/infra/manual/developers.html
 
 Setup Dev Environment
 =====================
@@ -57,7 +57,7 @@ Magnum source code should be pulled directly from git::
 
     # from your home or source directory
     cd ~
-    git clone https://git.openstack.org/openstack/magnum
+    git clone https://opendev.org/openstack/magnum
     cd magnum
 
 All unit tests should be run using tox. To run magnum's entire test suite::
@@ -84,7 +84,7 @@ To run unit test coverage and check percentage of code covered::
     tox -e cover
 
 To discover and interact with templates, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/cluster-type-definition.html>`_
+:doc:`/user/cluster-type-definition`.
 
 Exercising the Services Using DevStack
 ======================================
@@ -113,7 +113,7 @@ Clone devstack::
     sudo mkdir -p /opt/stack
     sudo chown $USER /opt/stack
 
-    git clone https://git.openstack.org/openstack-dev/devstack /opt/stack/devstack
+    git clone https://opendev.org/openstack/devstack /opt/stack/devstack
 
 We will run devstack with minimal local.conf settings required to enable
 magnum, heat, and neutron (neutron is enabled by default in devstack since
@@ -130,16 +130,16 @@ Kilo, and heat must be enabled by yourself)::
     PUBLIC_INTERFACE=eth1
 
     # Enable barbican service and use it to store TLS certificates
-    # For details https://docs.openstack.org/developer/magnum/userguide.html#transport-layer-security
-    enable_plugin barbican https://git.openstack.org/openstack/barbican
+    # For details https://docs.openstack.org/magnum/latest/user/index.html#transport-layer-security
+    enable_plugin barbican https://opendev.org/openstack/barbican
 
-    enable_plugin heat https://git.openstack.org/openstack/heat
+    enable_plugin heat https://opendev.org/openstack/heat
 
     # Enable magnum plugin after dependent plugins
-    enable_plugin magnum https://git.openstack.org/openstack/magnum
+    enable_plugin magnum https://opendev.org/openstack/magnum
 
     # Optional:  uncomment to enable the Magnum UI plugin in Horizon
-    #enable_plugin magnum-ui https://github.com/openstack/magnum-ui
+    #enable_plugin magnum-ui https://opendev.org/openstack/magnum-ui
 
     VOLUME_BACKING_FILE_SIZE=20G
     END
@@ -152,8 +152,8 @@ Optionally, you can enable neutron/lbaas v2 with octavia to create load
 balancers for multi master clusters::
 
     $ cat >> /opt/stack/devstack/local.conf << END
-    enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
-    enable_plugin octavia https://git.openstack.org/openstack/octavia
+    enable_plugin neutron-lbaas https://opendev.org/openstack/neutron-lbaas
+    enable_plugin octavia https://opendev.org/openstack/octavia
 
     # Disable LBaaS(v1) service
     disable_service q-lbaas
@@ -170,7 +170,7 @@ Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
 magnum will periodically send metrics to ceilometer::
 
     $ cat >> /opt/stack/devstack/local.conf << END
-    enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
+    enable_plugin ceilometer https://opendev.org/openstack/ceilometer
     END
 
 If you want to deploy Docker Registry 2.0 in your cluster, you should enable
@@ -184,10 +184,10 @@ swift in devstack::
     END
 
 More devstack configuration information can be found at
-http://docs.openstack.org/developer/devstack/configuration.html
+https://docs.openstack.org/devstack/latest/configuration.html
 
 More neutron configuration information can be found at
-http://docs.openstack.org/developer/devstack/guides/neutron.html
+https://docs.openstack.org/devstack/latest/guides/neutron.html
 
 Run devstack::
 
@@ -391,8 +391,7 @@ cluster using::
     sudo mv ./kubectl /usr/local/bin/kubectl
 
 We first need to setup the certs to allow Kubernetes to authenticate our
-connection.   Please refer to
-`<http://docs.openstack.org/developer/magnum/userguide.html#transport-layer-security>`_
+connection.   Please refer to :ref:`transport_layer_security`
 for more info on using TLS keys/certs which are setup below.
 
 To generate an RSA key, you will use the 'genrsa' command of the 'openssl'
@@ -550,7 +549,7 @@ except for the absence of some Kubernetes-specific arguments and the use of
                            --coe swarm-mode
 
 **NOTE:** If you are using Magnum behind a firewall then refer
-to `<http://docs.openstack.org/developer/magnum/magnum-proxy.html>`_
+to :doc:`/admin/magnum-proxy`.
 
 Finally, create the cluster. Use the ClusterTemplate 'swarm-cluster-template'
 as a template for cluster creation. This cluster will result in one swarm
@@ -658,7 +657,7 @@ Building and Using a Mesos Cluster
 
 Provisioning a mesos cluster requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
-`<http://docs.openstack.org/developer/magnum/userguide.html#building-mesos-image>`_
+:ref`building_mesos_image`.
 
 Alternatively, you can download and upload a pre-built image::
 

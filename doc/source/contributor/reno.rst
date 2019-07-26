@@ -4,7 +4,7 @@ Release Notes
 What is reno ?
 --------------
 
-Magnum uses `reno <http://docs.openstack.org/developer/reno/usage.html>`_ for
+Magnum uses `reno <https://docs.openstack.org/reno/latest/index.html>`_ for
 providing release notes in-tree. That means that a patch can include a *reno
 file* or a series can have a follow-on change containing that file explaining
 what the impact is.
@@ -19,7 +19,7 @@ generated using the reno tool this way:
 where usually ``<name-your-file>`` can be ``bp-<blueprint_name>`` for a
 blueprint or ``bug-XXXXXX`` for a bugfix.
 
-Refer to the `reno documentation <http://docs.openstack.org/developer/reno/usage.html#editing-a-release-note>`_
+Refer to the `reno documentation <https://docs.openstack.org/reno/latest/user/usage.html#editing-a-release-note>`_
 for the full list of sections.
 
 
@@ -32,10 +32,10 @@ of the note file entirely. If no section is needed, then you know you don't
 need to provide a release note :-)
 
 * ``upgrade``
-    * The patch has an `UpgradeImpact <http://docs.openstack.org/infra/manual/developers.html#peer-review>`_ tag
+    * The patch has an `UpgradeImpact <https://docs.openstack.org/infra/manual/developers.html#peer-review>`_ tag
     * A DB change needs some deployer modification (like a migration)
     * A configuration option change (deprecation, removal or modified default)
-    * some specific changes that have a `DocImpact <http://docs.openstack.org/infra/manual/developers.html#peer-review>`_ tag
+    * some specific changes that have a `DocImpact <https://docs.openstack.org/infra/manual/developers.html#peer-review>`_ tag
       but require further action from an deployer perspective
     * any patch that requires an action from the deployer in general
 
@@ -43,7 +43,7 @@ need to provide a release note :-)
     * If the patch fixes a known vulnerability
 
 * ``features``
-    * If the patch has an `APIImpact <http://docs.openstack.org/infra/manual/developers.html#peer-review>`_ tag
+    * If the patch has an `APIImpact <https://docs.openstack.org/infra/manual/developers.html#peer-review>`_ tag
 
 * ``critical``
     * Bugfixes categorized as Critical in Launchpad *impacting users*

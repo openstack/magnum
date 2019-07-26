@@ -55,4 +55,4 @@ pipeline, you can create a file under the file path defined by
 ``disable_by_file_path`` ie. ``/etc/magnum/healthcheck_disable``.
 
 For more information see
-`oslo.middleware <http://docs.openstack.org/developer/oslo.middleware/api.html#oslo_middleware.Healthcheck>`_.
+`oslo.middleware <https://docs.openstack.org/oslo.middleware/latest/reference/api.html#oslo_middleware.Healthcheck>`_.

@@ -9,10 +9,9 @@ Prerequisite
 ============
 
 You need to have a Magnum instance running somewhere. If you are using
-devstack, follow the developer quickstart guide to deploy Magnum in a devstack
-environment
+devstack, follow :ref:`quickstart`  to deploy Magnum in a devstack
+environment.
 
-`<https://docs.openstack.org/developer/magnum/dev/quickstart.html>`_
 
 Configuration
 =============
@@ -66,7 +65,7 @@ Outside of devstack
 If you are not using devstack, you'll need to create the configuration files.
 The /etc/tempest.conf configuration file is documented here
 
-`<https://docs.openstack.org/developer/tempest/configuration.html#tempest-configuration>`_
+`<https://docs.openstack.org/tempest/latest/configuration.html#tempest-configuration>`_
 
 Here's a reasonable sample of tempest.conf settings you might need::
 

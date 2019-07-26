@@ -105,7 +105,7 @@ Install and configure components
       .. code-block:: console
 
          # cd /var/lib/magnum
-         # git clone https://git.openstack.org/openstack/magnum.git
+         # git clone https://opendev.org/openstack/magnum
          # chown -R magnum:magnum magnum
          # cd magnum
          # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install -r requirements.txt" magnum
@@ -254,7 +254,7 @@ Install the command-line client
    .. code-block:: console
 
       $ cd ~
-      $ git clone https://git.openstack.org/openstack/python-magnumclient.git
+      $ git clone https://opendev.org/openstack/python-magnumclient
       $ cd python-magnumclient
       $ virtualenv .magnumclient-env
       $ .magnumclient-env/bin/pip install -r requirements.txt

@@ -420,6 +420,8 @@ the table are linked to more details elsewhere in the user guide.
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
 
+.. _cluster:
+
 Cluster
 -------
 
@@ -503,9 +505,7 @@ network cannot be removed while a Nova instance is still attached.
 **NOTE** Currently Heat nested templates are used to create the
 resources; therefore if an error occurs, you can troubleshoot through
 Heat.  For more help on Heat stack troubleshooting, refer to the
-`Troubleshooting Guide
-<https://docs.openstack.org/magnum/latest/admin/troubleshooting-guide.html#heat-stacks>`_.
-
+:ref:`magnum_troubleshooting_guide`.
 
 
 Create
@@ -700,11 +700,11 @@ Follow the instructions in the OpenStack Installation Guide to enable the
 repositories for your distribution:
 
 * `RHEL/CentOS/Fedora
-  <http://docs.openstack.org/liberty/install-guide-rdo/>`_
+  <https://docs.openstack.org/liberty/install-guide-rdo/>`_
 * `Ubuntu/Debian
-  <http://docs.openstack.org/liberty/install-guide-ubuntu/>`_
+  <https://docs.openstack.org/liberty/install-guide-ubuntu/>`_
 * `openSUSE/SUSE Linux Enterprise
-  <http://docs.openstack.org/liberty/install-guide-obs/>`_
+  <https://docs.openstack.org/liberty/install-guide-obs/>`_
 
 Install using distribution packages for RHEL/CentOS/Fedora::
 
@@ -730,7 +730,7 @@ Using the command-line client
 -----------------------------
 
 Refer to the `OpenStack Command-Line Interface Reference
-<http://docs.openstack.org/cli-reference/magnum.html>`_ for a full list of the
+<https://docs.openstack.org/cli-reference/magnum.html>`_ for a full list of the
 commands supported by the `openstack coe` command-line client.
 
 Horizon Interface
@@ -739,11 +739,10 @@ Horizon Interface
 Magnum provides a Horizon plugin so that users can access the Container
 Infrastructure Management service through the OpenStack browser-based
 graphical UI.  The plugin is available from
-`magnum-ui <https://github.com/openstack/magnum-ui>`_.  It is not
+`magnum-ui <https://opendev.org/openstack/magnum-ui>`_.  It is not
 installed by default in the standard Horizon service, but you can
 follow the instruction for `installing a Horizon plugin
-<http://docs.openstack.org/developer/horizon/tutorials/
-plugin.html#installing-your-plugin>`_.
+<https://docs.openstack.org/horizon/latest/contributor/tutorials/plugin.html#installing-your-plugin>`_.
 
 In Horizon, the container infrastructure panel is part of the
 'Project' view and it currently supports the following operations:
@@ -1015,8 +1014,7 @@ look for the attribute *coe_version* and *container_version*::
 Kubernetes
 ==========
 Kubernetes uses a range of terminology that we refer to in this guide. We
-define these common terms in the `Glossary
-<https://docs.openstack.org/magnum/latest/glossary.html>`_ for your reference.
+define these common terms in the :ref:`Glossary` for your reference.
 
 When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
@@ -1757,6 +1755,8 @@ _`mesos_slave_executor_env_variables`
   variables.
 
 
+.. _building_mesos_image:
+
 Building Mesos image
 --------------------
 
@@ -1774,7 +1774,7 @@ Diskimage-builder
 +++++++++++++++++
 
 To run the `diskimage-builder
-<http://docs.openstack.org/developer/diskimage-builder>`__ tool
+<https://docs.openstack.org/diskimage-builder/latest>`__ tool
 manually, use the provided `elements
 <https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/mesos_ubuntu_v1/image/mesos/>`__.
 Following are the typical steps to use the diskimage-builder tool on
@@ -1784,10 +1784,10 @@ an Ubuntu server::
     $ sudo apt-get install git qemu-utils python-pip
     $ sudo pip install diskimage-builder
 
-    $ git clone https://git.openstack.org/openstack/magnum
-    $ git clone https://git.openstack.org/openstack/dib-utils.git
-    $ git clone https://git.openstack.org/openstack/tripleo-image-elements.git
-    $ git clone https://git.openstack.org/openstack/heat-templates.git
+    $ git clone https://opendev.org/openstack/magnum
+    $ git clone https://opendev.org/openstack/dib-utils.git
+    $ git clone https://opendev.org/openstack/tripleo-image-elements.git
+    $ git clone https://opendev.org/openstack/heat-templates.git
     $ export PATH="${PWD}/dib-utils/bin:$PATH"
     $ export ELEMENTS_PATH=tripleo-image-elements/elements:heat-templates/hot/software-config/elements:magnum/magnum/drivers/mesos_ubuntu_v1/image/mesos
     $ export DIB_RELEASE=trusty
@@ -1806,7 +1806,7 @@ provided `Dockerfile
 The output image will be saved as '/tmp/ubuntu-mesos.qcow2'.
 Following are the typical steps to run a Docker container to build the image::
 
-    $ git clone https://git.openstack.org/openstack/magnum
+    $ git clone https://opendev.org/openstack/magnum
     $ cd magnum/magnum/drivers/mesos_ubuntu_v1/image
     $ sudo docker build -t magnum/mesos-builder .
     $ sudo docker run -v /tmp:/output --rm -ti --privileged magnum/mesos-builder
@@ -1849,6 +1849,7 @@ For example, you can 'post' a JSON app description to
     $ curl -X POST -H "Content-Type: application/json" \
         http://${API_ADDRESS}:8080/v2/apps -d@app.json
 
+.. _transport_layer_security:
 
 Transport Layer Security
 ========================
@@ -2918,7 +2919,7 @@ This image can be downloaded from the `public Atomic site
 <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images/>`_
 or can be built locally using diskimagebuilder.  Details can be found in the
 `fedora-atomic element
-<https://github.com/openstack/magnum/tree/master/magnum/elements/fedora-atomic>`_
+<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/k8s_fedora_atomic_v1>`_
 The image currently has the following OS/software:
 
 +--------------------------+-----------+
@@ -2996,7 +2997,7 @@ Kubernetes on Ironic
 
 This image is built manually using diskimagebuilder.  The scripts and
 instructions are included in `Magnum code repo
-<https://github.com/openstack/magnum/tree/master/magnum/templates/kubernetes/elements>`_.
+<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/k8s_fedora_ironic_v1>`_.
 Currently Ironic is not fully supported yet, therefore more details will be
 provided when this driver has been fully tested.
 
@@ -3048,7 +3049,7 @@ capabilities for compliance with security, operational, and business processes
 and supports normalized and categorized event data for federation and
 aggregation.
 
-.. _PyCADF: http://docs.openstack.org/developer/pycadf
+.. _PyCADF: https://docs.openstack.org/pycadf
 .. _CADF: http://www.dmtf.org/standards/cadf
 
 Below table describes the event model components and semantics for

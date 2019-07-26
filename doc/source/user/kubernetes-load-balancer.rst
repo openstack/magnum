@@ -128,8 +128,8 @@ Create a file (e.g nginx-service.yaml) describing a service for the nginx pod::
         app: nginx
       type: LoadBalancer
 
-Please refer to the `quickstart <https://docs.openstack.org/developer/magnum/
-userguide.html>`_ guide on how to connect to Kubernetes running on the launched
+Please refer to :ref:`quickstart` on how to connect to Kubernetes
+running on the launched
 cluster. Assuming a Kubernetes cluster named k8sclusterv1 has been created,
 deploy the pod and service using following commands::
 

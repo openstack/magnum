@@ -1,3 +1,5 @@
+.. _magnum_troubleshooting_guide:
+
 ============================
 Magnum Troubleshooting Guide
 ============================
@@ -239,16 +241,17 @@ Check the following:
   interface?  Does this interface have a route to the external internet?
 - If "external-network" is specified in the ClusterTemplate, does this
   network have a route to the external internet?
-- Is your devstack environment behind a firewall?  This can be the case for some
-  enterprises or countries.  In this case, consider using a `proxy server
-  <https://docs.openstack.org/magnum/latest/admin/magnum-proxy.html>`_.
+- Is your devstack environment behind a firewall?  This can be the
+  case for some
+  enterprises or countries.  In this case, consider using a
+  :doc:`proxy server </admin/magnum-proxy>`.
 - Is the traffic blocked by the security group? Check the
   `rules of security group
-  <http://docs.openstack.org/ops-guide/ops-user-facing-operations.html#security-groups>`_.
+  <https://docs.openstack.org/operations-guide/ops-user-facing-operations.html#security-groups>`_.
 - Is your host NAT'ing your internal network correctly? Check your host
-  `iptables <http://docs.openstack.org/ops-guide/ops-network-troubleshooting.html#iptables>`_.
+  `iptables <https://docs.openstack.org/operations-guide/ops-network-troubleshooting.html#iptables>`_.
 - Use *tcpdump* for `networking troubleshooting
-  <http://docs.openstack.org/ops-guide/ops-network-troubleshooting.html#tcpdump>`_.
+  <https://docs.openstack.org/operations-guide/ops-network-troubleshooting.html#tcpdump>`_.
   You can run *tcpdump* on the interface *docker0, flannel0* and *eth0* on the
   node and then run *ping* to see the path of the message from the container.
 
@@ -266,7 +269,7 @@ If the name lookup fails, check the following:
   specified by "dns-nameserver" in the ClusterTemplate.
 - If you are using your own DNS server by specifying "dns-nameserver"
   in the ClusterTemplate, is it reachable and working?
-- More help on `DNS troubleshooting <http://docs.openstack.org/ops-guide/ops-network-troubleshooting.html#debugging-dns-issues>`_.
+- More help on `DNS troubleshooting <https://docs.openstack.org/operations-guide/ops-network-troubleshooting.html#debugging-dns-issues>`_.
 
 
 Kubernetes networking
@@ -354,7 +357,7 @@ If the ping is not successful, check the following:
 - Is Flannel running properly?  check the `Running Flannel`_.
 
 - Ping and try `tcpdump
-  <http://docs.openstack.org/ops-guide/ops-network-troubleshooting.html#tcpdump>`_
+  <https://docs.openstack.org/operations-guide/ops-network-troubleshooting.html#tcpdump>`_
   on each network interface along the path between two nodes
   to see how far the message is able to travel.
   The message path should be as follows:

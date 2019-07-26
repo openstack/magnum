@@ -6,9 +6,9 @@ Launch an instance
 In environments that include the Container Infrastructure Management service,
 you can provision container clusters made up of virtual machines or baremetal
 servers. The Container Infrastructure Management service uses
-`Cluster Templates <http://docs.openstack.org/developer/magnum/userguide.html#clustertemplate>`__
-to describe how a `Cluster <http://docs.openstack.org/developer/magnum/
-userguide.html#cluster>`__ is constructed. In each of the following examples
+`Cluster Templates <ClusterTemplate>`_
+to describe how a :ref:`cluster` is constructed. In each of the
+following examples
 you will create a Cluster Template for a specific COE and then you will
 provision a Cluster using the corresponding Cluster Template. Then, you can use
 the appropriate COE client or endpoint to create containers.

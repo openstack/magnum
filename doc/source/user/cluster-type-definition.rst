@@ -45,7 +45,7 @@ Enabling a Cluster Type is as simple as adding it's Entry Point to the
 
     $ virtualenv .venv
     $ . .venv/bin/active
-    (.venv)$ git clone https://github.com/openstack/magnum.git
+    (.venv)$ git clone https://opendev.org/openstack/magnum
     (.venv)$ cd magnum
     (.venv)$ python setup.py install
 

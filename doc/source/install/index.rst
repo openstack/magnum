@@ -21,5 +21,5 @@ runs that image in either virtual machines or bare metal in a cluster
 configuration.
 
 This chapter assumes a working setup of OpenStack following `OpenStack
-Installation Tutorial <http://docs.openstack.org/#install-guides>`_.
+Installation Tutorial <https://docs.openstack.org/#install-guides>`_.
 

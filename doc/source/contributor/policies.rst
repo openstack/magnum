@@ -133,7 +133,7 @@ Summary of Core Reviewer Responsibilities
 PTL Responsibilities
 ====================
 In accordance with our `Project Team Guide for PTLs
-<http://docs.openstack.org/project-team-guide/ptl.html>`_
+<https://docs.openstack.org/project-team-guide/ptl.html>`_
 our PTL carries all the responsibilities referenced above plus:
 
 * Select and target blueprints for each release cycle.
@@ -310,9 +310,9 @@ Reviews
 =======
 A review is a patch set that includes a proposal for inclusion in our code
 base. We follow the process outlined in the `Code Review
-<http://docs.openstack.org/infra/manual/developers.html#code-review>`_
+<https://docs.openstack.org/infra/manual/developers.html#code-review>`_
 section of the `OpenStack Developer's Guide
-<http://docs.openstack.org/infra/manual/developers.html>`_.
+<https://docs.openstack.org/infra/manual/developers.html>`_.
 The following workflow states may by applied to each review:
 
 ========== ================== =============================================
@@ -478,7 +478,7 @@ applied.
 Fast Revert
 -----------
 This policy was adapted from nova's `Reverts for Retrospective Vetos
-<http://docs.openstack.org/developer/nova/policies.html>`_ policy in 2017.
+<https://docs.openstack.org/nova/latest/policies.html>`_ policy in 2017.
 Sometimes our simple `2 +2s` approval policy will result in errors when we
 move quickly. These errors might be a bug that was missed, or equally
 importantly, it might be that other cores feel that there is a need for
