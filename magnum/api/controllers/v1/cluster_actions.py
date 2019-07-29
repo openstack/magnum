@@ -82,7 +82,7 @@ class ActionsController(base.Controller):
     }
 
     @base.Controller.api_version("1.7")
-    @expose.expose(None, types.uuid_or_name,
+    @expose.expose(ClusterID, types.uuid_or_name,
                    body=ClusterResizeRequest, status_code=202)
     def resize(self, cluster_ident, cluster_resize_req):
         """Resize a cluster.
@@ -127,7 +127,7 @@ class ActionsController(base.Controller):
         return ClusterID(cluster.uuid)
 
     @base.Controller.api_version("1.8")
-    @expose.expose(None, types.uuid_or_name,
+    @expose.expose(ClusterID, types.uuid_or_name,
                    body=ClusterUpgradeRequest, status_code=202)
     def upgrade(self, cluster_ident, cluster_upgrade_req):
         """Upgrade a cluster.
