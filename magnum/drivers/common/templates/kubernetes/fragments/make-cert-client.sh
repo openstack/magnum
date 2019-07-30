@@ -79,7 +79,7 @@ EOF
     curl $VERIFY_CA -X GET \
         -H "X-Auth-Token: $USER_TOKEN" \
         -H "OpenStack-API-Version: container-infra latest" \
-        $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
+        $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' > $CA_CERT
 
     # Generate client's private key and csr
     $ssh_cmd openssl genrsa -out "${_KEY}" 4096
@@ -91,13 +91,13 @@ EOF
             -config "${_CONF}"
 
     # Send csr to Magnum to have it signed
-    csr_req=$(python -c "import json; fp = open('${_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
+    csr_req=$(python -c "import json; fp = open('${_CSR}'); print(json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()})); fp.close()")
     curl  $VERIFY_CA -X POST \
         -H "X-Auth-Token: $USER_TOKEN" \
         -H "OpenStack-API-Version: container-infra latest" \
         -H "Content-Type: application/json" \
         -d "$csr_req" \
-        $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${_CERT}
+        $MAGNUM_URL/certificates | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' > ${_CERT}
 }
 
 #Kubelet Certs
