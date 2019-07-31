@@ -25,9 +25,12 @@ from magnum.api import utils as api_utils
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import policy
+import magnum.conf
 from magnum.i18n import _
 from magnum import objects
 from magnum.objects import fields
+
+CONF = magnum.conf.CONF
 
 
 class Quota(base.APIBase):
@@ -157,10 +160,16 @@ class QuotaController(base.Controller):
         if not context.is_admin and project_id != context.project_id:
             raise exception.NotAuthorized()
 
-        quota = objects.Quota.get_quota_by_project_id_resource(context,
-                                                               project_id,
-                                                               resource)
-        return Quota.convert(quota)
+        try:
+            quota = objects.Quota.get_quota_by_project_id_resource(context,
+                                                                   project_id,
+                                                                   resource)
+            quota = Quota.convert(quota)
+        except exception.QuotaNotFound:
+            # If explicit quota was not set for the project, use default limit
+            quota = Quota(project_id=project_id,
+                          hard_limit=CONF.quotas.max_clusters_per_project)
+        return quota
 
     @expose.expose(Quota, body=Quota, status_code=201)
     @validation.enforce_valid_project_id_on_create()

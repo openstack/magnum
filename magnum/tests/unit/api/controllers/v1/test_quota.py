@@ -16,10 +16,13 @@ from keystoneauth1 import exceptions as ka_exception
 
 from magnum.api.controllers.v1 import quota as api_quota
 from magnum.common import clients
+import magnum.conf
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
 from magnum.tests.unit.objects import utils as obj_utils
+
+CONF = magnum.conf.CONF
 
 
 class TestQuotaObject(base.TestCase):
@@ -60,14 +63,27 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(quota.resource, response['resource'])
 
     @mock.patch("magnum.common.policy.enforce")
-    def test_get_one_not_found(self, mock_policy):
+    def test_get_one_no_config_default(self, mock_policy):
         mock_policy.return_value = True
         response = self.get_json(
-            '/quotas/fake_project/invalid_res',
+            '/quotas/fake_project/Cluster',
             expect_errors=True)
-        self.assertEqual(404, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['errors'])
+        self.assertEqual(200, response.status_int)
+        self.assertEqual('fake_project', response.json['project_id'])
+        self.assertEqual(CONF.quotas.max_clusters_per_project,
+                         response.json['hard_limit'])
+
+    @mock.patch("magnum.common.policy.enforce")
+    def test_get_one_with_config_default(self, mock_policy):
+        mock_policy.return_value = True
+        quota = 15
+        CONF.set_override('max_clusters_per_project', quota, group='quotas')
+        response = self.get_json(
+            '/quotas/fake_project/Cluster',
+            expect_errors=True)
+        self.assertEqual(200, response.status_int)
+        self.assertEqual('fake_project', response.json['project_id'])
+        self.assertEqual(quota, response.json['hard_limit'])
 
     def test_get_one_not_authorized(self):
         obj_utils.create_test_quota(self.context)
@@ -300,6 +316,7 @@ class TestQuota(api_base.FunctionalTest):
         response = self.get_json(
             '/quotas/%s/%s' % (project_id, resource),
             expect_errors=True)
-        self.assertEqual(404, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['errors'])
+        self.assertEqual(200, response.status_int)
+        self.assertEqual('fake_project', response.json['project_id'])
+        self.assertEqual(CONF.quotas.max_clusters_per_project,
+                         response.json['hard_limit'])
