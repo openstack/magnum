@@ -424,5 +424,5 @@ class MasterNGResizeNotSupported(NotSupported):
 
 class NGResizeOutBounds(Invalid):
     message = _("Resizing %(nodegroup)s outside the allowed range: "
-                "min_node_count = %(min_node_count), "
-                "max_node_count = %(max_node_count)")
+                "min_node_count = %(min_node_count)s, "
+                "max_node_count = %(max_node_count)s")
