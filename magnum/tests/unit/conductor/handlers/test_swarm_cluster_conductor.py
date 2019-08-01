@@ -81,7 +81,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
                        'rexray_preempt': 'False',
                        'swarm_strategy': 'spread',
                        'availability_zone': 'az_1'},
-            'coe_version': 'fake-version'
+            'coe_version': 'fake-version',
+            'fixed_network': '',
+            'fixed_subnet': '',
+            'floating_ip_enabled': False,
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',

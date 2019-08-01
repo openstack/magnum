@@ -118,7 +118,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
             'project_id': 'project_id',
-            'keystone_auth_default_policy': self.keystone_auth_default_policy
+            'keystone_auth_default_policy': self.keystone_auth_default_policy,
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
+            'floating_ip_enabled': False,
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
@@ -554,6 +557,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_volume_size': 20,
             'master_flavor': 'master_flavor_id',
             'minion_flavor': 'flavor_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'external_network': 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e',
             'flannel_backend': 'vxlan',
             'flannel_network_cidr': '10.101.0.0/16',
@@ -607,7 +612,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_private_network.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
              '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',

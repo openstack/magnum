@@ -51,8 +51,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.19: Added nodegroups, default_ng_worker, default_ng_master
     # Version 1.20: Fields node_count, master_count, node_addresses,
     #               master_addresses are now properties.
+    # Version 1.21  Added fixed_network, fixed_subnet, floating_ip_enabled
 
-    VERSION = '1.20'
+    VERSION = '1.21'
 
     dbapi = dbapi.get_instance()
 
@@ -84,7 +85,10 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'trustee_password': fields.StringField(nullable=True),
         'trustee_user_id': fields.StringField(nullable=True),
         'coe_version': fields.StringField(nullable=True),
-        'container_version': fields.StringField(nullable=True)
+        'container_version': fields.StringField(nullable=True),
+        'fixed_network': fields.StringField(nullable=True),
+        'fixed_subnet': fields.StringField(nullable=True),
+        'floating_ip_enabled': fields.BooleanField(default=True),
     }
 
     @staticmethod

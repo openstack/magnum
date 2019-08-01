@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    When using a public cluster template, user still need the capability
+    to reuse their existing network/subnet, and they also need to be
+    able to turn of/off the floating IP to overwrite the setting in the
+    public template. Now this is supported by adding those three
+    items as parameters when creating cluster.

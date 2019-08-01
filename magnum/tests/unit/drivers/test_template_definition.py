@@ -219,7 +219,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_cluster_template = mock.MagicMock(floating_ip_enabled=False,
                                                master_lb_enabled=False,
                                                labels={})
-        mock_cluster = mock.MagicMock(labels={})
+        mock_cluster = mock.MagicMock(labels={}, floating_ip_enabled=False)
         env_files = []
         cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
                                   mock_cluster)
@@ -235,7 +235,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_cluster_template = mock.MagicMock(floating_ip_enabled=False,
                                                master_lb_enabled=True,
                                                labels={})
-        mock_cluster = mock.MagicMock(labels={})
+        mock_cluster = mock.MagicMock(labels={}, floating_ip_enabled=False,)
         env_files = []
         cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
                                   mock_cluster)
@@ -254,7 +254,8 @@ class TemplateDefinitionTestCase(base.TestCase):
             labels={"master_lb_floating_ip_enabled": "true"}
         )
         mock_cluster = mock.MagicMock(
-            labels={"master_lb_floating_ip_enabled": "true"})
+            labels={"master_lb_floating_ip_enabled": "true"},
+            floating_ip_enabled=False,)
         env_files = []
         cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
                                   mock_cluster)
@@ -273,7 +274,8 @@ class TemplateDefinitionTestCase(base.TestCase):
             labels={"master_lb_floating_ip_enabled": "false"}
         )
         mock_cluster = mock.MagicMock(
-            labels={"master_lb_floating_ip_enabled": "false"})
+            labels={"master_lb_floating_ip_enabled": "false"},
+            floating_ip_enabled=False,)
         env_files = []
 
         cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,

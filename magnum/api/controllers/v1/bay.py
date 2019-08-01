@@ -142,6 +142,15 @@ class Bay(base.APIBase):
     bay_faults = wsme.wsattr(wtypes.DictType(wtypes.text, wtypes.text))
     """Fault info collected from the heat resources of this bay"""
 
+    fixed_network = wtypes.StringType(min_length=1, max_length=255)
+    """The fixed network name to attach to the Cluster"""
+
+    fixed_subnet = wtypes.StringType(min_length=1, max_length=255)
+    """The fixed subnet name to attach to the Cluster"""
+
+    floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
+    """Indicates whether created clusters should have a floating ip or not."""
+
     def __init__(self, **kwargs):
         super(Bay, self).__init__()
 

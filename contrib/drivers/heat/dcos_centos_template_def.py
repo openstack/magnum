@@ -156,7 +156,7 @@ class DcosCentosTemplateDefinition(template_def.BaseTemplateDefinition):
     def get_env_files(self, cluster_template, cluster):
         env_files = []
 
-        template_def.add_priv_net_env_file(env_files, cluster_template)
+        template_def.add_priv_net_env_file(env_files, cluster)
         template_def.add_lb_env_file(env_files, cluster_template)
         template_def.add_fip_env_file(env_files, cluster_template, cluster)
 
