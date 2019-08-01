@@ -14,6 +14,7 @@
 """Starter script for magnum-db-manage."""
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.db import migration
 
@@ -63,6 +64,7 @@ command_opt = cfg.SubCommandOpt('command',
 
 
 def main():
+    logging.register_options(CONF)
     CONF.register_cli_opt(command_opt)
 
     CONF(project='magnum')
