@@ -15,6 +15,6 @@ kubernetes_images:
 
 magnum_images:
   - name: heat-container-agent
-    tag: stein-dev
+    tag: train-dev
 
 helm_version: v2.12.3
