@@ -119,11 +119,11 @@ please refer
 <https://opendev.org/openstack/magnum/src/branch/master/specs/create-trustee-user-for-each-bay.rst>`_.
 
 If Magnum fails to create the trustee, check the magnum config file (usually
-in /etc/magnum/magnum.conf). Make sure 'trustee_*' and 'auth_uri' are set and
-their values are correct:
+in /etc/magnum/magnum.conf). Make sure 'trustee_*' and 'www_authenticate_uri'
+are set and their values are correct:
 
     [keystone_authtoken]
-    auth_uri = http://controller:5000/v3
+    www_authenticate_uri = http://controller:5000/v3
     ...
 
     [trust]
