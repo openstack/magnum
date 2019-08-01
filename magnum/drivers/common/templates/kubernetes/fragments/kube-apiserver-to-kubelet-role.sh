@@ -292,7 +292,7 @@ spec:
         command:
         - /bin/openstack-cloud-controller-manager
         - --v=2
-        - --cloud-config=/etc/kubernetes/cloud-config
+        - --cloud-config=/etc/kubernetes/cloud-config-occm
         - --cluster-name=${CLUSTER_UUID}
         - --use-service-account-credentials=true
         - --bind-address=127.0.0.1

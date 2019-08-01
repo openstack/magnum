@@ -15,7 +15,7 @@ $ssh_cmd cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
 # Generate a the configuration for Kubernetes services
 # to talk to OpenStack Neutron and Cinder
-cat > $KUBE_OS_CLOUD_CONFIG <<EOF
+CLOUD_CONFIG=$(cat <<EOF
 [Global]
 auth-url=$AUTH_URL
 user-id=$TRUSTEE_USER_ID
@@ -33,6 +33,8 @@ monitor-max-retries=3
 [BlockStorage]
 bs-version=v2
 EOF
+)
+echo $CLOUD_CONFIG > $KUBE_OS_CLOUD_CONFIG
 
 # Provide optional region parameter if it's set.
 if [ -n "${REGION_NAME}" ]; then
@@ -41,3 +43,11 @@ fi
 
 # backwards compatibility, some apps may expect this file from previous magnum versions.
 $ssh_cmd cp ${KUBE_OS_CLOUD_CONFIG} /etc/kubernetes/kube_openstack_config
+
+# Append additional networking config to config file provided to openstack
+# cloud controller manager (not supported by in-tree Cinder).
+cat > ${KUBE_OS_CLOUD_CONFIG}-occm <<EOF
+$CLOUD_CONFIG
+[Networking]
+internal-network-name=$CLUSTER_NETWORK
+EOF
