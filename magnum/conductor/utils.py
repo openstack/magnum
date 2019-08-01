@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from oslo_utils import uuidutils
+from pycadf import attachment
 from pycadf import cadftaxonomy as taxonomy
 from pycadf import cadftype
 from pycadf import eventfactory
@@ -98,19 +99,58 @@ def _get_request_audit_info(context):
     return initiator
 
 
-def notify_about_cluster_operation(context, action, outcome):
+def _get_event_target(cluster_obj=None):
+    if cluster_obj:
+        target = resource.Resource(
+            id=cluster_obj.uuid,
+            name=cluster_obj.name,
+            typeURI='service/magnum/cluster'
+        )
+        target.add_attachment(attach_val=attachment.Attachment(
+            typeURI='service/magnum/cluster',
+            content={
+                'status': cluster_obj.status,
+                'status_reason': cluster_obj.status_reason,
+                'project_id': cluster_obj.project_id,
+                'created_at': cluster_obj.created_at,
+                'updated_at': cluster_obj.updated_at,
+                'cluster_template_id': cluster_obj.cluster_template_id,
+                'keypair': cluster_obj.keypair,
+                'docker_volume_size:': cluster_obj.docker_volume_size,
+                'labels': cluster_obj.labels,
+                'master_flavor_id': cluster_obj.master_flavor_id,
+                'flavor_id': cluster_obj.flavor_id,
+                'stack_id': cluster_obj.stack_id,
+                'health_status': cluster_obj.health_status,
+                'create_timeout': cluster_obj.create_timeout,
+                'api_address': cluster_obj.api_address,
+                'discovery_url': cluster_obj.discovery_url,
+                'node_addresses': cluster_obj.node_addresses,
+                'master_addresses': cluster_obj.master_addresses,
+                'node_count': cluster_obj.node_count,
+                'master_count': cluster_obj.master_count,
+            },
+            name='cluster_data'
+        ))
+        return target
+    return resource.Resource(typeURI='service/magnum/cluster')
+
+
+def notify_about_cluster_operation(context, action, outcome, cluster_obj=None):
     """Send a notification about cluster operation.
 
     :param action: CADF action being audited
     :param outcome: CADF outcome
+    :param cluster_obj: the cluster the notification is related to
     """
     notifier = rpc.get_notifier()
+
     event = eventfactory.EventFactory().new_event(
         eventType=cadftype.EVENTTYPE_ACTIVITY,
         outcome=outcome,
         action=action,
         initiator=_get_request_audit_info(context),
-        target=resource.Resource(typeURI='service/magnum/cluster'),
+        target=_get_event_target(cluster_obj=cluster_obj),
         observer=resource.Resource(typeURI='service/magnum/cluster'))
     service = 'magnum'
     event_type = '%(service)s.cluster.%(action)s' % {
