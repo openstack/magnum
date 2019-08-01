@@ -42,11 +42,12 @@ if [ ${new_kube_tag}!=${KUBE_TAG} ]; then
 
     ${ssh_cmd} /var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig /etc/kubernetes/kubelet-config.yaml uncordon ${HOSTNAME_OVERRIDE}
 
-    # FIXME(flwang): The KUBE_TAG could be out of date after a successful upgrade
     for service in ${SERVICE_LIST}; do
         ${ssh_cmd} atomic --assumeyes images "delete docker.io/openstackmagnum/${service_image_mapping[${service}]}:${KUBE_TAG}"
     done
 
     ${ssh_cmd} atomic images prune
 
+    # Appending the new KUBE_TAG into the heat-parms to log and indicate the current k8s version
+    echo "KUBE_TAG=$new_kube_tag" >> /etc/sysconfig/heat-params
 fi
