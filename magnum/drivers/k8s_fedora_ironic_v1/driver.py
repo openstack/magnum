@@ -12,12 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.drivers.common import k8s_monitor
 from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_ironic_v1 import template_def
 
 
-class Driver(driver.HeatDriver):
+class Driver(driver.KubernetesDriver):
 
     @property
     def provides(self):
@@ -29,16 +28,3 @@ class Driver(driver.HeatDriver):
 
     def get_template_definition(self):
         return template_def.FedoraK8sIronicTemplateDefinition()
-
-    def get_monitor(self, context, cluster):
-        return k8s_monitor.K8sMonitor(context, cluster)
-
-    def get_scale_manager(self, context, osclient, cluster):
-        # FIXME: Until the kubernetes client is fixed, remove
-        # the scale_manager.
-        # https://bugs.launchpad.net/magnum/+bug/1746510
-        return None
-
-    def upgrade_cluster(self, context, cluster, scale_manager=None,
-                        rollback=False):
-        raise NotImplementedError("Must implement 'upgrade_cluster'")
