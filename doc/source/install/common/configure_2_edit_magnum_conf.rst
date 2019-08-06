@@ -68,7 +68,7 @@
         user_domain_id = default
         password = MAGNUM_PASS
         username = magnum
-        auth_url = http://controller:35357
+        auth_url = http://controller:5000
         auth_type = password
         admin_user = magnum
         admin_password = MAGNUM_PASS
