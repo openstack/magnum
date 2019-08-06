@@ -281,6 +281,12 @@ parameters:
     description: >
       true if the auto healing feature should be enabled
 
+  auto_healing_controller:
+    type: string
+    description: >
+      The service to be deployed for auto-healing.
+    default: "draino"
+
   npd_enabled:
     type: boolean
     description: >
@@ -373,6 +379,7 @@ resources:
                   $OCTAVIA_ENABLED: {get_param: octavia_enabled}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
                   $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
+                  $AUTO_HEALING_CONTROLLER: {get_param: auto_healing_controller}
                   $NPD_ENABLED: {get_param: npd_enabled}
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh

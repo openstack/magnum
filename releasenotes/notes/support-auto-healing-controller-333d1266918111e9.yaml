@@ -1,0 +1,7 @@
+---
+features:
+  - A new tag ``auto_healing_controller`` is introduced to allow the user to
+    choose the auto-healing service when ``auto_healing_enabled`` is specified
+    in the labels, ``draino`` and ``magnum-auto-healer`` are supported for now.
+    Another label ``magnum_auto_healer_tag`` is also added to specify the
+    ``magnum-auto-healer`` image tag.

@@ -526,6 +526,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'traefik_ingress_controller_tag')
         auto_healing_enabled = mock_cluster.labels.get(
             'auto_healing_enabled')
+        auto_healing_controller = mock_cluster.labels.get(
+            'auto_healing_controller')
+        magnum_auto_healer_tag = mock_cluster.labels.get(
+            'magnum_auto_healer_tag')
         auto_scaling_enabled = mock_cluster.labels.get(
             'auto_scaling_enabled')
         draino_tag = mock_cluster.labels.get('draino_tag')
@@ -602,6 +606,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_namespace': tiller_namespace,
             'node_problem_detector_tag': npd_tag,
             'auto_healing_enabled': auto_healing_enabled,
+            'auto_healing_controller': auto_healing_controller,
+            'magnum_auto_healer_tag': magnum_auto_healer_tag,
             'auto_scaling_enabled': auto_scaling_enabled,
             'draino_tag': draino_tag,
             'autoscaler_tag': autoscaler_tag,
@@ -936,6 +942,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'traefik_ingress_controller_tag')
         auto_healing_enabled = mock_cluster.labels.get(
             'auto_healing_enabled')
+        auto_healing_controller = mock_cluster.labels.get(
+            'auto_healing_controller')
+        magnum_auto_healer_tag = mock_cluster.labels.get(
+            'magnum_auto_healer_tag')
         auto_scaling_enabled = mock_cluster.labels.get(
             'auto_scaling_enabled')
         draino_tag = mock_cluster.labels.get('draino_tag')
@@ -1014,6 +1024,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_namespace': tiller_namespace,
             'node_problem_detector_tag': npd_tag,
             'auto_healing_enabled': auto_healing_enabled,
+            'auto_healing_controller': auto_healing_controller,
+            'magnum_auto_healer_tag': magnum_auto_healer_tag,
             'auto_scaling_enabled': auto_scaling_enabled,
             'draino_tag': draino_tag,
             'autoscaler_tag': autoscaler_tag,

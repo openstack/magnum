@@ -457,6 +457,17 @@ parameters:
     description: >
       true if the auto healing feature should be enabled
 
+  auto_healing_controller:
+    type: string
+    description: >
+      The service to be deployed for auto-healing.
+    default: "draino"
+
+  magnum_auto_healer_tag:
+    type: string
+    description: tag of the magnum-auto-healer service.
+    default: "v1.15.0"
+
   auto_scaling_enabled:
     type: boolean
     description: >
@@ -635,6 +646,8 @@ resources:
                   "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
                   "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
                   "$AUTO_HEALING_ENABLED": {get_param: auto_healing_enabled}
+                  "$AUTO_HEALING_CONTROLLER": {get_param: auto_healing_controller}
+                  "$MAGNUM_AUTO_HEALER_TAG": {get_param: magnum_auto_healer_tag}
                   "$AUTO_SCALING_ENABLED": {get_param: auto_scaling_enabled}
                   "$DRAINO_TAG": {get_param: draino_tag}
                   "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
