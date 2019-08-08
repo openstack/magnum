@@ -68,7 +68,6 @@ KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 if [ -z "${KUBE_NODE_IP}" ]; then
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
-HOSTNAME_OVERRIDE="$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')"
 cat << EOF >> ${KUBELET_KUBECONFIG}
 apiVersion: v1
 clusters:
@@ -79,13 +78,13 @@ clusters:
 contexts:
 - context:
     cluster: kubernetes
-    user: system:node:${HOSTNAME_OVERRIDE}
+    user: system:node:${INSTANCE_NAME}
   name: default
 current-context: default
 kind: Config
 preferences: {}
 users:
-- name: system:node:${HOSTNAME_OVERRIDE}
+- name: system:node:${INSTANCE_NAME}
   user:
     as-user-extra: {}
     client-certificate: ${CERT_DIR}/kubelet.crt
@@ -137,7 +136,7 @@ sed -i '
 # the option --hostname-override for kubelet uses the hostname to register the node.
 # Using any other name will break the load balancer and cinder volume features.
 mkdir -p /etc/kubernetes/manifests
-KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --kubeconfig ${KUBELET_KUBECONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --kubeconfig ${KUBELET_KUBECONFIG} --hostname-override=${INSTANCE_NAME}"
 KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only-port=0 --anonymous-auth=false --authorization-mode=Webhook --authentication-token-webhook=true"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 KUBELET_ARGS="${KUBELET_ARGS} --volume-plugin-dir=/var/lib/kubelet/volumeplugins"
@@ -208,5 +207,3 @@ EOF
 cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=$KUBE_MASTER_URI
 EOF
-
-$ssh_cmd "hostname $(cat /etc/hostname | head -1 |sed 's/.novalocal//')"

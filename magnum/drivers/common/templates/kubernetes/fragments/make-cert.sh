@@ -149,7 +149,6 @@ extendedKeyUsage = clientAuth,serverAuth
 EOF
 
 #Kubelet Certs
-INSTANCE_NAME=$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')
 cat > ${cert_dir}/kubelet.conf <<EOF
 [req]
 distinguished_name = req_distinguished_name
