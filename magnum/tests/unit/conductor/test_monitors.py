@@ -47,10 +47,10 @@ class MonitorsTestCase(base.TestCase):
 
     def setUp(self):
         super(MonitorsTestCase, self).setUp()
-
         cluster = utils.get_test_cluster(node_addresses=['1.2.3.4'],
                                          api_address='https://5.6.7.8:2376',
-                                         master_addresses=['10.0.0.6'])
+                                         master_addresses=['10.0.0.6'],
+                                         labels={})
         self.cluster = objects.Cluster(self.context, **cluster)
         nodegroups = utils.get_nodegroups_for_cluster(
             node_addresses=['1.2.3.4'], master_addresses=['10.0.0.6'])
@@ -511,3 +511,15 @@ class MonitorsTestCase(base.TestCase):
         self.assertEqual(self.k8s_monitor.data['health_status_reason'],
                          {'api': 'ok', 'k8s-cluster-node-0.Ready': False,
                           'api': 'ok', 'k8s-cluster-node-1.Ready': True})
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    def test_k8s_monitor_health_unreachable_cluster(self, mock_k8s_api):
+        mock_nodes = mock.MagicMock()
+        mock_node = mock.MagicMock()
+        mock_node.status = mock.MagicMock()
+        mock_nodes.items = [mock_node]
+        self.k8s_monitor.cluster.floating_ip_enabled = False
+
+        self.k8s_monitor.poll_health_status()
+        self.assertEqual(self.k8s_monitor.data['health_status'],
+                         m_fields.ClusterHealthStatus.UNKNOWN)
