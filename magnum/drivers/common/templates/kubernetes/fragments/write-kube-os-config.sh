@@ -34,7 +34,10 @@ monitor-max-retries=3
 bs-version=v2
 EOF
 )
-echo $CLOUD_CONFIG > $KUBE_OS_CLOUD_CONFIG
+
+cat > ${KUBE_OS_CLOUD_CONFIG} <<EOF
+$CLOUD_CONFIG
+EOF
 
 # Provide optional region parameter if it's set.
 if [ -n "${REGION_NAME}" ]; then
