@@ -127,7 +127,7 @@ def validate_dns(dns_list):
     dns_nameservers = dns_list.split(',')
     try:
         for dns in dns_nameservers:
-            netaddr.IPAddress(dns, version=4, flags=netaddr.INET_PTON)
+            netaddr.IPAddress(dns.strip(), version=4, flags=netaddr.INET_PTON)
     except netaddr.AddrFormatError:
         raise exception.InvalidDNS(dns=dns_list)
     else:
