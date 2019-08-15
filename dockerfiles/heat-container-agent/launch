@@ -2,4 +2,6 @@
 
 /opt/heat-container-agent/configure_container_agent.sh
 
+export LC_ALL=C
+
 exec os-collect-config --debug
