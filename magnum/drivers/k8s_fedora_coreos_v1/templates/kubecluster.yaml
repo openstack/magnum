@@ -842,6 +842,13 @@ parameters:
     description: sha256 of the target containerd tarball.
     default: '1f2f0fb928179df90492a83c326a194b8e9d992538498efb44cbb6ef15465627'
 
+  post_install_manifest_url:
+    type: string
+    description: >
+      Post install manifest URL used to setup some cloud provider/vendor
+      specific configs
+    default: ""
+
 resources:
 
   ######################################################################
@@ -1173,6 +1180,7 @@ resources:
           containerd_version: {get_param: containerd_version}
           containerd_tarball_url: {get_param: containerd_tarball_url}
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
+          post_install_manifest_url: {get_param: post_install_manifest_url}
 
   kube_cluster_config:
     condition: create_cluster_resources

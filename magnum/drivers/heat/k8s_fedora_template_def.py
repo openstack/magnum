@@ -127,6 +127,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             csr_keys["private_key"].replace("\n", "\\n")
 
         extra_params['project_id'] = cluster.project_id
+        extra_params['post_install_manifest_url'] = \
+            CONF.kubernetes.post_install_manifest_url
 
         if not extra_params.get('max_node_count'):
             extra_params['max_node_count'] = cluster.node_count + 1

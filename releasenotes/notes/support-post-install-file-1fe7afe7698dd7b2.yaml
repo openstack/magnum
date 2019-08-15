@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new config option `post_install_manifest_url` is added to support installing
+    cloud provider/vendor specific manifest after booted the k8s cluster.
+    It's an URL pointing to the manifest file. For example, cloud admin
+    can set their specific storageclass into this file, then it will be
+    automatically setup after created the cluster.

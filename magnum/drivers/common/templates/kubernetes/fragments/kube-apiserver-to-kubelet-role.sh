@@ -443,4 +443,9 @@ kind: List
 metadata: {}
 EOF
 
+# Post install file to setup some cloud provider/vendor specific configs
+if [ "$POST_INSTALL_MANIFEST_URL" != "" ]; then
+    kubectl apply -f "$POST_INSTALL_MANIFEST_URL"
+fi
+
 printf "Finished running ${step}\n"

@@ -32,6 +32,7 @@ created and managed by Magnum to support the COE's.
 #. `Image Management`_
 #. `Notification`_
 #. `Container Monitoring`_
+#. `Kubernetes Post Install Manifest`_
 #. `Kubernetes External Load Balancer`_
 #. `Rolling Upgrade`_
 #. `Keystone Authentication and Authorization for Kubernetes`_
@@ -3379,6 +3380,18 @@ the service is running, the Grafana dashboards can be accessed through port
 
 For both Prometheus and Grafana, there is an assigned *systemd* service
 called *kube-enable-monitoring*.
+
+Kubernetes Post Install Manifest
+================================
+
+A new config option `post_install_manifest_url` under `[kubernetes]` section
+has been added to support installing cloud provider/vendor specific manifest
+after provisioning the k8s cluster. It's an URL pointing to the manifest file.
+For example, cloud admin can set their specific `StorageClass` into this file,
+then it will be automatically setup after the cluster is created by end user.
+
+**NOTE:** The URL must be reachable from the master nodes when creating the
+cluster.
 
 Kubernetes External Load Balancer
 =================================

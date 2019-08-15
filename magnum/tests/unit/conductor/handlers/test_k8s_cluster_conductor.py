@@ -373,6 +373,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
+            'post_install_manifest_url': '',
         }
 
         if missing_attr is not None:
@@ -524,6 +525,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
+            'post_install_manifest_url': '',
         }
 
         self.assertEqual(expected, definition)
@@ -657,6 +659,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
+            'post_install_manifest_url': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1112,6 +1115,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
+            'post_install_manifest_url': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
