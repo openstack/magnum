@@ -43,6 +43,9 @@ Host localhost
 EOF
 
 sed -i '/^PermitRootLogin/ s/ .*/ without-password/' /etc/ssh/sshd_config
+# Security enhancement: Disable password authentication
+sed -i '/^PasswordAuthentication yes/ s/ yes/ no/' /etc/ssh/sshd_config
+
 systemctl restart sshd
 
 
