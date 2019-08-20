@@ -11,7 +11,7 @@ LABEL name="heat-container-agent" \
       atomic.type="system" \
       distribution-scope="public"
 
-RUN dnf -y --setopt=tsflags=nodocs install \
+RUN dnf -y --setopt=tsflags=nodocs --nogpgcheck install \
         bash \
         findutils \
         gcc \
