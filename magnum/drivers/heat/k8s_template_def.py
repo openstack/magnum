@@ -11,7 +11,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_utils import uuidutils
 
 from magnum.common import exception
 from magnum.common import keystone
@@ -132,12 +131,18 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         # field name is confused. If external_network_id is not specified in
         # cluster template use 'public' as the default value, which is the same
         # with the heat template default value as before.
-        ext_net = cluster_template.external_network_id or "public"
-        if not uuidutils.is_uuid_like(ext_net):
-            ext_net_id = neutron.get_network_id(context, ext_net)
-            extra_params['external_network'] = ext_net_id
-        else:
-            extra_params['external_network'] = ext_net
+        external_network = cluster_template.external_network_id or "public"
+        extra_params['external_network'] = \
+            neutron.get_external_network_id(context, external_network)
+
+        # NOTE(brtknr): Convert fixed network UUID to name if the given network
+        # name is UUID like because OpenStack Cloud Controller Manager only
+        # accepts a name as an argument to internal-network-name in the
+        # cloud-config file provided to it. The default fixed network name is
+        # the same as that defined in the heat template.
+        fixed_network = cluster_template.fixed_network or "private"
+        extra_params['fixed_network_name'] = \
+            neutron.get_fixed_network_name(context, fixed_network)
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen',

@@ -337,6 +337,13 @@ class FlavorNotFound(ResourceNotFound):
     code = 400
 
 
+class FixedNetworkNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
+    """"Ensure the network is private."""
+    message = _("Unable to find fixed network %(network)s.")
+    code = 400
+
+
 class ExternalNetworkNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
     """"Ensure the network is not private."""
