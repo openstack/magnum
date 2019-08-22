@@ -283,6 +283,16 @@ floating_ip_enabled:
   in: body
   required: true
   type: boolean
+floating_ip_enabled_cluster:
+  description: |
+    Whether enable or not using the floating IP of cloud provider. Some
+    cloud providers used floating IP, some used public IP, thus Magnum
+    provide this option for specifying the choice of using floating IP.
+    If it's not set, the value of floating_ip_enabled in template
+    will be used.
+  in: body
+  required: false
+  type: boolean
 host:
   description: |
     The host for the service.
