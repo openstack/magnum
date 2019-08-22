@@ -42,6 +42,9 @@ Request
   - master_flavor_id: master_flavor_id
   - labels: labels
   - flavor_id: flavor_id
+  - fixed_subnet: fixed_subnet
+  - fixed_network: fixed_network
+  - floating_ip_enabled: floating_ip_enabled_cluster
 
 .. note::
 
