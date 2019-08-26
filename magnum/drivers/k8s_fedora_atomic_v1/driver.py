@@ -56,9 +56,15 @@ class Driver(driver.KubernetesDriver):
             if ((label.endswith('_tag') or
                  label.endswith('_version')) and label in heat_params):
                 current_addons[label] = heat_params[label]
-                if (SV.from_pip_string(new_addons[label]) <
-                        SV.from_pip_string(current_addons[label])):
-                    raise exception.InvalidVersion(tag=label)
+                try:
+                    if (SV.from_pip_string(new_addons[label]) <
+                            SV.from_pip_string(current_addons[label])):
+                        raise exception.InvalidVersion(tag=label)
+                except Exception as e:
+                    # NOTE(flwang): Different cloud providers may use different
+                    # tag/version format which maybe not able to parse by
+                    # SemanticVersion. For this case, let's just skip it.
+                    LOG.debug("Failed to parse tag/version %s", str(e))
 
         heat_params["server_image"] = cluster_template.image_id
         heat_params["master_image"] = cluster_template.image_id
