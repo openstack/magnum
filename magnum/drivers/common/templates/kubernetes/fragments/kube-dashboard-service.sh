@@ -112,7 +112,7 @@ subjects:
 # ------------------- Dashboard Deployment ------------------- #
 
 kind: Deployment
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 metadata:
   labels:
     k8s-app: kubernetes-dashboard
@@ -213,7 +213,7 @@ EOF
             echo "Writing File: $INFLUX_DEPLOY"
             mkdir -p $(dirname ${INFLUX_DEPLOY})
             cat << EOF > ${INFLUX_DEPLOY}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: monitoring-influxdb
@@ -260,7 +260,7 @@ EOF
             echo "Writing File: $GRAFANA_DEPLOY"
             mkdir -p $(dirname ${GRAFANA_DEPLOY})
             cat << EOF > ${GRAFANA_DEPLOY}
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: monitoring-grafana
@@ -358,13 +358,17 @@ metadata:
   name: heapster
   namespace: kube-system
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: heapster
   namespace: kube-system
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      task: monitoring
+      k8s-app: heapster
   template:
     metadata:
       labels:

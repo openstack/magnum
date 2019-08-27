@@ -203,7 +203,7 @@ spec:
     protocol: TCP
     port: 9090
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
@@ -313,13 +313,18 @@ spec:
   selector:
     grafana: "true"
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
   namespace: prometheus-monitoring
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      name: grafana
+      grafana: "true"
+      role: db
   template:
     metadata:
       labels:
