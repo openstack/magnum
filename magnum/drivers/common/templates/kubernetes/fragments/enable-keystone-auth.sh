@@ -77,7 +77,7 @@ EOF
         mkdir -p $(dirname ${KEYSTONE_AUTH_DEPLOY})
         cat << EOF > ${KEYSTONE_AUTH_DEPLOY}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
@@ -87,6 +87,9 @@ metadata:
   namespace: kube-system
 spec:
   # The controllers can only have a single active instance.
+  selector:
+    matchLabels:
+      k8s-app: k8s-keystone-auth
   template:
     metadata:
       name: k8s-keystone-auth

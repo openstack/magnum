@@ -76,7 +76,7 @@ EOF
         mkdir -p $(dirname ${TILLER_DEPLOYER})
         cat << EOF > ${TILLER_DEPLOYER}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
@@ -88,6 +88,10 @@ metadata:
 spec:
   replicas: 1
   strategy: {}
+  selector:
+    matchLabels:
+      app: helm
+      name: tiller
   template:
     metadata:
       creationTimestamp: null
