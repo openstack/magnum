@@ -149,9 +149,6 @@ def invoke_hook(c, log):
     stdout, stderr = subproc.communicate(
         input=json.dumps(c).encode('utf-8', 'replace'))
 
-    log.info(stdout)
-    log.debug(stderr)
-
     if subproc.returncode:
         log.error("Error running %s. [%s]\n" % (
             hook_path, subproc.returncode))
@@ -167,6 +164,10 @@ def invoke_hook(c, log):
             'deploy_stderr': stderr,
             'deploy_status_code': subproc.returncode,
         }
+
+    for i in signal_data.items():
+        log.info('%s\n%s' % i)
+    log.debug(stderr.decode('utf-8', 'replace'))
 
     signal_data_path = os.path.join(DEPLOYED_DIR, '%s.notify.json' % c['id'])
     # write out notify data for debugging
