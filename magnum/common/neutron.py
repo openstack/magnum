@@ -14,6 +14,7 @@
 import re
 
 from oslo_log import log as logging
+from oslo_utils import uuidutils
 
 from magnum.common import clients
 from magnum.common import exception
@@ -54,23 +55,42 @@ def delete_floatingip(context, fix_port_id, cluster):
                                           msg=str(e))
 
 
-def get_network_id(context, network_name):
+def get_network(context, network, source, target, external):
     nets = []
     n_client = clients.OpenStackClients(context).neutron()
-    ext_filter = {'router:external': True}
+    ext_filter = {'router:external': external}
 
     networks = n_client.list_networks(**ext_filter)
     for net in networks.get('networks'):
-        if net.get('name') == network_name:
+        if net.get(source) == network:
             nets.append(net)
 
     if len(nets) == 0:
-        raise exception.ExternalNetworkNotFound(network=network_name)
+        if external:
+            raise exception.ExternalNetworkNotFound(network=network)
+        else:
+            raise exception.FixedNetworkNotFound(network=network)
 
     if len(nets) > 1:
         raise exception.Conflict(
             "Multiple networks exist with same name '%s'. Please use the "
-            "network ID instead." % network_name
+            "network ID instead." % network
         )
 
-    return nets[0]["id"]
+    return nets[0][target]
+
+
+def get_external_network_id(context, network):
+    if uuidutils.is_uuid_like(network):
+        return network
+    else:
+        return get_network(context, network, source='name',
+                           target='id', external=True)
+
+
+def get_fixed_network_name(context, network):
+    if uuidutils.is_uuid_like(network):
+        return get_network(context, network, source='id',
+                           target='name', external=False)
+    else:
+        return network

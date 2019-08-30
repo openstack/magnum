@@ -388,6 +388,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         expected_scale_params = {'minions_to_remove': ['node1', 'node2']}
         self.assertEqual(scale_params, expected_scale_params)
 
+    @mock.patch('magnum.common.neutron.get_fixed_network_name')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -403,7 +404,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                             mock_sign_node_certificate,
                             mock_get_output, mock_get_params,
                             mock_get_discovery_url, mock_osc_class,
-                            mock_enable_octavia):
+                            mock_enable_octavia,
+                            mock_get_fixed_network_name):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -417,6 +419,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.network_driver = 'flannel'
         external_network_id = '17e4e301-b7f3-4996-b3dd-97b3a700174b'
         mock_cluster_template.external_network_id = external_network_id
+        fixed_network_name = 'fixed_network'
+        mock_get_fixed_network_name.return_value = fixed_network_name
+        fixed_network = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        mock_cluster_template.fixed_network = fixed_network
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
@@ -572,6 +578,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
             'coredns_tag': coredns_tag,
+            'fixed_network_name': fixed_network_name,
             'flannel_tag': flannel_tag,
             'flannel_cni_tag': flannel_cni_tag,
             'container_infra_prefix': container_infra_prefix,
@@ -636,8 +643,17 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             mock_cluster_template,
             mock_cluster,
         )
+        actual_params = mock_get_params.call_args[1]["extra_params"]
+        self.assertEqual(
+            fixed_network_name,
+            actual_params.get("fixed_network_name")
+        )
+        mock_get_fixed_network_name.assert_called_once_with(
+            mock_context,
+            mock_cluster_template.fixed_network
+        )
 
-    @mock.patch('magnum.common.neutron.get_network_id')
+    @mock.patch('magnum.common.neutron.get_external_network_id')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -654,14 +670,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                                 mock_get_discovery_url,
                                                 mock_osc_class,
                                                 mock_enable_octavia,
-                                                mock_network_id):
+                                                mock_get_external_network_id):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
         mock_enable_octavia.return_value = False
         mock_get_discovery_url.return_value = 'fake_discovery_url'
         external_network_id = 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e'
-        mock_network_id.return_value = external_network_id
+        mock_get_external_network_id.return_value = external_network_id
 
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
@@ -672,7 +688,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.tls_disabled = False
         mock_cluster_template.registry_enabled = False
         mock_cluster_template.network_driver = 'calico'
-        mock_cluster_template.external_network_id = "public"
+        mock_cluster_template.external_network_id = 'public'
 
         mock_cluster = mock.MagicMock()
         mock_cluster.labels = {}
@@ -692,7 +708,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             external_network_id,
             actual_params.get("external_network")
         )
-        mock_network_id.assert_called_once_with(
+        mock_get_external_network_id.assert_called_once_with(
             mock_context,
             mock_cluster_template.external_network_id
         )
@@ -833,6 +849,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.network_driver = 'calico'
         external_network_id = '17e4e301-b7f3-4996-b3dd-97b3a700174b'
         mock_cluster_template.external_network_id = external_network_id
+        fixed_network_name = 'fixed_network'
+        mock_cluster_template.fixed_network = fixed_network_name
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
@@ -967,6 +985,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'flannel_backend': flannel_backend,
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
+            'fixed_network_name': fixed_network_name,
             'admission_control_list': admission_control_list,
             'prometheus_monitoring': prometheus_monitoring,
             'grafana_admin_passwd': grafana_admin_passwd,

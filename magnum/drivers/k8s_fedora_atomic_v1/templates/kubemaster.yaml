@@ -174,6 +174,10 @@ parameters:
     type: string
     description: Network from which to allocate fixed addresses.
 
+  fixed_network_name:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
@@ -585,6 +589,7 @@ resources:
                   "$USERNAME": {get_param: username}
                   "$PASSWORD": {get_param: password}
                   "$CLUSTER_NETWORK": {get_param: fixed_network}
+                  "$CLUSTER_NETWORK_NAME": {get_param: fixed_network_name}
                   "$CLUSTER_SUBNET": {get_param: fixed_subnet}
                   "$TLS_DISABLED": {get_param: tls_disabled}
                   "$TRAEFIK_INGRESS_CONTROLLER_TAG": {get_param: traefik_ingress_controller_tag}

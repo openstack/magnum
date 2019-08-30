@@ -143,7 +143,7 @@ class NeutronTest(base.TestCase):
         )
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    def test_get_network_id(self, mock_clients):
+    def test_get_external_network_id(self, mock_clients):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
@@ -161,12 +161,12 @@ class NeutronTest(base.TestCase):
         mock_clients.return_value = osc
         osc.neutron.return_value = mock_nclient
 
-        network_id = neutron.get_network_id(self.context, fake_name)
+        network_id = neutron.get_external_network_id(self.context, fake_name)
 
         self.assertEqual(fake_id, network_id)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    def test_get_network_id_notfound(self, mock_clients):
+    def test_get_external_network_id_notfound(self, mock_clients):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
@@ -186,13 +186,13 @@ class NeutronTest(base.TestCase):
 
         self.assertRaises(
             exception.ExternalNetworkNotFound,
-            neutron.get_network_id,
+            neutron.get_external_network_id,
             self.context,
             "another_network"
         )
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    def test_get_network_id_conflict(self, mock_clients):
+    def test_get_external_network_id_conflict(self, mock_clients):
         fake_name = "fake_network"
         fake_id_1 = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         fake_id_2 = "93781f82-1ac0-11e9-84cd-00224d6b7bc1"
@@ -218,7 +218,57 @@ class NeutronTest(base.TestCase):
 
         self.assertRaises(
             exception.Conflict,
-            neutron.get_network_id,
+            neutron.get_external_network_id,
             self.context,
             fake_name
+        )
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_fixed_network_name(self, mock_clients):
+        fake_name = "fake_network"
+        fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_networks.return_value = {
+            'networks': [
+                {
+                    'id': fake_id,
+                    'name': fake_name,
+                    'router:external': False
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        network_name = neutron.get_fixed_network_name(self.context, fake_id)
+
+        self.assertEqual(fake_name, network_name)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_fixed_network_name_notfound(self, mock_clients):
+        fake_name = "fake_network"
+        fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        another_fake_id = "34fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_networks.return_value = {
+            'networks': [
+                {
+                    'id': fake_id,
+                    'name': fake_name,
+                    'router:external': False
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        self.assertRaises(
+            exception.FixedNetworkNotFound,
+            neutron.get_fixed_network_name,
+            self.context,
+            another_fake_id
         )
