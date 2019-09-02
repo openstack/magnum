@@ -55,6 +55,8 @@ Request
   - flavor_id: flavor_id
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
+  - floating_ip_enabled: floating_ip_enabled
+  - hidden: hidden
 
 Request Example
 ----------------
@@ -99,6 +101,7 @@ Response
   - flavor_id: flavor_id
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
+  - hidden: hidden
 
 Response Example
 ----------------
@@ -163,6 +166,7 @@ Response
   - flavor_id: flavor_id
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
+  - hidden: hidden
 
 Response Example
 ----------------
@@ -235,6 +239,7 @@ Response
   - flavor_id: flavor_id
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
+  - hidden: hidden
 
 Response Example
 ----------------
@@ -358,6 +363,7 @@ Return new cluster templates with updated attributes.
   - flavor_id: flavor_id
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
+  - hidden: hidden
 
 Response Example
 ----------------
