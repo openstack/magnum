@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    The default value of flannel_backend will be replaced with `vxlan` which
+    was `udp` based on the recommendation at
+    https://github.com/coreos/flannel/blob/master/Documentation/backends.md
