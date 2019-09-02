@@ -293,6 +293,13 @@ floating_ip_enabled_cluster:
   in: body
   required: false
   type: boolean
+hidden:
+  description: |
+    Indicates whether the ClusterTemplate is hidden or not, the default
+    value is false.
+  in: body
+  required: false
+  type: boolean
 host:
   description: |
     The host for the service.
