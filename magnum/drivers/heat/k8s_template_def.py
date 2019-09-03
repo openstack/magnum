@@ -140,7 +140,10 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         # accepts a name as an argument to internal-network-name in the
         # cloud-config file provided to it. The default fixed network name is
         # the same as that defined in the heat template.
-        fixed_network = cluster_template.fixed_network or "private"
+        fixed_network = (cluster.fixed_network or
+                         cluster_template.fixed_network or
+                         "private")
+
         extra_params['fixed_network_name'] = \
             neutron.get_fixed_network_name(context, fixed_network)
 

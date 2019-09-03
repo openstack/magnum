@@ -424,6 +424,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         fixed_network = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         mock_cluster_template.fixed_network = fixed_network
         mock_cluster = mock.MagicMock()
+        mock_cluster.fixed_network = None
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
         mock_osc = mock.MagicMock()
@@ -852,6 +853,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         fixed_network_name = 'fixed_network'
         mock_cluster_template.fixed_network = fixed_network_name
         mock_cluster = mock.MagicMock()
+        mock_cluster.fixed_network = None
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
         mock_osc = mock.MagicMock()
