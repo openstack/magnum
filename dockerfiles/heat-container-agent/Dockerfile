@@ -16,9 +16,11 @@ RUN dnf -y --setopt=tsflags=nodocs --nogpgcheck install \
         findutils \
         gcc \
         kubernetes-client \
+        libffi-devel \
         openssh-clients \
         openssl \
         python-devel \
+        python-lxml \
         python-pip \
         python-psutil \
         redhat-rpm-config && \
@@ -54,6 +56,8 @@ RUN chmod 700 /tmp/write-os-apply-config-templates.sh
 RUN /tmp/write-os-apply-config-templates.sh
 
 COPY manifest.json service.template config.json.template tmpfiles.template /exports/
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 COPY launch /usr/bin/start-heat-container-agent
 
