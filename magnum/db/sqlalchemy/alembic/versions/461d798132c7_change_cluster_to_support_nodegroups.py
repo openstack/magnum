@@ -90,7 +90,7 @@ def upgrade():
     # Create a list containing populated master nodegroups
     master_ngs = [{
         'uuid': uuidutils.generate_uuid(),
-        'name': '%s-master' % rs[1],
+        'name': 'default-master',
         'cluster_id': rs[0],
         'project_id': rs[2],
         'docker_volume_size': rs[3],
@@ -107,7 +107,7 @@ def upgrade():
     # Create a list containing populated worker nodegroups
     worker_ngs = [{
         'uuid': uuidutils.generate_uuid(),
-        'name': '%s-worker' % rs[1],
+        'name': 'default-worker',
         'cluster_id': rs[0],
         'project_id': rs[2],
         'docker_volume_size': rs[3],
