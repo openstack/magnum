@@ -62,6 +62,7 @@ CERT_DIR=/etc/kubernetes/certs
 PROXY_KUBECONFIG=/etc/kubernetes/proxy-kubeconfig.yaml
 cat > /etc/kubernetes/proxy << EOF
 KUBE_PROXY_ARGS="--kubeconfig=${PROXY_KUBECONFIG} --cluster-cidr=${PODS_NETWORK_CIDR}"
+KUBE_PROXY_ARGS="${KUBE_PROXY_ARGS} ${KUBEPROXY_OPTIONS}"
 EOF
 
 cat > ${PROXY_KUBECONFIG} << EOF
