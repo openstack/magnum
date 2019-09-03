@@ -500,8 +500,8 @@ def add_volume_env_file(env_files, cluster):
         env_files.append(COMMON_ENV_PATH + 'with_volume.yaml')
 
 
-def add_etcd_volume_env_file(env_files, cluster_template):
-    if int(cluster_template.labels.get('etcd_volume_size', 0)) < 1:
+def add_etcd_volume_env_file(env_files, cluster):
+    if int(cluster.labels.get('etcd_volume_size', 0)) < 1:
         env_files.append(COMMON_ENV_PATH + 'no_etcd_volume.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'with_etcd_volume.yaml')
