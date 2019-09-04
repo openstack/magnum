@@ -16,6 +16,7 @@
 # - create_magnum_conf
 # - init_magnum
 # - magnum_register_image
+# - magnum_configure_flavor
 # - start_magnum
 # - configure_iptables_magnum
 # - configure_apache_magnum
@@ -273,7 +274,7 @@ function magnum_register_image {
 
     local atomic="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io 'atomic' || true;)"
     if [ ! -z "$atomic" ]; then
-        magnum_image_property=$magnum_image_property"fedora-atomic"
+        magnum_image_property=$magnum_image_property"fedora-atomic --property hw_rng_model=virtio"
     fi
     local ubuntu="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "ubuntu" || true;)"
     if [ ! -z "$ubuntu" ]; then
@@ -305,6 +306,16 @@ function magnum_register_image {
     fi
 
     openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 2 image set $image_name $magnum_image_property
+}
+
+#magnum_configure_flavor - set hw_rng property for flavor to address the potential entropy issue
+function magnum_configure_flavor {
+    local magnum_flavor_property="--property hw_rng:allowed=True --property hw_rng:rate_bytes=1024 --property hw_rng:rate_period=1"
+
+    local FLAVOR_LIST=$(openstack --os-url $NOVA_SERVICE_PROTOCOL://$NOVA_HOSTPORT --os-compute-api-version 2.1 flavor list -c Name -f value)
+    for flavor in ${FLAVOR_LIST}; do
+        openstack --os-url $NOVA_SERVICE_PROTOCOL://$NOVA_HOSTPORT --os-compute-api-version 2.1 flavor set $flavor $magnum_flavor_property
+    done
 }
 
 # install_magnumclient() - Collect source and prepare
