@@ -46,8 +46,7 @@ extensions = [
 
 # openstackdocstheme options
 repository_name = 'openstack/magnum'
-bug_project = 'magnum'
-bug_tag = ''
+use_storyboard = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

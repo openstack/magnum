@@ -31,8 +31,7 @@ extensions = [
 
 # openstackdocstheme options
 repository_name = 'openstack/magnum'
-bug_project = 'magnum'
-bug_tag = ''
+use_storyboard = True
 
 config_generator_config_file = '../../etc/magnum/magnum-config-generator.conf'
 sample_config_basename = '_static/magnum'

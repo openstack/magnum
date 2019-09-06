@@ -92,8 +92,7 @@ pygments_style = 'sphinx'
 
 # openstackdocstheme options
 repository_name = 'openstack/magnum'
-bug_project = 'magnum'
-bug_tag = 'api-ref'
+use_storyboard = True
 
 # -- Options for man page output ----------------------------------------------
 
