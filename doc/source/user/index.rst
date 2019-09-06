@@ -277,7 +277,7 @@ the table are linked to more details elsewhere in the user guide.
 | `flannel_network_cidr`_               | IPv4 CIDR          | 10.100.0.0/16 |
 |                                       |                    |               |
 +---------------------------------------+--------------------+---------------+
-| `flannel_backend`_                    | - udp              | udp           |
+| `flannel_backend`_                    | - udp              | vxlan         |
 |                                       | - vxlan            |               |
 |                                       | - host-gw          |               |
 +---------------------------------------+--------------------+---------------+
