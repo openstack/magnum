@@ -203,7 +203,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_cluster_template = mock.MagicMock(floating_ip_enabled=True,
                                                master_lb_enabled=True,
                                                labels={})
-        mock_cluster = mock.MagicMock(labels={})
+        mock_cluster = mock.MagicMock(floating_ip_enabled=True, labels={})
         env_files = []
         cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
                                   mock_cluster)
@@ -285,6 +285,28 @@ class TemplateDefinitionTestCase(base.TestCase):
             [
                 cmn_tdef.COMMON_ENV_PATH + 'disable_floating_ip.yaml',
                 cmn_tdef.COMMON_ENV_PATH + 'disable_lb_floating_ip.yaml'
+            ],
+            env_files
+        )
+
+    def test_add_fip_env_lb_enable_lbfip_template_disable_cluster_enable(self):
+        mock_cluster_template = mock.MagicMock(
+            floating_ip_enabled=False,
+            master_lb_enabled=True,
+            labels={}
+        )
+        mock_cluster = mock.MagicMock(
+            floating_ip_enabled=True,
+            labels={})
+        env_files = []
+
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
+                                  mock_cluster)
+
+        self.assertEqual(
+            [
+                cmn_tdef.COMMON_ENV_PATH + 'enable_floating_ip.yaml',
+                cmn_tdef.COMMON_ENV_PATH + 'enable_lb_floating_ip.yaml'
             ],
             env_files
         )

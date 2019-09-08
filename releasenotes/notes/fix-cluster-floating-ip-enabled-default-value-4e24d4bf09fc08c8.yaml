@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    There shouldn't be a default value for floating_ip_enabled when creating
+    cluster. By default, when it's not set, the cluster's floating_ip_enabled
+    attribute should be set with the value of cluster template. It's fixed
+    by removing the default value from Magnum API.
