@@ -92,6 +92,7 @@ sed -i '
 ' /etc/kubernetes/config
 
 KUBE_API_ARGS="--runtime-config=api/all=true"
+KUBE_API_ARGS="$KUBE_API_ARGS --allow-privileged=$KUBE_ALLOW_PRIV"
 KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
 KUBE_API_ARGS="$KUBE_API_ARGS $KUBEAPI_OPTIONS"
 if [ "$TLS_DISABLED" == "True" ]; then

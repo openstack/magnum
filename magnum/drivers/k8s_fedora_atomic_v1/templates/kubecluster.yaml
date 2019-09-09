@@ -382,7 +382,7 @@ parameters:
   flannel_tag:
     type: string
     description: tag of the flannel container
-    default: v0.10.0-amd64
+    default: v0.11.0-amd64
 
   flannel_cni_tag:
     type: string
