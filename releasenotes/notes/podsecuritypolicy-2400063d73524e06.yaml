@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    k8s_fedora_atomic_v1 Add PodSecurityPolicy for privileged pods. Use
+    privileged PSP for calico and node-problem-detector. Add PSP for flannel
+    from upstream.

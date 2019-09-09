@@ -1,8 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
+set -e
+set +x
 . /etc/sysconfig/heat-params
-
 set -x
+
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     _prefix=${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}
@@ -11,13 +13,65 @@ if [ "$NETWORK_DRIVER" = "flannel" ]; then
     [ -f ${FLANNEL_DEPLOY} ] || {
     echo "Writing File: $FLANNEL_DEPLOY"
     mkdir -p "$(dirname ${FLANNEL_DEPLOY})"
+    set +x
     cat << EOF > ${FLANNEL_DEPLOY}
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: psp.flannel.unprivileged
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default
+    seccomp.security.alpha.kubernetes.io/defaultProfileName: docker/default
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+spec:
+  privileged: false
+  volumes:
+    - configMap
+    - secret
+    - emptyDir
+    - hostPath
+  allowedHostPaths:
+    - pathPrefix: "/etc/cni/net.d"
+    - pathPrefix: "/etc/kube-flannel"
+    - pathPrefix: "/run/flannel"
+  readOnlyRootFilesystem: false
+  # Users and groups
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  # Privilege Escalation
+  allowPrivilegeEscalation: false
+  defaultAllowPrivilegeEscalation: false
+  # Capabilities
+  allowedCapabilities: ['NET_ADMIN']
+  defaultAddCapabilities: []
+  requiredDropCapabilities: []
+  # Host namespaces
+  hostPID: false
+  hostIPC: false
+  hostNetwork: true
+  hostPorts:
+  - min: 0
+    max: 65535
+  # SELinux
+  seLinux:
+    # SELinux is unsed in CaaSP
+    rule: 'RunAsAny'
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: flannel
 rules:
+  - apiGroups: ['extensions']
+    resources: ['podsecuritypolicies']
+    verbs: ['use']
+    resourceNames: ['psp.flannel.unprivileged']
   - apiGroups:
       - ""
     resources:
@@ -101,7 +155,7 @@ data:
       echo "Wrote CNI binaries to /host/opt/cni/bin/";
     fi;
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: kube-flannel-ds-amd64
@@ -110,6 +164,9 @@ metadata:
     tier: node
     app: flannel
 spec:
+  selector:
+    matchLabels:
+      app: flannel
   template:
     metadata:
       labels:
@@ -120,14 +177,8 @@ spec:
       nodeSelector:
         beta.kubernetes.io/arch: amd64
       tolerations:
-        # Make sure flannel gets scheduled on all nodes.
-        - effect: NoSchedule
-          operator: Exists
-        # Mark the pod as a critical add-on for rescheduling.
-        - key: CriticalAddonsOnly
-          operator: Exists
-        - effect: NoExecute
-          operator: Exists
+      - operator: Exists
+        effect: NoSchedule
       serviceAccountName: flannel
       initContainers:
       - name: install-cni-plugins
@@ -170,7 +221,9 @@ spec:
             cpu: "100m"
             memory: "50Mi"
         securityContext:
-          privileged: true
+          privileged: false
+          capabilities:
+             add: ["NET_ADMIN"]
         env:
         - name: POD_NAME
           valueFrom:
@@ -182,7 +235,7 @@ spec:
               fieldPath: metadata.namespace
         volumeMounts:
         - name: run
-          mountPath: /run
+          mountPath: /run/flannel
         - name: flannel-cfg
           mountPath: /etc/kube-flannel/
       volumes:
@@ -191,7 +244,7 @@ spec:
             path: /opt/cni/bin
         - name: run
           hostPath:
-            path: /run
+            path: /run/flannel
         - name: cni
           hostPath:
             path: /etc/cni/net.d
@@ -200,6 +253,7 @@ spec:
             name: kube-flannel-cfg
 EOF
     }
+    set -x
 
     if [ "$MASTER_INDEX" = "0" ]; then
 
