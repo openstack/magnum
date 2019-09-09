@@ -3,8 +3,8 @@
 step="kube-apiserver-to-kubelet-role"
 printf "Starting to run ${step}\n"
 
+set +x
 . /etc/sysconfig/heat-params
-
 set -x
 
 echo "Waiting for Kubernetes API..."
@@ -80,6 +80,76 @@ EOF
 }
 
 kubectl apply --validate=false -f ${ADMIN_RBAC}
+
+POD_SECURITY_POLICIES=/srv/magnum/kubernetes/podsecuritypolicies.yaml
+# Pod Security Policies
+[ -f ${POD_SECURITY_POLICIES} ] || {
+    echo "Writing File: $POD_SECURITY_POLICIES"
+    mkdir -p $(dirname ${POD_SECURITY_POLICIES})
+    cat > ${POD_SECURITY_POLICIES} <<EOF
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: magnum.privileged
+  annotations:
+    kubernetes.io/description: 'privileged allows full unrestricted access to
+      pod features, as if the PodSecurityPolicy controller was not enabled.'
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+  labels:
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  privileged: true
+  allowPrivilegeEscalation: true
+  allowedCapabilities:
+  - '*'
+  volumes:
+  - '*'
+  hostNetwork: true
+  hostPorts:
+  - min: 0
+    max: 65535
+  hostIPC: true
+  hostPID: true
+  runAsUser:
+    rule: 'RunAsAny'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'RunAsAny'
+  readOnlyRootFilesystem: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: magnum:podsecuritypolicy:privileged
+  labels:
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+rules:
+- apiGroups:
+  - policy
+  resourceNames:
+  - magnum.privileged
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+EOF
+}
+kubectl apply -f ${POD_SECURITY_POLICIES}
+
+# Add the openstack trustee as a secret under kube-system
+kubectl -n kube-system create secret generic os-trustee \
+    --from-literal=os-authURL=${AUTH_URL} \
+    --from-literal=os-trustID=${TRUST_ID} \
+    --from-literal=os-trusteeID=${TRUSTEE_USER_ID} \
+    --from-literal=os-trusteePassword=${TRUSTEE_PASSWORD} \
+    --from-literal=os-region=${REGION_NAME} \
+    --from-file=os-certAuthority=/etc/kubernetes/ca-bundle.crt
 
 if [ -z "${TRUST_ID}" ] || [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then
     exit 0
