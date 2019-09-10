@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 set +x
 . /etc/sysconfig/heat-params
 set -x
+set -e
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
@@ -41,6 +42,8 @@ unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 }
         $ssh_cmd systemctl restart NetworkManager
+        echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
+        $ssh_cmd sysctl -p
     fi
 fi
 

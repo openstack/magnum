@@ -1,6 +1,9 @@
-#!/bin/sh -x
+#!/bin/bash
 
+set +x
 . /etc/sysconfig/heat-params
+set -x
+set -e
 
 echo "configuring kubernetes (master)"
 
@@ -39,6 +42,8 @@ unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 }
         systemctl restart NetworkManager
+        echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
+        $ssh_cmd sysctl -p
     fi
 fi
 
