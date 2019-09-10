@@ -33,6 +33,8 @@ unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 }
         systemctl restart NetworkManager
+        echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
+        sysctl -p
     fi
 fi
 
