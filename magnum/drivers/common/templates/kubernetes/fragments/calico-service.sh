@@ -14,6 +14,23 @@ if [ "$NETWORK_DRIVER" = "calico" ]; then
     mkdir -p $(dirname ${CALICO_DEPLOY})
     cat << EOF > ${CALICO_DEPLOY}
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: magnum:podsecuritypolicy:calico
+  namespace: kube-system
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+    kubernetes.io/cluster-service: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: magnum:podsecuritypolicy:privileged
+subjects:
+- kind: ServiceAccount
+  name: calico-node
+  namespace: kube-system
+---
 # Calico Version v3.3.6
 # https://docs.projectcalico.org/v3.3/releases#v3.3.6
 kind: ClusterRole
