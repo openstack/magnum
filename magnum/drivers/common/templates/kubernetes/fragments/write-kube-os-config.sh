@@ -3,17 +3,14 @@
 . /etc/sysconfig/heat-params
 
 mkdir -p /etc/kubernetes/
-
-if [ -z "${TRUST_ID}" ]; then
-    exit 0
-fi
-
-KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/cloud-config
 cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
-# Generate a the configuration for Kubernetes services
-# to talk to OpenStack Neutron and Cinder
-cat > $KUBE_OS_CLOUD_CONFIG <<EOF
+if [ -n "${TRUST_ID}" ]; then
+    KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/cloud-config
+
+    # Generate a the configuration for Kubernetes services
+    # to talk to OpenStack Neutron and Cinder
+    cat > ${KUBE_OS_CLOUD_CONFIG} <<EOF
 [Global]
 auth-url=$AUTH_URL
 user-id=$TRUSTEE_USER_ID
@@ -32,10 +29,11 @@ monitor-max-retries=3
 bs-version=v2
 EOF
 
-# Provide optional region parameter if it's set.
-if [ -n ${REGION_NAME} ]; then
-    sed -i '/ca-file/a region='${REGION_NAME}'' $KUBE_OS_CLOUD_CONFIG
-fi
+    # Provide optional region parameter if it's set.
+    if [ -n "${REGION_NAME}" ]; then
+        sed -i '/ca-file/a region='${REGION_NAME}'' $KUBE_OS_CLOUD_CONFIG
+    fi
 
-# backwards compatibility, some apps may expect this file from previous magnum versions.
-cp ${KUBE_OS_CLOUD_CONFIG} /etc/kubernetes/kube_openstack_config
+    # backwards compatibility, some apps may expect this file from previous magnum versions.
+    cp ${KUBE_OS_CLOUD_CONFIG} /etc/kubernetes/kube_openstack_config
+fi
