@@ -1110,7 +1110,7 @@ labels attribute.
 _`admission_control_list`
   This label corresponds to Kubernetes parameter for the API server '--admission-control'.
   For more details, refer to the `Admission Controllers
-  <https://kubernetes.io/docs/admin/admission-controllers//>`_.
+  <https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/>`_.
   The default value corresponds to the one recommended in this doc
   for our current Kubernetes version.
 
@@ -1566,7 +1566,7 @@ Image (image)
   The image binary is loaded in Glance with the attribute
   'os_distro = fedora-atomic'.
   Current supported image is Fedora Atomic (download from `Fedora
-  <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images>`_ )
+  <https://dl.fedoraproject.org/pub/alt/atomic/stable/>`_ )
 
 TLS (tls-disabled)
   Transport Layer Security is enabled by default to secure the Swarm API for
@@ -2932,11 +2932,9 @@ Kubernetes on Fedora Atomic
 ---------------------------
 
 This image can be downloaded from the `public Atomic site
-<https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images/>`_
+<https://dl.fedoraproject.org/pub/alt/atomic/stable/>`_
 or can be built locally using diskimagebuilder.  Details can be found in the
-`fedora-atomic element
-<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/k8s_fedora_atomic_v1>`_
-The image currently has the following OS/software:
+``fedora-atomic element``. The image currently has the following OS/software:
 
 +--------------------------+-----------+
 | OS/software              | version   |
@@ -3011,9 +3009,9 @@ The login for this image is *core*.
 Kubernetes on Ironic
 --------------------
 
-This image is built manually using diskimagebuilder.  The scripts and
+This image is built manually using diskimagebuilder. The scripts and
 instructions are included in `Magnum code repo
-<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/k8s_fedora_ironic_v1>`_.
+<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/k8s_fedora_ironic_v1/image/kubernetes>`_.
 Currently Ironic is not fully supported yet, therefore more details will be
 provided when this driver has been fully tested.
 

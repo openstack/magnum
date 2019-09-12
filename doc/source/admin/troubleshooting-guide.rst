@@ -115,8 +115,8 @@ for the cluster. The service account will be used by the cluster to
 access the OpenStack services (i.e. Neutron, Swift, etc.). A trust relationship
 will be created between the user who created the cluster (the "trustor") and
 the service account created for the cluster (the "trustee"). For details,
-please refer
-<https://opendev.org/openstack/magnum/src/branch/master/specs/create-trustee-user-for-each-bay.rst>`_.
+please refer to
+`Create a trustee user for each bay <https://opendev.org/openstack/magnum/src/branch/master/specs/create-trustee-user-for-each-bay.rst>`_.
 
 If Magnum fails to create the trustee, check the magnum config file (usually
 in /etc/magnum/magnum.conf). Make sure 'trustee_*' and 'www_authenticate_uri'
@@ -670,8 +670,9 @@ Kubernetes services
 
 (How to introspect k8s when heat works and k8s does not)
 
-Additional `Kubernetes troubleshooting guide
-<http://kubernetes.io/v1.0/docs/troubleshooting.html>`_ is available.
+Additional `Kubernetes troubleshooting section
+<https://kubernetes.io/docs/tasks/debug-application-cluster/troubleshooting/>`_
+is available in the Monitoring, Logging, and Debugging section.
 
 Swarm services
 --------------
@@ -715,10 +716,8 @@ Troubleshooting in Gate
 -----------------------
 
 Simulating gate tests
-  *Note*: This is adapted from Devstack Gate's `README`_ which
-  is worth a quick read to better understand the following)
 
-  #. Boot a VM like described in the Devstack Gate's `README`_ .
+  #. Boot a VM
   #. Provision this VM like so::
 
       apt-get update \
@@ -796,35 +795,3 @@ Simulating gate tests
       export -f post_test_hook
       cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
       ./safe-devstack-vm-gate-wrap.sh
-
-Helpful nuances about the Devstack Gate
-  * Main job is in ``project-config``'s `magnum.yaml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/magnum.yaml>`_.
-
-    * Must modify parameters passed in since those are escaped:
-
-      * Anything with ``{}`` should be set as an environment variable
-
-      * Anything with ``{{ }}`` should have those brackets changed to
-        single brackets - ``{}``.
-
-      * As with the documentation for Devstack Gate, you can just create
-        a new file for the job you want, paste in what you want, then
-        ``chmod u+x <filename>`` and run it.
-
-    * Parameters can be found in `projects.yaml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/projects.yaml>`_.
-      This file changes a lot, so it's more reliable to say that you can
-      search for the magnum jobs where you'll see examples of what
-      gets passed in.
-
-  * Three jobs are usually run as a part of Magnum gate, all of which are found in ``project-config``'s `macros.yml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/macros.yaml>`_:
-
-    * link-logs
-
-    * net-info
-
-    * devstack-checkout
-
-  * After you run a job, it's ideal to clean up and start over with a
-    fresh VM to best simulate the Devstack Gate environment.
-
-.. _README: https://github.com/openstack-infra/devstack-gate/blob/master/README.rst#simulating-devstack-gate-tests P

@@ -55,9 +55,8 @@ Pod
   smallest deployable unit that can be created and managed. A pod is a
   co-located group of application containers that run with a shared context.
   When using Magnum, pods are created and managed within clusters. Refer to the
-  `pods section
-  <https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/>`_ in the `Kubernetes
-  User Guide`_ for more information.
+  `pods section <https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/>`_ in
+  `Kubernetes Tasks`_ for more information.
 
 Replication controller
   A replication controller is used to ensure that at any given time a certain
@@ -65,8 +64,8 @@ Replication controller
   deleted by the replication controller as necessary based on a template to
   ensure that the defined number of replicas exist. Refer to the `replication
   controller section
-  <http://kubernetes.io/v1.0/docs/user-guide/replication-controller.html>`_ in
-  the `Kubernetes User Guide`_ for more information.
+  <https://kubernetes.io/docs/tasks/run-application/rolling-update-replication-controller/>`_ in
+  the `Kubernetes Tasks`_ for more information.
 
 Service
   A service is an additional layer of abstraction provided by the Kubernetes
@@ -75,8 +74,8 @@ Service
   deleted by a replication controller, for example, other pods needing to
   discover them can do so via the service abstraction. Refer to the
   `services section
-  <http://kubernetes.io/v1.0/docs/user-guide/services.html>`_ in the
-  `Kubernetes User Guide`_ for more information.
+  <https://kubernetes.io/docs/concepts/services-networking/service/>`_ in
+  `Kubernetes Concepts`_ for more information.
 
-.. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
-
+.. _Kubernetes Tasks: https://kubernetes.io/docs/tasks/
+.. _Kubernetes Concepts: https://kubernetes.io/docs/concepts/
