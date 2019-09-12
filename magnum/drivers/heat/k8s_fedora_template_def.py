@@ -110,7 +110,13 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         # check cloud provider and cinder options. If cinder is selected,
         # the cloud provider needs to be enabled.
         cloud_provider_enabled = cluster.labels.get(
-            'cloud_provider_enabled', 'true').lower()
+            'cloud_provider_enabled',
+            'true' if CONF.trust.cluster_user_trust else 'false').lower()
+        if (not CONF.trust.cluster_user_trust
+                and cloud_provider_enabled == 'true'):
+            raise exception.InvalidParameterValue(_(
+                '"cluster_user_trust" must be set to True in magnum.conf when '
+                '"cloud_provider_enabled" label is set to true.'))
         if (cluster_template.volume_driver == 'cinder'
                 and cloud_provider_enabled == 'false'):
             raise exception.InvalidParameterValue(_(
