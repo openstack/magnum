@@ -57,7 +57,7 @@ RUN /tmp/write-os-apply-config-templates.sh
 
 COPY manifest.json service.template config.json.template tmpfiles.template /exports/
 
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN if [ ! -f /usr/bin/python ]; then ln -s /usr/bin/python3 /usr/bin/python; fi
 
 COPY launch /usr/bin/start-heat-container-agent
 

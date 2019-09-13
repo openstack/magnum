@@ -177,7 +177,6 @@
     name: magnum-functional-swarm-mode
     parent: magnum-functional-coe
     voting: false
-    branches: ^(?!stable/(newton|ocata)).*$
     vars:
       coe: swarm-mode
     irrelevant-files:
@@ -195,7 +194,6 @@
     name: magnum-functional-dcos
     parent: magnum-functional-coe
     voting: false
-    branches: ^(?!stable/(newton|ocata)).*$
     vars:
       coe: dcos
     irrelevant-files:
@@ -296,7 +294,6 @@
     name: magnum-functional-swarm-mode-multinode
     parent: magnum-functional-multinode-base
     voting: false
-    branches: ^(?!stable/(newton|ocata)).*$
     vars:
       coe: swarm-mode
     irrelevant-files:
