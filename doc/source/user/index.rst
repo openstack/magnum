@@ -386,7 +386,7 @@ the table are linked to more details elsewhere in the user guide.
 | `cgroup_driver`_                      | - systemd          | "cgroupfs"    |
 |                                       | - cgroupfs         |               |
 +---------------------------------------+--------------------+---------------+
-| `cloud_provider_enabled`_             | - true             | true          |
+| `cloud_provider_enabled`_             | - true             | see below     |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
 | `service_cluster_ip_range`            | IPv4 CIDR for k8s  | 10.254.0.0/16 |
@@ -1284,9 +1284,12 @@ _`cgroup_driver`
 
 _`cloud_provider_enabled`
   Add 'cloud_provider_enabled' label for the k8s_fedora_atomic driver. Defaults
-  to true. For specific kubernetes versions if 'cinder' is selected as a
-  'volume_driver', it is implied that the cloud provider will be enabled since
-  they are combined.
+  to the value of 'cluster_user_trust' (default: 'false' unless explicitly set
+  to 'true' in magnum.conf due to CVE-2016-7404). Consequently,
+  'cloud_provider_enabled' label cannot be overridden to 'true' when
+  'cluster_user_trust' resolves to 'false'. For specific kubernetes versions,
+  if 'cinder' is selected as a 'volume_driver', it is implied that the cloud
+  provider will be enabled since they are combined.
 
 _`keystone_auth_enabled`
   If this label is set to True, Kubernetes will support use Keystone for

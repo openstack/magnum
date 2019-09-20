@@ -382,7 +382,6 @@ parameters:
   cloud_provider_enabled:
     type: boolean
     description: Enable or disable the openstack kubernetes cloud provider
-    default: true
 
   etcd_tag:
     type: string
