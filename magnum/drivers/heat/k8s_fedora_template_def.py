@@ -98,24 +98,25 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         # the cloud provider needs to be enabled.
         cloud_provider_enabled = cluster.labels.get(
             'cloud_provider_enabled',
-            'true' if CONF.trust.cluster_user_trust else 'false').lower()
+            'true' if CONF.trust.cluster_user_trust else 'false')
         if (not CONF.trust.cluster_user_trust
-                and cloud_provider_enabled == 'true'):
+                and cloud_provider_enabled.lower() == 'true'):
             raise exception.InvalidParameterValue(_(
                 '"cluster_user_trust" must be set to True in magnum.conf when '
                 '"cloud_provider_enabled" label is set to true.'))
         if (cluster_template.volume_driver == 'cinder'
-                and cloud_provider_enabled == 'false'):
+                and cloud_provider_enabled.lower() == 'false'):
             raise exception.InvalidParameterValue(_(
                 '"cinder" volume driver needs "cloud_provider_enabled" label '
                 'to be true or unset.'))
+        extra_params['cloud_provider_enabled'] = cloud_provider_enabled
 
         label_list = ['kube_tag', 'container_infra_prefix',
                       'availability_zone', 'cgroup_driver',
                       'calico_tag', 'calico_cni_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
                       'etcd_tag', 'flannel_tag', 'flannel_cni_tag',
-                      'cloud_provider_enabled', 'cloud_provider_tag',
+                      'cloud_provider_tag',
                       'prometheus_tag', 'grafana_tag',
                       'heat_container_agent_tag',
                       'keystone_auth_enabled', 'k8s_keystone_auth_tag',
