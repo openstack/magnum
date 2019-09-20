@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Support boot from volume for Kubernetes all nodes (master and worker)
+    so that user can create a big size root volume, which could be more
+    flexible than using docker_volume_size. And user can specify the
+    volume type so that user can leverage high performance storage, e.g.
+    NVMe etc. And a new label etcd_volme_type is added as well so that
+    user can set volume type for etcd volume. If the boot_volume_type
+    or etcd_volume_type are not passed by labels, Magnum will try to
+    read them from config option default_boot_volume_type and
+    default_etcd_volume_type. A random volume type from Cinder will
+    be used if those options are not set.

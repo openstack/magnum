@@ -279,6 +279,12 @@ class OperationInProgress(Invalid):
                 "progress.")
 
 
+class VolumeTypeNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
+    message = _("Valid volume type could not be found.")
+    code = 400
+
+
 class ImageNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
     message = _("Image %(image_id)s could not be found.")

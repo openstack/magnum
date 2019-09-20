@@ -13,6 +13,7 @@
 # under the License.
 
 from barbicanclient.v1 import client as barbicanclient
+from cinderclient.v2 import client as cinder_client
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient
 from keystoneauth1.exceptions import catalog
@@ -41,6 +42,7 @@ class OpenStackClients(object):
         self._nova = None
         self._neutron = None
         self._octavia = None
+        self._cinder = None
 
     def url_for(self, **kwargs):
         return self.keystone().session.get_endpoint(**kwargs)
@@ -207,3 +209,24 @@ class OpenStackClients(object):
         }
         self._neutron = neutronclient.Client(**args)
         return self._neutron
+
+    @exception.wrap_keystone_exception
+    def cinder(self):
+        if self._cinder:
+            return self._cinder
+        endpoint_type = self._get_client_option('cinder', 'endpoint_type')
+        region_name = self._get_client_option('cinder', 'region_name')
+        cinderclient_version = self._get_client_option('cinder', 'api_version')
+        endpoint = self.url_for(service_type='block-storage',
+                                interface=endpoint_type,
+                                region_name=region_name)
+        args = {
+            'cacert': self._get_client_option('cinder', 'ca_file'),
+            'insecure': self._get_client_option('cinder', 'insecure')
+        }
+
+        session = self.keystone().session
+        self._cinder = cinder_client.Client(cinderclient_version,
+                                            session=session,
+                                            endpoint_override=endpoint, **args)
+        return self._cinder

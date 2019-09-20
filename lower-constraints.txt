@@ -117,6 +117,7 @@ python-barbicanclient==4.5.2
 python-dateutil==2.7.0
 python-editor==1.0.3
 python-glanceclient==2.8.0
+python-cinderclient==2.2.0
 python-heatclient==1.10.0
 python-keystoneclient==3.8.0
 python-mimeparse==1.6.0

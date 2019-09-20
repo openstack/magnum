@@ -479,6 +479,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'influx_grafana_dashboard_enabled')
         docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
+        boot_volume_size = mock_cluster.labels.get(
+            'boot_volume_size')
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
@@ -566,6 +568,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         npd_enabled = mock_cluster.labels.get('npd_enabled')
         master_image = mock_cluster_template.image_id
         minion_image = mock_cluster_template.image_id
+        boot_volume_size = mock_cluster.labels.get('boot_volume_size')
+        boot_volume_type = mock_cluster.labels.get('boot_volume_type')
+        etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -585,6 +590,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'influx_grafana_dashboard_enabled':
                 influx_grafana_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
+            'boot_volume_size': boot_volume_size,
             'etcd_volume_size': etcd_volume_size,
             'kubelet_options': kubelet_options,
             'kubeapi_options': kubeapi_options,
@@ -647,6 +653,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kube_version': kube_tag,
             'master_kube_tag': kube_tag,
             'minion_kube_tag': kube_tag,
+            'boot_volume_size': boot_volume_size,
+            'boot_volume_type': boot_volume_type,
+            'etcd_volume_type': etcd_volume_type
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -905,6 +914,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'influx_grafana_dashboard_enabled')
         docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
+        boot_volume_size = mock_cluster.labels.get(
+            'boot_volume_size')
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
@@ -992,6 +1003,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         npd_enabled = mock_cluster.labels.get('npd_enabled')
         master_image = mock_cluster_template.image_id
         minion_image = mock_cluster_template.image_id
+        boot_volume_size = mock_cluster.labels.get('boot_volume_size')
+        boot_volume_type = mock_cluster.labels.get('boot_volume_type')
+        etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1012,6 +1026,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'influx_grafana_dashboard_enabled':
                 influx_grafana_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
+            'boot_volume_size': boot_volume_size,
             'etcd_volume_size': etcd_volume_size,
             'kubelet_options': kubelet_options,
             'kubeapi_options': kubeapi_options,
@@ -1075,6 +1090,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kube_version': kube_tag,
             'master_kube_tag': kube_tag,
             'minion_kube_tag': kube_tag,
+            'boot_volume_size': boot_volume_size,
+            'boot_volume_type': boot_volume_type,
+            'etcd_volume_type': etcd_volume_type
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,

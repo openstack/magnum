@@ -15,6 +15,7 @@ import json
 from oslo_log import log as logging
 from oslo_utils import strutils
 
+from magnum.common import cinder
 from magnum.common import exception
 from magnum.common.x509 import operations as x509
 from magnum.conductor.handlers.common import cert_manager
@@ -91,11 +92,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         osc = self.get_osc(context)
         extra_params['region_name'] = osc.cinder_region_name()
 
-        # set docker_volume_type
-        # use the configuration default if None provided
-        docker_volume_type = cluster.labels.get(
-            'docker_volume_type', CONF.cinder.default_docker_volume_type)
-        extra_params['docker_volume_type'] = docker_volume_type
+        self._set_volumes(context, cluster, extra_params)
 
         extra_params['nodes_affinity_policy'] = \
             CONF.cluster.nodes_affinity_policy
@@ -169,6 +166,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
         self._set_cert_manager_params(cluster, extra_params)
         self._get_keystone_auth_default_policy(extra_params)
+        self._set_volumes(context, cluster, extra_params)
 
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
@@ -219,6 +217,28 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             washed_policy = default_policy.replace('"', '\"') \
                 .replace("$PROJECT_ID", extra_params["project_id"])
             extra_params["keystone_auth_default_policy"] = washed_policy
+
+    def _set_volumes(self, context, cluster, extra_params):
+        # set docker_volume_type
+        docker_volume_type = cluster.labels.get(
+            'docker_volume_type',
+            cinder.get_default_docker_volume_type(context))
+        extra_params['docker_volume_type'] = docker_volume_type
+
+        # set etcd_volume_type
+        etcd_volume_type = cluster.labels.get(
+            'etcd_volume_type', cinder.get_default_etcd_volume_type(context))
+        extra_params['etcd_volume_type'] = etcd_volume_type
+
+        # set boot_volume_type
+        boot_volume_type = cluster.labels.get(
+            'boot_volume_type', cinder.get_default_boot_volume_type(context))
+        extra_params['boot_volume_type'] = boot_volume_type
+
+        # set boot_volume_size
+        boot_volume_size = cluster.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        extra_params['boot_volume_size'] = boot_volume_size
 
     def get_env_files(self, cluster_template, cluster):
         env_files = []
