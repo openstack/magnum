@@ -299,10 +299,6 @@ parameters:
     type: string
     description: tag of the calico containers used to provision the calico node
 
-  calico_cni_tag:
-    type: string
-    description: tag of the cni used to provision the calico node
-
   calico_kube_controllers_tag:
     type: string
     description: tag of the kube_controllers used to provision the calico node
