@@ -78,10 +78,23 @@ htmlhelp_basename = 'magnumdoc'
 # [howto/manual]).
 latex_documents = [
     ('index',
-     'magnum.tex',
+     'doc-magnum.tex',
      u'magnum Documentation',
      u'OpenStack Foundation', 'manual'),
 ]
+
+# If false, no module index is generated.
+latex_domain_indices = False
+
+latex_elements = {
+    'makeindex': '',
+    'printindex': '',
+    'preamble': r'\setcounter{tocdepth}{3}',
+    'maxlistdepth': 10,
+}
+
+# Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
+latex_use_xindy = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
 # intersphinx_mapping = {'http://docs.python.org/': None}
