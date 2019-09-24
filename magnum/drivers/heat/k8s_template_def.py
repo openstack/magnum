@@ -189,9 +189,17 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         fixed_network = (cluster.fixed_network or
                          cluster_template.fixed_network or
                          "private")
-
         extra_params['fixed_network_name'] = \
             neutron.get_fixed_network_name(context, fixed_network)
+
+        # NOTE(brtknr): Convert fixed subnet name to UUID. If fixed_subnet
+        # is not specified in cluster template use 'private' as the default
+        # value, which is the same as the heat template default value.
+        fixed_subnet = (cluster.fixed_subnet or
+                        cluster_template.fixed_subnet or
+                        "private")
+        extra_params['fixed_subnet'] = \
+            neutron.get_fixed_subnet_id(context, fixed_subnet)
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen',

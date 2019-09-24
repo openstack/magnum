@@ -350,6 +350,12 @@ class FixedNetworkNotFound(ResourceNotFound):
     code = 400
 
 
+class FixedSubnetNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
+    message = _("Unable to find fixed subnet %(subnet)s.")
+    code = 400
+
+
 class ExternalNetworkNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
     """"Ensure the network is not private."""
