@@ -58,10 +58,10 @@ def delete_floatingip(context, fix_port_id, cluster):
 def get_network(context, network, source, target, external):
     nets = []
     n_client = clients.OpenStackClients(context).neutron()
-    ext_filter = {'router:external': external}
+    filters = {source: network, 'router:external': external}
+    networks = n_client.list_networks(**filters).get('networks')
 
-    networks = n_client.list_networks(**ext_filter)
-    for net in networks.get('networks'):
+    for net in networks:
         if net.get(source) == network:
             nets.append(net)
 
@@ -94,3 +94,33 @@ def get_fixed_network_name(context, network):
                            target='name', external=False)
     else:
         return network
+
+
+def get_subnet(context, subnet, source, target):
+    nets = []
+    n_client = clients.OpenStackClients(context).neutron()
+    filters = {source: subnet}
+    subnets = n_client.list_subnets(**filters).get('subnets', [])
+
+    for net in subnets:
+        if net.get(source) == subnet:
+            nets.append(net)
+
+    if len(nets) == 0:
+        raise exception.FixedSubnetNotFound(subnet=subnet)
+
+    if len(nets) > 1:
+        raise exception.Conflict(
+            "Multiple subnets exist with same name '%s'. Please use the "
+            "subnet ID instead." % subnet
+        )
+
+    return nets[0][target]
+
+
+def get_fixed_subnet_id(context, subnet):
+    if uuidutils.is_uuid_like(subnet):
+        return subnet
+    else:
+        return get_subnet(context, subnet, source='name',
+                          target='id')
