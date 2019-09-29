@@ -369,7 +369,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
             'etcd_volume_type': 'lvmdriver-1',
-            'role': 'master'
+            'master_role': 'master',
+            'worker_role': 'worker',
         }
 
         if missing_attr is not None:
@@ -517,7 +518,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
             'etcd_volume_type': 'lvmdriver-1',
-            'role': 'master',
+            'master_role': 'master',
+            'worker_role': 'worker',
         }
 
         self.assertEqual(expected, definition)
@@ -647,7 +649,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'boot_volume_type': 'lvmdriver-1',
             'etcd_volume_type': 'lvmdriver-1',
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
-            'role': 'master',
+            'master_role': 'master',
+            'worker_role': 'worker',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -756,7 +759,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
             'portal_network_cidr': '10.254.0.0/16',
-            'role': 'master',
+            'master_role': 'master',
+            'worker_role': 'worker',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -863,7 +867,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
             'portal_network_cidr': '10.254.0.0/16',
-            'role': 'master',
+            'master_role': 'master',
+            'worker_role': 'worker',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1093,7 +1098,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
             'etcd_volume_type': 'lvmdriver-1',
-            'role': 'master'
+            'master_role': 'master',
+            'worker_role': 'worker',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

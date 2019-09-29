@@ -213,7 +213,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -300,7 +299,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -382,7 +380,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'node_flavor': 'flavor_id',
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -467,7 +464,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -556,7 +552,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -643,7 +638,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

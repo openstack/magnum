@@ -423,9 +423,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         worker_params = worker_params or dict()
         master_params.update({
             'number_of_masters': 'node_count',
-            'role': 'role'
         })
-        worker_params.update({'role': 'role'})
         return master_params, worker_params
 
     def _handle_nodegroup_param_map(self, nodegroup, param_map):
