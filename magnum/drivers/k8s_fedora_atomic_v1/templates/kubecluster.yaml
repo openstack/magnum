@@ -6,28 +6,35 @@ description: >
   defaults to 1).
 
 conditions:
-  master_only:
-    or:
-    - equals:
-      - get_param: role
-      - "master"
-    - equals:
-      - get_param: is_cluster_stack
-      - true
-
-  worker_only:
-    or:
-    - equals:
-      - get_param: role
-      - "worker"
-    - equals:
-      - get_param: is_cluster_stack
-      - true
-
   create_cluster_resources:
     equals:
     - get_param: is_cluster_stack
     - true
+
+  is_master:
+    and:
+    - equals:
+      - get_param: master_role
+      - "master"
+    - equals:
+      - get_param: worker_role
+      - ""
+
+  is_worker:
+    not:
+      equals:
+      - get_param: worker_role
+      - ""
+
+  master_only:
+    or:
+    - create_cluster_resources
+    - is_master
+
+  worker_only:
+    or:
+    - create_cluster_resources
+    - is_worker
 
 parameters:
 
@@ -40,7 +47,11 @@ parameters:
     type: boolean
     default: false
 
-  role:
+  master_role:
+    type: string
+    default: ""
+
+  worker_role:
     type: string
     default: ""
 

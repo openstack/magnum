@@ -188,7 +188,6 @@ class TestClusterConductorWithMesos(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -255,7 +254,6 @@ class TestClusterConductorWithMesos(base.TestCase):
             'slave_flavor': 'flavor_id',
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -327,7 +325,6 @@ class TestClusterConductorWithMesos(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -403,7 +400,6 @@ class TestClusterConductorWithMesos(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -477,7 +473,6 @@ class TestClusterConductorWithMesos(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'nodes_affinity_policy': 'soft-anti-affinity',
-            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

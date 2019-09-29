@@ -7,6 +7,18 @@ description: >
 
 parameters:
 
+  is_cluster_stack:
+    type: boolean
+    default: false
+
+  master_role:
+    type: string
+    default: ""
+
+  worker_role:
+    type: string
+    default: ""
+
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server

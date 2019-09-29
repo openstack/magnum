@@ -126,11 +126,13 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         master_params.update({
             'master_flavor': 'flavor_id',
             'master_image': 'image_id',
+            'master_role': 'role',
         })
         worker_params.update({
             'number_of_minions': 'node_count',
             'minion_flavor': 'flavor_id',
             'minion_image': 'image_id',
+            'worker_role': 'role',
         })
         return super(
             K8sTemplateDefinition, self).get_nodegroup_param_maps(

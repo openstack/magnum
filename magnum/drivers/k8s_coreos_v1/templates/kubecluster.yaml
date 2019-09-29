@@ -7,6 +7,18 @@ description: >
 
 parameters:
 
+  is_cluster_stack:
+    type: boolean
+    default: false
+
+  master_role:
+    type: string
+    default: ""
+
+  worker_role:
+    type: string
+    default: ""
+
   octavia_enabled:
     type: string
     default: true
