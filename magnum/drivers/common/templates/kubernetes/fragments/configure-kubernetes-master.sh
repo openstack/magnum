@@ -204,7 +204,6 @@ fi
 
 KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
 KUBELET_ARGS="${KUBELET_ARGS} --register-with-taints=CriticalAddonsOnly=True:NoSchedule,dedicated=master:NoSchedule"
-KUBELET_ARGS="${KUBELET_ARGS} --node-labels=node-role.kubernetes.io/master=\"\""
 
 KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
