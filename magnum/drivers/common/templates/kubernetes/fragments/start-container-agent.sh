@@ -50,12 +50,43 @@ systemctl restart sshd
 
 
 _prefix="${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}"
-atomic install \
---storage ostree \
---system \
---system-package no \
---set REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt \
---name heat-container-agent \
-"${_prefix}heat-container-agent:${HEAT_CONTAINER_AGENT_TAG}"
 
+cat > /etc/systemd/system/heat-container-agent.service <<EOF
+[Unit]
+Description=Run heat-container-agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStartPre=mkdir -p /var/lib/heat-container-agent
+ExecStartPre=mkdir -p /var/run/heat-config
+ExecStartPre=mkdir -p /var/run/os-collect-config
+ExecStartPre=mkdir -p /opt/stack/os-config-refresh
+ExecStartPre=mkdir -p /srv/magnum
+ExecStartPre=-/bin/podman kill heat-container-agent
+ExecStartPre=-/bin/podman rm heat-container-agent
+ExecStartPre=-/bin/podman pull docker.io/openstackmagnum/heat-container-agent:train-dev
+ExecStart=/bin/podman run \\
+    --name heat-container-agent \\
+    --net=host \\
+    --privileged \\
+    --volume /srv/magnum:/srv/magnum \\
+    --volume /opt/stack/os-config-refresh:/opt/stack/os-config-refresh \\
+    --volume /run/systemd:/run/systemd \\
+    --volume /etc/:/etc/ \\
+    --volume /var/lib:/var/lib \\
+    --volume /var/run:/var/run \\
+    --volume /var/log:/var/log \\
+    --volume /tmp:/tmp \\
+    --volume /dev:/dev \\
+    --env REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt \\
+    ${_prefix}heat-container-agent:${HEAT_CONTAINER_AGENT_TAG} \\
+    /usr/bin/start-heat-container-agent
+ExecStop=/bin/podman stop heat-container-agent
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable heat-container-agent
 systemctl start heat-container-agent

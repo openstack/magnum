@@ -19,7 +19,7 @@ echo "starting services"
 for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
     echo "activating service $service"
     $ssh_cmd systemctl enable $service
-    $ssh_cmd systemctl --no-block restart $service
+    $ssh_cmd systemctl restart $service
 done
 
 # Label self as master

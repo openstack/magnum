@@ -21,12 +21,11 @@ if [ ! -z "$NO_PROXY" ]; then
     export NO_PROXY
 fi
 
-_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
-
 $ssh_cmd rm -rf /etc/cni/net.d/*
 $ssh_cmd rm -rf /var/lib/cni/*
 $ssh_cmd rm -rf /opt/cni/*
 $ssh_cmd mkdir -p /opt/cni
+$ssh_cmd mkdir -p /opt/cni/bin
 $ssh_cmd mkdir -p /etc/cni/net.d/
 _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]},{"type":"bind","source":"/var/lib/docker","destination":"/var/lib/docker","options":["bind","rw","slave","mode=755"]}'
 
@@ -48,13 +47,91 @@ EOF
 fi
 
 mkdir -p /srv/magnum/kubernetes/
-cat > /srv/magnum/kubernetes/install-kubernetes.sh <<EOF
-#!/bin/bash -x
-atomic install --storage ostree --system --system-package=no --set=ADDTL_MOUNTS='${_addtl_mounts}' --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
-atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
+cat > /etc/kubernetes/config <<EOF
+KUBE_LOGTOSTDERR="--logtostderr=true"
+KUBE_LOG_LEVEL="--v=3"
+KUBE_MASTER="--master=http://127.0.0.1:8080"
 EOF
-chmod +x /srv/magnum/kubernetes/install-kubernetes.sh
-$ssh_cmd "/srv/magnum/kubernetes/install-kubernetes.sh"
+cat > /etc/kubernetes/kubelet <<EOF
+KUBELET_ARGS="--fail-swap-on=false"
+EOF
+cat > /etc/kubernetes/proxy <<EOF
+KUBE_PROXY_ARGS=""
+EOF
+cat > /etc/systemd/system/kubelet.service <<EOF
+[Unit]
+Description=Kubelet via Hyperkube (System Container)
+[Service]
+EnvironmentFile=/etc/sysconfig/heat-params
+EnvironmentFile=/etc/kubernetes/config
+EnvironmentFile=/etc/kubernetes/kubelet
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
+ExecStartPre=/bin/mkdir -p /var/lib/calico
+ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
+ExecStartPre=/bin/mkdir -p /opt/cni/bin
+ExecStartPre=-/usr/bin/podman rm kubelet
+ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
+    --privileged \\
+    --pid host \\
+    --network host \\
+    --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \\
+    --volume /etc/kubernetes:/etc/kubernetes:ro,z \\
+    --volume /usr/lib/os-release:/etc/os-release:ro \\
+    --volume /etc/ssl/certs:/etc/ssl/certs:ro \\
+    --volume /lib/modules:/lib/modules:ro \\
+    --volume /run:/run \\
+    --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \\
+    --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \\
+    --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
+    --volume /var/lib/calico:/var/lib/calico \\
+    --volume /var/lib/docker:/var/lib/docker \\
+    --volume /var/lib/kubelet:/var/lib/kubelet:rshared,z \\
+    --volume /var/log:/var/log \\
+    --volume /var/run:/var/run \\
+    --volume /var/run/lock:/var/run/lock:z \\
+    --volume /opt/cni/bin:/opt/cni/bin:z \\
+    \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} \\
+    /hyperkube kubelet \\
+    \$KUBE_LOGTOSTDERR \$KUBE_LOG_LEVEL \$KUBELET_API_SERVER \$KUBELET_ADDRESS \$KUBELET_PORT \$KUBELET_HOSTNAME \$KUBELET_ARGS'
+ExecStop=-/usr/bin/podman stop kubelet
+Delegate=yes
+Restart=always
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat > /etc/systemd/system/kube-proxy.service <<EOF
+[Unit]
+Description=kube-proxy via Hyperkube
+[Service]
+EnvironmentFile=/etc/sysconfig/heat-params
+EnvironmentFile=/etc/kubernetes/config
+EnvironmentFile=/etc/kubernetes/proxy
+ExecStartPre=/bin/mkdir -p /etc/kubernetes/
+ExecStartPre=-/usr/bin/podman rm kube-proxy
+ExecStart=/bin/bash -c '/usr/bin/podman run --name kube-proxy \\
+    --privileged \\
+    --net host \\
+    --volume /etc/kubernetes:/etc/kubernetes:ro,z \\
+    --volume /usr/lib/os-release:/etc/os-release:ro \\
+    --volume /etc/ssl/certs:/etc/ssl/certs:ro \\
+    --volume /run:/run \\
+    --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \\
+    --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \\
+    --volume /lib/modules:/lib/modules:ro \\
+    --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
+    \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} \\
+    /hyperkube kube-proxy \\
+    \$KUBE_LOGTOSTDERR \$KUBE_LOG_LEVEL \$KUBE_MASTER \$KUBE_PROXY_ARGS'
+ExecStop=-/usr/bin/podman stop kube-proxy
+Delegate=yes
+Restart=always
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
 
 CERT_DIR=/etc/kubernetes/certs
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
@@ -139,7 +216,7 @@ sed -i '
 # the option --hostname-override for kubelet uses the hostname to register the node.
 # Using any other name will break the load balancer and cinder volume features.
 mkdir -p /etc/kubernetes/manifests
-KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --kubeconfig ${KUBELET_KUBECONFIG} --hostname-override=${INSTANCE_NAME}"
+KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --kubeconfig ${KUBELET_KUBECONFIG} --hostname-override=${INSTANCE_NAME}"
 KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only-port=0 --anonymous-auth=false --authorization-mode=Webhook --authentication-token-webhook=true"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 KUBELET_ARGS="${KUBELET_ARGS} --volume-plugin-dir=/var/lib/kubelet/volumeplugins"
@@ -183,24 +260,13 @@ fi
 $ssh_cmd systemctl daemon-reload
 $ssh_cmd systemctl enable docker
 
-cat > /etc/kubernetes/get_require_kubeconfig.sh <<EOF
-#!/bin/bash
-
-KUBE_VERSION=\$(kubelet --version | awk '{print \$2}')
-min_version=v1.8.0
-if [[ "\${min_version}" != \$(echo -e "\${min_version}\n\${KUBE_VERSION}" | sort -s -t. -k 1,1 -k 2,2n -k 3,3n | head -n1) && "\${KUBE_VERSION}" != "devel" ]]; then
-    echo "--require-kubeconfig"
-fi
-EOF
-chmod +x /etc/kubernetes/get_require_kubeconfig.sh
-
 KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
 
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
     /^KUBELET_HOSTNAME=/ s/=.*/=""/
     s/^KUBELET_API_SERVER=.*$//
-    /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
+    /^KUBELET_ARGS=/ s|=.*|="'"${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
 
 KUBE_PROXY_ARGS="--kubeconfig=${PROXY_KUBECONFIG} --cluster-cidr=${PODS_NETWORK_CIDR} --hostname-override=${INSTANCE_NAME}"
