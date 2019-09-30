@@ -30,6 +30,7 @@ from magnum.common import keystone as magnum_keystone
 from magnum.objects import base as objects_base
 from magnum.tests import conf_fixture
 from magnum.tests import fake_notifier
+from magnum.tests import output_fixture
 from magnum.tests import policy_fixture
 
 
@@ -78,6 +79,8 @@ class TestCase(base.BaseTestCase):
         self.keystone_client = magnum_keystone.KeystoneClientV3(self.context)
 
         self.policy = self.useFixture(policy_fixture.PolicyFixture())
+
+        self.output = self.useFixture(output_fixture.OutputStreamCapture())
 
         self.useFixture(fixtures.MockPatchObject(
             oslo_messaging, 'Notifier',
