@@ -44,7 +44,31 @@ class TestNodegroupObject(base.TestCase):
         self.assertIsNone(nodegroup.max_node_count)
 
 
-class TestListNodegroups(api_base.FunctionalTest):
+class NodeGroupControllerTest(api_base.FunctionalTest):
+    headers = {"Openstack-Api-Version": "container-infra latest"}
+
+    def _add_headers(self, kwargs):
+        if 'headers' not in kwargs:
+            kwargs['headers'] = self.headers
+
+    def get_json(self, *args, **kwargs):
+        self._add_headers(kwargs)
+        return super(NodeGroupControllerTest, self).get_json(*args, **kwargs)
+
+    def post_json(self, *args, **kwargs):
+        self._add_headers(kwargs)
+        return super(NodeGroupControllerTest, self).post_json(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self._add_headers(kwargs)
+        return super(NodeGroupControllerTest, self).delete(*args, **kwargs)
+
+    def patch_json(self, *args, **kwargs):
+        self._add_headers(kwargs)
+        return super(NodeGroupControllerTest, self).patch_json(*args, **kwargs)
+
+
+class TestListNodegroups(NodeGroupControllerTest):
     _expanded_attrs = ["id", "project_id", "docker_volume_size", "labels",
                        "node_addresses", "links"]
 
@@ -156,8 +180,21 @@ class TestListNodegroups(api_base.FunctionalTest):
         self._verify_attrs(self._nodegroup_attrs, response)
         self._verify_attrs(self._expanded_attrs, response)
 
+    def test_get_one_wrong_microversion(self):
+        headers = {"Openstack-Api-Version": "container-infra 1.8"}
+        worker = self.cluster.default_ng_worker
+        url = '/clusters/%s/nodegroups/%s' % (self.cluster.uuid, worker.uuid)
+        response = self.get_json(url, headers=headers, expect_errors=True)
+        self.assertEqual(406, response.status_code)
 
-class TestPost(api_base.FunctionalTest):
+    def test_get_all_wrong_microversion(self):
+        headers = {"Openstack-Api-Version": "container-infra 1.8"}
+        url = '/clusters/%s/nodegroups/' % (self.cluster.uuid)
+        response = self.get_json(url, headers=headers, expect_errors=True)
+        self.assertEqual(406, response.status_code)
+
+
+class TestPost(NodeGroupControllerTest):
     def setUp(self):
         super(TestPost, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
@@ -307,8 +344,17 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(409, response.status_int)
 
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_ng_wrong_microversion(self, mock_utcnow):
+        headers = {"Openstack-Api-Version": "container-infra 1.8"}
+        ng_dict = apiutils.nodegroup_post_data(name="new_ng")
+        response = self.post_json(self.url, ng_dict, headers=headers,
+                                  expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(406, response.status_int)
 
-class TestDelete(api_base.FunctionalTest):
+
+class TestDelete(NodeGroupControllerTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
@@ -381,8 +427,14 @@ class TestDelete(api_base.FunctionalTest):
         response = self.delete(url)
         self.assertEqual(204, response.status_int)
 
+    def test_delete_wrong_microversion(self):
+        headers = {"Openstack-Api-Version": "container-infra 1.8"}
+        response = self.delete(self.url + self.nodegroup.uuid, headers=headers,
+                               expect_errors=True)
+        self.assertEqual(406, response.status_int)
 
-class TestPatch(api_base.FunctionalTest):
+
+class TestPatch(NodeGroupControllerTest):
     def setUp(self):
         super(TestPatch, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
@@ -553,8 +605,17 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_code)
 
+    def test_replace_wrong_microversion(self):
+        headers = {"Openstack-Api-Version": "container-infra 1.8"}
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/max_node_count',
+                                     'value': 4,
+                                     'op': 'replace'}], headers=headers,
+                                   expect_errors=True)
+        self.assertEqual(406, response.status_code)
 
-class TestNodeGroupPolicyEnforcement(api_base.FunctionalTest):
+
+class TestNodeGroupPolicyEnforcement(NodeGroupControllerTest):
     def setUp(self):
         super(TestNodeGroupPolicyEnforcement, self).setUp()
         obj_utils.create_test_cluster_template(self.context)

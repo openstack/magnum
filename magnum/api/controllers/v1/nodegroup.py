@@ -222,6 +222,7 @@ class NodeGroupController(base.Controller):
                                            sort_key=sort_key,
                                            sort_dir=sort_dir)
 
+    @base.Controller.api_version("1.9")
     @expose.expose(NodeGroupCollection, types.uuid_or_name, int, int,
                    wtypes.text, wtypes.text, wtypes.text)
     def get_all(self, cluster_id, marker=None, limit=None, sort_key='id',
@@ -260,6 +261,7 @@ class NodeGroupController(base.Controller):
                                               filters,
                                               expand=False)
 
+    @base.Controller.api_version("1.9")
     @expose.expose(NodeGroup, types.uuid_or_name, types.uuid_or_name)
     def get_one(self, cluster_id, nodegroup_id):
         """Retrieve information for the given nodegroup in a cluster.
@@ -277,6 +279,7 @@ class NodeGroupController(base.Controller):
         nodegroup = objects.NodeGroup.get(context, cluster.uuid, nodegroup_id)
         return NodeGroup.convert(nodegroup)
 
+    @base.Controller.api_version("1.9")
     @expose.expose(NodeGroup, types.uuid_or_name, NodeGroup, body=NodeGroup,
                    status_code=202)
     def post(self, cluster_id, nodegroup):
@@ -315,6 +318,7 @@ class NodeGroupController(base.Controller):
         pecan.request.rpcapi.nodegroup_create_async(cluster, new_obj)
         return NodeGroup.convert(new_obj)
 
+    @base.Controller.api_version("1.9")
     @expose.expose(NodeGroup, types.uuid_or_name, types.uuid_or_name,
                    body=[NodeGroupPatchType], status_code=202)
     def patch(self, cluster_id, nodegroup_id, patch):
@@ -329,6 +333,7 @@ class NodeGroupController(base.Controller):
         pecan.request.rpcapi.nodegroup_update_async(cluster, nodegroup)
         return NodeGroup.convert(nodegroup)
 
+    @base.Controller.api_version("1.9")
     @expose.expose(None, types.uuid_or_name, types.uuid_or_name,
                    status_code=204)
     def delete(self, cluster_id,  nodegroup_id):
