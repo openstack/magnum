@@ -31,6 +31,8 @@ $ssh_cmd mkdir -p /etc/cni/net.d/
 _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]},{"type":"bind","source":"/var/lib/docker","destination":"/var/lib/docker","options":["bind","rw","slave","mode=755"]}'
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
+    echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
+    $ssh_cmd sysctl -p
     if [ "$($ssh_cmd systemctl status NetworkManager.service | grep -o "Active: active")" = "Active: active" ]; then
         CALICO_NM=/etc/NetworkManager/conf.d/calico.conf
         [ -f ${CALICO_NM} ] || {
@@ -42,8 +44,6 @@ unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 }
         $ssh_cmd systemctl restart NetworkManager
-        echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
-        $ssh_cmd sysctl -p
     fi
 fi
 
