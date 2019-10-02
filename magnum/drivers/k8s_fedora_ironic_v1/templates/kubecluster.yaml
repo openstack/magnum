@@ -65,6 +65,16 @@ parameters:
     default: baremetal
     description: flavor to use when booting the server
 
+  master_nodegroup_name:
+    type: string
+    default: ""
+    description: the name of the nodegroup where the node belongs
+
+  worker_nodegroup_name:
+    type: string
+    default: ""
+    description: the name of the nodegroup where the node belongs
+
   prometheus_monitoring:
     type: boolean
     default: false

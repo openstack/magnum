@@ -19,6 +19,14 @@ parameters:
     type: string
     description: flavor to use when booting the server
 
+  nodegroup_role:
+    type: string
+    description: the role of the nodegroup
+
+  nodegroup_name:
+    type: string
+    description: the name of the nodegroup where the node belongs
+
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
@@ -401,6 +409,8 @@ resources:
                   $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
                   $AUTO_HEALING_CONTROLLER: {get_param: auto_healing_controller}
                   $NPD_ENABLED: {get_param: npd_enabled}
+                  $NODEGROUP_ROLE: {get_param: nodegroup_role}
+                  $NODEGROUP_NAME: {get_param: nodegroup_name}
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
             - get_file: ../../common/templates/fragments/configure-docker-registry.sh
