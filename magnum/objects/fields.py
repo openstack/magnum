@@ -52,8 +52,9 @@ class ClusterStatus(fields.Enum):
 class ClusterHealthStatus(fields.Enum):
     HEALTHY = 'HEALTHY'
     UNHEALTHY = 'UNHEALTHY'
+    UNKNOWN = 'UNKNOWN'
 
-    ALL = (HEALTHY, UNHEALTHY)
+    ALL = (HEALTHY, UNHEALTHY, UNKNOWN)
 
     STATUS_FAILED = (UNHEALTHY)
 
