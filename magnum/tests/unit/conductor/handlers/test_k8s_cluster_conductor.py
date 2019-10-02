@@ -371,6 +371,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'etcd_volume_type': 'lvmdriver-1',
             'master_role': 'master',
             'worker_role': 'worker',
+            'master_nodegroup_name': 'master_ng',
+            'worker_nodegroup_name': 'worker_ng',
         }
 
         if missing_attr is not None:
@@ -520,6 +522,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'etcd_volume_type': 'lvmdriver-1',
             'master_role': 'master',
             'worker_role': 'worker',
+            'master_nodegroup_name': 'master_ng',
+            'worker_nodegroup_name': 'worker_ng',
         }
 
         self.assertEqual(expected, definition)
@@ -651,6 +655,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'master_role': 'master',
             'worker_role': 'worker',
+            'master_nodegroup_name': 'master_ng',
+            'worker_nodegroup_name': 'worker_ng',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -761,6 +767,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'master_role': 'master',
             'worker_role': 'worker',
+            'master_nodegroup_name': 'master_ng',
+            'worker_nodegroup_name': 'worker_ng',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -869,6 +877,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'master_role': 'master',
             'worker_role': 'worker',
+            'master_nodegroup_name': 'master_ng',
+            'worker_nodegroup_name': 'worker_ng',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1100,6 +1110,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'etcd_volume_type': 'lvmdriver-1',
             'master_role': 'master',
             'worker_role': 'worker',
+            'master_nodegroup_name': 'master_ng',
+            'worker_nodegroup_name': 'worker_ng',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
