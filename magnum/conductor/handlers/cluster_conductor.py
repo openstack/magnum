@@ -259,6 +259,7 @@ class Handler(object):
         # Resize cluster
         try:
             nodegroup.node_count = node_count
+            nodegroup.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING,
@@ -273,6 +274,8 @@ class Handler(object):
             cluster.status_reason = six.text_type(e)
             cluster.save()
             nodegroup.node_count = old_node_count
+            nodegroup.status = fields.ClusterStatus.UPDATE_FAILED
+            nodegroup.status_reason = six.text_type(e)
             nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
@@ -321,11 +324,15 @@ class Handler(object):
             cluster_driver.upgrade_cluster(context, cluster, cluster_template,
                                            max_batch_size, nodegroup, rollback)
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
+            nodegroup.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None
         except Exception as e:
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)
             cluster.save()
+            nodegroup.status = fields.ClusterStatus.UPDATE_FAILED
+            nodegroup.status_reason = six.text_type(e)
+            nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
@@ -334,5 +341,6 @@ class Handler(object):
                 raise e
             raise
 
+        nodegroup.save()
         cluster.save()
         return cluster

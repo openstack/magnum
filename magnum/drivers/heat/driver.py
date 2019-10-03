@@ -327,14 +327,14 @@ class FedoraKubernetesDriver(KubernetesDriver):
     def upgrade_cluster(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, scale_manager=None,
                         rollback=False):
+        """For Train release we are going to upgrade only the kube tag"""
         osc = clients.OpenStackClients(context)
-        _, heat_params, _ = (
-            self._extract_template_definition(context, cluster,
-                                              scale_manager=scale_manager))
-        # Extract labels/tags from cluster not template
-        # There are some version tags are not decalared in labels explicitly,
-        # so we need to get them from heat_params based on the labels given in
-        # new cluster template.
+
+        # Use this just to check that we are not downgrading.
+        heat_params = {}
+        if 'kube_tag' in nodegroup.labels:
+            heat_params['kube_tag'] = nodegroup.labels['kube_tag']
+
         current_addons = {}
         new_addons = {}
         for label in cluster_template.labels:
@@ -348,41 +348,63 @@ class FedoraKubernetesDriver(KubernetesDriver):
                     if (SV.from_pip_string(new_addons[label]) <
                             SV.from_pip_string(current_addons[label])):
                         raise exception.InvalidVersion(tag=label)
+                except exception.InvalidVersion:
+                    raise
                 except Exception as e:
                     # NOTE(flwang): Different cloud providers may use different
                     # tag/version format which maybe not able to parse by
                     # SemanticVersion. For this case, let's just skip it.
                     LOG.debug("Failed to parse tag/version %s", str(e))
 
-        heat_params["master_image"] = cluster_template.image_id
-        heat_params["minion_image"] = cluster_template.image_id
-        # NOTE(flwang): Overwrite the kube_tag as well to avoid a server
-        # rebuild then do the k8s upgrade again, when both image id and
-        # kube_tag changed
-        heat_params["kube_tag"] = cluster_template.labels["kube_tag"]
-        heat_params["kube_version"] = cluster_template.labels["kube_tag"]
-        heat_params["master_kube_tag"] = cluster_template.labels["kube_tag"]
-        heat_params["minion_kube_tag"] = cluster_template.labels["kube_tag"]
-        heat_params["update_max_batch_size"] = max_batch_size
+        # Since the above check passed just
+        # hardcode what we want to send to heat.
         # Rules: 1. No downgrade 2. Explicitly override 3. Merging based on set
         # Update heat_params based on the data generated above
-        del heat_params['kube_service_account_private_key']
-        del heat_params['kube_service_account_key']
+        try:
+            heat_params = {
+                "kube_tag": cluster_template.labels["kube_tag"],
+                "kube_version": cluster_template.labels["kube_tag"],
+                "master_kube_tag": cluster_template.labels["kube_tag"],
+                "minion_kube_tag": cluster_template.labels["kube_tag"],
+                "update_max_batch_size": max_batch_size
+            }
+        except KeyError:
+            # Corner case but if the user defined an invalid CT just abort
+            reason = ("Cluster template %s does not contain a "
+                      "valid kube_tag") % cluster_template.name
+            raise exception.InvalidClusterTemplateForUpgrade(reason=reason)
 
-        for label in new_addons:
-            heat_params[label] = cluster_template.labels[label]
+        stack_id = nodegroup.stack_id
+        if nodegroup is not None and not nodegroup.is_default:
+            heat_params['is_cluster_stack'] = False
+            # For now set the worker_role explicitly in order to
+            # make sure that the is_master condition fails.
+            heat_params['worker_role'] = nodegroup.role
 
-        cluster['cluster_template_id'] = cluster_template.uuid
-        new_labels = cluster.labels.copy()
-        new_labels.update(cluster_template.labels)
-        cluster['labels'] = new_labels
+        new_kube_tag = cluster_template.labels['kube_tag']
+        new_labels = nodegroup.labels.copy()
+        new_labels.update({'kube_tag': new_kube_tag})
+        # we need to set the whole dict to the object
+        # and not just update the existing labels. This
+        # is how obj_what_changed works.
+        nodegroup.labels = new_labels
+
+        if nodegroup.is_default:
+            cluster.cluster_template_id = cluster_template.uuid
+            cluster.labels = new_labels
+            if nodegroup.role == 'master':
+                other_default_ng = cluster.default_ng_worker
+            else:
+                other_default_ng = cluster.default_ng_master
+            other_default_ng.labels = new_labels
+            other_default_ng.save()
 
         fields = {
             'existing': True,
             'parameters': heat_params,
             'disable_rollback': not rollback
         }
-        osc.heat().stacks.update(cluster.stack_id, **fields)
+        osc.heat().stacks.update(stack_id, **fields)
 
     def get_nodegroup_extra_params(self, cluster, osc):
         network = osc.heat().resources.get(cluster.stack_id, 'network')

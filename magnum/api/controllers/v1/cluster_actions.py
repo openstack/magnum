@@ -140,8 +140,7 @@ class ActionsController(base.Controller):
                        action='cluster:upgrade')
 
         new_cluster_template = api_utils.get_resource(
-            'ClusterTemplate',
-            cluster_upgrade_req.cluster_template)
+            'ClusterTemplate', cluster_upgrade_req.cluster_template)
 
         if (cluster_upgrade_req.nodegroup == wtypes.Unset or
                 not cluster_upgrade_req.nodegroup):
@@ -151,6 +150,13 @@ class ActionsController(base.Controller):
         else:
             nodegroup = objects.NodeGroup.get(
                 context, cluster.uuid, cluster_upgrade_req.nodegroup)
+            if (new_cluster_template.uuid != cluster.cluster_template_id
+                    and not nodegroup.is_default):
+                reason = ("Nodegroup %s can be upgraded only to "
+                          "match cluster's template (%s).")
+                reason = reason % (nodegroup.name,
+                                   cluster.cluster_template.name)
+                raise exception.InvalidClusterTemplateForUpgrade(reason=reason)
 
         pecan.request.rpcapi.cluster_upgrade(
             cluster,

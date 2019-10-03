@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Cluster upgrade API supports upgrading specific nodegroups
+    in kubernetes clusters. If a user chooses a default nodegroup to
+    be upgraded, then both of the default nodegroups will be upgraded
+    since they are in one stack. For non-default nodegroups users are
+    allowed to use only the cluster template already set in the
+    cluster. This means that the cluster (default nodegroups) has to
+    be upgraded on the first hand. For now, the only label that is
+    taken into consideration during upgrades is the kube_tag. All
+    other labels are ignored.

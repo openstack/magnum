@@ -20,10 +20,10 @@ from magnum.tests.unit.objects import utils as obj_utils
 CONF = magnum.conf.CONF
 
 
-class TestClusterActions(api_base.FunctionalTest):
+class TestClusterResize(api_base.FunctionalTest):
 
     def setUp(self):
-        super(TestClusterActions, self).setUp()
+        super(TestClusterResize, self).setUp()
         self.cluster_obj = obj_utils.create_test_cluster(
             self.context, name='cluster_example_A', node_count=3)
         p = mock.patch.object(rpcapi.API, 'cluster_resize_async')
@@ -123,3 +123,126 @@ class TestClusterActions(api_base.FunctionalTest):
                                            "container-infra latest"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)
+
+
+class TestClusterUpgrade(api_base.FunctionalTest):
+    def setUp(self):
+        super(TestClusterUpgrade, self).setUp()
+        self.cluster_template1 = obj_utils.create_test_cluster_template(
+            self.context, uuid='94889766-e686-11e9-81b4-2a2ae2dbcce4',
+            name='test_1', id=1)
+        self.cluster_template2 = obj_utils.create_test_cluster_template(
+            self.context, uuid='94889aa4-e686-11e9-81b4-2a2ae2dbcce4',
+            name='test_2', id=2)
+        self.cluster_obj = obj_utils.create_test_cluster(
+            self.context, name='cluster_example_A',
+            cluster_template_id=self.cluster_template1.uuid)
+        self.nodegroup_obj = obj_utils.create_test_nodegroup(
+            self.context, name='test_ng', cluster_id=self.cluster_obj.uuid,
+            uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
+            project_id=self.cluster_obj.project_id,
+            is_default=False)
+        p = mock.patch.object(rpcapi.API, 'cluster_upgrade')
+        self.mock_cluster_resize = p.start()
+        self.mock_cluster_resize.side_effect = self._sim_rpc_cluster_upgrade
+        self.addCleanup(p.stop)
+
+    def _sim_rpc_cluster_upgrade(self, cluster, cluster_template, batch_size,
+                                 nodegroup):
+        return cluster
+
+    def test_upgrade(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_2"
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"})
+        self.assertEqual(202, response.status_code)
+
+    def test_upgrade_default_worker(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_2",
+            "nodegroup": self.cluster_obj.default_ng_worker.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"})
+        self.assertEqual(202, response.status_code)
+
+    def test_upgrade_default_master(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_2",
+            "nodegroup": self.cluster_obj.default_ng_master.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"})
+        self.assertEqual(202, response.status_code)
+
+    def test_upgrade_non_default_ng(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_1",
+            "nodegroup": self.nodegroup_obj.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"})
+        self.assertEqual(202, response.status_code)
+
+    def test_upgrade_cluster_not_found(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_2"
+        }
+        response = self.post_json('/clusters/not_there/actions/upgrade',
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"},
+                                  expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
+    def test_upgrade_ct_not_found(self):
+        cluster_upgrade_req = {
+            "cluster_template": "not_there"
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"},
+                                  expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
+    def test_upgrade_ng_not_found(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_2",
+            "nodegroup": "not_there"
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"},
+                                  expect_errors=True)
+        self.assertEqual(404, response.status_code)
+
+    def test_upgrade_non_default_ng_invalid_ct(self):
+        cluster_upgrade_req = {
+            "cluster_template": "test_2",
+            "nodegroup": self.nodegroup_obj.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/upgrade' %
+                                  self.cluster_obj.uuid,
+                                  cluster_upgrade_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra latest"},
+                                  expect_errors=True)
+        self.assertEqual(409, response.status_code)

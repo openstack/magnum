@@ -462,3 +462,7 @@ class CreateMasterNodeGroup(NotSupported):
 class NgOperationInProgress(Invalid):
     message = _("Nodegroup %(nodegroup)s already has an operation in "
                 "progress.")
+
+
+class InvalidClusterTemplateForUpgrade(Conflict):
+    message = _("Cluster Template is not valid for upgrade: %(reason)s")

@@ -333,7 +333,8 @@ def get_nodegroups_for_cluster(**kw):
         node_addresses=kw.get('node_addresses', ['172.17.2.4']),
         node_count=kw.get('node_count', 3),
         status=kw.get('worker_status', 'CREATE_COMPLETE'),
-        status_reason=kw.get('worker_reason', 'Completed successfully')
+        status_reason=kw.get('worker_reason', 'Completed successfully'),
+        image_id=kw.get('image_id', 'test_image')
     )
 
     # get masters nodegroup
@@ -347,7 +348,8 @@ def get_nodegroups_for_cluster(**kw):
         node_addresses=kw.get('master_addresses', ['172.17.2.18']),
         node_count=kw.get('master_count', 3),
         status=kw.get('master_status', 'CREATE_COMPLETE'),
-        status_reason=kw.get('master_reason', 'Completed successfully')
+        status_reason=kw.get('master_reason', 'Completed successfully'),
+        image_id=kw.get('image_id', 'test_image')
     )
     return {'master': master, 'worker': worker}
 
