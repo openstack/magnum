@@ -18,6 +18,11 @@ parameters:
     description: name of ssh key to be provisioned on our server
     default: ""
 
+  ssh_public_key:
+    type: string
+    description: The public ssh key to add in all nodes
+    default: ""
+
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses
