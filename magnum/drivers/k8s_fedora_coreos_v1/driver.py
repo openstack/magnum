@@ -1,5 +1,3 @@
-# Copyright 2016 Rackspace Inc. All rights reserved.
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -15,7 +13,7 @@
 from oslo_log import log as logging
 
 from magnum.drivers.heat import driver
-from magnum.drivers.k8s_fedora_atomic_v1 import template_def
+from magnum.drivers.k8s_fedora_coreos_v1 import template_def
 
 LOG = logging.getLogger(__name__)
 
@@ -26,9 +24,9 @@ class Driver(driver.FedoraKubernetesDriver):
     def provides(self):
         return [
             {'server_type': 'vm',
-             'os': 'fedora-atomic',
+             'os': 'fedora-coreos',
              'coe': 'kubernetes'},
         ]
 
     def get_template_definition(self):
-        return template_def.AtomicK8sTemplateDefinition()
+        return template_def.FCOSK8sTemplateDefinition()
