@@ -130,6 +130,13 @@ class TestClusterConductorWithSwarm(base.TestCase):
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc.url_for.return_value = 'http://192.168.10.10:5000/v3'
+
+        mock_keypair = mock.MagicMock()
+        mock_keypair.public_key = 'ssh-rsa AAAAB3Nz'
+        self.mock_nova = mock.MagicMock()
+        self.mock_nova.keypairs.get.return_value = mock_keypair
+        self.mock_osc.nova.return_value = self.mock_nova
+
         self.mock_keystone = mock.MagicMock()
         self.mock_keystone.trustee_domain_id = 'trustee_domain_id'
         self.mock_osc.keystone.return_value = self.mock_keystone
@@ -167,6 +174,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'external_network': 'external_network_id',
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
@@ -251,6 +259,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'external_network': 'external_network_id',
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
@@ -345,6 +354,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'external_network': 'external_network_id',
             'number_of_masters': 1,
             'number_of_nodes': 1,
@@ -418,6 +428,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'external_network': 'external_network_id',
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
@@ -506,6 +517,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'external_network': 'external_network_id',
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
@@ -592,6 +604,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'external_network': 'external_network_id',
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',

@@ -162,6 +162,13 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.mock_osc_class = osc_patcher.start()
         self.addCleanup(osc_patcher.stop)
         self.mock_osc = mock.MagicMock()
+
+        mock_keypair = mock.MagicMock()
+        mock_keypair.public_key = 'ssh-rsa AAAAB3Nz'
+        self.mock_nova = mock.MagicMock()
+        self.mock_nova.keypairs.get.return_value = mock_keypair
+        self.mock_osc.nova.return_value = self.mock_nova
+
         self.mock_osc.url_for.return_value = 'http://192.168.10.10:5000/v3'
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc.cinder_region_name.return_value = 'RegionOne'
@@ -338,6 +345,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
@@ -485,6 +493,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
@@ -615,6 +624,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'username': 'fake_user',
             'verify_ca': True,
             'openstack_ca': '',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
@@ -733,6 +743,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'openstack_ca_coreos': '',
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
@@ -839,6 +850,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             'openstack_ca_coreos': '',
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
@@ -1057,6 +1069,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            'ssh_public_key': 'ssh-rsa AAAAB3Nz',
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
