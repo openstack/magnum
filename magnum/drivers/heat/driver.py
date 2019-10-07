@@ -13,6 +13,7 @@
 import abc
 import collections
 import os
+from pbr.version import SemanticVersion as SV
 import six
 
 from string import ascii_letters
@@ -318,6 +319,86 @@ class KubernetesDriver(HeatDriver):
                         max_batch_size, nodegroup, scale_manager=None,
                         rollback=False):
         raise NotImplementedError("Must implement 'upgrade_cluster'")
+
+
+class FedoraKubernetesDriver(KubernetesDriver):
+    """Base driver for Kubernetes clusters."""
+
+    def upgrade_cluster(self, context, cluster, cluster_template,
+                        max_batch_size, nodegroup, scale_manager=None,
+                        rollback=False):
+        osc = clients.OpenStackClients(context)
+        _, heat_params, _ = (
+            self._extract_template_definition(context, cluster,
+                                              scale_manager=scale_manager))
+        # Extract labels/tags from cluster not template
+        # There are some version tags are not decalared in labels explicitly,
+        # so we need to get them from heat_params based on the labels given in
+        # new cluster template.
+        current_addons = {}
+        new_addons = {}
+        for label in cluster_template.labels:
+            # This is upgrade API, so we don't introduce new stuff by this API,
+            # but just focus on the version change.
+            new_addons[label] = cluster_template.labels[label]
+            if ((label.endswith('_tag') or
+                 label.endswith('_version')) and label in heat_params):
+                current_addons[label] = heat_params[label]
+                try:
+                    if (SV.from_pip_string(new_addons[label]) <
+                            SV.from_pip_string(current_addons[label])):
+                        raise exception.InvalidVersion(tag=label)
+                except Exception as e:
+                    # NOTE(flwang): Different cloud providers may use different
+                    # tag/version format which maybe not able to parse by
+                    # SemanticVersion. For this case, let's just skip it.
+                    LOG.debug("Failed to parse tag/version %s", str(e))
+
+        heat_params["master_image"] = cluster_template.image_id
+        heat_params["minion_image"] = cluster_template.image_id
+        # NOTE(flwang): Overwrite the kube_tag as well to avoid a server
+        # rebuild then do the k8s upgrade again, when both image id and
+        # kube_tag changed
+        heat_params["kube_tag"] = cluster_template.labels["kube_tag"]
+        heat_params["kube_version"] = cluster_template.labels["kube_tag"]
+        heat_params["master_kube_tag"] = cluster_template.labels["kube_tag"]
+        heat_params["minion_kube_tag"] = cluster_template.labels["kube_tag"]
+        heat_params["update_max_batch_size"] = max_batch_size
+        # Rules: 1. No downgrade 2. Explicitly override 3. Merging based on set
+        # Update heat_params based on the data generated above
+        del heat_params['kube_service_account_private_key']
+        del heat_params['kube_service_account_key']
+
+        for label in new_addons:
+            heat_params[label] = cluster_template.labels[label]
+
+        cluster['cluster_template_id'] = cluster_template.uuid
+        new_labels = cluster.labels.copy()
+        new_labels.update(cluster_template.labels)
+        cluster['labels'] = new_labels
+
+        fields = {
+            'existing': True,
+            'parameters': heat_params,
+            'disable_rollback': not rollback
+        }
+        osc.heat().stacks.update(cluster.stack_id, **fields)
+
+    def get_nodegroup_extra_params(self, cluster, osc):
+        network = osc.heat().resources.get(cluster.stack_id, 'network')
+        secgroup = osc.heat().resources.get(cluster.stack_id,
+                                            'secgroup_kube_minion')
+        for output in osc.heat().stacks.get(cluster.stack_id).outputs:
+            if output['output_key'] == 'api_address':
+                api_address = output['output_value']
+                break
+        extra_params = {
+            'existing_master_private_ip': api_address,
+            'existing_security_group': secgroup.attributes['id'],
+            'fixed_network': network.attributes['fixed_network'],
+            'fixed_subnet': network.attributes['fixed_subnet'],
+        }
+        return extra_params
 
 
 class HeatPoller(object):

@@ -1,0 +1,84 @@
+{
+  "ignition": {
+    "config": {
+      "replace": {
+        "source": null,
+        "verification": {}
+      }
+    },
+    "security": {
+      "tls": {}
+    },
+    "timeouts": {},
+    "version": "3.0.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "sshAuthorizedKeys": [
+          "$SSH_KEY_VALUE"
+        ]
+      }
+    ]
+  },
+  "storage": {
+      "directories":[
+        {
+          "path": "/var/lib/cloud/data",
+          "group": {"name": "root"},
+          "user": {"name": "root"},
+          "mode": 644
+        },
+        {
+          "path": "/var/lib/heat-cfntools",
+          "group": {"name": "root"},
+          "user": {"name": "root"},
+          "mode": 644
+        }
+      ],
+      "files": [
+        {
+          "filesystem": "root",
+          "path": "/etc/hostname",
+          "mode": 420,
+          "contents": { "source": "data:,$HOSTNAME" }
+        },
+        {
+          "filesystem": "root",
+          "group": {"name": "root"},
+          "path": "/etc/pki/ca-trust/source/anchors/openstack-ca.pem",
+          "user": {"name": "root"},
+          "contents": {
+            "source": "data:,$OPENSTACK_CA",
+            "verification": {}
+          },
+          "mode": 644
+        },
+        {
+          "user": {"name": "root"},
+          "group": {"name": "root"},
+          "mode": 700,
+          "path": "/root/configure-agent-env.sh",
+          "contents": {
+            "source": "data:,%23!%2Fbin%2Fbash%0A%0Aset%20-x%0Aset%20-e%0Aset%20%2Bu%0A%0Auntil%20%5B%20-f%20%2Fetc%2Fpki%2Fca-trust%2Fsource%2Fanchors%2Fopenstack-ca.pem%20%5D%0Ado%0A%20%20%20%20echo%20%22waiting%20for%20%2Fetc%2Fpki%2Fca-trust%2Fsource%2Fanchors%2Fopenstack-ca.pem%22%0A%20%20%20%20sleep%203s%0Adone%0A%2Fusr%2Fbin%2Fupdate-ca-trust%0A%0AHTTP_PROXY%3D%22%24HTTP_PROXY%22%0AHTTPS_PROXY%3D%22%24HTTPS_PROXY%22%0ANO_PROXY%3D%22%24NO_PROXY%22%0ACONTAINER_INFRA_PREFIX%3D%22%24CONTAINER_INFRA_PREFIX%22%0AHEAT_CONTAINER_AGENT_TAG%3D%22%24HEAT_CONTAINER_AGENT_TAG%22%0A%0A%0Aif%20%5B%20-n%20%22%24%7BHTTP_PROXY%7D%22%20%5D%3B%20then%0A%20%20%20%20export%20HTTP_PROXY%0Afi%0A%0Aif%20%5B%20-n%20%22%24%7BHTTPS_PROXY%7D%22%20%5D%3B%20then%0A%20%20%20%20export%20HTTPS_PROXY%0Afi%0A%0Aif%20%5B%20-n%20%22%24%7BNO_PROXY%7D%22%20%5D%3B%20then%0A%20%20%20%20export%20NO_PROXY%0Afi%0A%0A%23%20Create%20a%20keypair%20for%20the%20heat-container-agent%20to%0A%23%20access%20the%20node%20over%20ssh.%20It%20is%20useful%20to%20operate%0A%23%20in%20host%20mount%20namespace%20and%20apply%20configuration.%0Aid%0Amkdir%20-p%20%2Fsrv%2Fmagnum%2F.ssh%0Achmod%200700%20%2Fsrv%2Fmagnum%2F.ssh%0A%23touch%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa%0Assh-keygen%20-q%20-t%20rsa%20-N%20''%20-f%20%2Ftmp%2Fheat_agent_rsa%0Amv%20%2Ftmp%2Fheat_agent_rsa%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa%0Amv%20%2Ftmp%2Fheat_agent_rsa.pub%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa.pub%0Achmod%200400%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa%0Achmod%200400%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa.pub%0A%23%20Add%20the%20public%20to%20the%20host%20authorized_keys%20file.%0Amkdir%20-p%20%2Froot%2F.ssh%0Achmod%200700%20%2Froot%2F.ssh%0Acat%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa.pub%20%3E%20%2Froot%2F.ssh%2Fauthorized_keys%0A%23%20Add%20localost%20to%20know_hosts%0Assh-keyscan%20127.0.0.1%20%3E%20%2Fsrv%2Fmagnum%2F.ssh%2Fknown_hosts%0A%23%20ssh%20configguration%20file%2C%20to%20be%20specified%20with%20ssh%20-F%0Acat%20%3E%20%2Fsrv%2Fmagnum%2F.ssh%2Fconfig%20%3C%3CEOF%0AHost%20localhost%0A%20%20%20%20%20HostName%20127.0.0.1%0A%20%20%20%20%20User%20root%0A%20%20%20%20%20IdentityFile%20%2Fsrv%2Fmagnum%2F.ssh%2Fheat_agent_rsa%0A%20%20%20%20%20UserKnownHostsFile%20%2Fsrv%2Fmagnum%2F.ssh%2Fknown_hosts%0AEOF%0A%0Ased%20-i%20'%2F%5EPermitRootLogin%2F%20s%2F%20.*%2F%20without-password%2F'%20%2Fetc%2Fssh%2Fsshd_config%0A%23%20Security%20enhancement%3A%20Disable%20password%20authentication%0Ased%20-i%20'%2F%5EPasswordAuthentication%20yes%2F%20s%2F%20yes%2F%20no%2F'%20%2Fetc%2Fssh%2Fsshd_config%0A%0Asystemctl%20restart%20sshd%0A",
+            "verification": {}
+          }
+        }
+      ]
+  },
+  "systemd": {
+      "units": [
+      {
+          "name": "configure-agent-env.service",
+          "enabled": true,
+          "contents": "[Unit]\nDescription=Configure heat agent environment\nAfter=sshd.service\n\n[Service]\nUser=root\nGroup=root\nType=simple\nExecStart=/bin/bash /root/configure-agent-env.sh\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target"
+      },
+      {
+        "name": "heat-container-agent.service",
+        "enabled": true,
+        "contents": "[Unit]\nDescription=Run heat-container-agent\nAfter=network-online.target configure-agent-env.service\nWants=network-online.target\n\n[Service]\nExecStartPre=mkdir -p /var/lib/heat-container-agent\nExecStartPre=mkdir -p /var/run/heat-config\nExecStartPre=mkdir -p /var/run/os-collect-config\nExecStartPre=mkdir -p /opt/stack/os-config-refresh\nExecStartPre=-mv /var/lib/os-collect-config/local-data /var/lib/cloud/data/cfn-init-data\nExecStartPre=mkdir -p /srv/magnum\nExecStartPre=-/bin/podman kill heat-container-agent\nExecStartPre=-/bin/podman rm heat-container-agent\nExecStartPre=-/bin/podman pull docker.io/openstackmagnum/heat-container-agent:train-dev\nExecStart=/bin/podman run \\\n        --name heat-container-agent \\\n        --privileged \\\n        --volume /srv/magnum:/srv/magnum \\\n        --volume /opt/stack/os-config-refresh:/opt/stack/os-config-refresh \\\n        --volume /run/systemd:/run/systemd \\\n        --volume /etc/:/etc/ \\\n        --volume /var/lib:/var/lib \\\n        --volume /var/run:/var/run \\\n        --volume /var/log:/var/log \\\n        --volume /tmp:/tmp \\\n        --volume /dev:/dev \\\n        --env REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/source/anchors/openstack-ca.pem --net=host \\\n        docker.io/openstackmagnum/heat-container-agent:train-dev \\\n        /usr/bin/start-heat-container-agent\nTimeoutStartSec=10min\n\nExecStop=/bin/podman stop heat-container-agent\n\n[Install]\nWantedBy=multi-user.target\n"
+      }
+      ]
+  }
+}

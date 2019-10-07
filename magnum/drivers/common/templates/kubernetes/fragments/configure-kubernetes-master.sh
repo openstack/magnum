@@ -42,6 +42,9 @@ EOF
 }
         systemctl restart NetworkManager
     fi
+elif [ "$NETWORK_DRIVER" = "flannel" ]; then
+    $ssh_cmd modprobe vxlan
+    echo "vxlan" > /etc/modules-load.d/vxlan.conf
 fi
 
 
@@ -182,6 +185,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --volume /etc/ssl/certs:/etc/ssl/certs:ro \\
     --volume /lib/modules:/lib/modules:ro \\
     --volume /run:/run \\
+    --volume /dev:/dev \\
     --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \\
     --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \\
     --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
