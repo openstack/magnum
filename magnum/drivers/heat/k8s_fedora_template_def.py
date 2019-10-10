@@ -35,8 +35,6 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
     def __init__(self):
         super(K8sFedoraTemplateDefinition, self).__init__()
-        self.add_parameter('docker_volume_size',
-                           cluster_attr='docker_volume_size')
         self.add_parameter('docker_storage_driver',
                            cluster_template_attr='docker_storage_driver')
 
@@ -195,13 +193,14 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             'boot_volume_size', CONF.cinder.default_boot_volume_size)
         extra_params['boot_volume_size'] = boot_volume_size
 
-    def get_env_files(self, cluster_template, cluster):
+    def get_env_files(self, cluster_template, cluster, nodegroup=None):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster_template,
                                            cluster)
         template_def.add_etcd_volume_env_file(env_files, cluster)
-        template_def.add_volume_env_file(env_files, cluster)
+        template_def.add_volume_env_file(env_files, cluster,
+                                         nodegroup=nodegroup)
         template_def.add_lb_env_file(env_files, cluster_template)
         template_def.add_fip_env_file(env_files, cluster_template, cluster)
 

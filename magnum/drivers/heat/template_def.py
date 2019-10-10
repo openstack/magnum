@@ -235,7 +235,7 @@ class TemplateDefinition(object):
 
         return template_params
 
-    def get_env_files(self, cluster_template, cluster):
+    def get_env_files(self, cluster_template, cluster, nodegroup=None):
         """Gets stack environment files based upon ClusterTemplate attributes.
 
         Base implementation returns no files (empty list). Meant to be
@@ -323,9 +323,12 @@ class TemplateDefinition(object):
         pass
 
     def extract_definition(self, context, cluster_template, cluster, **kwargs):
+        nodegroups_list = kwargs.get('nodegroups', None)
+        nodegroup = None if not nodegroups_list else nodegroups_list[0]
         return (self.template_path,
                 self.get_params(context, cluster_template, cluster, **kwargs),
-                self.get_env_files(cluster_template, cluster))
+                self.get_env_files(cluster_template, cluster,
+                                   nodegroup=nodegroup))
 
 
 class BaseTemplateDefinition(TemplateDefinition):
@@ -533,8 +536,12 @@ def add_lb_env_file(env_files, cluster_template):
         env_files.append(COMMON_ENV_PATH + 'no_master_lb.yaml')
 
 
-def add_volume_env_file(env_files, cluster):
-    if cluster.docker_volume_size is None:
+def add_volume_env_file(env_files, cluster, nodegroup=None):
+    if nodegroup:
+        docker_volume_size = nodegroup.docker_volume_size
+    else:
+        docker_volume_size = cluster.docker_volume_size
+    if docker_volume_size is None:
         env_files.append(COMMON_ENV_PATH + 'no_volume.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'with_volume.yaml')
