@@ -123,6 +123,7 @@ data:
   cni-conf.json: |
     {
       "name": "cbr0",
+      "cniVersion": "0.2.0",
       "plugins": [
         {
           "type": "flannel",
