@@ -90,7 +90,7 @@ write_files:
       TEMPLATE=/etc/kubernetes/addons/coredns-de.yaml
       mkdir -p $(dirname ${TEMPLATE})
       cat > $TEMPLATE <<EOF
-      apiVersion: extensions/v1beta1
+      apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: coredns

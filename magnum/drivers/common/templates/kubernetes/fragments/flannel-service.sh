@@ -166,6 +166,7 @@ metadata:
 spec:
   selector:
     matchLabels:
+      tier: node
       app: flannel
   template:
     metadata:
