@@ -20,7 +20,7 @@ CONF = magnum.conf.CONF
 
 
 class CoreOSK8sTemplateDefinition(kctd.CoreOSK8sTemplateDefinition):
-    """Kubernetes template for a CoreOS Atomic VM."""
+    """Kubernetes template for a CoreOS Container Linux VM."""
 
     @property
     def driver_module_path(self):

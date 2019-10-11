@@ -1,7 +1,7 @@
 heat_template_version: 2014-10-16
 
 description: >
-  This is a nested stack that defines swarm master node. A swarm mater node is
+  This is a nested stack that defines swarm master node. A swarm master node is
   running a Docker daemon and joins swarm as a manager. The Docker daemon
   listens on port 2375.
 
