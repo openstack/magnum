@@ -23,6 +23,7 @@ import six
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import keystone
+from magnum.common import nova
 from magnum.common import utils
 import magnum.conf
 
@@ -370,6 +371,9 @@ class BaseTemplateDefinition(TemplateDefinition):
         extra_params['trustee_password'] = cluster.trustee_password
         extra_params['verify_ca'] = CONF.drivers.verify_ca
         extra_params['openstack_ca'] = utils.get_openstack_ca()
+        ssh_public_key = nova.get_ssh_key(context, cluster.keypair)
+        if ssh_public_key != "":
+            extra_params['ssh_public_key'] = ssh_public_key
 
         # Only pass trust ID into the template if allowed by the config file
         if CONF.trust.cluster_user_trust:
