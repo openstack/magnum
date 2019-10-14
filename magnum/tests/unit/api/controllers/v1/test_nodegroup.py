@@ -353,6 +353,16 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(406, response.status_int)
 
+    def test_create_ng_cluster_no_api_address(self):
+        # Remove the api address from the cluster and make sure
+        # that the request is not accepted.
+        self.cluster.api_address = None
+        self.cluster.save()
+        ng_dict = apiutils.nodegroup_post_data()
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
 
 class TestDelete(NodeGroupControllerTest):
 
