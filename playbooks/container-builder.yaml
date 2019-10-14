@@ -105,3 +105,16 @@
               HELM_VERSION: "{{ helm_version }}"
             push: no
           retries: 10
+
+    - name: "Build cluster-autoscaler image"
+      block:
+        - name: "Build {{ magnum_repository }}/cluster-autoscaler:v{{ item.version }}"
+          docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/cluster-autoscaler"
+            name: "{{ magnum_repository }}/cluster-autoscaler"
+            tag: "v{{ item.version }}"
+            buildargs:
+              AUTOSCALER_VERSION: "cluster-autoscaler-{{ item.version }}"
+            push: no
+          with_items: "{{ cluster_autoscaler_versions }}"
+          retries: 10
