@@ -411,30 +411,28 @@ class HeatPoller(object):
         IN_PROGRESS = '_IN_PROGRESS'
         COMPLETE = '_COMPLETE'
         UPDATE = 'UPDATE'
+        DELETE = 'DELETE'
 
         previous_state = self.cluster.status
         self.cluster.status_reason = None
 
+        non_default_ngs_exist = any(not ns.is_default for ns in ng_statuses)
         # Both default nodegroups will have the same status so it's
         # enough to check one of them.
-        self.cluster.status = self.cluster.default_ng_master.status
-        default_ng = self.cluster.default_ng_master
-        if (default_ng.status.endswith(IN_PROGRESS) or
-                default_ng.status == fields.ClusterStatus.DELETE_COMPLETE):
-            self.cluster.save()
-            return
-
+        default_ng_status = self.cluster.default_ng_master.status
+        # Whatever action is going on in a cluster that has
+        # non-default ngs, we call it update except for delete.
+        action = DELETE if default_ng_status.startswith(DELETE) else UPDATE
         # Keep priority to the states below
         for state in (IN_PROGRESS, FAILED, COMPLETE):
-            if any(ns.status.endswith(state) for ns in ng_statuses
-                   if not ns.is_default):
-                status = getattr(fields.ClusterStatus, UPDATE+state)
+            if any(ns.status.endswith(state) for ns in ng_statuses):
+                if non_default_ngs_exist:
+                    status = getattr(fields.ClusterStatus, action+state)
+                else:
+                    # If there are no non-default NGs
+                    # just use the default NG's status.
+                    status = default_ng_status
                 self.cluster.status = status
-                if state == FAILED:
-                    reasons = ["%s failed" % (ns.name)
-                               for ns in ng_statuses
-                               if ns.status.endswith(FAILED)]
-                    self.cluster.status_reason = ' ,'.join(reasons)
                 break
 
         if self.cluster.status == fields.ClusterStatus.CREATE_COMPLETE:
@@ -448,6 +446,13 @@ class HeatPoller(object):
             if previous_state not in (fields.ClusterStatus.CREATE_COMPLETE,
                                       fields.ClusterStatus.CREATE_IN_PROGRESS):
                 self.cluster.status = fields.ClusterStatus.UPDATE_COMPLETE
+
+        # Summarize the failed reasons.
+        if self.cluster.status.endswith(FAILED):
+            reasons = ["%s failed" % (ns.name)
+                       for ns in ng_statuses
+                       if ns.status.endswith(FAILED)]
+            self.cluster.status_reason = ' ,'.join(reasons)
 
         self.cluster.save()
 
