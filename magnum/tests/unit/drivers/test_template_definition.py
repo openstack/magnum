@@ -448,6 +448,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.fixed_network = None
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
+        mock_cluster.fixed_subnet = fixed_subnet
         del mock_cluster.stack_id
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -604,6 +606,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'etcd_tag': etcd_tag,
             'coredns_tag': coredns_tag,
             'fixed_network_name': fixed_network_name,
+            'fixed_subnet': fixed_subnet,
             'flannel_tag': flannel_tag,
             'flannel_cni_tag': flannel_cni_tag,
             'container_infra_prefix': container_infra_prefix,
@@ -719,6 +722,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster.labels = {}
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         mock_cluster.project_id = 'e2a6c8b0-a3c2-42a3-b3f4-1f639a523a52'
+        mock_cluster.fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
 
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -776,6 +780,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster.labels = {"ingress_controller": "octavia"}
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         mock_cluster.project_id = 'e2a6c8b0-a3c2-42a3-b3f4-1f639a523a52'
+        mock_cluster.fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
 
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -830,6 +835,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster.labels = {"ingress_controller": "octavia"}
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         mock_cluster.project_id = 'e2a6c8b0-a3c2-42a3-b3f4-1f639a523a52'
+        mock_cluster.fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
 
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -879,6 +885,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.fixed_network = None
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
+        mock_cluster.fixed_subnet = fixed_subnet
         del mock_cluster.stack_id
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -1013,6 +1021,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'fixed_network_name': fixed_network_name,
+            'fixed_subnet': fixed_subnet,
             'admission_control_list': admission_control_list,
             'prometheus_monitoring': prometheus_monitoring,
             'grafana_admin_passwd': grafana_admin_passwd,

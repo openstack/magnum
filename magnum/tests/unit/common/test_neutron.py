@@ -272,3 +272,80 @@ class NeutronTest(base.TestCase):
             self.context,
             another_fake_id
         )
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_fixed_subnet_id(self, mock_clients):
+        fake_name = "fake_subnet"
+        fake_id = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_subnets.return_value = {
+            'subnets': [
+                {
+                    'id': fake_id,
+                    'name': fake_name,
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        subnet_id = neutron.get_fixed_subnet_id(self.context, fake_name)
+
+        self.assertEqual(fake_id, subnet_id)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_fixed_subnet_id_notfound(self, mock_clients):
+        fake_name = "fake_subnet"
+        fake_id = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_subnets.return_value = {
+            'subnets': [
+                {
+                    'id': fake_id,
+                    'name': fake_name,
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        self.assertRaises(
+            exception.FixedSubnetNotFound,
+            neutron.get_fixed_subnet_id,
+            self.context,
+            "another_subnet"
+        )
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_fixed_subnet_id_conflict(self, mock_clients):
+        fake_name = "fake_subnet"
+        fake_id_1 = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        fake_id_2 = "93781f82-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_subnets.return_value = {
+            'subnets': [
+                {
+                    'id': fake_id_1,
+                    'name': fake_name,
+                },
+                {
+                    'id': fake_id_2,
+                    'name': fake_name,
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        self.assertRaises(
+            exception.Conflict,
+            neutron.get_fixed_subnet_id,
+            self.context,
+            fake_name
+        )
