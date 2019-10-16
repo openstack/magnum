@@ -30,3 +30,6 @@
           retries: 10
         - command: docker push {{ magnum_repository }}/helm-client:{{ helm_version }}
           retries: 10
+        - command: docker push {{ magnum_repository }}/cluster-autoscaler:v{{ item.version }}
+          with_items: "{{ cluster_autoscaler_versions }}"
+          retries: 10
