@@ -441,12 +441,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.network_driver = 'flannel'
         external_network_id = '17e4e301-b7f3-4996-b3dd-97b3a700174b'
         mock_cluster_template.external_network_id = external_network_id
+        mock_cluster = mock.MagicMock()
         fixed_network_name = 'fixed_network'
         mock_get_fixed_network_name.return_value = fixed_network_name
         fixed_network = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        mock_cluster_template.fixed_network = fixed_network
-        mock_cluster = mock.MagicMock()
-        mock_cluster.fixed_network = None
+        mock_cluster.fixed_network = fixed_network
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
         mock_cluster.fixed_subnet = fixed_subnet
@@ -678,7 +677,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         )
         mock_get_fixed_network_name.assert_called_once_with(
             mock_context,
-            mock_cluster_template.fixed_network
+            mock_cluster.fixed_network
         )
 
     @mock.patch('magnum.common.neutron.get_external_network_id')
@@ -880,10 +879,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.network_driver = 'calico'
         external_network_id = '17e4e301-b7f3-4996-b3dd-97b3a700174b'
         mock_cluster_template.external_network_id = external_network_id
-        fixed_network_name = 'fixed_network'
-        mock_cluster_template.fixed_network = fixed_network_name
         mock_cluster = mock.MagicMock()
-        mock_cluster.fixed_network = None
+        fixed_network_name = 'fixed_network'
+        mock_cluster.fixed_network = fixed_network_name
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         fixed_subnet = 'f2a6c8b0-a3c2-42a3-b3f4-1f639a523a53'
         mock_cluster.fixed_subnet = fixed_subnet
