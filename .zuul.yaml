@@ -1,29 +1,3 @@
-- secret:
-    name: magnum_docker_login
-    data:
-      user: !encrypted/pkcs1-oaep
-        - mM1s+mysmyzj5pIxVhuGVkvOSmTPqJkYtnfngIyOhzJyAINIPw+CwoVVPBhVa0jXgoACq
-          s7a01eDSmyGjOtMVvCB1rpJMf9KlmIIs7wXa44VRvU6ZN1IHbmCHyK4cnGBDTNBktfSag
-          FLBJ0c8/QCATJeKBhK3ynwQPKTT6IHB38RsHE9kqU8RgUK95MvvUVIeEKC1fVvlETIS5x
-          kKty+NWaeLZGkLO4lbWlF+LlVcdgOthhp7OO2Ivjrbt9P+jCOiIliMKVM6lTuRTki3D7o
-          ucVeEM2SCfZXQGeMz5cZgyv/dD5krb2W+/VHHx/M3TVvNLwWPwcjl2fOCEh+HUEIAa3bW
-          muHPRHu8CirS5hIxjHIh1hsykwYtYCoZTFbTmJwjWD4URyev8fCEmbrMHD8KNi4cgWjos
-          nHlR7L79YVE6LaIOfxAe4OjBv48I+Mq2P/s84RgjAJyfp7TgR+mJ+wSW4W6SkM0PkfpHx
-          5gIQ1W8NLvEbHWul1P7kv5ikLr4wStNkEDc2VH1gflI7VSM4KLhANwedx3f6qVGBAPsrY
-          vw7QsmUHGUiunX1SABZf1nhc0Xu0FFCLujnMSuuccfC90RbYZk+4xIo6CRFKy+q9Ko4ju
-          pH1gUp+GKiHDXme61oI9M+rjy11MzzeaFHacOZbccZhJBy7EcnYvxPxH22nPds=
-      password: !encrypted/pkcs1-oaep
-        - DeKrk9fGHRFpf1pGXCfX0gItAAUyS1ZmuRIqq7iMvioz8P6k0NdYaPRGtQG5f0ijJSaG0
-          /TTxKySQ5Dtnf7PumH5U2nXDQzi0oieH+u6h9Iu5x6sPDcOsO3XryPouQGhs+T1iqMd0j
-          cXnbhM4/0QxtMD3b9rxL4WAp16nJ0c1p8Nh0d7KxulhF2n0fNcHgCxSpDU09Ehf5z1X+r
-          z4fc9K7jxr/P5wJ5mTQ85NVEOGchMq5H2a3MuJGU7B7NViv3nBd8nd39sQrvsCMAD/es0
-          vABLC5HJyZj5wrjh2b0sgAbHdM89TXDXg6FAk3HlS0jXdu7Sd6BUEZuHcymd680qV+bui
-          gF6RT+qO9D3Q/9koGrNabi8VFUSNqOavBJVn0W/ZTG/vGy3DmgjtGtgQu+2Q1zuwodaa+
-          tiZwyrd2t9g33ePZgjBiCF8ehPgkkzgHmKEYDrc2itBb3T4PxcdMCfwt1KtmhNfYnSpSF
-          VY57IV7OGysaedKuYpb8aJ0ckj47lJLS669ZoOFGPIMTuVFpdFTILaQOPqws/HTZgKlTk
-          aidm/zvriGovFY8tAjcOnpbkJ44lGUPNH09aoMh47q7yfPoMJJ9QDVb3WLxhY18jfwfCY
-          eD4eIWo2s0YG37VX0N5lPeHR6Y5HZq9AI0oOTmXjmRKHkq2JdpeBz7avdZBu7M=
-
 - job:
     name: magnum-functional-base
     parent: legacy-dsvm-base
