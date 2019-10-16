@@ -175,6 +175,11 @@ spec:
         tier: node
         app: flannel
     spec:
+      # https://pagure.io/atomic/kubernetes-sig/issue/3
+      # https://danwalsh.livejournal.com/74754.html
+      securityContext:
+        seLinuxOptions:
+          type: "spc_t"
       hostNetwork: true
       nodeSelector:
         beta.kubernetes.io/arch: amd64

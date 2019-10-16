@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Add fedora coreos driver. To deploy clusters with fedora coreos operators
+    or users need to add os_distro=fedora-coreos to the image. The scripts
+    to deploy kubernetes on top are the same with fedora atomic. Note that
+    this driver has selinux enabled.
+issues:
+  - |
+    The startup of the heat-container-agent uses a workaround to copy the
+    SoftwareDeployment credentials to /var/lib/cloud/data/cfn-init-data.
+    The fedora coreos driver requires heat train to support ignition.
