@@ -81,7 +81,7 @@ def get_network(context, network, source, target, external):
 
 
 def get_external_network_id(context, network):
-    if uuidutils.is_uuid_like(network):
+    if network and uuidutils.is_uuid_like(network):
         return network
     else:
         return get_network(context, network, source='name',
@@ -89,7 +89,7 @@ def get_external_network_id(context, network):
 
 
 def get_fixed_network_name(context, network):
-    if uuidutils.is_uuid_like(network):
+    if network and uuidutils.is_uuid_like(network):
         return get_network(context, network, source='id',
                            target='name', external=False)
     else:
@@ -119,8 +119,7 @@ def get_subnet(context, subnet, source, target):
 
 
 def get_fixed_subnet_id(context, subnet):
-    if uuidutils.is_uuid_like(subnet):
-        return subnet
+    if subnet and not uuidutils.is_uuid_like(subnet):
+        return get_subnet(context, subnet, source='name', target='id')
     else:
-        return get_subnet(context, subnet, source='name',
-                          target='id')
+        return subnet
