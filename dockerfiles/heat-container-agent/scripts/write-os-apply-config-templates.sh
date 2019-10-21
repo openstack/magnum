@@ -7,7 +7,8 @@ mkdir -p $oac_templates/etc
 
 
 # template for building os-collect-config.conf for polling heat
-cat <<EOF >$oac_templates/etc/os-collect-config.conf
+if [ ! -f $oac_templates/etc/os-collect-config.conf ] ; then
+    cat <<EOF >$oac_templates/etc/os-collect-config.conf
 [DEFAULT]
 {{^os-collect-config.command}}
 command = os-refresh-config
@@ -67,7 +68,11 @@ metadata_url = {{metadata_url}}
 
 {{/os-collect-config}}
 EOF
+fi
+
 mkdir -p $oac_templates/var/run/heat-config
 
 # template for writing heat deployments data to a file
-echo "{{deployments}}" > $oac_templates/var/run/heat-config/heat-config
+if [ ! -f $oac_templates/var/run/heat-config/heat-config ] ; then
+    echo "{{deployments}}" > $oac_templates/var/run/heat-config/heat-config
+fi
