@@ -164,6 +164,35 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
               self).update_outputs(stack, cluster_template, cluster,
                                    nodegroups=nodegroups)
 
+    def get_net_params(self, context, cluster_template, cluster):
+        extra_params = dict()
+        # NOTE(lxkong): Convert external network name to UUID, the template
+        # field name is confused. If external_network_id is not specified in
+        # cluster template use 'public' as the default value, which is the same
+        # with the heat template default value as before.
+        external_network = cluster_template.external_network_id
+        ext_net_id = neutron.get_external_network_id(context, external_network)
+        extra_params['external_network'] = ext_net_id
+
+        # NOTE(brtknr): Convert fixed network UUID to name if the given network
+        # name is UUID like because OpenStack Cloud Controller Manager only
+        # accepts a name as an argument to internal-network-name in the
+        # cloud-config file provided to it. The default fixed network name is
+        # the same as that defined in the heat template.
+        fixed_network = cluster.fixed_network
+        net_name = neutron.get_fixed_network_name(context, fixed_network)
+        if net_name:
+            extra_params['fixed_network_name'] = net_name
+
+        # NOTE(brtknr): Convert fixed subnet name to UUID. If fixed_subnet
+        # is not specified in cluster template use 'private' as the default
+        # value, which is the same as the heat template default value.
+        fixed_subnet = cluster.fixed_subnet
+        subnet_id = neutron.get_fixed_subnet_id(context, fixed_subnet)
+        if subnet_id:
+            extra_params['fixed_subnet'] = subnet_id
+        return extra_params
+
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
@@ -177,33 +206,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
         extra_params['octavia_enabled'] = keystone.is_octavia_enabled()
 
-        # NOTE(lxkong): Convert external network name to UUID, the template
-        # field name is confused. If external_network_id is not specified in
-        # cluster template use 'public' as the default value, which is the same
-        # with the heat template default value as before.
-        external_network = cluster_template.external_network_id or "public"
-        extra_params['external_network'] = \
-            neutron.get_external_network_id(context, external_network)
-
-        # NOTE(brtknr): Convert fixed network UUID to name if the given network
-        # name is UUID like because OpenStack Cloud Controller Manager only
-        # accepts a name as an argument to internal-network-name in the
-        # cloud-config file provided to it. The default fixed network name is
-        # the same as that defined in the heat template.
-        fixed_network = (cluster.fixed_network or
-                         cluster_template.fixed_network or
-                         "private")
-        extra_params['fixed_network_name'] = \
-            neutron.get_fixed_network_name(context, fixed_network)
-
-        # NOTE(brtknr): Convert fixed subnet name to UUID. If fixed_subnet
-        # is not specified in cluster template use 'private' as the default
-        # value, which is the same as the heat template default value.
-        fixed_subnet = (cluster.fixed_subnet or
-                        cluster_template.fixed_subnet or
-                        "private")
-        extra_params['fixed_subnet'] = \
-            neutron.get_fixed_subnet_id(context, fixed_subnet)
+        net_params = self.get_net_params(context, cluster_template, cluster)
+        extra_params.update(net_params)
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen',
