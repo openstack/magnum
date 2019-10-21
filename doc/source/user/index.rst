@@ -1443,7 +1443,7 @@ _`ingress_controller_role`
   This label is not used for octavia-ingress-controller.
 
 _`octavia_ingress_controller_tag`
-  The image tag for octavia-ingress-controller. Stein-default: 1.13.2-alpha
+  The image tag for octavia-ingress-controller. Train-default: v1.15.0
 
 _`nginx_ingress_controller_tag`
   The image tag for nginx-ingress-controller. Stein-default: 0.23.0

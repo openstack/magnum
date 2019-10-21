@@ -572,7 +572,7 @@ parameters:
   octavia_ingress_controller_tag:
     type: string
     description: Octavia ingress controller docker image tag.
-    default: "1.13.2-alpha"
+    default: "v1.15.0"
 
   kubelet_options:
     type: string

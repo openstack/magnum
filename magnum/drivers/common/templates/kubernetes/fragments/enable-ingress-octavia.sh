@@ -35,17 +35,17 @@ metadata:
   namespace: kube-system
 data:
   config: |
-    cluster_name: ${CLUSTER_UUID}
+    cluster-name: ${CLUSTER_UUID}
     openstack:
-      auth_url: ${AUTH_URL}
-      user_id: ${TRUSTEE_USER_ID}
+      auth-url: ${AUTH_URL}
+      user-id: ${TRUSTEE_USER_ID}
       password: ${TRUSTEE_PASSWORD}
-      trust_id: ${TRUST_ID}
+      trust-id: ${TRUST_ID}
       region: ${REGION_NAME}
-      ca_file: /etc/kubernetes/ca-bundle.crt
+      ca-file: /etc/kubernetes/ca-bundle.crt
     octavia:
-      subnet_id: ${CLUSTER_SUBNET}
-      floating_network_id: ${EXTERNAL_NETWORK_ID}
+      subnet-id: ${CLUSTER_SUBNET}
+      floating-network-id: ${EXTERNAL_NETWORK_ID}
 EOF
 )
 writeFile $OCTAVIA_INGRESS_CONTROLLER_CONFIGMAP "$OCTAVIA_INGRESS_CONTROLLER_CONFIGMAP_CONTENT"
