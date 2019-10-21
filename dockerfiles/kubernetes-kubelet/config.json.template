@@ -368,7 +368,8 @@
             "options": [
                 "bind",
                 "rw",
-                "mode=755"
+                "rshared",
+                "mode=777"
              ]
           },
           {
@@ -379,7 +380,7 @@
                 "rbind",
                 "rshared",
                 "rw",
-                "mode=755"
+                "mode=777"
              ]
           },
           {

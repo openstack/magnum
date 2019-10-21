@@ -16,7 +16,7 @@ kubernetes_images:
 
 magnum_images:
   - name: heat-container-agent
-    tag: train-dev
+    tag: ussuri-dev
 
 helm_version: v2.12.3
 
