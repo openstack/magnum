@@ -101,6 +101,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
 ExecStop=-/usr/bin/podman stop kubelet
 Delegate=yes
 Restart=always
+TimeoutStartSec=10min
 RestartSec=10
 [Install]
 WantedBy=multi-user.target
@@ -132,6 +133,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kube-proxy \\
 ExecStop=-/usr/bin/podman stop kube-proxy
 Delegate=yes
 Restart=always
+TimeoutStartSec=10min
 RestartSec=10
 [Install]
 WantedBy=multi-user.target
