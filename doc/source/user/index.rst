@@ -429,6 +429,9 @@ the table are linked to more details elsewhere in the user guide.
 | `npd_enabled`_                        | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `use_podman`_                         | - true             | see below     |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1372,7 +1375,21 @@ _`max_node_count`
 _`npd_enabled`
   Set Node Problem Detector service enabled or disabled. Default enabled.
 
+_`use_podman`
+  Choose whether system containers etcd, kubernetes and the heat-agent will
+  be installed with podman or atomic. This label is relevant for
+  k8s_fedora drivers.
 
+  k8s_fedora_atomic_v1 defaults to use_podman=false, meaning atomic will be
+  used pulling containers from docker.io/openstackmagnum. use_podman=true
+  is accepted as well, which will pull containers by k8s.gcr.io.
+
+  k8s_fedora_coreos_v1 defaults and accepts only use_podman=true.
+
+  Note that, to use kubernetes version greater or equal to v1.16.0 with the
+  k8s_fedora_atomic_v1 driver, you need to set use_podman=true. This is
+  necessary since v1.16 dropped the --containerized flag in kubelet.
+  https://github.com/kubernetes/kubernetes/pull/80043/files
 
 External load balancer for services
 -----------------------------------

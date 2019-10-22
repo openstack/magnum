@@ -572,6 +572,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
+        use_podman = mock_cluster.labels.get('use_podman')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -658,6 +659,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'etcd_volume_type': etcd_volume_type,
             'ostree_remote': ostree_remote,
             'ostree_commit': ostree_commit,
+            'use_podman': use_podman,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1012,6 +1014,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
+        use_podman = mock_cluster.labels.get('use_podman')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1100,6 +1103,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'etcd_volume_type': etcd_volume_type,
             'ostree_remote': ostree_remote,
             'ostree_commit': ostree_commit,
+            'use_podman': use_podman,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
