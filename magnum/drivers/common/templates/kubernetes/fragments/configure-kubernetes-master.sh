@@ -103,6 +103,7 @@ ExecStop=-/usr/bin/podman stop kube-apiserver
 Delegate=yes
 Restart=always
 RestartSec=10
+TimeoutStartSec=10min
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -132,6 +133,7 @@ ExecStop=-/usr/bin/podman stop kube-controller-manager
 Delegate=yes
 Restart=always
 RestartSec=10
+TimeoutStartSec=10min
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -160,6 +162,7 @@ ExecStop=-/usr/bin/podman stop kube-scheduler
 Delegate=yes
 Restart=always
 RestartSec=10
+TimeoutStartSec=10min
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -209,6 +212,7 @@ ExecStop=-/usr/bin/podman stop kubelet
 Delegate=yes
 Restart=always
 RestartSec=10
+TimeoutStartSec=10min
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -241,6 +245,7 @@ ExecStop=-/usr/bin/podman stop kube-proxy
 Delegate=yes
 Restart=always
 RestartSec=10
+TimeoutStartSec=10min
 [Install]
 WantedBy=multi-user.target
 EOF
