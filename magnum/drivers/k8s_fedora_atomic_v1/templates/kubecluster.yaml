@@ -755,6 +755,16 @@ parameters:
     default:
       true
 
+  ostree_remote:
+    type: string
+    description: The ostree remote branch to upgrade
+    default: ''
+
+  ostree_commit:
+    type: string
+    description: The ostree commit to deploy
+    default: ''
+
 resources:
 
   ######################################################################
@@ -1069,6 +1079,8 @@ resources:
           min_node_count: {get_param: min_node_count}
           max_node_count: {get_param: max_node_count}
           npd_enabled: {get_param: npd_enabled}
+          ostree_remote: {get_param: ostree_remote}
+          ostree_commit: {get_param: ostree_commit}
 
   kube_cluster_config:
     condition: create_cluster_resources
@@ -1232,6 +1244,8 @@ resources:
           auto_healing_enabled: {get_param: auto_healing_enabled}
           npd_enabled: {get_param: npd_enabled}
           auto_healing_controller: {get_param: auto_healing_controller}
+          ostree_remote: {get_param: ostree_remote}
+          ostree_commit: {get_param: ostree_commit}
 
 outputs:
 

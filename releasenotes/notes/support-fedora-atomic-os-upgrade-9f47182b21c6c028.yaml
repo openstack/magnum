@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Along with the kubernetes version upgrade support we just released, we're
+    adding the support to upgrade the operating system of the k8s cluster
+    (including master and worker nodes). It's an inplace upgrade leveraging the
+    atomic/ostree upgrade capability.

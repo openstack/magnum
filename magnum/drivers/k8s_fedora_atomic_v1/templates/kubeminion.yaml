@@ -312,6 +312,16 @@ parameters:
     default:
       true
 
+  ostree_remote:
+    type: string
+    description: The ostree remote branch to upgrade
+    default: ''
+
+  ostree_commit:
+    type: string
+    description: The ostree commit to deploy
+    default: ''
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -320,6 +330,7 @@ conditions:
       equals:
       - get_param: boot_volume_size
       - 0
+
 
 resources:
 
@@ -526,6 +537,8 @@ resources:
       group: script
       inputs:
       - name: kube_tag_input
+      - name: ostree_remote_input
+      - name: ostree_commit_input
       config:
         get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
 
@@ -538,6 +551,8 @@ resources:
       actions: ['UPDATE']
       input_values:
         kube_tag_input: {get_param: kube_tag}
+        ostree_remote_input: {get_param: ostree_remote}
+        ostree_commit_input: {get_param: ostree_commit}
 
 outputs:
 
