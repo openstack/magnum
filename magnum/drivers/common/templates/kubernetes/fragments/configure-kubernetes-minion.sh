@@ -61,7 +61,8 @@ EOF
 cat > /etc/kubernetes/proxy <<EOF
 KUBE_PROXY_ARGS=""
 EOF
-cat > /etc/systemd/system/kubelet.service <<EOF
+if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    cat > /etc/systemd/system/kubelet.service <<EOF
 [Unit]
 Description=Kubelet via Hyperkube (System Container)
 [Service]
@@ -73,6 +74,7 @@ ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
 ExecStartPre=/bin/mkdir -p /var/lib/calico
 ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
 ExecStartPre=/bin/mkdir -p /opt/cni/bin
+ExecStartPre=-/bin/bash -c '/usr/bin/podman run --privileged --user root --net host --rm --volume /usr/local/bin:/host/usr/local/bin \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} /bin/sh -c "cp /usr/local/bin/kubectl /host/usr/local/bin/kubectl"'
 ExecStartPre=-/usr/bin/podman rm kubelet
 ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --privileged \\
@@ -106,7 +108,7 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
-cat > /etc/systemd/system/kube-proxy.service <<EOF
+    cat > /etc/systemd/system/kube-proxy.service <<EOF
 [Unit]
 Description=kube-proxy via Hyperkube
 [Service]
@@ -136,6 +138,21 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 EOF
+else
+    _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
+    _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]},{"type":"bind","source":"/var/lib/docker","destination":"/var/lib/docker","options":["bind","rw","slave","mode=755"]}'
+    mkdir -p /srv/magnum/kubernetes/
+    cat > /srv/magnum/kubernetes/install-kubernetes.sh <<EOF
+#!/bin/bash -x
+atomic install --storage ostree --system --set=ADDTL_MOUNTS='${_addtl_mounts}' --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
+EOF
+    chmod +x /srv/magnum/kubernetes/install-kubernetes.sh
+    $ssh_cmd "/srv/magnum/kubernetes/install-kubernetes.sh"
+fi
 
 CERT_DIR=/etc/kubernetes/certs
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}

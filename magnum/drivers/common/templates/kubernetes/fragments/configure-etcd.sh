@@ -50,7 +50,8 @@ if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
 
 fi
 
-cat > /etc/systemd/system/etcd.service <<EOF
+if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    cat > /etc/systemd/system/etcd.service <<EOF
 [Unit]
 Description=Etcd server
 After=network-online.target
@@ -73,6 +74,14 @@ ExecStop=/bin/podman stop etcd
 [Install]
 WantedBy=multi-user.target
 EOF
+else
+    _prefix=${CONTAINER_INFRA_PREFIX:-"docker.io/openstackmagnum/"}
+    $ssh_cmd atomic install \
+    --system-package no \
+    --system \
+    --storage ostree \
+    --name=etcd ${_prefix}etcd:${ETCD_TAG}
+fi
 
 
 if [ -z "$KUBE_NODE_IP" ]; then
@@ -153,4 +162,35 @@ peer-transport-security:
   # Path to the peer server TLS trusted CA cert file.
   trusted-ca-file: $cert_dir/ca.crt
 EOF
+fi
+# backwards compatible conf file
+cat > /etc/etcd/etcd.conf <<EOF
+ETCD_NAME="$INSTANCE_NAME"
+ETCD_DATA_DIR="/var/lib/etcd/default.etcd"
+ETCD_LISTEN_CLIENT_URLS="$protocol://$myip:2379,http://127.0.0.1:2379"
+ETCD_LISTEN_PEER_URLS="$protocol://$myip:2380"
+ETCD_ADVERTISE_CLIENT_URLS="$protocol://$myip:2379,http://127.0.0.1:2379"
+ETCD_INITIAL_ADVERTISE_PEER_URLS="$protocol://$myip:2380"
+ETCD_DISCOVERY="$ETCD_DISCOVERY_URL"
+EOF
+
+if [ "$TLS_DISABLED" = "False" ]; then
+
+cat >> /etc/etcd/etcd.conf <<EOF
+ETCD_CA_FILE=$cert_dir/ca.crt
+ETCD_TRUSTED_CA_FILE=$cert_dir/ca.crt
+ETCD_CERT_FILE=$cert_dir/server.crt
+ETCD_KEY_FILE=$cert_dir/server.key
+ETCD_CLIENT_CERT_AUTH=true
+ETCD_PEER_CA_FILE=$cert_dir/ca.crt
+ETCD_PEER_TRUSTED_CA_FILE=$cert_dir/ca.crt
+ETCD_PEER_CERT_FILE=$cert_dir/server.crt
+ETCD_PEER_KEY_FILE=$cert_dir/server.key
+ETCD_PEER_CLIENT_CERT_AUTH=true
+EOF
+
+fi
+
+if [ -n "$HTTP_PROXY" ]; then
+    echo "ETCD_DISCOVERY_PROXY=$HTTP_PROXY" >> /etc/etcd/etcd.conf
 fi
