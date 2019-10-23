@@ -33,7 +33,7 @@ class TestHeatPoller(base.TestCase):
         self.mock_stacks = dict()
         self.def_ngs = list()
 
-    def _create_nodegroup(self, cluster, uuid, stack_id, role=None,
+    def _create_nodegroup(self, cluster, uuid, stack_id, name=None, role=None,
                           is_default=False, stack_status=None,
                           status_reason=None, stack_params=None,
                           stack_missing=False):
@@ -45,6 +45,8 @@ class TestHeatPoller(base.TestCase):
         role = 'worker' if role is None else role
         ng = mock.MagicMock(uuid=uuid, role=role, is_default=is_default,
                             stack_id=stack_id)
+        if name is not None:
+            type(ng).name = name
 
         cluster.nodegroups.append(ng)
 
@@ -88,13 +90,15 @@ class TestHeatPoller(base.TestCase):
         cluster = mock.MagicMock(nodegroups=list())
 
         def_worker = self._create_nodegroup(cluster, 'worker_ng', 'stack1',
-                                            role='worker', is_default=True,
+                                            name='worker_ng', role='worker',
+                                            is_default=True,
                                             stack_status=default_stack_status,
                                             status_reason=status_reason,
                                             stack_params=stack_params,
                                             stack_missing=stack_missing)
         def_master = self._create_nodegroup(cluster, 'master_ng', 'stack1',
-                                            role='master', is_default=True,
+                                            name='master_ng', role='master',
+                                            is_default=True,
                                             stack_status=default_stack_status,
                                             status_reason=status_reason,
                                             stack_params=stack_params,
@@ -669,3 +673,90 @@ class TestHeatPoller(base.TestCase):
         for def_ng in self.def_ngs:
             self.assertEqual(cluster_status.CREATE_COMPLETE, def_ng.status)
         self.assertEqual(cluster_status.DELETE_COMPLETE, ng.status)
+
+    def test_poll_and_check_failed_default_ng(self):
+        cluster, poller = self.setup_poll_test(
+            default_stack_status=cluster_status.UPDATE_FAILED)
+
+        ng = self._create_nodegroup(
+            cluster, 'ng', 'stack2',
+            stack_status=cluster_status.UPDATE_COMPLETE)
+
+        cluster.status = cluster_status.UPDATE_IN_PROGRESS
+        poller.poll_and_check()
+
+        for def_ng in self.def_ngs:
+            self.assertEqual(cluster_status.UPDATE_FAILED, def_ng.status)
+            self.assertEqual(2, def_ng.save.call_count)
+
+        self.assertEqual(cluster_status.UPDATE_COMPLETE, ng.status)
+        self.assertEqual(1, ng.save.call_count)
+
+        self.assertEqual(cluster_status.UPDATE_FAILED, cluster.status)
+        self.assertEqual(1, cluster.save.call_count)
+
+    def test_poll_and_check_rollback_failed_default_ng(self):
+        cluster, poller = self.setup_poll_test(
+            default_stack_status=cluster_status.ROLLBACK_FAILED)
+
+        ng = self._create_nodegroup(
+            cluster, 'ng', 'stack2',
+            stack_status=cluster_status.UPDATE_COMPLETE)
+
+        cluster.status = cluster_status.UPDATE_IN_PROGRESS
+        poller.poll_and_check()
+
+        for def_ng in self.def_ngs:
+            self.assertEqual(cluster_status.ROLLBACK_FAILED, def_ng.status)
+            self.assertEqual(2, def_ng.save.call_count)
+
+        self.assertEqual(cluster_status.UPDATE_COMPLETE, ng.status)
+        self.assertEqual(1, ng.save.call_count)
+
+        self.assertEqual(cluster_status.UPDATE_FAILED, cluster.status)
+        self.assertEqual(1, cluster.save.call_count)
+
+    def test_poll_and_check_rollback_failed_def_ng(self):
+        cluster, poller = self.setup_poll_test(
+            default_stack_status=cluster_status.DELETE_FAILED)
+
+        ng = self._create_nodegroup(
+            cluster, 'ng', 'stack2',
+            stack_status=cluster_status.DELETE_IN_PROGRESS)
+
+        cluster.status = cluster_status.DELETE_IN_PROGRESS
+        poller.poll_and_check()
+
+        for def_ng in self.def_ngs:
+            self.assertEqual(cluster_status.DELETE_FAILED, def_ng.status)
+            self.assertEqual(2, def_ng.save.call_count)
+
+        self.assertEqual(cluster_status.DELETE_IN_PROGRESS, ng.status)
+        self.assertEqual(1, ng.save.call_count)
+
+        self.assertEqual(cluster_status.DELETE_IN_PROGRESS, cluster.status)
+        self.assertEqual(1, cluster.save.call_count)
+
+    def test_poll_and_check_delete_failed_def_ng(self):
+        cluster, poller = self.setup_poll_test(
+            default_stack_status=cluster_status.DELETE_FAILED)
+
+        ng = self._create_nodegroup(
+            cluster, 'ng', 'stack2',
+            stack_status=cluster_status.DELETE_COMPLETE)
+
+        cluster.status = cluster_status.DELETE_IN_PROGRESS
+        poller.poll_and_check()
+
+        for def_ng in self.def_ngs:
+            self.assertEqual(cluster_status.DELETE_FAILED, def_ng.status)
+            self.assertEqual(2, def_ng.save.call_count)
+
+        # Check that the non-default ng was deleted
+        self.assertEqual(1, ng.destroy.call_count)
+
+        self.assertEqual(cluster_status.DELETE_FAILED, cluster.status)
+        self.assertEqual(1, cluster.save.call_count)
+
+        self.assertIn('worker_ng', cluster.status_reason)
+        self.assertIn('master_ng', cluster.status_reason)
