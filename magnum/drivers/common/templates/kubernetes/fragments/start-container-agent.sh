@@ -51,7 +51,8 @@ systemctl restart sshd
 
 _prefix="${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}"
 
-cat > /etc/systemd/system/heat-container-agent.service <<EOF
+if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    cat > /etc/systemd/system/heat-container-agent.service <<EOF
 [Unit]
 Description=Run heat-container-agent
 After=network-online.target
@@ -87,6 +88,15 @@ ExecStop=/bin/podman stop heat-container-agent
 [Install]
 WantedBy=multi-user.target
 EOF
+else
+    atomic install \
+    --storage ostree \
+    --system \
+    --system-package no \
+    --set REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt \
+    --name heat-container-agent \
+    "${_prefix}heat-container-agent:${HEAT_CONTAINER_AGENT_TAG}"
+fi
 
 systemctl enable heat-container-agent
 systemctl start heat-container-agent

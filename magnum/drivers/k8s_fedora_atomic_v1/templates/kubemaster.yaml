@@ -538,6 +538,11 @@ parameters:
     type: string
     description: The ostree commit to deploy
 
+  use_podman:
+    type: boolean
+    description: >
+      if true, run system containers for kubernetes, etcd and heat-agent
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -586,6 +591,7 @@ resources:
                 params:
                   $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
+                  $USE_PODMAN: {get_param: use_podman}
             - get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh
 
   master_config:
@@ -699,6 +705,7 @@ resources:
                   "$NPD_ENABLED": {get_param: npd_enabled}
                   "$NODEGROUP_ROLE": {get_param: nodegroup_role}
                   "$NODEGROUP_NAME": {get_param: nodegroup_name}
+                  "$USE_PODMAN": {get_param: use_podman}
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
             - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh

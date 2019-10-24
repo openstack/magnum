@@ -755,6 +755,25 @@ parameters:
     default:
       true
 
+  ostree_remote:
+    type: string
+    description: This parameter is ignored for k8s_fedora_coreos.
+    default: ''
+
+  ostree_commit:
+    type: string
+    description: This parameter is ignored for k8s_fedora_coreos.
+    default: ''
+
+  use_podman:
+    type: boolean
+    description: >
+      If true, run system containers for kubernetes, etcd and heat-agent
+    default:
+      true
+    constraints:
+      - allowed_values: [true]
+
 resources:
 
   ######################################################################
@@ -1070,6 +1089,9 @@ resources:
           min_node_count: {get_param: min_node_count}
           max_node_count: {get_param: max_node_count}
           npd_enabled: {get_param: npd_enabled}
+          ostree_remote: {get_param: ostree_remote}
+          ostree_commit: {get_param: ostree_commit}
+          use_podman: {get_param: use_podman}
 
   kube_cluster_config:
     condition: create_cluster_resources
@@ -1234,6 +1256,9 @@ resources:
           auto_healing_enabled: {get_param: auto_healing_enabled}
           npd_enabled: {get_param: npd_enabled}
           auto_healing_controller: {get_param: auto_healing_controller}
+          ostree_remote: {get_param: ostree_remote}
+          ostree_commit: {get_param: ostree_commit}
+          use_podman: {get_param: use_podman}
 
 outputs:
 
