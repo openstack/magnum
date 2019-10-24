@@ -128,6 +128,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             'master_image': 'image_id',
             'master_role': 'role',
             'master_nodegroup_name': 'name',
+            'docker_volume_size': 'docker_volume_size'
         })
         worker_params.update({
             'number_of_minions': 'node_count',
@@ -135,6 +136,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             'minion_image': 'image_id',
             'worker_role': 'role',
             'worker_nodegroup_name': 'name',
+            'docker_volume_size': 'docker_volume_size'
         })
         return super(
             K8sTemplateDefinition, self).get_nodegroup_param_maps(

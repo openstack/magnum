@@ -122,7 +122,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                 scale_manager.get_removal_nodes(hosts))
         return scale_params
 
-    def get_env_files(self, cluster_template, cluster):
+    def get_env_files(self, cluster_template, cluster, nodegroup=None):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster_template,
