@@ -466,3 +466,7 @@ class NgOperationInProgress(Invalid):
 
 class InvalidClusterTemplateForUpgrade(Conflict):
     message = _("Cluster Template is not valid for upgrade: %(reason)s")
+
+
+class ClusterAPIAddressUnavailable(Conflict):
+    message = _("Cluster API address is not available yet")
