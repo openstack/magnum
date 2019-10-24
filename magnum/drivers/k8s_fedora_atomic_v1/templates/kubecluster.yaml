@@ -455,7 +455,7 @@ parameters:
   etcd_tag:
     type: string
     description: tag of the etcd system container
-    default: 3.2.26
+    default: v3.2.7
 
   coredns_tag:
     type: string
@@ -764,6 +764,13 @@ parameters:
     type: string
     description: The ostree commit to deploy
     default: ''
+
+  use_podman:
+    type: boolean
+    description: >
+      if true, run system containers for kubernetes, etcd and heat-agent
+    default:
+      false
 
 resources:
 
@@ -1081,6 +1088,7 @@ resources:
           npd_enabled: {get_param: npd_enabled}
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
+          use_podman: {get_param: use_podman}
 
   kube_cluster_config:
     condition: create_cluster_resources
@@ -1246,6 +1254,7 @@ resources:
           auto_healing_controller: {get_param: auto_healing_controller}
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
+          use_podman: {get_param: use_podman}
 
 outputs:
 

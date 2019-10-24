@@ -5,10 +5,14 @@ set -x
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 KUBECONFIG="/etc/kubernetes/kubelet-config.yaml"
+if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig $KUBECONFIG"
+else
+    kubecontrol="/usr/local/bin/kubectl --kubeconfig $KUBECONFIG"
+fi
 new_kube_tag="$kube_tag_input"
 new_ostree_remote="$ostree_remote_input"
 new_ostree_commit="$ostree_commit_input"
-HOSTNAME_OVERRIDE="$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')"
 
 function drain {
     # If there is only one master and this is the master node, skip the drain, just cordon it
@@ -26,19 +30,50 @@ if [ "${new_kube_tag}" != "${KUBE_TAG}" ]; then
 
     drain
 
-    SERVICE_LIST=$($ssh_cmd podman ps -f name=kube --format {{.Names}})
+    if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+        SERVICE_LIST=$($ssh_cmd podman ps -f name=kube --format {{.Names}})
 
-    for service in ${SERVICE_LIST}; do
-        ${ssh_cmd} systemctl stop ${service}
-        ${ssh_cmd} podman rm ${service}
-    done
+        for service in ${SERVICE_LIST}; do
+            ${ssh_cmd} systemctl stop ${service}
+            ${ssh_cmd} podman rm ${service}
+        done
 
-    ${ssh_cmd} podman rmi ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:${KUBE_TAG}
-    echo "KUBE_TAG=$new_kube_tag" >> /etc/sysconfig/heat-params
+        ${ssh_cmd} podman rmi ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:${KUBE_TAG}
+        echo "KUBE_TAG=$new_kube_tag" >> /etc/sysconfig/heat-params
 
-    for service in ${SERVICE_LIST}; do
-        ${ssh_cmd} systemctl start ${service}
-    done
+        for service in ${SERVICE_LIST}; do
+            ${ssh_cmd} systemctl start ${service}
+        done
+    else
+        declare -A service_image_mapping
+        service_image_mapping=( ["kubelet"]="kubernetes-kubelet" ["kube-controller-manager"]="kubernetes-controller-manager" ["kube-scheduler"]="kubernetes-scheduler" ["kube-proxy"]="kubernetes-proxy" ["kube-apiserver"]="kubernetes-apiserver" )
+
+        SERVICE_LIST=$($ssh_cmd atomic containers list -f container=kube -q --no-trunc)
+
+        for service in ${SERVICE_LIST}; do
+            ${ssh_cmd} systemctl stop ${service}
+        done
+
+        for service in ${SERVICE_LIST}; do
+            ${ssh_cmd} atomic pull --storage ostree "docker.io/openstackmagnum/${service_image_mapping[${service}]}:${new_kube_tag}"
+        done
+
+        for service in ${SERVICE_LIST}; do
+            ${ssh_cmd} atomic containers update --rebase docker.io/openstackmagnum/${service_image_mapping[${service}]}:${new_kube_tag} ${service}
+        done
+
+        for service in ${SERVICE_LIST}; do
+            systemctl restart ${service}
+        done
+
+        ${ssh_cmd} /var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig /etc/kubernetes/kubelet-config.yaml uncordon ${INSTANCE_NAME}
+
+        for service in ${SERVICE_LIST}; do
+            ${ssh_cmd} atomic --assumeyes images "delete docker.io/openstackmagnum/${service_image_mapping[${service}]}:${KUBE_TAG}"
+        done
+
+        ${ssh_cmd} atomic images prune
+    fi
 
     i=0
     until kubectl uncordon ${INSTANCE_NAME}
@@ -61,7 +96,7 @@ After=network.target kubelet.service
 [Service]
 Restart=Always
 RemainAfterExit=yes
-ExecStart=${kubecontrol} uncordon ${HOSTNAME_OVERRIDE}
+ExecStart=${kubecontrol} uncordon ${INSTANCE_NAME}
 
 [Install]
 WantedBy=multi-user.target

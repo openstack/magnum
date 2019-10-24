@@ -534,6 +534,19 @@ parameters:
     default:
       true
 
+  ostree_remote:
+    type: string
+    description: The ostree remote branch to upgrade
+
+  ostree_commit:
+    type: string
+    description: The ostree commit to deploy
+
+  use_podman:
+    type: boolean
+    description: >
+      If true, run system containers for kubernetes, etcd and heat-agent
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -690,6 +703,7 @@ resources:
                   "$NPD_ENABLED": {get_param: npd_enabled}
                   "$NODEGROUP_ROLE": {get_param: nodegroup_role}
                   "$NODEGROUP_NAME": {get_param: nodegroup_name}
+                  "$USE_PODMAN": {get_param: use_podman}
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
             - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
@@ -834,6 +848,8 @@ resources:
       group: script
       inputs:
       - name: kube_tag_input
+      - name: ostree_remote_input
+      - name: ostree_commit_input
       config:
         get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
 
@@ -846,6 +862,8 @@ resources:
       actions: ['UPDATE']
       input_values:
         kube_tag_input: {get_param: kube_tag}
+        ostree_remote_input: {get_param: ostree_remote}
+        ostree_commit_input: {get_param: ostree_commit}
 
 outputs:
 
