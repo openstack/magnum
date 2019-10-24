@@ -292,6 +292,10 @@ class NodeGroupController(base.Controller):
         policy.enforce(context, 'nodegroup:create', action='nodegroup:create')
 
         cluster = api_utils.get_resource('Cluster', cluster_id)
+        # Before we start, we need to check that the cluster has an
+        # api_address. If not, just fail.
+        if 'api_address' not in cluster or not cluster.api_address:
+            raise exception.ClusterAPIAddressUnavailable()
         cluster_ngs = [ng.name for ng in cluster.nodegroups]
         if nodegroup.name in cluster_ngs:
             raise exception.NodeGroupAlreadyExists(name=nodegroup.name,
