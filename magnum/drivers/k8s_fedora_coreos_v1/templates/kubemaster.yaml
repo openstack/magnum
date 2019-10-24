@@ -591,6 +591,14 @@ resources:
                   $HOSTNAME: {get_param: name}
                   $SSH_KEY_VALUE: {get_param: ssh_public_key}
                   $OPENSTACK_CA: {get_param: openstack_ca}
+                  $CONTAINER_INFRA_PREFIX:
+                    if:
+                      - equals:
+                        - get_param: container_infra_prefix
+                        - ""
+                      - "docker.io/openstackmagnum/"
+                      - get_param: container_infra_prefix
+                  $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
 
   master_config:
     type: OS::Heat::SoftwareConfig
