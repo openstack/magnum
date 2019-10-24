@@ -324,6 +324,40 @@ class KubernetesDriver(HeatDriver):
 class FedoraKubernetesDriver(KubernetesDriver):
     """Base driver for Kubernetes clusters."""
 
+    def get_heat_params(self, cluster_template):
+        heat_params = {}
+        try:
+            kube_tag = cluster_template.labels["kube_tag"]
+            kube_tag_params = {
+                "kube_tag": kube_tag,
+                "kube_version": kube_tag,
+                "master_kube_tag": kube_tag,
+                "minion_kube_tag": kube_tag,
+            }
+            heat_params.update(kube_tag_params)
+        except KeyError:
+            LOG.debug(("Cluster template %s does not contain a "
+                       "valid kube_tag"), cluster_template.name)
+
+        for ostree_tag in ["ostree_commit", "ostree_remote"]:
+            try:
+                ostree_param = {
+                    ostree_tag: cluster_template.labels[ostree_tag]
+                }
+                heat_params.update(ostree_param)
+            except KeyError:
+                LOG.debug("Cluster template %s does not define %s",
+                          (cluster_template.name, ostree_tag))
+
+        upgrade_labels = ['kube_tag', 'ostree_remote', 'ostree_commit']
+        if not any([u in heat_params.keys() for u in upgrade_labels]):
+            reason = ("Cluster template %s does not contain any supported "
+                      "upgrade labels: [%s]") % (cluster_template.name,
+                                                 ', '.join(upgrade_labels))
+            raise exception.InvalidClusterTemplateForUpgrade(reason=reason)
+
+        return heat_params
+
     def upgrade_cluster(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, scale_manager=None,
                         rollback=False):
@@ -331,7 +365,10 @@ class FedoraKubernetesDriver(KubernetesDriver):
         osc = clients.OpenStackClients(context)
 
         # Use this just to check that we are not downgrading.
-        heat_params = {}
+        heat_params = {
+            "update_max_batch_size": max_batch_size,
+        }
+
         if 'kube_tag' in nodegroup.labels:
             heat_params['kube_tag'] = nodegroup.labels['kube_tag']
 
@@ -360,19 +397,7 @@ class FedoraKubernetesDriver(KubernetesDriver):
         # hardcode what we want to send to heat.
         # Rules: 1. No downgrade 2. Explicitly override 3. Merging based on set
         # Update heat_params based on the data generated above
-        try:
-            heat_params = {
-                "kube_tag": cluster_template.labels["kube_tag"],
-                "kube_version": cluster_template.labels["kube_tag"],
-                "master_kube_tag": cluster_template.labels["kube_tag"],
-                "minion_kube_tag": cluster_template.labels["kube_tag"],
-                "update_max_batch_size": max_batch_size
-            }
-        except KeyError:
-            # Corner case but if the user defined an invalid CT just abort
-            reason = ("Cluster template %s does not contain a "
-                      "valid kube_tag") % cluster_template.name
-            raise exception.InvalidClusterTemplateForUpgrade(reason=reason)
+        heat_params.update(self.get_heat_params(cluster_template))
 
         stack_id = nodegroup.stack_id
         if nodegroup is not None and not nodegroup.is_default:
