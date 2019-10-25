@@ -463,6 +463,18 @@ parameters:
     description: The stable/prometheus-operator chart version to use.
     default: 5.12.3
 
+  prometheus_adapter_enabled:
+    type: boolean
+    description: Enable or disable prometheus-adapter custom metrics.
+
+  prometheus_adapter_chart_tag:
+    type: string
+    description: The stable/prometheus-adapter chart version to use.
+
+  prometheus_adapter_configmap:
+    type: string
+    description: The prometheus adapter rules ConfigMap name to use as overwrite.
+
   project_id:
     type: string
     description: >
@@ -697,6 +709,9 @@ resources:
                   "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
                   "$MONITORING_ENABLED": {get_param: monitoring_enabled}
                   "$PROMETHEUS_OPERATOR_CHART_TAG": {get_param: prometheus_operator_chart_tag}
+                  "$PROMETHEUS_ADAPTER_ENABLED": {get_param: prometheus_adapter_enabled}
+                  "$PROMETHEUS_ADAPTER_CHART_TAG": {get_param: prometheus_adapter_chart_tag}
+                  "$PROMETHEUS_ADAPTER_CONFIGMAP": {get_param: prometheus_adapter_configmap}
                   "$PROJECT_ID": {get_param: project_id}
                   "$EXTERNAL_NETWORK_ID": {get_param: external_network}
                   "$TILLER_ENABLED": {get_param: tiller_enabled}
