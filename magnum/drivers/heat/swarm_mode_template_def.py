@@ -92,8 +92,6 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('cluster_uuid',
                            cluster_attr='uuid',
                            param_type=str)
-        self.add_parameter('docker_volume_size',
-                           cluster_attr='docker_volume_size')
         self.add_parameter('volume_driver',
                            cluster_template_attr='volume_driver')
         self.add_parameter('external_network',
@@ -148,12 +146,14 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         worker_params = worker_params or dict()
         master_params.update({
             'master_flavor': 'flavor_id',
-            'master_image': 'image_id'
+            'master_image': 'image_id',
+            'docker_volume_size': 'docker_volume_size'
         })
         worker_params.update({
             'number_of_nodes': 'node_count',
             'node_flavor': 'flavor_id',
-            'node_image': 'image_id'
+            'node_image': 'image_id',
+            'docker_volume_size': 'docker_volume_size'
         })
         return super(
             SwarmModeTemplateDefinition, self).get_nodegroup_param_maps(
@@ -182,12 +182,13 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
               self).update_outputs(stack, cluster_template, cluster,
                                    nodegroups=nodegroups)
 
-    def get_env_files(self, cluster_template, cluster):
+    def get_env_files(self, cluster_template, cluster, nodegroup=None):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster_template,
                                            cluster)
-        template_def.add_volume_env_file(env_files, cluster)
+        template_def.add_volume_env_file(env_files, cluster,
+                                         nodegroup=nodegroup)
         template_def.add_lb_env_file(env_files, cluster_template)
         template_def.add_fip_env_file(env_files, cluster_template, cluster)
 
