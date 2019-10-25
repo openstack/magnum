@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Added custom.metrics.k8s.io API installer by means of stable/prometheus-adapter
+    helm chart. The label prometheus_adapter_enabled (default: true) controls
+    configuration. You can also use prometheus_adapter_chart_tag to select helm
+    chart version, and prometheus_adapter_configmap if you would like to setup
+    your own metrics (specifying this other than default overwrites default
+    configurations).
+    This feature requires the usage of label monitoring_enabled=true.

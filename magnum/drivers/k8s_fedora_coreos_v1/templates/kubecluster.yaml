@@ -666,6 +666,21 @@ parameters:
     description: The stable/prometheus-operator chart version to use.
     default: 5.12.3
 
+  prometheus_adapter_enabled:
+    type: boolean
+    description: Enable or disable prometheus-adapter custom metrics.
+    default: true
+
+  prometheus_adapter_chart_tag:
+    type: string
+    description: The stable/prometheus-adapter chart version to use.
+    default: 1.4.0
+
+  prometheus_adapter_configmap:
+    type: string
+    description: The prometheus adapter rules ConfigMap name to use as overwrite.
+    default: ""
+
   project_id:
     type: string
     description: >
@@ -1079,6 +1094,9 @@ resources:
           k8s_keystone_auth_tag: {get_param: k8s_keystone_auth_tag}
           monitoring_enabled: {get_param: monitoring_enabled}
           prometheus_operator_chart_tag: {get_param: prometheus_operator_chart_tag}
+          prometheus_adapter_enabled: {get_param: prometheus_adapter_enabled}
+          prometheus_adapter_chart_tag: {get_param: prometheus_adapter_chart_tag}
+          prometheus_adapter_configmap: {get_param: prometheus_adapter_configmap}
           project_id: {get_param: project_id}
           tiller_enabled: {get_param: tiller_enabled}
           tiller_tag: {get_param: tiller_tag}
@@ -1139,6 +1157,7 @@ resources:
                 template: {get_file:  ../../common/templates/kubernetes/helm/prometheus-operator.sh}
                 params:
                   "${ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
+            - get_file: ../../common/templates/kubernetes/helm/prometheus-adapter.sh
             - get_file: ../../common/templates/kubernetes/helm/ingress-nginx.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
 
