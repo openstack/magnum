@@ -49,7 +49,7 @@ Object Change Example
 The following example shows the unit test workflow when changing an object
 (Cluster was updated to hold a new 'foo' field)::
 
-    tox -e py27 magnum.tests.unit.objects.test_objects
+    tox -e py37 magnum.tests.unit.objects.test_objects
 
 This results in a unit test failure with the following output:
 

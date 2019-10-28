@@ -67,13 +67,13 @@ All unit tests should be run using tox. To run magnum's entire test suite::
 
 To run a specific test, use a positional argument for the unit tests::
 
-    # run a specific test for Python 2.7
-    tox -epy27 -- test_conductor
+    # run a specific test for Python 3.7
+    tox -epy37 -- test_conductor
 
 You may pass options to the test programs using positional arguments::
 
-    # run all the Python 2.7 unit tests (in parallel!)
-    tox -epy27 -- --parallel
+    # run all the Python 3.7 unit tests (in parallel!)
+    tox -epy37 -- --parallel
 
 To run only the pep8/flake8 syntax and style checks::
 
