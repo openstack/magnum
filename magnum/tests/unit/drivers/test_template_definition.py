@@ -466,6 +466,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         flannel_backend = mock_cluster.labels.get('flannel_backend')
         heapster_enabled = mock_cluster.labels.get(
             'heapster_enabled')
+        metrics_server_enabled = mock_cluster.labels.get(
+            'metrics_server_enabled')
+        metrics_server_chart_tag = mock_cluster.labels.get(
+            'metrics_server_chart_tag')
         system_pods_initial_delay = mock_cluster.labels.get(
             'system_pods_initial_delay')
         system_pods_timeout = mock_cluster.labels.get(
@@ -594,6 +598,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'flannel_network_subnetlen': flannel_subnet,
             'flannel_backend': flannel_backend,
             'heapster_enabled': heapster_enabled,
+            'metrics_server_enabled': metrics_server_enabled,
+            'metrics_server_chart_tag': metrics_server_chart_tag,
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'admission_control_list': admission_control_list,
@@ -924,6 +930,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         flannel_backend = mock_cluster.labels.get('flannel_backend')
         heapster_enabled = mock_cluster.labels.get(
             'heapster_enabled')
+        metrics_server_enabled = mock_cluster.labels.get(
+            'metrics_server_enabled')
+        metrics_server_chart_tag = mock_cluster.labels.get(
+            'metrics_server_chart_tag')
         system_pods_initial_delay = mock_cluster.labels.get(
             'system_pods_initial_delay')
         system_pods_timeout = mock_cluster.labels.get(
@@ -1052,6 +1062,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'flannel_network_subnetlen': flannel_subnet,
             'flannel_backend': flannel_backend,
             'heapster_enabled': heapster_enabled,
+            'metrics_server_enabled': metrics_server_enabled,
+            'metrics_server_chart_tag': metrics_server_chart_tag,
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'fixed_network_name': fixed_network_name,

@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Installs the metrics-server service that is replacing kubernetes
+    deprecated heapster as a cluster wide metrics reporting service used by
+    schedulling, HPA and others. This service is installed and configured
+    using helm and so tiller_enabled flag must be True. The label
+    metrics_server_chart_tag can be used to specify the stable/metrics-server
+    chart tag to be used. The label metrics_server_enabled is used to enable
+    disable the installation of the metrics server (default: true).
