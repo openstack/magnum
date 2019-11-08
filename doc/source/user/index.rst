@@ -309,6 +309,11 @@ the table are linked to more details elsewhere in the user guide.
 | `heapster_enabled`_                   | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `metrics_server_chart_tag`_           | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `metrics_server_enabled`_             | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 | `monitoring_enabled`_                 | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1184,6 +1189,7 @@ _`container_infra_prefix`
   * docker.io/traefik:v1.7.10
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google-containers/hyperkube:v1.12.1
+  * gcr.io/google_containers/metrics-server-amd64:v0.3.6
   * quay.io/coreos/configmap-reload:v0.0.1
   * quay.io/coreos/prometheus-config-reloader:v0.30.1
   * quay.io/coreos/prometheus-operator:v0.30.1
@@ -1204,6 +1210,17 @@ _`heapster_enabled`
   heapster_enabled is used to enable disable the installation of heapster.
   Ussuri default: true
   Train default: true
+
+_`metrics_server_chart_tag`
+  Add metrics_server_chart_tag to select the version of the
+  stable/metrics-server chart to install.
+  Ussuri default: v2.8.8
+
+_`metrics_server_enabled`
+  metrics_server_enabled is used to enable disable the installation of
+  the metrics server. To use this service tiller_enabled must be true.
+  Train default: true
+  Stein default: true
 
 _`cloud_provider_tag`
   This label allows users to select `a specific release for the openstack
