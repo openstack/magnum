@@ -114,11 +114,29 @@ class TestListNodegroups(NodeGroupControllerTest):
         self._test_list_nodegroups(self.cluster.name, expected=expected)
 
     def test_get_all_with_pagination_marker(self):
-        ng_uuid = self.cluster.default_ng_master.uuid
-        url = '/clusters/%s/nodegroups?limit=1&marker=1' % (self.cluster_uuid)
+        worker_ng_uuid = self.cluster.default_ng_worker.uuid
+        master_ng_uuid = self.cluster.default_ng_master.uuid
+        # First make sure that the api returns 1 ng and since they
+        # are sorted by id, the ng should be the default-worker
+        url = '/clusters/%s/nodegroups?limit=1' % (self.cluster_uuid)
         response = self.get_json(url)
         self.assertEqual(1, len(response['nodegroups']))
-        self.assertEqual(ng_uuid, response['nodegroups'][0]['uuid'])
+        self.assertEqual(worker_ng_uuid, response['nodegroups'][0]['uuid'])
+        marker = "marker=%s" % worker_ng_uuid
+        self.assertIn(marker, response['next'])
+        # Now using the next url make sure that we get the default-master
+        next_url = response['next'].split('v1')[1]
+        response = self.get_json(next_url)
+        self.assertEqual(1, len(response['nodegroups']))
+        self.assertEqual(master_ng_uuid, response['nodegroups'][0]['uuid'])
+        marker = "marker=%s" % master_ng_uuid
+        self.assertIn(marker, response['next'])
+        # Now we should not get any other entry since the cluster only has two
+        # nodegroups and the marker is set at the default-master.
+        next_url = response['next'].split('v1')[1]
+        response = self.get_json(next_url)
+        self.assertEqual(0, len(response['nodegroups']))
+        self.assertNotIn('next', response)
 
     def test_get_all_by_role(self):
         filters = {'role': 'master'}

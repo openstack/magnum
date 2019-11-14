@@ -180,12 +180,13 @@ class NodeGroupCollection(collection.Collection):
         self._type = 'nodegroups'
 
     @staticmethod
-    def convert(nodegroups, limit, expand=True, **kwargs):
+    def convert(nodegroups, cluster_id, limit, expand=True, **kwargs):
         collection = NodeGroupCollection()
         collection.nodegroups = [NodeGroup.convert(ng, expand)
                                  for ng in nodegroups]
+        url = "clusters/%s/nodegroups" % cluster_id
         collection.next = collection.get_next(limit,
-                                              marker_attribute='id',
+                                              url=url,
                                               **kwargs)
         return collection
 
@@ -217,13 +218,14 @@ class NodeGroupController(base.Controller):
                                             filters=filters)
 
         return NodeGroupCollection.convert(nodegroups,
+                                           cluster_id,
                                            limit,
                                            expand=expand,
                                            sort_key=sort_key,
                                            sort_dir=sort_dir)
 
     @base.Controller.api_version("1.9")
-    @expose.expose(NodeGroupCollection, types.uuid_or_name, int, int,
+    @expose.expose(NodeGroupCollection, types.uuid_or_name, types.uuid, int,
                    wtypes.text, wtypes.text, wtypes.text)
     def get_all(self, cluster_id, marker=None, limit=None, sort_key='id',
                 sort_dir='asc', role=None):
