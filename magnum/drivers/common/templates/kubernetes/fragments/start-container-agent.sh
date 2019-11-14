@@ -84,6 +84,7 @@ ExecStart=/bin/podman run \\
     ${_prefix}heat-container-agent:${HEAT_CONTAINER_AGENT_TAG} \\
     /usr/bin/start-heat-container-agent
 ExecStop=/bin/podman stop heat-container-agent
+TimeoutStartSec=10min
 
 [Install]
 WantedBy=multi-user.target

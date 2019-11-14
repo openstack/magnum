@@ -70,6 +70,7 @@ ExecStart=/bin/podman run \\
     /usr/local/bin/etcd \\
     --config-file /etc/etcd/etcd.conf.yaml
 ExecStop=/bin/podman stop etcd
+TimeoutStartSec=10min
 
 [Install]
 WantedBy=multi-user.target
