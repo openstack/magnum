@@ -505,6 +505,10 @@ parameters:
     type: string
     description: nginx ingress controller docker image tag
 
+  nginx_ingress_controller_chart_tag:
+    type: string
+    description: nginx ingress controller helm chart tag
+
   draino_tag:
     type: string
     description: tag of the draino container
@@ -694,6 +698,7 @@ resources:
                   "$TILLER_NAMESPACE": {get_param: tiller_namespace}
                   "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
                   "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
+                  "$NGINX_INGRESS_CONTROLLER_CHART_TAG": {get_param: nginx_ingress_controller_chart_tag}
                   "$AUTO_HEALING_ENABLED": {get_param: auto_healing_enabled}
                   "$AUTO_HEALING_CONTROLLER": {get_param: auto_healing_controller}
                   "$MAGNUM_AUTO_HEALER_TAG": {get_param: magnum_auto_healer_tag}

@@ -719,7 +719,12 @@ parameters:
   nginx_ingress_controller_tag:
     type: string
     description: nginx ingress controller docker image tag
-    default: 0.23.0
+    default: 0.26.1
+
+  nginx_ingress_controller_chart_tag:
+    type: string
+    description: nginx ingress controller helm chart tag
+    default: v1.24.7
 
   draino_tag:
     type: string
@@ -1080,6 +1085,7 @@ resources:
           tiller_namespace: {get_param: tiller_namespace}
           node_problem_detector_tag: {get_param: node_problem_detector_tag}
           nginx_ingress_controller_tag: {get_param: nginx_ingress_controller_tag}
+          nginx_ingress_controller_chart_tag: {get_param: nginx_ingress_controller_chart_tag}
           auto_healing_enabled: {get_param: auto_healing_enabled}
           auto_healing_controller: {get_param: auto_healing_controller}
           magnum_auto_healer_tag: {get_param: magnum_auto_healer_tag}
