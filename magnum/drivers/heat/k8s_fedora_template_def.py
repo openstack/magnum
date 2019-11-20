@@ -176,25 +176,32 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
     def _set_volumes(self, context, cluster, extra_params):
         # set docker_volume_type
-        docker_volume_type = cluster.labels.get(
+        docker_volume_size = cluster.docker_volume_size or 0
+        docker_volume_type = (cluster.labels.get(
             'docker_volume_type',
             cinder.get_default_docker_volume_type(context))
+            if int(docker_volume_size) > 0 else '')
         extra_params['docker_volume_type'] = docker_volume_type
 
         # set etcd_volume_type
-        etcd_volume_type = cluster.labels.get(
-            'etcd_volume_type', cinder.get_default_etcd_volume_type(context))
+        etcd_volume_size = cluster.labels.get('etcd_volume_size', 0)
+        etcd_volume_type = (cluster.labels.get(
+            'etcd_volume_type',
+            cinder.get_default_etcd_volume_type(context))
+            if int(etcd_volume_size) > 0 else '')
         extra_params['etcd_volume_type'] = etcd_volume_type
-
-        # set boot_volume_type
-        boot_volume_type = cluster.labels.get(
-            'boot_volume_type', cinder.get_default_boot_volume_type(context))
-        extra_params['boot_volume_type'] = boot_volume_type
 
         # set boot_volume_size
         boot_volume_size = cluster.labels.get(
             'boot_volume_size', CONF.cinder.default_boot_volume_size)
         extra_params['boot_volume_size'] = boot_volume_size
+
+        # set boot_volume_type
+        boot_volume_type = (cluster.labels.get(
+            'boot_volume_type',
+            cinder.get_default_boot_volume_type(context))
+            if int(boot_volume_size) > 0 else '')
+        extra_params['boot_volume_type'] = boot_volume_type
 
     def get_env_files(self, cluster_template, cluster, nodegroup=None):
         env_files = []
