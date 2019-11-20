@@ -447,6 +447,15 @@ the table are linked to more details elsewhere in the user guide.
 | `use_podman`_                         | - true             | see below     |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `container_runtime`_                  | - ""               | ""            |
+|                                       | - containerd       |               |
++---------------------------------------+--------------------+---------------+
+| `containerd_version`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `containerd_tarball_url`_             | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `containerd_tarball_sha256`_          | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1491,6 +1500,23 @@ _`use_podman`
   k8s_fedora_atomic_v1 driver, you need to set use_podman=true. This is
   necessary since v1.16 dropped the --containerized flag in kubelet.
   https://github.com/kubernetes/kubernetes/pull/80043/files
+
+_`container_runtime`
+  The container runtime to use. Empty value means, use docker from the
+  host. Since ussuri, apart from empty (host-docker), containerd is also
+  an option.
+
+_`containerd_version`
+  The containerd version to use as released in
+  https://github.com/containerd/containerd/releases and
+  https://storage.googleapis.com/cri-containerd-release/
+
+_`containerd_tarball_url`
+  Url with the tarball of containerd's binaries.
+
+_`containerd_tarball_sha256`
+  sha256 of the tarball fetched with containerd_tarball_url or from
+  https://storage.googleapis.com/cri-containerd-release/.
 
 External load balancer for services
 -----------------------------------

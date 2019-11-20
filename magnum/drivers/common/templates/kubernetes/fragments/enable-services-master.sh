@@ -16,8 +16,13 @@ while [ ! -f /etc/kubernetes/certs/ca.key ] && \
 done
 
 echo "starting services"
+if [ ${CONTAINER_RUNTIME} = "containerd"  ] ; then
+    container_runtime_service="containerd"
+else
+    container_runtime_service="docker"
+fi
 for action in enable restart; do
-    for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
+    for service in etcd ${container_runtime_service} kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
         echo "$action service $service"
         $ssh_cmd systemctl $action $service
     done
