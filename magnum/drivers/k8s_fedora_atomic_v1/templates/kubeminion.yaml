@@ -327,6 +327,22 @@ parameters:
     description: >
       if true, run system containers for kubernetes, etcd and heat-agent
 
+  container_runtime:
+    type: string
+    description: The container runtime to install
+
+  containerd_version:
+    type: string
+    description: The containerd version to download from https://storage.googleapis.com/cri-containerd-release/
+
+  containerd_tarball_url:
+    type: string
+    description: Url location of the containerd tarball.
+
+  containerd_tarball_sha256:
+    type: string
+    description: sha256 of the target containerd tarball.
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -432,6 +448,11 @@ resources:
                   $NODEGROUP_ROLE: {get_param: nodegroup_role}
                   $NODEGROUP_NAME: {get_param: nodegroup_name}
                   $USE_PODMAN: {get_param: use_podman}
+                  $CONTAINER_RUNTIME: {get_param: container_runtime}
+                  $CONTAINERD_VERSION: {get_param: containerd_version}
+                  $CONTAINERD_TARBALL_URL: {get_param: containerd_tarball_url}
+                  $CONTAINERD_TARBALL_SHA256: {get_param: containerd_tarball_sha256}
+            - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
             - get_file: ../../common/templates/fragments/configure-docker-registry.sh

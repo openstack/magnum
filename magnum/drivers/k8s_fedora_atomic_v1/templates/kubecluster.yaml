@@ -820,6 +820,26 @@ parameters:
       The digest of the image which should match the given kube_tag
     default: ''
 
+  container_runtime:
+    type: string
+    description: The container runtime to install
+    default: 'host-docker'
+
+  containerd_version:
+    type: string
+    description: The containerd version to download from https://storage.googleapis.com/cri-containerd-release/
+    default: '1.2.8'
+
+  containerd_tarball_url:
+    type: string
+    description: Url location of the containerd tarball.
+    default: ''
+
+  containerd_tarball_sha256:
+    type: string
+    description: sha256 of the target containerd tarball.
+    default: '1f2f0fb928179df90492a83c326a194b8e9d992538498efb44cbb6ef15465627'
+
 resources:
 
   ######################################################################
@@ -1145,6 +1165,10 @@ resources:
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
           use_podman: {get_param: use_podman}
+          container_runtime: {get_param: container_runtime}
+          containerd_version: {get_param: containerd_version}
+          containerd_tarball_url: {get_param: containerd_tarball_url}
+          containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
 
   kube_cluster_config:
     condition: create_cluster_resources
@@ -1308,6 +1332,10 @@ resources:
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
           use_podman: {get_param: use_podman}
+          container_runtime: {get_param: container_runtime}
+          containerd_version: {get_param: containerd_version}
+          containerd_tarball_url: {get_param: containerd_tarball_url}
+          containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
 
 outputs:
 
