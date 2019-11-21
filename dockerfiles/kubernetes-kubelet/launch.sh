@@ -11,4 +11,4 @@ ARGS=$(echo $ARGS | sed s/--cadvisor-port=0//)
 ARGS=$(echo $ARGS | sed s/--require-kubeconfig//)
 ARGS=$(echo $ARGS | sed s/node-role/node/)
 
-exec /hyperkube kubelet $ARGS
+exec /hyperkube kubelet $ARGS --containerized
