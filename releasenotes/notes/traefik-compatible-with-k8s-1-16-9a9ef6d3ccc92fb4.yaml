@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Bump up traefik to 1.7.19 for compatibility with Kubernetes 1.16.x.
