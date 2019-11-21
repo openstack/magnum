@@ -48,6 +48,10 @@ metadata:
   labels:
     k8s-app: ingress-traefik-backend
 spec:
+  selector:
+    matchLabels:
+      k8s-app: ingress-traefik-backend
+      name: ingress-traefik-backend
   template:
     metadata:
       labels:
