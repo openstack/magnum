@@ -104,12 +104,9 @@ data:
       replicaCount: 1
       minAvailable: 1
       resources:
-        limits:
-          cpu: 100m
-          memory: 64Mi
         requests:
-          cpu: 100m
-          memory: 64Mi
+          cpu: 200m
+          memory: 256Mi
       autoscaling:
         enabled: false
       customTemplate:
@@ -163,7 +160,7 @@ data:
             release: prometheus-operator
           namespace: kube-system
       lifecycle: {}
-      priorityClassName: ""
+      priorityClassName: "system-node-critical"
     revisionHistoryLimit: 10
     defaultBackend:
       enabled: true
@@ -182,9 +179,6 @@ data:
       replicaCount: 1
       minAvailable: 1
       resources:
-        limits:
-          cpu: 10m
-          memory: 20Mi
         requests:
           cpu: 10m
           memory: 20Mi
@@ -196,7 +190,7 @@ data:
         loadBalancerSourceRanges: []
         servicePort: 80
         type: ClusterIP
-      priorityClassName: ""
+      priorityClassName: "system-cluster-critical"
     rbac:
       create: true
     podSecurityPolicy:
