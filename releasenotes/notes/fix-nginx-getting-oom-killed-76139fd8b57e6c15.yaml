@@ -1,0 +1,11 @@
+---
+upgrade:
+  - |
+    nginx-ingress-controller QoS changed from Guaranteed to Burstable.
+    Priority class 'system-cluster-critical' or higher for
+    nginx-ingress-controller.
+fixes:
+  - |
+    nginx-ingress-controller requests.memory increased to 256MiB. This is a
+    result of tests that showed the pod getting oom killed by the node on
+    a relatively generic use case.
