@@ -754,7 +754,10 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh
-              # TODO add docker_storage_setup
+            - str_replace:
+                template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+                params:
+                  $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_fedora_coreos.sh}
             - get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh
             - get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh
 
