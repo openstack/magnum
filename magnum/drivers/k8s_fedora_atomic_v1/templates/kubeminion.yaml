@@ -306,6 +306,7 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params.yaml}
           params:
+            $INSTANCE_NAME: {get_param: name}
             $PROMETHEUS_MONITORING: {get_param: prometheus_monitoring}
             $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
             $KUBE_MASTER_IP: {get_param: kube_master_ip}
