@@ -306,7 +306,7 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
-| `heapster_enabled`_                   | - true             | true          |
+| `heapster_enabled`_                   | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
 | `metrics_server_chart_tag`_           | see below          | see below     |
@@ -411,7 +411,7 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `k8s_keystone_auth_tag`_              | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| `tiller_enabled`_                     | - true             | false         |
+| `tiller_enabled`_                     | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
 | `tiller_tag`_                         | see below          | ""            |
@@ -1208,7 +1208,7 @@ _`kube_tag`
 
 _`heapster_enabled`
   heapster_enabled is used to enable disable the installation of heapster.
-  Ussuri default: true
+  Ussuri default: false
   Train default: true
 
 _`metrics_server_chart_tag`
@@ -1368,7 +1368,8 @@ _`prometheus_operator_chart_tag`
 
 _`tiller_enabled`
   If set to true, tiller will be deployed in the kube-system namespace.
-  Defaults to false.
+  Ussuri default: true
+  Train default: false
 
 _`tiller_tag`
   Add tiller_tag label to select the version of tiller. If the tag is not set

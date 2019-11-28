@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    Heapster phased out in favor of metrics-server. Last openstack/magnum
+    version to include heapster has standard version is magnum train.

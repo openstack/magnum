@@ -120,7 +120,7 @@ parameters:
   heapster_enabled:
     type: boolean
     description: enable/disable the use of heapster
-    default: true
+    default: false
 
   metrics_server_enabled:
     type: boolean
@@ -704,7 +704,7 @@ parameters:
   tiller_enabled:
     type: boolean
     description: Choose whether to install tiller or not.
-    default: false
+    default: true
 
   tiller_tag:
     type: string
