@@ -392,7 +392,7 @@ the table are linked to more details elsewhere in the user guide.
 | `service_cluster_ip_range`            | IPv4 CIDR for k8s  | 10.254.0.0/16 |
 |                                       | service portals    |               |
 +---------------------------------------+--------------------+---------------+
-| `keystone_auth_enabled`_              | see below          | false         |
+| `keystone_auth_enabled`_              | see below          | true          |
 +---------------------------------------+--------------------+---------------+
 | `k8s_keystone_auth_tag`_              | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
@@ -1163,6 +1163,7 @@ _`container_infra_prefix`
   * docker.io/openstackmagnum/kubernetes-kubelet
   * docker.io/openstackmagnum/kubernetes-proxy
   * docker.io/openstackmagnum/kubernetes-scheduler
+  * docker.io/k8scloudprovider/k8s-keystone-auth
   * gcr.io/google_containers/pause:3.0
 
   Images that might be needed:
@@ -1302,7 +1303,9 @@ _`k8s_keystone_auth_tag`
   This label allows users to select `a specific k8s_keystone_auth
   version, based on its container tag
   <https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags/>`_.
-  Stein-default: 1.13.0
+  Stein-default: v1.13.0
+  Train-default: v1.14.0
+  Ussuri-default: v1.15.0
 
 _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the

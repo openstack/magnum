@@ -654,7 +654,7 @@ parameters:
   k8s_keystone_auth_tag:
     type: string
     description: tag of the k8s_keystone_auth container
-    default: v1.14.0
+    default: v1.15.0
 
   monitoring_enabled:
     type: boolean
