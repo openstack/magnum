@@ -626,10 +626,10 @@ resources:
         - config: {get_resource: make_cert}
         - config: {get_resource: add_proxy}
         - config: {get_resource: start_container_agent}
-        - config: {get_resource: enable_services}
         - config: {get_resource: write_flannel_config}
         - config: {get_resource: flannel_config_service}
         - config: {get_resource: flannel_service}
+        - config: {get_resource: enable_services}
 
   ######################################################################
   #
