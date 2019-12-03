@@ -358,10 +358,17 @@ class FedoraKubernetesDriver(KubernetesDriver):
 
         return heat_params
 
+    @staticmethod
+    def get_new_labels(nodegroup, cluster_template):
+        new_labels = nodegroup.labels.copy()
+        if 'kube_tag' in cluster_template.labels:
+            new_kube_tag = cluster_template.labels['kube_tag']
+            new_labels.update({'kube_tag': new_kube_tag})
+        return new_labels
+
     def upgrade_cluster(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, scale_manager=None,
                         rollback=False):
-        """For Train release we are going to upgrade only the kube tag"""
         osc = clients.OpenStackClients(context)
 
         # Use this just to check that we are not downgrading.
@@ -406,13 +413,11 @@ class FedoraKubernetesDriver(KubernetesDriver):
             # make sure that the is_master condition fails.
             heat_params['worker_role'] = nodegroup.role
 
-        new_kube_tag = cluster_template.labels['kube_tag']
-        new_labels = nodegroup.labels.copy()
-        new_labels.update({'kube_tag': new_kube_tag})
         # we need to set the whole dict to the object
         # and not just update the existing labels. This
         # is how obj_what_changed works.
-        nodegroup.labels = new_labels
+        nodegroup.labels = new_labels = self.get_new_labels(nodegroup,
+                                                            cluster_template)
 
         if nodegroup.is_default:
             cluster.cluster_template_id = cluster_template.uuid
