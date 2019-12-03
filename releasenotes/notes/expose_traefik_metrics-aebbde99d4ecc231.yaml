@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Expose traefik prometheus metrics.
