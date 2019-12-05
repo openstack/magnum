@@ -10,6 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 import os
+import sys
 
 from oslo_config import cfg
 from oslo_log import log
@@ -19,6 +20,7 @@ import pecan
 from magnum.api import config as api_config
 from magnum.api import middleware
 from magnum.common import config as common_config
+from magnum.common import service
 import magnum.conf
 
 CONF = magnum.conf.CONF
@@ -65,3 +67,8 @@ def load_app():
 
 def app_factory(global_config, **local_conf):
     return setup_app()
+
+
+def build_wsgi_app(argv=None):
+    service.prepare_service(sys.argv)
+    return load_app()
