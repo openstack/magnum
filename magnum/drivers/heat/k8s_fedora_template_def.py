@@ -93,6 +93,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'traefik_ingress_controller_tag',
                       'node_problem_detector_tag',
                       'nginx_ingress_controller_tag',
+                      'nginx_ingress_controller_chart_tag',
                       'auto_healing_enabled', 'auto_scaling_enabled',
                       'auto_healing_controller', 'magnum_auto_healer_tag',
                       'draino_tag', 'autoscaler_tag',
