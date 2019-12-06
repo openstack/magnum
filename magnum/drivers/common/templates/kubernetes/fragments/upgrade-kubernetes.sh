@@ -6,9 +6,9 @@ set -x
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 KUBECONFIG="/etc/kubernetes/kubelet-config.yaml"
 if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig $KUBECONFIG"
-else
     kubecontrol="/usr/local/bin/kubectl --kubeconfig $KUBECONFIG"
+else
+    kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig $KUBECONFIG"
 fi
 new_kube_tag="$kube_tag_input"
 new_ostree_remote="$ostree_remote_input"
@@ -44,6 +44,15 @@ if [ "${new_kube_tag}" != "${KUBE_TAG}" ]; then
         for service in ${SERVICE_LIST}; do
             ${ssh_cmd} systemctl start ${service}
         done
+
+        i=0
+        until ${kubecontrol} uncordon ${INSTANCE_NAME}
+        do
+            i=$((i+1))
+            [ $i -lt 30 ] || break;
+            echo "Trying to uncordon node..."
+            sleep 5s
+        done
     else
         declare -A service_image_mapping
         service_image_mapping=( ["kubelet"]="kubernetes-kubelet" ["kube-controller-manager"]="kubernetes-controller-manager" ["kube-scheduler"]="kubernetes-scheduler" ["kube-proxy"]="kubernetes-proxy" ["kube-apiserver"]="kubernetes-apiserver" )
@@ -66,7 +75,7 @@ if [ "${new_kube_tag}" != "${KUBE_TAG}" ]; then
             systemctl restart ${service}
         done
 
-        ${ssh_cmd} /var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig /etc/kubernetes/kubelet-config.yaml uncordon ${INSTANCE_NAME}
+        ${ssh_cmd} ${kubecontrol} uncordon ${INSTANCE_NAME}
 
         for service in ${SERVICE_LIST}; do
             ${ssh_cmd} atomic --assumeyes images "delete ${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}${service_image_mapping[${service}]}:${KUBE_TAG}"
@@ -74,15 +83,6 @@ if [ "${new_kube_tag}" != "${KUBE_TAG}" ]; then
 
         ${ssh_cmd} atomic images prune
     fi
-
-    i=0
-    until kubectl uncordon ${INSTANCE_NAME}
-    do
-        i=$((i+1))
-        [ $i -lt 30 ] || break;
-        echo "Trying to uncordon node..."
-        sleep 5s
-    done
 fi
 
 function setup_uncordon {
@@ -94,8 +94,9 @@ Description=magnum-uncordon
 After=network.target kubelet.service
 
 [Service]
-Restart=Always
+Restart=always
 RemainAfterExit=yes
+RestartSec=10
 ExecStart=${kubecontrol} uncordon ${INSTANCE_NAME}
 
 [Install]

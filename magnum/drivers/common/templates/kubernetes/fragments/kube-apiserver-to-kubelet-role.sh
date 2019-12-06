@@ -408,6 +408,7 @@ items:
     - apps
     resources:
     - statefulsets
+    - daemonsets
     verbs:
     - get
     - list
@@ -415,7 +416,6 @@ items:
     - extensions
     resources:
     - daemonsets
-    - replicasets
     verbs:
     - get
     - list
