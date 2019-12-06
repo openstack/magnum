@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    k8s-keystone-auth now uses the upstream k8scloudprovider docker repo instead
+    of the openstackmagnum repo.
