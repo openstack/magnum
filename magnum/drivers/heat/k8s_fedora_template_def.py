@@ -177,10 +177,11 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
     def _set_volumes(self, context, cluster, extra_params):
         # set docker_volume_type
+        docker_volume_size = cluster.docker_volume_size or 0
         docker_volume_type = (cluster.labels.get(
             'docker_volume_type',
             cinder.get_default_docker_volume_type(context))
-            if int(cluster.docker_volume_size) > 0 else '')
+            if int(docker_volume_size) > 0 else '')
         extra_params['docker_volume_type'] = docker_volume_type
 
         # set etcd_volume_type
