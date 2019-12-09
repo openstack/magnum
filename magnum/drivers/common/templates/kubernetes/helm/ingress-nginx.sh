@@ -10,7 +10,6 @@ printf "Starting to run ${step}\n"
 ### Configuration
 ###############################################################################
 CHART_NAME="nginx-ingress"
-CHART_VERSION="1.4.0"
 
 if [ "$(echo ${INGRESS_CONTROLLER} | tr '[:upper:]' '[:lower:]')" = "nginx" ]; then
 
@@ -46,7 +45,7 @@ data:
         echo "${CHART_NAME} already installed on server. Continue..."
         exit 0
     else
-        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version v${CHART_VERSION} --values /opt/magnum/install-${CHART_NAME}-values.yaml
+        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version ${NGINX_INGRESS_CONTROLLER_CHART_TAG} --values /opt/magnum/install-${CHART_NAME}-values.yaml
     fi
 
   install-${CHART_NAME}-values.yaml:  |
