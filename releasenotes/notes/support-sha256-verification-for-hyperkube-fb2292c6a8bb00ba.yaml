@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Now the Fedora CoreOS driver can support the sha256 verification for the
+    hyperkube image when bootstraping the Kubernetes cluster.
