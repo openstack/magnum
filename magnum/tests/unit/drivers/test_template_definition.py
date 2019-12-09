@@ -587,6 +587,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
         use_podman = mock_cluster.labels.get('use_podman')
+        kube_image_digest = mock_cluster.labels.get('kube_image_digest')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -682,6 +683,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ostree_remote': ostree_remote,
             'ostree_commit': ostree_commit,
             'use_podman': use_podman,
+            'kube_image_digest': kube_image_digest,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1051,6 +1053,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
         use_podman = mock_cluster.labels.get('use_podman')
+        kube_image_digest = mock_cluster.labels.get('kube_image_digest')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1148,6 +1151,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ostree_remote': ostree_remote,
             'ostree_commit': ostree_commit,
             'use_podman': use_podman,
+            'kube_image_digest': kube_image_digest,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,

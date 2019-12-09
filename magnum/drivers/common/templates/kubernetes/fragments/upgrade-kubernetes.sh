@@ -11,18 +11,19 @@ else
     kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig $KUBECONFIG"
 fi
 new_kube_tag="$kube_tag_input"
+new_kube_image_digest="$kube_image_digest"
 new_ostree_remote="$ostree_remote_input"
 new_ostree_commit="$ostree_commit_input"
 
 function drain {
     # If there is only one master and this is the master node, skip the drain, just cordon it
     # If there is only one worker and this is the worker node, skip the drain, just cordon it
-    all_masters=$(kubectl get nodes --selector=node-role.kubernetes.io/master= -o name)
-    all_workers=$(kubectl get nodes --selector=node-role.kubernetes.io/master!= -o name)
+    all_masters=$(${ssh_cmd} ${kubecontrol} get nodes --selector=node-role.kubernetes.io/master= -o name)
+    all_workers=$(${ssh_cmd} ${kubecontrol} get nodes --selector=node-role.kubernetes.io/master!= -o name)
     if [ "node/${INSTANCE_NAME}" != "${all_masters}" ] && [ "node/${INSTANCE_NAME}" != "${all_workers}" ]; then
-        kubectl drain ${INSTANCE_NAME} --ignore-daemonsets --delete-local-data --force
+        ${ssh_cmd} ${kubecontrol} drain ${INSTANCE_NAME} --ignore-daemonsets --delete-local-data --force
     else
-        kubectl cordon ${INSTANCE_NAME}
+        ${ssh_cmd} ${kubecontrol} cordon ${INSTANCE_NAME}
     fi
 }
 
@@ -45,8 +46,14 @@ if [ "${new_kube_tag}" != "${KUBE_TAG}" ]; then
             ${ssh_cmd} systemctl start ${service}
         done
 
+        KUBE_DIGEST=$($ssh_cmd podman image inspect hyperkube:${new_kube_tag} --format "{{.Digest}}")
+        if [ -n "${new_kube_image_digest}"  ] && [ "${new_kube_image_digest}" != "${KUBE_DIGEST}" ]; then
+            printf "The sha256 ${KUBE_DIGEST} of current hyperkube image cannot match the given one: ${new_kube_image_digest}."
+            exit 1
+        fi
+
         i=0
-        until ${kubecontrol} uncordon ${INSTANCE_NAME}
+        until ${ssh_cmd} ${kubecontrol} uncordon ${INSTANCE_NAME}
         do
             i=$((i+1))
             [ $i -lt 30 ] || break;
