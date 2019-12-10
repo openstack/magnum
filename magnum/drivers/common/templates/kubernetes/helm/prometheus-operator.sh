@@ -166,7 +166,7 @@ metadata:
   name: install-${CHART_NAME}-job
   namespace: magnum-tiller
 spec:
-  backoffLimit: 5
+  backoffLimit: 10
   template:
     spec:
       serviceAccountName: tiller
