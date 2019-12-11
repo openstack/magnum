@@ -548,6 +548,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'monitoring_enabled')
         prometheus_operator_chart_tag = mock_cluster.labels.get(
             'prometheus_operator_chart_tag')
+        prometheus_adapter_enabled = mock_cluster.labels.get(
+            'prometheus_adapter_enabled')
+        prometheus_adapter_chart_tag = mock_cluster.labels.get(
+            'prometheus_adapter_chart_tag')
+        prometheus_adapter_configmap = mock_cluster.labels.get(
+            'prometheus_adapter_configmap')
         project_id = mock_cluster.project_id
         tiller_enabled = mock_cluster.labels.get(
             'tiller_enabled')
@@ -642,6 +648,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'monitoring_enabled': monitoring_enabled,
             'prometheus_operator_chart_tag': prometheus_operator_chart_tag,
+            'prometheus_adapter_enabled': prometheus_adapter_enabled,
+            'prometheus_adapter_chart_tag': prometheus_adapter_chart_tag,
+            'prometheus_adapter_configmap': prometheus_adapter_configmap,
             'project_id': project_id,
             'external_network': external_network_id,
             'tiller_enabled': tiller_enabled,
@@ -997,6 +1006,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'monitoring_enabled')
         prometheus_operator_chart_tag = mock_cluster.labels.get(
             'prometheus_operator_chart_tag')
+        prometheus_adapter_enabled = mock_cluster.labels.get(
+            'prometheus_adapter_enabled')
+        prometheus_adapter_chart_tag = mock_cluster.labels.get(
+            'prometheus_adapter_chart_tag')
+        prometheus_adapter_configmap = mock_cluster.labels.get(
+            'prometheus_adapter_configmap')
         project_id = mock_cluster.project_id
         tiller_enabled = mock_cluster.labels.get(
             'tiller_enabled')
@@ -1093,6 +1108,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'monitoring_enabled': monitoring_enabled,
             'prometheus_operator_chart_tag': prometheus_operator_chart_tag,
+            'prometheus_adapter_enabled': prometheus_adapter_enabled,
+            'prometheus_adapter_chart_tag': prometheus_adapter_chart_tag,
+            'prometheus_adapter_configmap': prometheus_adapter_configmap,
             'project_id': project_id,
             'external_network': external_network_id,
             'tiller_enabled': tiller_enabled,
