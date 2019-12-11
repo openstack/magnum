@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    A regression issue about downloading images has been fixed. Now both Fedora
+    Atomic driver and Fedora CoreOS driver can support using proxy in template
+    to create cluster.
