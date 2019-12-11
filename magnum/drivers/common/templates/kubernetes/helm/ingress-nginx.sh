@@ -148,7 +148,7 @@ data:
           servicePort: 18080
           type: ClusterIP
       metrics:
-        enabled: false
+        enabled: ${MONITORING_ENABLED}
         service:
           annotations: {}
           clusterIP: ""
@@ -158,9 +158,10 @@ data:
           servicePort: 9913
           type: ClusterIP
         serviceMonitor:
-          enabled: false
-          additionalLabels: {}
-          namespace: ""
+          enabled: ${MONITORING_ENABLED}
+          additionalLabels:
+            release: prometheus-operator
+          namespace: kube-system
       lifecycle: {}
       priorityClassName: ""
     revisionHistoryLimit: 10
