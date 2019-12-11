@@ -27,6 +27,10 @@ parameters:
     type: string
     description: the name of the nodegroup where the node belongs
 
+  heapster_enabled:
+    type: boolean
+    description: enable/disable the use of heapster
+
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
@@ -616,6 +620,7 @@ resources:
                 template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh}
                 params:
                   "$INSTANCE_NAME": {get_param: name}
+                  "$HEAPSTER_ENABLED": {get_param: heapster_enabled}
                   "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
                   "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
                   "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}

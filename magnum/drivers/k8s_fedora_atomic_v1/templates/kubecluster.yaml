@@ -117,6 +117,11 @@ parameters:
     default: ""
     description: the name of the nodegroup where the node belongs
 
+  heapster_enabled:
+    type: boolean
+    description: enable/disable the use of heapster
+    default: true
+
   minion_flavor:
     type: string
     default: m1.small
@@ -984,6 +989,7 @@ resources:
               - [{ get_param: 'OS::stack_name' }, 'master', '%index%']
           nodegroup_role: {get_param: master_role}
           nodegroup_name: {get_param: master_nodegroup_name}
+          heapster_enabled: {get_param: heapster_enabled}
           prometheus_monitoring: {get_param: prometheus_monitoring}
           grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}
