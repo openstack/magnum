@@ -306,6 +306,9 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
+| `heapster_enabled`_                   | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 | `monitoring_enabled`_                 | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1189,6 +1192,11 @@ _`kube_tag`
   <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
   If unset, the current Magnum version's default Kubernetes release is
   installed.
+
+_`heapster_enabled`
+  heapster_enabled is used to enable disable the installation of heapster.
+  Ussuri default: true
+  Train default: true
 
 _`cloud_provider_tag`
   This label allows users to select `a specific release for the openstack
