@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Bump up prometheus operator chart version to 8.2.2 so that it is compatible
+    with k8s 1.16.x.

@@ -10,8 +10,6 @@ printf "Starting to run ${step}\n"
 ### Configuration
 ###############################################################################
 CHART_NAME="prometheus-operator"
-CHART_VERSION=${PROMETHEUS_OPERATOR_CHART_TAG:-5.12.3}
-
 
 if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
 
@@ -64,7 +62,7 @@ data:
         exit 0
     else
         # TODO: Set namespace to monitoring. This is needed as the Kubernetes default priorityClass can only be used in NS kube-system
-        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version v${CHART_VERSION} --values /opt/magnum/install-${CHART_NAME}-values.yaml
+        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version ${PROMETHEUS_OPERATOR_CHART_TAG} --values /opt/magnum/install-${CHART_NAME}-values.yaml
     fi
 
   install-${CHART_NAME}-values.yaml:  |
