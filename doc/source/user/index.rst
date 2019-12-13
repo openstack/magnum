@@ -314,6 +314,13 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `prometheus_operator_chart_tag`_      | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `prometheus_adapter_enabled`_         | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `prometheus_adapter_chart_tag`_       | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `prometheus_adapter_configmap`_       | (rules CM name)    | ""            |
++---------------------------------------+--------------------+---------------+
 | `swarm_strategy`_                     | - spread           | spread        |
 |                                       | - binpack          |               |
 |                                       | - random           |               |
@@ -1318,6 +1325,21 @@ _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the
   stable/prometheus-operator helm chart.
   Default: false
+
+_`prometheus_adapter_enabled`
+  Enable installation of cluster custom metrics provided by the
+  stable/prometheus-adapter helm chart. This service depends on
+  monitoring_enabled.
+  Default: true
+
+_`prometheus_adapter_chart_tag`
+  The stable/prometheus-adapter helm chart version to use.
+  Train-default: 1.4.0
+
+_`prometheus_adapter_configmap`
+  The name of the prometheus-adapter rules ConfigMap to use. Using this label
+  will overwrite the default rules.
+  Default: ""
 
 _`prometheus_operator_chart_tag`
   Add prometheus_operator_chart_tag to select version of the
