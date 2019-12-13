@@ -464,6 +464,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         flannel_subnet = mock_cluster.labels.get(
             'flannel_network_subnetlen')
         flannel_backend = mock_cluster.labels.get('flannel_backend')
+        heapster_enabled = mock_cluster.labels.get(
+            'heapster_enabled')
         system_pods_initial_delay = mock_cluster.labels.get(
             'system_pods_initial_delay')
         system_pods_timeout = mock_cluster.labels.get(
@@ -585,6 +587,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'flannel_network_cidr': flannel_cidr,
             'flannel_network_subnetlen': flannel_subnet,
             'flannel_backend': flannel_backend,
+            'heapster_enabled': heapster_enabled,
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'admission_control_list': admission_control_list,
@@ -910,6 +913,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         flannel_subnet = mock_cluster.labels.get(
             'flannel_network_subnetlen')
         flannel_backend = mock_cluster.labels.get('flannel_backend')
+        heapster_enabled = mock_cluster.labels.get(
+            'heapster_enabled')
         system_pods_initial_delay = mock_cluster.labels.get(
             'system_pods_initial_delay')
         system_pods_timeout = mock_cluster.labels.get(
@@ -1031,6 +1036,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'flannel_network_cidr': flannel_cidr,
             'flannel_network_subnetlen': flannel_subnet,
             'flannel_backend': flannel_backend,
+            'heapster_enabled': heapster_enabled,
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'fixed_network_name': fixed_network_name,

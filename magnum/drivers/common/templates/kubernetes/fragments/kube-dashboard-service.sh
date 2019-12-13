@@ -5,6 +5,12 @@ printf "Starting to run ${step}\n"
 
 . /etc/sysconfig/heat-params
 
+echo "Waiting for Kubernetes API..."
+until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+do
+    sleep 5
+done
+
 if [ "$(echo $KUBE_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
     KUBE_DASH_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}"
     HEAPSTER_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-amd64:v1.4.2"
@@ -335,23 +341,19 @@ spec:
 EOF
         }
 
-        echo "Waiting for Kubernetes API..."
-        until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-        do
-            sleep 5
-        done
-
         kubectl apply --validate=false -f $INFLUX_DEPLOY
         kubectl apply --validate=false -f $GRAFANA_DEPLOY
     fi
 
     # Deploy Heapster
-    HEAPSTER_DEPLOY=/srv/magnum/kubernetes/heapster-controller.yaml
+    if [ "$(echo ${HEAPSTER_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
 
-    [ -f ${HEAPSTER_DEPLOY} ] || {
-        echo "Writing File: $HEAPSTER_DEPLOY"
-        mkdir -p $(dirname ${HEAPSTER_DEPLOY})
-        cat << EOF > ${HEAPSTER_DEPLOY}
+        HEAPSTER_DEPLOY=/srv/magnum/kubernetes/heapster-controller.yaml
+
+        [ -f ${HEAPSTER_DEPLOY} ] || {
+            echo "Writing File: $HEAPSTER_DEPLOY"
+            mkdir -p $(dirname ${HEAPSTER_DEPLOY})
+            cat << EOF > ${HEAPSTER_DEPLOY}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -450,16 +452,12 @@ subjects:
   name: heapster
   namespace: kube-system
 EOF
-    }
+        }
 
-    echo "Waiting for Kubernetes API..."
-    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-    do
-        sleep 5
-    done
+        kubectl apply --validate=false -f $HEAPSTER_DEPLOY
+    fi
 
     kubectl apply --validate=false -f $KUBE_DASH_DEPLOY
-    kubectl apply --validate=false -f $HEAPSTER_DEPLOY
 fi
 
 printf "Finished running ${step}\n"
