@@ -1216,6 +1216,7 @@ _`cloud_provider_tag`
   the cloud-provider. The images are hosted `here
   <https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/>`_.
   Stein default: v0.2.0
+  Train default: v1.15.0
 
 _`etcd_tag`
   This label allows users to select `a specific etcd version,
