@@ -122,6 +122,16 @@ parameters:
     description: enable/disable the use of heapster
     default: true
 
+  metrics_server_enabled:
+    type: boolean
+    description: enable/disable the use of metrics-server
+    default: true
+
+  metrics_server_chart_tag:
+    type: string
+    description: tag of the stable/metrics-server chart to install
+    default: v2.8.8
+
   minion_flavor:
     type: string
     default: m1.small
@@ -1005,6 +1015,8 @@ resources:
           nodegroup_role: {get_param: master_role}
           nodegroup_name: {get_param: master_nodegroup_name}
           heapster_enabled: {get_param: heapster_enabled}
+          metrics_server_enabled: {get_param: metrics_server_enabled}
+          metrics_server_chart_tag: {get_param: metrics_server_chart_tag}
           prometheus_monitoring: {get_param: prometheus_monitoring}
           grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}

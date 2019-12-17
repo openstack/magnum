@@ -1,15 +1,23 @@
 #!/bin/bash
 
+. /etc/sysconfig/heat-params
+
 set -ex
 
-CHART_NAME="metrics-server"
-CHART_VERSION="2.1.0"
+step="metrics-server"
+printf "Starting to run ${step}\n"
 
-HELM_MODULE_CONFIG_FILE="/srv/magnum/kubernetes/helm/${CHART_NAME}.yaml"
-[ -f ${HELM_MODULE_CONFIG_FILE} ] || {
-    echo "Writing File: ${HELM_MODULE_CONFIG_FILE}"
-    mkdir -p $(dirname ${HELM_MODULE_CONFIG_FILE})
-    cat << EOF > ${HELM_MODULE_CONFIG_FILE}
+### Configuration
+###############################################################################
+CHART_NAME="metrics-server"
+
+if [ "$(echo ${METRICS_SERVER_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+
+    HELM_MODULE_CONFIG_FILE="/srv/magnum/kubernetes/helm/${CHART_NAME}.yaml"
+    [ -f ${HELM_MODULE_CONFIG_FILE} ] || {
+        echo "Writing File: ${HELM_MODULE_CONFIG_FILE}"
+        mkdir -p $(dirname ${HELM_MODULE_CONFIG_FILE})
+        cat << EOF > ${HELM_MODULE_CONFIG_FILE}
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -37,9 +45,12 @@ data:
         echo "${CHART_NAME} already installed on server. Continue..."
         exit 0
     else
-        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version v${CHART_VERSION}
+        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version ${METRICS_SERVER_CHART_TAG} --values /opt/magnum/install-${CHART_NAME}-values.yaml
     fi
 
+  install-${CHART_NAME}-values.yaml:  |
+    image:
+      repository: ${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}metrics-server-amd64
 ---
 
 apiVersion: batch/v1
@@ -80,4 +91,8 @@ spec:
         secret:
           secretName: helm-client-secret
 EOF
-}
+    }
+
+fi
+
+printf "Finished running ${step}\n"
