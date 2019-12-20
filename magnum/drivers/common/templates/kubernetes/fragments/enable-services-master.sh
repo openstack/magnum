@@ -16,10 +16,11 @@ while [ ! -f /etc/kubernetes/certs/ca.key ] && \
 done
 
 echo "starting services"
-for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
-    echo "activating service $service"
-    $ssh_cmd systemctl enable $service
-    $ssh_cmd systemctl restart $service
+for action in enable restart; do
+    for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
+        echo "$action service $service"
+        $ssh_cmd systemctl $action $service
+    done
 done
 
 # Label self as master
