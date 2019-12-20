@@ -13,8 +13,9 @@ $ssh_cmd systemctl stop docker
 # make sure we pick up any modified unit files
 $ssh_cmd systemctl daemon-reload
 
-for service in docker kubelet kube-proxy; do
-    echo "activating service $service"
-    $ssh_cmd systemctl enable $service
-    $ssh_cmd systemctl start $service
+for action in enable restart; do
+    for service in docker kubelet kube-proxy; do
+        echo "$action service $service"
+        $ssh_cmd systemctl $action $service
+    done
 done
