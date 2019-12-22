@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add cinder_csi_enabled label to support out of tree Cinder CSI.
