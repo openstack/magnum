@@ -387,7 +387,9 @@ fi
 
 if [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
     KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-provider=external"
-    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --external-cloud-volume-plugin=openstack --cloud-config=/etc/kubernetes/cloud-config"
+    if [ "$(echo "${VOLUME_DRIVER}" | tr '[:upper:]' '[:lower:]')" = "cinder" ] && [ "$(echo "${CINDER_CSI_ENABLED}" | tr '[:upper:]' '[:lower:]')" != "true" ]; then
+        KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --external-cloud-volume-plugin=openstack --cloud-config=/etc/kubernetes/cloud-config"
+    fi
 fi
 
 

@@ -1199,6 +1199,14 @@ _`container_infra_prefix`
   * docker.io/planetlabs/draino:abf028a
   * docker.io/openstackmagnum/cluster-autoscaler:v1.0
 
+  Images that might be needed if 'cinder_csi_enabled' is 'true':
+  * docker.io/k8scloudprovider/cinder-csi-plugin:v1.16.0
+  * quay.io/k8scsi/csi-attacher:v2.0.0
+  * quay.io/k8scsi/csi-provisioner:v1.4.0
+  * quay.io/k8scsi/csi-snapshotter:v1.2.2
+  * quay.io/k8scsi/csi-resizer:v0.3.0
+  * quay.io/k8scsi/csi-node-driver-registrar:v1.1.0
+
 _`kube_tag`
   This label allows users to select `a specific Kubernetes release,
   based on its container tag
@@ -1327,6 +1335,49 @@ _`cloud_provider_enabled`
   'cluster_user_trust' resolves to 'false'. For specific kubernetes versions,
   if 'cinder' is selected as a 'volume_driver', it is implied that the cloud
   provider will be enabled since they are combined.
+
+_`cinder_csi_enabled`
+  When 'true', out-of-tree Cinder CSI driver will be enabled. Requires 'cinder'
+  to be selected as a 'volume_driver' and consequently also requires label
+  'cloud_provider_enabled' to be 'true' (see 'cloud_provider_enabled' section).
+  Default: false
+
+_`cinder_csi_plugin_tag`
+  This label allows users to override the default container tag for Cinder CSI plugin.
+  For additional tags, `refer to Cinder CSI plugin page
+  <https://hub.docker.com/r/k8scloudprovider/cinder-csi-plugin/tags>`_.
+  Ussuri-default: v1.16.0
+
+_`csi_attacher_tag`
+  This label allows users to override the default container tag for CSI attacher.
+  For additional tags, `refer to CSI attacher page
+  <https://quay.io/repository/k8scsi/csi-attacher?tab=tags>`_.
+  Ussuri-default: v2.0.0
+
+_`csi_provisioner_tag`
+  This label allows users to override the default container tag for CSI provisioner.
+  For additional tags, `refer to CSI provisioner page
+  <https://quay.io/repository/k8scsi/csi-provisioner?tab=tags>`_.
+  Ussuri-default: v1.4.0
+
+_`csi_snapshotter_tag`
+  This label allows users to override the default container tag for CSI snapshotter.
+  For additional tags, `refer to CSI snapshotter page
+  <https://quay.io/repository/k8scsi/csi-snapshotter?tab=tags>`_.
+  Ussuri-default: v1.2.2
+
+_`csi_resizer_tag`
+  This label allows users to override the default container tag for CSI resizer.
+  For additional tags, `refer to CSI resizer page
+  <https://quay.io/repository/k8scsi/csi-resizer?tab=tags>`_.
+  Ussuri-default: v0.3.0
+
+_`csi_node_driver_registrar_tag`
+  This label allows users to override the default container tag for CSI node
+  driver registrar. For additional tags, `refer to CSI node driver registrar
+  page
+  <https://quay.io/repository/k8scsi/csi-node-driver-registrar?tab=tags>`_.
+  Ussuri-default: v1.1.0
 
 _`keystone_auth_enabled`
   If this label is set to True, Kubernetes will support use Keystone for
