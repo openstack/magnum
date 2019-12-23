@@ -362,6 +362,9 @@ resources:
                       - "docker.io/openstackmagnum/"
                       - get_param: container_infra_prefix
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
+                  $HTTP_PROXY: {get_param: http_proxy}
+                  $HTTPS_PROXY: {get_param: https_proxy}
+                  $NO_PROXY: {get_param: no_proxy}
 
   ######################################################################
   #

@@ -11,14 +11,17 @@ HEAT_CONTAINER_AGENT_TAG="$HEAT_CONTAINER_AGENT_TAG"
 
 if [ -n "${HTTP_PROXY}" ]; then
     export HTTP_PROXY
+    echo "http_proxy=${HTTP_PROXY}" >> /etc/environment
 fi
 
 if [ -n "${HTTPS_PROXY}" ]; then
     export HTTPS_PROXY
+    echo "https_proxy=${HTTPS_PROXY}" >> /etc/environment
 fi
 
 if [ -n "${NO_PROXY}" ]; then
     export NO_PROXY
+    echo "no_proxy=${NO_PROXY}" >> /etc/environment
 fi
 
 # Create a keypair for the heat-container-agent to

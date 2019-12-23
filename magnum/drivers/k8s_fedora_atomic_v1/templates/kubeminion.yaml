@@ -357,6 +357,9 @@ resources:
                   $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
                   $USE_PODMAN: {get_param: use_podman}
+                  $HTTP_PROXY: {get_param: http_proxy}
+                  $HTTPS_PROXY: {get_param: https_proxy}
+                  $NO_PROXY: {get_param: no_proxy}
             - get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh
 
   ######################################################################
