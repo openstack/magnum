@@ -52,7 +52,7 @@ data:
 
   install-${CHART_NAME}-values.yaml:  |
     image:
-      repository: ${CONTAINER_INFRA_PREFIX:-docker.io/directxman12/}k8s-prometheus-adapter-amd64
+      repository: ${CONTAINER_INFRA_PREFIX:-docker.io/directxman12/}k8s-prometheus-adapter-${ARCH}
 
     priorityClassName: "system-cluster-critical"
 
