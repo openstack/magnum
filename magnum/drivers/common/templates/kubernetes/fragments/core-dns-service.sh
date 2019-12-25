@@ -270,7 +270,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
       - name: autoscaler
-        image: ${_autoscaler_prefix}cluster-proportional-autoscaler-amd64:1.1.2
+        image: ${_autoscaler_prefix}cluster-proportional-autoscaler-${ARCH}:1.1.2
         resources:
             requests:
                 cpu: "20m"

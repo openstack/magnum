@@ -159,7 +159,7 @@ data:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: kube-flannel-ds-amd64
+  name: kube-flannel-ds-${ARCH}
   namespace: kube-system
   labels:
     tier: node
@@ -182,7 +182,7 @@ spec:
           type: "spc_t"
       hostNetwork: true
       nodeSelector:
-        beta.kubernetes.io/arch: amd64
+        beta.kubernetes.io/arch: ${ARCH}
       tolerations:
       - operator: Exists
         effect: NoSchedule

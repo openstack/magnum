@@ -2,11 +2,26 @@
 
 echo "START: write-heat-params"
 
+arch=$(uname -m)
+
+case "$arch" in
+    aarch64)
+        ARCH=arm64
+        ;;
+    x86_64)
+        ARCH=amd64
+        ;;
+    *)
+        ARCH=$arch
+        ;;
+esac
+
 HEAT_PARAMS=/etc/sysconfig/heat-params
 [ -f ${HEAT_PARAMS} ] || {
     echo "Writing File: $HEAT_PARAMS"
     mkdir -p "$(dirname ${HEAT_PARAMS})"
     cat > ${HEAT_PARAMS} <<EOF
+ARCH="$ARCH"
 INSTANCE_NAME="$INSTANCE_NAME"
 HEAPSTER_ENABLED="$HEAPSTER_ENABLED"
 METRICS_SERVER_ENABLED="$METRICS_SERVER_ENABLED"
