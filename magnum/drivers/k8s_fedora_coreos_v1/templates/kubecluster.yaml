@@ -568,6 +568,13 @@ parameters:
     description: Configure the IP pool from which Pod IPs will be chosen
     default: "192.168.0.0/16"
 
+  calico_ipv4pool_ipip:
+    type: string
+    description: IPIP Mode to use for the IPv4 POOL created at start up
+    default: "Off"
+    constraints:
+      - allowed_values: ["Always", "CrossSubnet", "Never", "Off"]
+
   pods_network_cidr:
     type: string
     description: Configure the IP pool/range from which pod IPs will be chosen
@@ -1093,6 +1100,7 @@ resources:
           calico_tag: {get_param: calico_tag}
           calico_kube_controllers_tag: {get_param: calico_kube_controllers_tag}
           calico_ipv4pool: {get_param: calico_ipv4pool}
+          calico_ipv4pool_ipip: {get_param: calico_ipv4pool_ipip}
           pods_network_cidr: {get_param: pods_network_cidr}
           ingress_controller: {get_param: ingress_controller}
           ingress_controller_role: {get_param: ingress_controller_role}

@@ -375,6 +375,10 @@ parameters:
     type: string
     description: Configure the IP pool from which Pod IPs will be chosen
 
+  calico_ipv4pool_ipip:
+    type: string
+    description: IPIP Mode to use for the IPv4 POOL created at start up
+
   pods_network_cidr:
     type: string
     description: Configure the IP pool/range from which pod IPs will be chosen
@@ -703,6 +707,7 @@ resources:
                   "$CALICO_TAG": {get_param: calico_tag}
                   "$CALICO_KUBE_CONTROLLERS_TAG": {get_param: calico_kube_controllers_tag}
                   "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
+                  "$CALICO_IPV4POOL_IPIP": {get_param: calico_ipv4pool_ipip}
                   "$INGRESS_CONTROLLER": {get_param: ingress_controller}
                   "$INGRESS_CONTROLLER_ROLE": {get_param: ingress_controller_role}
                   "$OCTAVIA_INGRESS_CONTROLLER_TAG": {get_param: octavia_ingress_controller_tag}
