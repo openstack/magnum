@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Added calico_ipv4pool_ipip label for configuring calico network_driver
+    IPIP Mode to use for the IPv4 POOL created at start up.
+    Allowed_values: Always, CrossSubnet, Never, Off.

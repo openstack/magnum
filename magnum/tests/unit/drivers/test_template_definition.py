@@ -506,6 +506,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'calico_kube_controllers_tag')
         calico_ipv4pool = mock_cluster.labels.get(
             'calico_ipv4pool')
+        calico_ipv4pool_ipip = mock_cluster.labels.get(
+            'calico_ipv4pool_ipip')
         if mock_cluster_template.network_driver == 'flannel':
             pods_network_cidr = flannel_cidr
         elif mock_cluster_template.network_driver == 'calico':
@@ -635,6 +637,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'calico_tag': calico_tag,
             'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
+            'calico_ipv4pool_ipip': calico_ipv4pool_ipip,
             'cgroup_driver': cgroup_driver,
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
@@ -970,6 +973,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'calico_kube_controllers_tag')
         calico_ipv4pool = mock_cluster.labels.get(
             'calico_ipv4pool')
+        calico_ipv4pool_ipip = mock_cluster.labels.get(
+            'calico_ipv4pool_ipip')
         if mock_cluster_template.network_driver == 'flannel':
             pods_network_cidr = flannel_cidr
         elif mock_cluster_template.network_driver == 'calico':
@@ -1101,6 +1106,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'calico_tag': calico_tag,
             'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
+            'calico_ipv4pool_ipip': calico_ipv4pool_ipip,
             'cgroup_driver': cgroup_driver,
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
