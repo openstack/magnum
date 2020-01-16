@@ -816,6 +816,12 @@ parameters:
     constraints:
       - allowed_values: [true]
 
+  kube_image_digest:
+    type: string
+    description: >
+      The digest of the image which should match the given kube_tag
+    default: ''
+
 resources:
 
   ######################################################################
@@ -1142,6 +1148,7 @@ resources:
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
           use_podman: {get_param: use_podman}
+          kube_image_digest: {get_param: kube_image_digest}
 
   kube_cluster_config:
     condition: create_cluster_resources

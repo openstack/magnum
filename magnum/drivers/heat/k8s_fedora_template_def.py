@@ -106,7 +106,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'draino_tag', 'autoscaler_tag',
                       'min_node_count', 'max_node_count', 'npd_enabled',
                       'ostree_remote', 'ostree_commit',
-                      'use_podman']
+                      'use_podman', 'kube_image_digest']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 

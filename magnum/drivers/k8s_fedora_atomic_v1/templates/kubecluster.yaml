@@ -814,6 +814,12 @@ parameters:
     default:
       false
 
+  kube_image_digest:
+    type: string
+    description: >
+      The digest of the image which should match the given kube_tag
+    default: ''
+
 resources:
 
   ######################################################################
