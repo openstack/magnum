@@ -10,7 +10,7 @@ if [ "$(echo $CERT_MANAGER_API | tr '[:upper:]' '[:lower:]')" != "false" ]; then
 
     echo -e "$CA_KEY" > ${cert_dir}/ca.key
 
-    chown kube.kube ${cert_dir}/ca.key
+    # chown kube:kube ${cert_dir}/ca.key
     chmod 400 ${cert_dir}/ca.key
 fi
 

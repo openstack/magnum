@@ -758,6 +758,10 @@ resources:
                   "$USE_PODMAN": {get_param: use_podman}
                   "$KUBE_IMAGE_DIGEST": {get_param: kube_image_digest}
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
+                params:
+                  "$CA_KEY": {get_param: ca_key}
             - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh
