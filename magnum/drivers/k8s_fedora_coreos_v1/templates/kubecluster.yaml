@@ -1159,10 +1159,6 @@ resources:
         list_join:
           - "\n"
           -
-            - str_replace:
-                template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
-                params:
-                  "$CA_KEY": {get_param: ca_key}
             - get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh
             - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
