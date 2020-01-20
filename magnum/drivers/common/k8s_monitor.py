@@ -233,6 +233,7 @@ class K8sMonitor(monitors.MonitorBase):
             if not api_status:
                 api_status = (getattr(exp_api, 'body', None) or
                               getattr(exp_api, 'message', None))
-                health_status_reason['api'] = api_status
+                if api_status is not None:
+                    health_status_reason['api'] = api_status
 
         return health_status, health_status_reason
