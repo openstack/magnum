@@ -226,6 +226,10 @@ metadata:
   namespace: kube-system
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      task: monitoring
+      k8s-app: influxdb
   template:
     metadata:
       labels:
@@ -273,6 +277,10 @@ metadata:
   namespace: kube-system
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      task: monitoring
+      k8s-app: grafana
   template:
     metadata:
       labels:
