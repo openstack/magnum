@@ -199,6 +199,7 @@ chmod 0644 ${INGRESS_TRAEFIK_SERVICE}
 
 # Launch the ingress traefik service
 set -x
-systemctl daemon-reload
-systemctl enable ingress-traefik.service
-systemctl start --no-block ingress-traefik.service
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+$ssh_cmd systemctl daemon-reload
+$ssh_cmd systemctl enable ingress-traefik.service
+$ssh_cmd systemctl start --no-block ingress-traefik.service
