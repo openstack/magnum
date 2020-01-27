@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    In a multi availability zone (AZ) environment, if Nova doesn't support
+    cross AZ volume mount, then the cluster creation may fail because Nova can
+    not mount volume in different AZ. This issue only impact Fedora Atomic and
+    Fedora CoreOS drivers. Now this issue is fixed by passing in the AZ info
+    when creating volumes.
+

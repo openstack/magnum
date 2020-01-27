@@ -790,6 +790,7 @@ resources:
       image: {get_param: server_image}
       size: {get_param: boot_volume_size}
       volume_type: {get_param: boot_volume_type}
+      availability_zone: {get_param: availability_zone}
 
   # do NOT use "_" (underscore) in the Nova server name
   # it creates a mismatch between the generated Nova name and its hostname
@@ -873,6 +874,7 @@ resources:
     properties:
       size: {get_param: etcd_volume_size}
       volume_type: {get_param: etcd_volume_type}
+      availability_zone: {get_param: availability_zone}
 
   etcd_volume_attach:
     type: Magnum::Optional::Etcd::VolumeAttachment
@@ -892,6 +894,7 @@ resources:
     properties:
       size: {get_param: docker_volume_size}
       volume_type: {get_param: docker_volume_type}
+      availability_zone: {get_param: availability_zone}
 
   docker_volume_attach:
     type: Magnum::Optional::Cinder::VolumeAttachment
