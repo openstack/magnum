@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    This proxy issue of Prometheus/Grafana script has been fixed.

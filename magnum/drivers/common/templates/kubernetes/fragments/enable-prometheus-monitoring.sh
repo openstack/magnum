@@ -5,6 +5,18 @@ printf "Starting to run ${step}\n"
 
 . /etc/sysconfig/heat-params
 
+if [ ! -z "$HTTP_PROXY" ]; then
+    export HTTP_PROXY
+fi
+
+if [ ! -z "$HTTPS_PROXY" ]; then
+    export HTTPS_PROXY
+fi
+
+if [ ! -z "$NO_PROXY" ]; then
+    export NO_PROXY
+fi
+
 function writeFile {
     # $1 is filename
     # $2 is file content
