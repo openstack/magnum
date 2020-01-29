@@ -83,7 +83,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --entrypoint /hyperkube \\
     --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \\
     --volume /etc/kubernetes:/etc/kubernetes:ro,z \\
-    --volume /usr/lib/os-release:/etc/os-release:ro \\
+    --volume /usr/lib/os-release:/usr/lib/os-release:ro \\
     --volume /etc/ssl/certs:/etc/ssl/certs:ro \\
     --volume /lib/modules:/lib/modules:ro \\
     --volume /run:/run \\

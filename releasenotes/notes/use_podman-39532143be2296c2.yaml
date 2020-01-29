@@ -15,3 +15,8 @@ features:
     k8s_fedora_atomic_v1 driver, you need to set use_podman=true. This is
     necessary since v1.16 dropped the --containerized flag in kubelet.
     https://github.com/kubernetes/kubernetes/pull/80043/files
+fixes:
+  - |
+    core-podman Mount os-release properly To display the node OS-IMAGE in k8s
+    properly we need to mount /usr/lib/os-release, /ets/os-release is just a
+    symlink.
