@@ -49,9 +49,9 @@ class OctaviaTest(base.TestCase):
                 },
                 {
                     "id": "fake_id_2",
-                    "description": "Kubernetes external service "
-                                   "a9f9ba08cf28811e89547fa163ea824f from "
-                                   "cluster %s" % self.cluster.uuid,
+                    "description": "Kubernetes Ingress test-octavia-ingress "
+                                   "in namespace default from cluster %s, "
+                                   "version: 32207" % self.cluster.uuid,
                     "name": "fake_name_2",
                     "provisioning_status": "ERROR",
                     "vip_port_id": "c17c1a6e-1868-11e9-84cd-00224d6b7bc1"
