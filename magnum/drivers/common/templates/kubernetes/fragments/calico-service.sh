@@ -398,7 +398,7 @@ spec:
             - name: CALICO_IPV4POOL_CIDR
               value: ${CALICO_IPV4POOL}
             - name: CALICO_IPV4POOL_IPIP
-              value: ${CALICO_IPV4POOL_IPIP}
+              value: "${CALICO_IPV4POOL_IPIP}"
             - name: CALICO_IPV4POOL_NAT_OUTGOING
               value: "true"
             # Set noderef for node controller.
