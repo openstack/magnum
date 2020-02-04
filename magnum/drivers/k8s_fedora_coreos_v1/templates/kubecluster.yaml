@@ -555,7 +555,7 @@ parameters:
   calico_tag:
     type: string
     description: tag of the calico containers used to provision the calico node
-    default: v3.3.6
+    default: v3.13.1
 
   calico_kube_controllers_tag:
     type: string
@@ -941,6 +941,9 @@ resources:
         - protocol: tcp
           port_range_min: 53
           port_range_max: 53
+        - protocol: tcp
+          port_range_min: 179
+          port_range_max: 179
         - protocol: tcp
           port_range_min: 7080
           port_range_max: 7080

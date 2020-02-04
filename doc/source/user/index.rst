@@ -458,6 +458,12 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `containerd_tarball_sha256`_          | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `calico_tag`_                         | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `calico_ipv4pool`_                    | see below          | 10.100.0.0/16 |
++---------------------------------------+--------------------+---------------+
+| `calico_ipv4pool_ipip`_               | see below          | Off           |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1209,6 +1215,10 @@ _`container_infra_prefix`
   * k8s.gcr.io/node-problem-detector:v0.6.2
   * docker.io/planetlabs/draino:abf028a
   * docker.io/openstackmagnum/cluster-autoscaler:v1.0
+  * quay.io/calico/cni:v3.13.1
+  * quay.io/calico/pod2daemon-flexvol:v3.13.1
+  * quay.io/calico/kube-controllers:v3.13.1
+  * quay.io/calico/node:v3.13.1
 
   Images that might be needed if 'cinder_csi_enabled' is 'true':
   * docker.io/k8scloudprovider/cinder-csi-plugin:v1.16.0
@@ -2583,6 +2593,9 @@ optional labels can be added:
 _`calico_ipv4pool`
   IPv4 network in CIDR format which is the IP pool, from which Pod IPs will
   be chosen. If not specified, the default is 10.100.0.0/16.
+  Stein default: 192.168.0.0/16
+  Train default: 192.168.0.0/16
+  Ussuri default: 10.100.0.0/16
 
 _`calico_ipv4pool_ipip`
   IPIP Mode to use for the IPv4 POOL created at start up.
@@ -2590,9 +2603,10 @@ _`calico_ipv4pool_ipip`
 
 _`calico_tag`
   Tag of the calico containers used to provision the calico node
+  Stein default: v2.6.7
+  Train default: v3.3.6
+  Ussuri default: v3.13.1
 
-_`calico_kube_controllers_tag`
-  Tag of the kube_controllers used to provision the calico node
 
 Besides, the Calico network driver needs kube_tag with v1.9.3 or later, because
 Calico needs extra mounts for the kubelet container. See `commit

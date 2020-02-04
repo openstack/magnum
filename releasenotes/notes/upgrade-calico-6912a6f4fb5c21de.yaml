@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    The default Calico version has been upgraded from v3.3.6 to v3.13.1.
