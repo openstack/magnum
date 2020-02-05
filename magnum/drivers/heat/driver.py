@@ -249,7 +249,6 @@ class HeatDriver(driver.Driver):
         stack_params = stack.parameters
         definition.add_nodegroup_params(cluster)
         heat_params = definition.get_stack_diff(context, stack_params, cluster)
-        LOG.debug('Updating stack with these params: %s', heat_params)
         scale_params = definition.get_scale_params(context,
                                                    cluster,
                                                    scale_manager)
@@ -261,6 +260,8 @@ class HeatDriver(driver.Driver):
             'disable_rollback': not rollback
         }
 
+        LOG.info('Updating cluster %s stack %s with these params: %s',
+                 cluster.uuid, cluster.stack_id, heat_params)
         osc.heat().stacks.update(cluster.stack_id, **fields)
 
     def _resize_stack(self, context, cluster, resize_manager,
@@ -276,7 +277,6 @@ class HeatDriver(driver.Driver):
         stack_params = stack.parameters
         definition.add_nodegroup_params(cluster, nodegroups=[nodegroup])
         heat_params = definition.get_stack_diff(context, stack_params, cluster)
-        LOG.debug('Updating stack with these params: %s', heat_params)
 
         scale_params = definition.get_scale_params(context,
                                                    cluster,
@@ -289,6 +289,8 @@ class HeatDriver(driver.Driver):
             'disable_rollback': not rollback
         }
 
+        LOG.info('Resizing cluster %s stack %s with these params: %s',
+                 cluster.uuid, nodegroup.stack_id, heat_params)
         osc = clients.OpenStackClients(context)
         osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
@@ -434,6 +436,8 @@ class FedoraKubernetesDriver(KubernetesDriver):
             'parameters': heat_params,
             'disable_rollback': not rollback
         }
+        LOG.info('Upgrading cluster %s stack %s with these params: %s',
+                 cluster.uuid, nodegroup.stack_id, heat_params)
         osc.heat().stacks.update(stack_id, **fields)
 
     def get_nodegroup_extra_params(self, cluster, osc):
