@@ -1179,7 +1179,7 @@ _`container_infra_prefix`
   * docker.io/openstackmagnum/kubernetes-proxy
   * docker.io/openstackmagnum/kubernetes-scheduler
   * docker.io/k8scloudprovider/k8s-keystone-auth
-  * gcr.io/google_containers/pause:3.0
+  * gcr.io/google_containers/pause:3.1
 
   Images that might be needed:
 
