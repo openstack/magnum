@@ -201,6 +201,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --volume /var/run:/var/run \\
     --volume /var/run/lock:/var/run/lock:z \\
     --volume /opt/cni/bin:/opt/cni/bin:z \\
+    --volume /etc/machine-id:/etc/machine-id \\
     \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} \\
     kubelet \\
     \$KUBE_LOGTOSTDERR \$KUBE_LOG_LEVEL \$KUBELET_API_SERVER \$KUBELET_ADDRESS \$KUBELET_PORT \$KUBELET_HOSTNAME \$KUBELET_ARGS'
