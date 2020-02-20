@@ -1,0 +1,5 @@
+---
+issues:
+  - |
+    Now Fedora CoreOS driver can support using docker storage driver,
+    only overlay2 is supported.
