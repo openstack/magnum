@@ -69,7 +69,7 @@ ExecStartPre=mkdir -p /opt/stack/os-config-refresh
 ExecStartPre=mkdir -p /srv/magnum
 ExecStartPre=-/bin/podman kill heat-container-agent
 ExecStartPre=-/bin/podman rm heat-container-agent
-ExecStartPre=-/bin/podman pull ${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}heat-container-agent:${HEAT_CONTAINER_AGENT_TAG}
+ExecStartPre=-/bin/podman pull ${_prefix}heat-container-agent:${HEAT_CONTAINER_AGENT_TAG}
 ExecStart=/bin/podman run \\
     --name heat-container-agent \\
     --net=host \\

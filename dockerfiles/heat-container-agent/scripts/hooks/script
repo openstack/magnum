@@ -15,6 +15,7 @@
 import json
 import logging
 import os
+import select
 import subprocess
 import sys
 
@@ -22,11 +23,13 @@ WORKING_DIR = os.environ.get('HEAT_SCRIPT_WORKING',
                              '/var/lib/heat-config/heat-config-script')
 OUTPUTS_DIR = os.environ.get('HEAT_SCRIPT_OUTPUTS',
                              '/var/run/heat-config/heat-config-script')
+LOGS_DIR = os.environ.get('HEAT_SCRIPT_LOGS',
+                             '/var/log/heat-config/heat-config-script')
 
 
-def prepare_dir(path):
+def prepare_dir(path, mode=0o700):
     if not os.path.isdir(path):
-        os.makedirs(path, 0o700)
+        os.makedirs(path, mode)
 
 
 def main(argv=sys.argv):
@@ -40,6 +43,7 @@ def main(argv=sys.argv):
 
     prepare_dir(OUTPUTS_DIR)
     prepare_dir(WORKING_DIR)
+    prepare_dir(LOGS_DIR, mode=0o644)
     os.chdir(WORKING_DIR)
 
     c = json.load(sys.stdin)
@@ -55,19 +59,26 @@ def main(argv=sys.argv):
         log.info('%s=%s' % (input_name, env[input_name]))
 
     fn = os.path.join(WORKING_DIR, c['id'])
+    suffix = c.get('name', '')
+    suffix = '-%s' % suffix if suffix else ''
+    lp = os.path.join(LOGS_DIR, '%s%s.log' % (c['id'], suffix))
     heat_outputs_path = os.path.join(OUTPUTS_DIR, c['id'])
     env['heat_outputs_path'] = heat_outputs_path
 
     with os.fdopen(os.open(fn, os.O_CREAT | os.O_WRONLY, 0o700), 'w') as f:
         f.write(c.get('config', ''))
 
-    log.debug('Running %s' % fn)
+    log.debug('Running %s, logging to %s' % (fn, lp))
     subproc = subprocess.Popen([fn], stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, env=env)
-    stdout, stderr = subproc.communicate()
-
-    log.info(stdout.decode('utf-8', 'replace'))
-    log.debug(stderr.decode('utf-8', 'replace'))
+                               stderr=subprocess.STDOUT, env=env)
+    with open(lp, 'w') as f:
+        while subproc.poll() is None:
+            read, _, _ = select.select([subproc.stdout], [], [])
+            for stream in read:
+                if stream:
+                    line = stream.readline().decode('utf-8', 'replace')
+                    f.write(line)
+                    f.flush()
 
     if subproc.returncode:
         log.error("Error running %s. [%s]\n" % (fn, subproc.returncode))
@@ -85,8 +96,6 @@ def main(argv=sys.argv):
             pass
 
     response.update({
-        'deploy_stdout': stdout.decode('utf-8', 'replace'),
-        'deploy_stderr': stderr.decode('utf-8', 'replace'),
         'deploy_status_code': subproc.returncode,
     })
 
