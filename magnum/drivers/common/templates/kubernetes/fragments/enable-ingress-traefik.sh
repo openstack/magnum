@@ -181,10 +181,13 @@ INGRESS_TRAEFIK_SERVICE_CONTENT='''[Unit]
 Requires=kube-apiserver.service
 
 [Service]
-Type=oneshot
-Environment=HOME=/root
+User=root
+Group=root
+Type=simple
+Restart=on-failure
 EnvironmentFile=-/etc/kubernetes/config
-ExecStart='''${INGRESS_TRAEFIK_BIN}'''
+ExecStart=/bin/bash '''${INGRESS_TRAEFIK_BIN}'''
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
