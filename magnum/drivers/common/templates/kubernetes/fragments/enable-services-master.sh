@@ -37,8 +37,10 @@ do
     sleep 5s
 done
 
-KUBE_DIGEST=$($ssh_cmd podman image inspect hyperkube:${KUBE_TAG} --format "{{.Digest}}")
-if [ -n "${KUBE_IMAGE_DIGEST}"  ] && [ "${KUBE_IMAGE_DIGEST}" != "${KUBE_DIGEST}" ]; then
-    printf "The sha256 ${KUBE_DIGEST} of current hyperkube image cannot match the given one: ${KUBE_IMAGE_DIGEST}."
-    exit 1
+if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    KUBE_DIGEST=$($ssh_cmd podman image inspect hyperkube:${KUBE_TAG} --format "{{.Digest}}")
+    if [ -n "${KUBE_IMAGE_DIGEST}"  ] && [ "${KUBE_IMAGE_DIGEST}" != "${KUBE_DIGEST}" ]; then
+        printf "The sha256 ${KUBE_DIGEST} of current hyperkube image cannot match the given one: ${KUBE_IMAGE_DIGEST}."
+        exit 1
+    fi
 fi
