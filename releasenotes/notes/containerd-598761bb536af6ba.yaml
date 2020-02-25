@@ -1,0 +1,21 @@
+---
+features:
+  - |
+    New labels to support containerd as a runtime.
+
+    container_runtime
+    The container runtime to use. Empty value means, use docker from the
+    host. Since ussuri, apart from empty (host-docker), containerd is also
+    an option.
+
+    containerd_version
+    The containerd version to use as released in
+    https://github.com/containerd/containerd/releases and
+    https://storage.googleapis.com/cri-containerd-release/
+
+    containerd_tarball_url
+    Url with the tarball of containerd's binaries.
+
+    containerd_tarball_sha256
+    sha256 of the tarball fetched with containerd_tarball_url or from
+    https://storage.googleapis.com/cri-containerd-release/.

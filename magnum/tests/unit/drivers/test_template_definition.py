@@ -589,6 +589,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
         use_podman = mock_cluster.labels.get('use_podman')
+        container_runtime = mock_cluster.labels.get('container_runtime')
+        containerd_version = mock_cluster.labels.get('containerd_version')
+        containerd_tarball_url = mock_cluster.labels.get(
+            'containerd_tarball_url')
+        containerd_tarball_sha256 = mock_cluster.labels.get(
+            'containerd_tarball_sha256')
         kube_image_digest = mock_cluster.labels.get('kube_image_digest')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
@@ -687,6 +693,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ostree_commit': ostree_commit,
             'use_podman': use_podman,
             'kube_image_digest': kube_image_digest,
+            'container_runtime': container_runtime,
+            'containerd_version': containerd_version,
+            'containerd_tarball_url': containerd_tarball_url,
+            'containerd_tarball_sha256': containerd_tarball_sha256,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1058,6 +1068,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
         use_podman = mock_cluster.labels.get('use_podman')
+        container_runtime = mock_cluster.labels.get('container_runtime')
+        containerd_version = mock_cluster.labels.get('containerd_version')
+        containerd_tarball_url = mock_cluster.labels.get(
+            'containerd_tarball_url')
+        containerd_tarball_sha256 = mock_cluster.labels.get(
+            'containerd_tarball_sha256')
         kube_image_digest = mock_cluster.labels.get('kube_image_digest')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
@@ -1158,6 +1174,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ostree_commit': ostree_commit,
             'use_podman': use_podman,
             'kube_image_digest': kube_image_digest,
+            'container_runtime': container_runtime,
+            'containerd_version': containerd_version,
+            'containerd_tarball_url': containerd_tarball_url,
+            'containerd_tarball_sha256': containerd_tarball_sha256,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,

@@ -72,6 +72,8 @@ EnvironmentFile=/etc/kubernetes/kubelet
 ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
 ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
 ExecStartPre=/bin/mkdir -p /var/lib/calico
+ExecStartPre=/bin/mkdir -p /var/lib/containerd
+ExecStartPre=/bin/mkdir -p /var/lib/docker
 ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
 ExecStartPre=/bin/mkdir -p /opt/cni/bin
 ExecStartPre=-/bin/bash -c '/usr/bin/podman run --privileged --user root --net host --entrypoint /bin/bash --rm --volume /usr/local/bin:/host/usr/local/bin \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} -c "cp /usr/local/bin/kubectl /host/usr/local/bin/kubectl"'
@@ -93,6 +95,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
     --volume /var/lib/calico:/var/lib/calico \\
     --volume /var/lib/docker:/var/lib/docker \\
+    --volume /var/lib/containerd:/var/lib/containerd \\
     --volume /var/lib/kubelet:/var/lib/kubelet:rshared,z \\
     --volume /var/log:/var/log \\
     --volume /var/run:/var/run \\
@@ -266,27 +269,18 @@ KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-fil
 
 # specified cgroup driver
 KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
+if [ ${CONTAINER_RUNTIME} = "containerd"  ] ; then
+    KUBELET_ARGS="${KUBELET_ARGS} --runtime-cgroups=/system.slice/containerd.service"
+    KUBELET_ARGS="${KUBELET_ARGS} --container-runtime=remote"
+    KUBELET_ARGS="${KUBELET_ARGS} --runtime-request-timeout=15m"
+    KUBELET_ARGS="${KUBELET_ARGS} --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
+fi
 
 auto_healing_enabled=$(echo ${AUTO_HEALING_ENABLED} | tr '[:upper:]' '[:lower:]')
 autohealing_controller=$(echo ${AUTO_HEALING_CONTROLLER} | tr '[:upper:]' '[:lower:]')
 if [[ "${auto_healing_enabled}" = "true" && "${autohealing_controller}" = "draino" ]]; then
     KUBELET_ARGS="${KUBELET_ARGS} --node-labels=draino-enabled=true"
 fi
-
-$ssh_cmd systemctl disable docker
-if $ssh_cmd cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
-        $ssh_cmd "cp /usr/lib/systemd/system/docker.service /etc/systemd/system/"
-        sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
-                /etc/systemd/system/docker.service
-else
-        cat > /etc/systemd/system/docker.service.d/cgroupdriver.conf << EOF
-ExecStart=---exec-opt native.cgroupdriver=$CGROUP_DRIVER
-EOF
-
-fi
-
-$ssh_cmd systemctl daemon-reload
-$ssh_cmd systemctl enable docker
 
 KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
 
