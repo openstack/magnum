@@ -62,7 +62,7 @@ def delete_loadbalancers(context, cluster):
     The load balancers created for kubernetes services and ingresses are
     deleted.
     """
-    pattern = (r'Kubernetes .+ from cluster %s$' % cluster.uuid)
+    pattern = (r'Kubernetes .+ from cluster %s' % cluster.uuid)
     valid_status = ["ACTIVE", "ERROR", "PENDING_DELETE", "DELETED"]
 
     try:
