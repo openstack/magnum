@@ -10,3 +10,7 @@ issues:
     The startup of the heat-container-agent uses a workaround to copy the
     SoftwareDeployment credentials to /var/lib/cloud/data/cfn-init-data.
     The fedora coreos driver requires heat train to support ignition.
+fixes:
+  - |
+    For k8s_coreos set REQUESTS_CA for heat-agent. The heat-agent as a python
+    service needs to use the ca bundle of the host.
