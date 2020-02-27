@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixed the usage of cert_manager_api=true making cluster creation fail
+    due to a logic lock between kubemaster.yaml and kubecluster.yaml
