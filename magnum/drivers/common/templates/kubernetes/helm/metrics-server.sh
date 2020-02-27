@@ -51,6 +51,8 @@ data:
   install-${CHART_NAME}-values.yaml:  |
     image:
       repository: ${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}metrics-server-amd64
+    args:
+      - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
 ---
 
 apiVersion: batch/v1
