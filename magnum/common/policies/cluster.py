@@ -130,6 +130,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER % 'update_health_status',
+        check_str=base.RULE_ADMIN_OR_USER + " or " + base.RULE_CLUSTER_USER,
+        description='Update the health status of an existing cluster.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}',
+                'method': 'PATCH'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER % 'update_all_projects',
         check_str=base.RULE_ADMIN_API,
         description='Update an existing cluster.',

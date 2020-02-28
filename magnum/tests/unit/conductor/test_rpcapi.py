@@ -19,6 +19,7 @@ import mock
 
 from magnum.conductor import api as conductor_rpcapi
 from magnum import objects
+from magnum.objects.fields import ClusterHealthStatus
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils as dbutils
 
@@ -99,7 +100,9 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.1',
                           cluster=self.fake_cluster['name'],
-                          node_count=2)
+                          node_count=2,
+                          health_status=ClusterHealthStatus.UNKNOWN,
+                          health_status_reason={})
 
     def test_ping_conductor(self):
         self._test_rpcapi('ping_conductor',

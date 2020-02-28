@@ -542,3 +542,24 @@ class MonitorsTestCase(base.TestCase):
         self.k8s_monitor.poll_health_status()
         self.assertEqual(self.k8s_monitor.data['health_status'],
                          m_fields.ClusterHealthStatus.UNKNOWN)
+
+    def test_is_magnum_auto_healer_running(self):
+        cluster = self.k8s_monitor.cluster
+        cluster.labels['auto_healing_enabled'] = True
+        cluster.labels['auto_healing_controller'] = 'magnum-auto-healer'
+        self.k8s_monitor._is_magnum_auto_healer_running()
+        self.assertTrue(self.k8s_monitor._is_magnum_auto_healer_running())
+
+        cluster.labels['auto_healing_enabled'] = False
+        cluster.labels['auto_healing_controller'] = 'magnum-auto-healer'
+        self.k8s_monitor._is_magnum_auto_healer_running()
+        self.assertFalse(self.k8s_monitor._is_magnum_auto_healer_running())
+
+        cluster.labels['auto_healing_enabled'] = True
+        cluster.labels['auto_healing_controller'] = 'draino'
+        self.k8s_monitor._is_magnum_auto_healer_running()
+        self.assertFalse(self.k8s_monitor._is_magnum_auto_healer_running())
+
+        cluster.labels = {}
+        self.k8s_monitor._is_magnum_auto_healer_running()
+        self.assertFalse(self.k8s_monitor._is_magnum_auto_healer_running())

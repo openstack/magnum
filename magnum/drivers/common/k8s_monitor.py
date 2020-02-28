@@ -49,6 +49,9 @@ class K8sMonitor(monitors.MonitorBase):
         self.data['pods'] = self._parse_pod_info(pods)
 
     def poll_health_status(self):
+        if self._is_magnum_auto_healer_running():
+            return
+
         k8s_api = k8s.create_k8s_api(self.context, self.cluster)
         if self._is_cluster_accessible():
             status, reason = self._poll_health_status(k8s_api)
@@ -59,6 +62,12 @@ class K8sMonitor(monitors.MonitorBase):
 
         self.data['health_status'] = status
         self.data['health_status_reason'] = reason
+
+    def _is_magnum_auto_healer_running(self):
+        auto_healing = self.cluster.labels.get("auto_healing_enabled")
+        auto_healing_enabled = strutils.bool_from_string(auto_healing)
+        controller = self.cluster.labels.get("auto_healing_controller")
+        return (auto_healing_enabled and controller == "magnum-auto-healer")
 
     def _is_cluster_accessible(self):
         if self.cluster.cluster_template.master_lb_enabled:

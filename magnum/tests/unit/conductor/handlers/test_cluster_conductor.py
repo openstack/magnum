@@ -27,6 +27,7 @@ from magnum.conductor.handlers import cluster_conductor
 import magnum.conf
 from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_atomic_dr
 from magnum import objects
+from magnum.objects.fields import ClusterHealthStatus
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import fake_notifier
 from magnum.tests.unit.db import base as db_base
@@ -79,7 +80,8 @@ class TestHandler(db_base.DbTestCase):
         self.master.create()
         self.worker.create()
         self.cluster.status = cluster_status.CREATE_COMPLETE
-        self.handler.cluster_update(self.context, self.cluster, node_count)
+        self.handler.cluster_update(self.context, self.cluster, node_count,
+                                    ClusterHealthStatus.UNKNOWN, {})
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -111,7 +113,8 @@ class TestHandler(db_base.DbTestCase):
         self.worker.create()
         self.cluster.status = cluster_status.CREATE_FAILED
         self.assertRaises(exception.NotSupported, self.handler.cluster_update,
-                          self.context, self.cluster, node_count)
+                          self.context, self.cluster, node_count,
+                          ClusterHealthStatus.UNKNOWN, {})
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -144,7 +147,8 @@ class TestHandler(db_base.DbTestCase):
         self.cluster.status = cluster_status.CREATE_COMPLETE
         self.master.create()
         self.worker.create()
-        self.handler.cluster_update(self.context, self.cluster, node_count)
+        self.handler.cluster_update(self.context, self.cluster, node_count,
+                                    ClusterHealthStatus.UNKNOWN, {})
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))

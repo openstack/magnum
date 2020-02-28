@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    The original design of k8s cluster health status is allowing
+    the health status being updated by Magnum control plane. However,
+    it doesn't work when the cluster is private. Now Magnum supports
+    updating the k8s cluster health status via the Magnum cluster
+    update API so that a controller (e.g. magnum-auto-healer) running
+    inside the k8s cluster can call the Magnum update API to update
+    the cluster health status.
