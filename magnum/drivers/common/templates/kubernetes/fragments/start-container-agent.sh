@@ -55,6 +55,12 @@ systemctl restart sshd
 _prefix="${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}"
 
 if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    cat > /etc/containers/libpod.conf <<EOF
+# Maximum size of log files (in bytes)
+# -1 is unlimited
+# 50m
+max_log_size = 52428800
+EOF
     cat > /etc/systemd/system/heat-container-agent.service <<EOF
 [Unit]
 Description=Run heat-container-agent
