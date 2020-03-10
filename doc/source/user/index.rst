@@ -1210,11 +1210,14 @@ _`container_infra_prefix`
   * docker.io/openstackmagnum/cluster-autoscaler:v1.0
 
 _`kube_tag`
-  This label allows users to select `a specific Kubernetes release,
-  based on its container tag
-  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
-  If unset, the current Magnum version's default Kubernetes release is
-  installed.
+  This label allows users to select a specific Kubernetes release based on its
+  container tag for `Fedora Atomic
+  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_ or
+  `Fedora CoreOS and Fedora Atomic (with use_podman=true label)
+  <https://github.com/kubernetes/kubernetes/releases>_`.  If unset, the current
+  Magnum version's default Kubernetes release is installed. `Take a look at
+  the Wiki for a compatibility matrix between Kubernetes and Magnum Releases
+  <https://wiki.openstack.org/wiki/Magnum#Compatibility_Matrix>`_.
 
 _`heapster_enabled`
   heapster_enabled is used to enable disable the installation of heapster.
