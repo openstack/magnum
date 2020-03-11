@@ -254,13 +254,19 @@ if [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true"
     KUBELET_ARGS="${KUBELET_ARGS} --cloud-provider=external"
 fi
 
-# For using default log-driver, other options should be ignored
-sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
+if [ -f /etc/sysconfig/docker ] ; then
+    # For using default log-driver, other options should be ignored
+    sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
+    # json-file is required for conformance.
+    # https://docs.docker.com/config/containers/logging/json-file/
+    sed -i -E 's/^OPTIONS=("|'"'"')/OPTIONS=\1--log-driver=json-file --log-opt max-size=10m --log-opt max-file=5 /' /etc/sysconfig/docker
+
+    if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+        echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
+    fi
+fi
 
 KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}pause:3.1"
-if [ -n "${INSECURE_REGISTRY_URL}" ]; then
-    echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
-fi
 
 KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key"
 
