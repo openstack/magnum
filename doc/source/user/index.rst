@@ -1165,8 +1165,8 @@ _`etcd_volume_size`
 
 _`etcd_volume_type`
   This label overrides the default_etcd_volume_type holding the etcd storage
-  data. The default value is '', meaning meaning that Magnum will randomly
-  select a Cinder volume type from all available options.
+  data. The default value is '', meaning that Magnum will randomly select a
+  Cinder volume type from all available options.
 
 _`container_infra_prefix`
   Prefix of all container images used in the cluster (kubernetes components,
