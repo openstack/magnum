@@ -101,6 +101,20 @@
           "verification": {}
         },
         "mode": 448
+      },
+      {
+        "group": {
+          "name": "root"
+        },
+        "path": "/etc/zincati/config.d/90-disable-auto-updates.toml",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bupdates%5D%0Aenabled%20%3D%20false%0A",
+          "verification": {}
+        },
+        "mode": 420
       }
     ]
   },
