@@ -40,6 +40,11 @@ metadata:
 rules:
   - apiGroups: [""]
     resources:
+      - nodes/status
+    verbs:
+      - patch
+  - apiGroups: [""]
+    resources:
       - namespaces
       - serviceaccounts
     verbs:
