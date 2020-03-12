@@ -2528,7 +2528,7 @@ optional labels can be added:
 
 _`calico_ipv4pool`
   IPv4 network in CIDR format which is the IP pool, from which Pod IPs will
-  be chosen. If not specified, the default is 192.168.0.0/16.
+  be chosen. If not specified, the default is 10.100.0.0/16.
 
 _`calico_ipv4pool_ipip`
   IPIP Mode to use for the IPv4 POOL created at start up.
