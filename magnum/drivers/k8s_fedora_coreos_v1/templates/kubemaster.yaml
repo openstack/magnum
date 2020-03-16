@@ -529,6 +529,35 @@ parameters:
     description: >
       true if the auto scaling feature should be enabled
 
+  cinder_csi_enabled:
+    type: boolean
+    description: >
+      true if the cinder csi feature should be enabled
+
+  cinder_csi_plugin_tag:
+    type: string
+    description: tag of cinder csi plugin
+
+  csi_attacher_tag:
+    type: string
+    description: tag of csi attacher
+
+  csi_provisioner_tag:
+    type: string
+    description: tag of csi provisioner
+
+  csi_snapshotter_tag:
+    type: string
+    description: tag of csi snapshotter
+
+  csi_resizer_tag:
+    type: string
+    description: tag of csi resizer
+
+  csi_node_driver_registrar_tag:
+    type: string
+    description: tag of csi node driver registrar
+
   node_problem_detector_tag:
     type: string
     description: tag of the node problem detector container
@@ -775,6 +804,13 @@ resources:
                   "$AUTO_HEALING_CONTROLLER": {get_param: auto_healing_controller}
                   "$MAGNUM_AUTO_HEALER_TAG": {get_param: magnum_auto_healer_tag}
                   "$AUTO_SCALING_ENABLED": {get_param: auto_scaling_enabled}
+                  "$CINDER_CSI_ENABLED": {get_param: cinder_csi_enabled}
+                  "$CINDER_CSI_PLUGIN_TAG": {get_param: cinder_csi_plugin_tag}
+                  "$CSI_ATTACHER_TAG": {get_param: csi_attacher_tag}
+                  "$CSI_PROVISIONER_TAG": {get_param: csi_provisioner_tag}
+                  "$CSI_SNAPSHOTTER_TAG": {get_param: csi_snapshotter_tag}
+                  "$CSI_RESIZER_TAG": {get_param: csi_resizer_tag}
+                  "$CSI_NODE_DRIVER_REGISTRAR_TAG": {get_param: csi_node_driver_registrar_tag}
                   "$DRAINO_TAG": {get_param: draino_tag}
                   "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
                   "$MIN_NODE_COUNT": {get_param: min_node_count}

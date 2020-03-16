@@ -578,6 +578,20 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'magnum_auto_healer_tag')
         auto_scaling_enabled = mock_cluster.labels.get(
             'auto_scaling_enabled')
+        cinder_csi_enabled = mock_cluster.labels.get(
+            'cinder_csi_enabled')
+        cinder_csi_plugin_tag = mock_cluster.labels.get(
+            'cinder_csi_plugin_tag')
+        csi_attacher_tag = mock_cluster.labels.get(
+            'csi_attacher_tag')
+        csi_provisioner_tag = mock_cluster.labels.get(
+            'csi_provisioner_tag')
+        csi_snapshotter_tag = mock_cluster.labels.get(
+            'csi_snapshotter_tag')
+        csi_resizer_tag = mock_cluster.labels.get(
+            'csi_resizer_tag')
+        csi_node_driver_registrar_tag = mock_cluster.labels.get(
+            'csi_node_driver_registrar_tag')
         draino_tag = mock_cluster.labels.get('draino_tag')
         autoscaler_tag = mock_cluster.labels.get('autoscaler_tag')
         min_node_count = mock_cluster.labels.get('min_node_count')
@@ -677,6 +691,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'auto_healing_controller': auto_healing_controller,
             'magnum_auto_healer_tag': magnum_auto_healer_tag,
             'auto_scaling_enabled': auto_scaling_enabled,
+            'cinder_csi_enabled': cinder_csi_enabled,
+            'cinder_csi_plugin_tag': cinder_csi_plugin_tag,
+            'csi_attacher_tag': csi_attacher_tag,
+            'csi_provisioner_tag': csi_provisioner_tag,
+            'csi_snapshotter_tag': csi_snapshotter_tag,
+            'csi_resizer_tag': csi_resizer_tag,
+            'csi_node_driver_registrar_tag': csi_node_driver_registrar_tag,
             'draino_tag': draino_tag,
             'autoscaler_tag': autoscaler_tag,
             'min_node_count': min_node_count,
@@ -1058,6 +1079,20 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'magnum_auto_healer_tag')
         auto_scaling_enabled = mock_cluster.labels.get(
             'auto_scaling_enabled')
+        cinder_csi_enabled = mock_cluster.labels.get(
+            'cinder_csi_enabled')
+        cinder_csi_plugin_tag = mock_cluster.labels.get(
+            'cinder_csi_plugin_tag')
+        csi_attacher_tag = mock_cluster.labels.get(
+            'csi_attacher_tag')
+        csi_provisioner_tag = mock_cluster.labels.get(
+            'csi_provisioner_tag')
+        csi_snapshotter_tag = mock_cluster.labels.get(
+            'csi_snapshotter_tag')
+        csi_resizer_tag = mock_cluster.labels.get(
+            'csi_resizer_tag')
+        csi_node_driver_registrar_tag = mock_cluster.labels.get(
+            'csi_node_driver_registrar_tag')
         draino_tag = mock_cluster.labels.get('draino_tag')
         autoscaler_tag = mock_cluster.labels.get('autoscaler_tag')
         min_node_count = mock_cluster.labels.get('min_node_count')
@@ -1159,6 +1194,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'auto_healing_controller': auto_healing_controller,
             'magnum_auto_healer_tag': magnum_auto_healer_tag,
             'auto_scaling_enabled': auto_scaling_enabled,
+            'cinder_csi_enabled': cinder_csi_enabled,
+            'cinder_csi_plugin_tag': cinder_csi_plugin_tag,
+            'csi_attacher_tag': csi_attacher_tag,
+            'csi_provisioner_tag': csi_provisioner_tag,
+            'csi_snapshotter_tag': csi_snapshotter_tag,
+            'csi_resizer_tag': csi_resizer_tag,
+            'csi_node_driver_registrar_tag': csi_node_driver_registrar_tag,
             'draino_tag': draino_tag,
             'autoscaler_tag': autoscaler_tag,
             'min_node_count': min_node_count,
