@@ -35,6 +35,19 @@ storage:
       group:
         name: root
   files:
+    - path: /etc/containers/libpod.conf
+      # 420 (decimal) == 644 (octal)
+      mode: 420
+      user:
+        name: root
+      group:
+        name: root
+      contents:
+        inline: |
+          # Maximum size of log files (in bytes)
+          # -1 is unlimited
+          # 50m
+          max_log_size = 52428800
     - path: /etc/hostname
       # 420 (decimal) == 644 (octal)
       mode: 420
