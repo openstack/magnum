@@ -15,16 +15,16 @@
 import json
 import logging
 import os
-import select
 import subprocess
 import sys
+import threading
 
 WORKING_DIR = os.environ.get('HEAT_SCRIPT_WORKING',
                              '/var/lib/heat-config/heat-config-script')
 OUTPUTS_DIR = os.environ.get('HEAT_SCRIPT_OUTPUTS',
                              '/var/run/heat-config/heat-config-script')
 LOGS_DIR = os.environ.get('HEAT_SCRIPT_LOGS',
-                             '/var/log/heat-config/heat-config-script')
+                          '/var/log/heat-config/heat-config-script')
 
 
 def prepare_dir(path, mode=0o700):
@@ -69,19 +69,30 @@ def main(argv=sys.argv):
         f.write(c.get('config', ''))
 
     log.debug('Running %s, logging to %s' % (fn, lp))
-    subproc = subprocess.Popen([fn], stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, env=env)
-    with open(lp, 'w') as f:
-        while subproc.poll() is None:
-            read, _, _ = select.select([subproc.stdout], [], [])
-            for stream in read:
-                if stream:
-                    line = stream.readline().decode('utf-8', 'replace')
-                    f.write(line)
-                    f.flush()
+    subproc = subprocess.Popen([fn], env=env,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
 
-    if subproc.returncode:
-        log.error("Error running %s. [%s]\n" % (fn, subproc.returncode))
+    def consumer(label, fd):
+        with feeder[label]:
+            # NOTE: workaround read-ahead bug
+            for line in iter(feeder[label].readline, b''):
+                line = line.decode('utf-8', 'replace')
+                logger[label](line.strip())
+                deploy[label] += line
+                fd.write(line)
+
+    feeder = dict(stdout=subproc.stdout, stderr=subproc.stderr)
+    deploy = dict(stdout='', stderr='')
+    logger = dict(stdout=lambda line: log.info(line),
+                  stderr=lambda line: log.debug(line))
+    with open(lp, 'w') as fd:
+        for label in ['stdout', 'stderr']:
+            threading.Thread(target=consumer, args=[label, fd]).start()
+        deploy_status_code = subproc.wait()
+
+    if deploy_status_code:
+        log.error("Error running %s. [%s]\n" % (fn, deploy_status_code))
     else:
         log.info('Completed %s' % fn)
 
@@ -96,7 +107,9 @@ def main(argv=sys.argv):
             pass
 
     response.update({
-        'deploy_status_code': subproc.returncode,
+        'deploy_stdout': deploy["stdout"],
+        'deploy_stderr': deploy["stderr"],
+        'deploy_status_code': deploy_status_code,
     })
 
     json.dump(response, sys.stdout)
