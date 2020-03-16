@@ -337,5 +337,4 @@
         - magnum-functional-k8s-multinode
         - magnum-functional-swarm-mode-multinode
     post:
-      jobs:
-        - magnum-container-publish
+      jobs: []
