@@ -585,7 +585,7 @@ class HeatPoller(object):
             reasons = ["%s failed" % (ns.name)
                        for ns in ng_statuses
                        if ns.status.endswith(FAILED)]
-            self.cluster.status_reason = ' ,'.join(reasons)
+            self.cluster.status_reason = ', '.join(reasons)
 
         self.cluster.save()
 
