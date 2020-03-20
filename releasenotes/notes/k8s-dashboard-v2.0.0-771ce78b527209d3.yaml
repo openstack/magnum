@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The default version of Kubernetes dashboard has been upgraded to v2.0.0 and
+    metrics-server is supported by k8s dashboard now.
