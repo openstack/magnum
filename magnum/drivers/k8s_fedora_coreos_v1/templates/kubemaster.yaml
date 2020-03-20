@@ -645,6 +645,11 @@ parameters:
       Post install manifest url to setup some cloud provider/vendor
       specific configs
 
+  metrics_scraper_tag:
+    type: string
+    description: >
+      Tag of metrics-scraper for kubernetes dashboard.
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -836,6 +841,7 @@ resources:
                   "$CONTAINERD_TARBALL_URL": {get_param: containerd_tarball_url}
                   "$CONTAINERD_TARBALL_SHA256": {get_param: containerd_tarball_sha256}
                   "$POST_INSTALL_MANIFEST_URL": {get_param: post_install_manifest_url}
+                  "$METRICS_SCRAPER_TAG":  {get_param: metrics_scraper_tag}
             - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
             - str_replace:
