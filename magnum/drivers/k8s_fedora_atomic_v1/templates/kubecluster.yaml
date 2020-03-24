@@ -81,7 +81,6 @@ parameters:
   fixed_network_name:
     type: string
     description: name of a private network to use to provision machines
-    default: "private"
 
   fixed_subnet:
     type: string
