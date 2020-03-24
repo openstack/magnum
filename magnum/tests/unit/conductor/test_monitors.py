@@ -52,6 +52,10 @@ class MonitorsTestCase(base.TestCase):
                                          master_addresses=['10.0.0.6'],
                                          labels={})
         self.cluster = objects.Cluster(self.context, **cluster)
+        cluster_template = (
+            utils.get_test_cluster_template(master_lb_enabled=False))
+        self.cluster.cluster_template = (
+            objects.ClusterTemplate(self.context, **cluster_template))
         nodegroups = utils.get_nodegroups_for_cluster(
             node_addresses=['1.2.3.4'], master_addresses=['10.0.0.6'])
         self.nodegroups = [
@@ -519,6 +523,21 @@ class MonitorsTestCase(base.TestCase):
         mock_node.status = mock.MagicMock()
         mock_nodes.items = [mock_node]
         self.k8s_monitor.cluster.floating_ip_enabled = False
+
+        self.k8s_monitor.poll_health_status()
+        self.assertEqual(self.k8s_monitor.data['health_status'],
+                         m_fields.ClusterHealthStatus.UNKNOWN)
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    def test_k8s_monitor_health_unreachable_with_master_lb(self, mock_k8s_api):
+        mock_nodes = mock.MagicMock()
+        mock_node = mock.MagicMock()
+        mock_node.status = mock.MagicMock()
+        mock_nodes.items = [mock_node]
+        cluster = self.k8s_monitor.cluster
+        cluster.floating_ip_enabled = True
+        cluster.cluster_template.master_lb_enabled = True
+        cluster.labels['master_lb_floating_ip_enabled'] = False
 
         self.k8s_monitor.poll_health_status()
         self.assertEqual(self.k8s_monitor.data['health_status'],
