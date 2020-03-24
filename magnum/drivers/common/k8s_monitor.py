@@ -61,11 +61,12 @@ class K8sMonitor(monitors.MonitorBase):
         self.data['health_status_reason'] = reason
 
     def _is_cluster_accessible(self):
-        lb_fip = self.cluster.labels.get("master_lb_floating_ip_enabled")
-        lb_fip_enabled = strutils.bool_from_string(lb_fip)
-        return (self.cluster.floating_ip_enabled or
-                (lb_fip_enabled and
-                 self.cluster.cluster_template.master_lb_enabled))
+        if self.cluster.cluster_template.master_lb_enabled:
+            lb_fip = self.cluster.labels.get("master_lb_floating_ip_enabled",
+                                             self.cluster.floating_ip_enabled)
+            return strutils.bool_from_string(lb_fip)
+        else:
+            return self.cluster.floating_ip_enabled
 
     def _compute_res_util(self, res):
         res_total = 0
