@@ -21,5 +21,6 @@ magnum_images:
 helm_version: v2.12.3
 
 cluster_autoscaler_versions:
-  - version: 1.15.2
-  - version: 1.16.1
+  - version: 1.16.5
+  - version: 1.17.2
+  - version: 1.18.1
