@@ -55,7 +55,7 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 cluster.labels.get('flannel_network_cidr', '10.100.0.0/16')
         if cluster_template.network_driver == 'calico':
             extra_params["pods_network_cidr"] = \
-                cluster.labels.get('calico_ipv4pool', '192.168.0.0/16')
+                cluster.labels.get('calico_ipv4pool', '10.100.0.0/16')
 
         label_list = ['coredns_tag',
                       'kube_tag', 'container_infra_prefix',
