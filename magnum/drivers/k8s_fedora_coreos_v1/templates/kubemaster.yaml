@@ -508,6 +508,10 @@ parameters:
     type: string
     description: namespace where tiller will be installed
 
+  helm_client_tag:
+    type: string
+    description: tag of helm container
+
   auto_healing_enabled:
     type: boolean
     description: >
@@ -803,6 +807,7 @@ resources:
                   "$TILLER_ENABLED": {get_param: tiller_enabled}
                   "$TILLER_TAG": {get_param: tiller_tag}
                   "$TILLER_NAMESPACE": {get_param: tiller_namespace}
+                  "$HELM_CLIENT_TAG": {get_param: helm_client_tag}
                   "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
                   "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
                   "$NGINX_INGRESS_CONTROLLER_CHART_TAG": {get_param: nginx_ingress_controller_chart_tag}
