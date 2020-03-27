@@ -185,6 +185,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         net_name = neutron.get_fixed_network_name(context, fixed_network)
         if net_name:
             extra_params['fixed_network_name'] = net_name
+        else:
+            extra_params['fixed_network_name'] = cluster.name
 
         # NOTE(brtknr): Convert fixed subnet name to UUID. If fixed_subnet
         # is not specified in cluster template use 'private' as the default
