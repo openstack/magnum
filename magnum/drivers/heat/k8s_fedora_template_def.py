@@ -55,7 +55,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 cluster.labels.get('flannel_network_cidr', '10.100.0.0/16')
         if cluster_template.network_driver == 'calico':
             extra_params["pods_network_cidr"] = \
-                cluster.labels.get('calico_ipv4pool', '192.168.0.0/16')
+                cluster.labels.get('calico_ipv4pool', '10.100.0.0/16')
 
         # check cloud provider and cinder options. If cinder is selected,
         # the cloud provider needs to be enabled.
