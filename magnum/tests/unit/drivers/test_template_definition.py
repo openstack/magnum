@@ -603,6 +603,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
         use_podman = mock_cluster.labels.get('use_podman')
+        selinux_mode = mock_cluster.labels.get('selinux_mode')
         container_runtime = mock_cluster.labels.get('container_runtime')
         containerd_version = mock_cluster.labels.get('containerd_version')
         containerd_tarball_url = mock_cluster.labels.get(
@@ -713,6 +714,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ostree_remote': ostree_remote,
             'ostree_commit': ostree_commit,
             'use_podman': use_podman,
+            'selinux_mode': selinux_mode,
             'kube_image_digest': kube_image_digest,
             'container_runtime': container_runtime,
             'containerd_version': containerd_version,
@@ -1104,6 +1106,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         ostree_remote = mock_cluster.labels.get('ostree_remote')
         ostree_commit = mock_cluster.labels.get('ostree_commit')
         use_podman = mock_cluster.labels.get('use_podman')
+        selinux_mode = mock_cluster.labels.get('selinux_mode')
         container_runtime = mock_cluster.labels.get('container_runtime')
         containerd_version = mock_cluster.labels.get('containerd_version')
         containerd_tarball_url = mock_cluster.labels.get(
@@ -1216,6 +1219,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ostree_remote': ostree_remote,
             'ostree_commit': ostree_commit,
             'use_podman': use_podman,
+            'selinux_mode': selinux_mode,
             'kube_image_digest': kube_image_digest,
             'container_runtime': container_runtime,
             'containerd_version': containerd_version,

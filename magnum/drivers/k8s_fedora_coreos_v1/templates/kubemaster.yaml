@@ -608,6 +608,11 @@ parameters:
     description: >
       If true, run system containers for kubernetes, etcd and heat-agent
 
+  selinux_mode:
+    type: string
+    description: >
+      Choose SELinux mode
+
   kube_image_digest:
     type: string
     description: >
@@ -691,6 +696,7 @@ resources:
                   __HTTP_PROXY__: {get_param: http_proxy}
                   __HTTPS_PROXY__: {get_param: https_proxy}
                   __NO_PROXY__: {get_param: no_proxy}
+                  __SELINUX_MODE__: {get_param: selinux_mode}
 
   master_config:
     type: OS::Heat::SoftwareConfig

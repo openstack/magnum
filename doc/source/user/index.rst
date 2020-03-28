@@ -448,6 +448,10 @@ the table are linked to more details elsewhere in the user guide.
 | `use_podman`_                         | - true             | see below     |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `selinux_mode`_                       | - enforcing        | see below     |
+|                                       | - permissive       |               |
+|                                       | - disabled         |               |
++---------------------------------------+--------------------+---------------+
 | `container_runtime`_                  | - ""               | ""            |
 |                                       | - containerd       |               |
 +---------------------------------------+--------------------+---------------+
@@ -1222,7 +1226,7 @@ _`kube_tag`
   container tag for `Fedora Atomic
   <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_ or
   `Fedora CoreOS and Fedora Atomic (with use_podman=true label)
-  <https://github.com/kubernetes/kubernetes/releases>_`.  If unset, the current
+  <https://github.com/kubernetes/kubernetes/releases>`_.  If unset, the current
   Magnum version's default Kubernetes release is installed. `Take a look at
   the Wiki for a compatibility matrix between Kubernetes and Magnum Releases
   <https://wiki.openstack.org/wiki/Magnum#Compatibility_Matrix>`_.
@@ -1506,6 +1510,20 @@ _`use_podman`
   k8s_fedora_atomic_v1 driver, you need to set use_podman=true. This is
   necessary since v1.16 dropped the --containerized flag in kubelet.
   https://github.com/kubernetes/kubernetes/pull/80043/files
+
+_`selinux_mode`
+  Choose `SELinux mode between enforcing, permissive and disabled
+  <http://man7.org/linux/man-pages/man5/selinux_config.5.html>`_. This label
+  is currently only relevant for k8s_fedora drivers.
+
+  k8s_fedora_atomic_v1 driver defaults to selinux_mode=permissive because this
+  was the only way atomic containers were able to start Kubernetes services. On
+  the other hand, if the opt-in use_podman=true label is supplied,
+  selinux_mode=enforcing is supported. Note that if selinux_mode=disabled is
+  chosen, this only takes full effect once the instances are manually rebooted
+  but they will be set to permissive mode in the meantime.
+
+  k8s_fedora_coreos_v1 driver defaults to selinux_mode=enforcing.
 
 _`container_runtime`
   The container runtime to use. Empty value means, use docker from the

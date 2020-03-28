@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add selinux_mode label. By default, selinux_mode=permissive with Fedora
+    Atomic driver and selinux_mode=enforcing with Fedora CoreOS.

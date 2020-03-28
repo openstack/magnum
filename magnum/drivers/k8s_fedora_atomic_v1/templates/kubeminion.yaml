@@ -327,6 +327,11 @@ parameters:
     description: >
       if true, run system containers for kubernetes, etcd and heat-agent
 
+  selinux_mode:
+    type: string
+    description: >
+      Choose SELinux mode
+
   container_runtime:
     type: string
     description: The container runtime to install
@@ -376,7 +381,10 @@ resources:
                   $HTTP_PROXY: {get_param: http_proxy}
                   $HTTPS_PROXY: {get_param: https_proxy}
                   $NO_PROXY: {get_param: no_proxy}
-            - get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh}
+                params:
+                  $SELINUX_MODE: {get_param: selinux_mode}
 
   ######################################################################
   #
