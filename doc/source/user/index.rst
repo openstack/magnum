@@ -436,6 +436,8 @@ the table are linked to more details elsewhere in the user guide.
 | `master_lb_floating_ip_enabled`_      | - true             | see below     |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `master_lb_allowed_cidrs`_            | see below          | ""            |
++---------------------------------------+--------------------+---------------+
 | `auto_healing_enabled`_               | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1514,6 +1516,12 @@ _`master_lb_floating_ip_enabled`
   nodes. This label only takes effect when the template property
   ``master_lb_enabled`` is set. If not specified, the default value is the same
   as template property ``floating_ip_enabled``.
+
+_`master_lb_allowed_cidrs`
+  A CIDR list which can be used to control the access for the load balancer of
+  master nodes. The input format is comma delimited list. For example,
+  192.168.0.0/16,10.0.0.0/24. Default value is "" which means opening to
+  0.0.0.0/0.
 
 _`auto_healing_enabled`
   If set to true, auto healing feature will be enabled. Defaults to false.

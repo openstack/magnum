@@ -230,7 +230,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'kubeproxy_options',
                       'kubecontroller_options',
                       'kubescheduler_options',
-                      'influx_grafana_dashboard_enabled']
+                      'influx_grafana_dashboard_enabled',
+                      'master_lb_allowed_cidrs']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 
@@ -262,10 +263,22 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             extra_params['master_kube_tag'] = kube_tag
             extra_params['minion_kube_tag'] = kube_tag
 
+        self._set_master_lb_allowed_cidrs(context, cluster, extra_params)
+
         return super(K8sTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    def _set_master_lb_allowed_cidrs(self, context, cluster, extra_params):
+        if extra_params.get("master_lb_allowed_cidrs"):
+            subnet_cidr = (cluster.labels.get("fixed_network_cidr") or
+                           "10.0.0.0/24")
+            if extra_params.get("fixed_subnet"):
+                subnet_cidr = neutron.get_subnet(context,
+                                                 extra_params["fixed_subnet"],
+                                                 "id", "cidr")
+            extra_params["master_lb_allowed_cidrs"] += "," + subnet_cidr
 
     def get_scale_params(self, context, cluster, scale_manager=None,
                          nodes_to_remove=None):

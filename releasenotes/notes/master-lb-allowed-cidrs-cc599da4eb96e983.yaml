@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add a new label named `master_lb_allowed_cidrs` to control the IP ranges
+    which can access the k8s API and etcd load balancers of master. To get
+    this feature, the minimum version of Heat is stable/ussuri and minimum
+    version of Octavia is stable/train.

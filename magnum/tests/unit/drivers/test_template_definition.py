@@ -432,6 +432,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         expected_scale_params = {'minions_to_remove': ['node1', 'node2']}
         self.assertEqual(scale_params, expected_scale_params)
 
+    @mock.patch('magnum.drivers.heat.k8s_template_def.K8sTemplateDefinition'
+                '._set_master_lb_allowed_cidrs')
     @mock.patch('magnum.common.neutron.get_fixed_network_name')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -449,7 +451,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                             mock_get_output, mock_get_params,
                             mock_get_discovery_url, mock_osc_class,
                             mock_enable_octavia,
-                            mock_get_fixed_network_name):
+                            mock_get_fixed_network_name,
+                            mock_set_master_lb_allowed_cidrs):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -640,6 +643,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'containerd_tarball_sha256')
         kube_image_digest = mock_cluster.labels.get('kube_image_digest')
         metrics_scraper_tag = mock_cluster.labels.get('metrics_scraper_tag')
+        master_lb_allowed_cidrs = mock_cluster.labels.get(
+            'master_lb_allowed_cidrs')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -754,6 +759,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'containerd_tarball_sha256': containerd_tarball_sha256,
             'post_install_manifest_url': '',
             'metrics_scraper_tag': metrics_scraper_tag,
+            'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -950,6 +956,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             actual_params.get("ingress_controller")
         )
 
+    @mock.patch('magnum.drivers.heat.k8s_template_def.K8sTemplateDefinition'
+                '._set_master_lb_allowed_cidrs')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.heat.template_def'
@@ -965,7 +973,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                      mock_sign_node_certificate,
                                      mock_get_output, mock_get_params,
                                      mock_get_discovery_url, mock_osc_class,
-                                     mock_enable_octavia):
+                                     mock_enable_octavia,
+                                     mock_set_master_lb_allowed_cidrs):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -1155,6 +1164,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         kube_image_digest = mock_cluster.labels.get('kube_image_digest')
         metrics_scraper_tag = mock_cluster.labels.get('metrics_scraper_tag')
 
+        master_lb_allowed_cidrs = mock_cluster.labels.get(
+            'master_lb_allowed_cidrs')
+
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster)
@@ -1270,6 +1282,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'containerd_tarball_sha256': containerd_tarball_sha256,
             'post_install_manifest_url': '',
             'metrics_scraper_tag': metrics_scraper_tag,
+            'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1532,6 +1545,49 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             nodegroup_attr='node_addresses',
             is_master=False
         )
+
+    def test_set_master_lb_allowed_cidrs(self):
+        definition = self.get_definition()
+        extra_params = {"master_lb_allowed_cidrs": "192.168.0.0/16"}
+        mock_cluster = mock.MagicMock()
+        mock_context = mock.MagicMock()
+        mock_cluster.labels = {}
+
+        definition._set_master_lb_allowed_cidrs(mock_context,
+                                                mock_cluster, extra_params)
+
+        self.assertEqual(extra_params["master_lb_allowed_cidrs"],
+                         "192.168.0.0/16,10.0.0.0/24")
+
+    def test_set_master_lb_allowed_cidrs_fixed_network_cidr(self):
+        definition = self.get_definition()
+        extra_params = {"master_lb_allowed_cidrs": "192.168.0.0/16"}
+        mock_cluster = mock.MagicMock()
+        mock_context = mock.MagicMock()
+        mock_cluster.labels = {"fixed_network_cidr": "100.0.0.0/24"}
+
+        definition._set_master_lb_allowed_cidrs(mock_context,
+                                                mock_cluster, extra_params)
+
+        self.assertEqual(extra_params["master_lb_allowed_cidrs"],
+                         "192.168.0.0/16,100.0.0.0/24")
+
+    @mock.patch('magnum.common.neutron.get_subnet')
+    def test_set_master_lb_allowed_cidrs_find_subnet_cidr(self,
+                                                          mock_get_subnet):
+        definition = self.get_definition()
+        extra_params = {"master_lb_allowed_cidrs": "192.168.0.0/16",
+                        "fixed_subnet": "fake_subnet_id"}
+        mock_cluster = mock.MagicMock()
+        mock_context = mock.MagicMock()
+        mock_cluster.labels = {}
+        mock_get_subnet.return_value = "172.24.0.0/16"
+
+        definition._set_master_lb_allowed_cidrs(mock_context,
+                                                mock_cluster, extra_params)
+
+        self.assertEqual(extra_params["master_lb_allowed_cidrs"],
+                         "192.168.0.0/16,172.24.0.0/16")
 
 
 class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):

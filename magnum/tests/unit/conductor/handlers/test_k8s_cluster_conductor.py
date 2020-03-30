@@ -373,6 +373,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
+            'master_lb_allowed_cidrs': None,
         }
 
         if missing_attr is not None:
@@ -525,6 +526,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
+            'master_lb_allowed_cidrs': None,
         }
 
         self.assertEqual(expected, definition)
@@ -658,6 +660,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
+            'master_lb_allowed_cidrs': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -770,6 +773,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
+            'master_lb_allowed_cidrs': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -880,6 +884,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
+            'master_lb_allowed_cidrs': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1114,6 +1119,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
+            'master_lb_allowed_cidrs': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
