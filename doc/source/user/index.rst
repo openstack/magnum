@@ -1189,7 +1189,6 @@ _`container_infra_prefix`
 
   * docker.io/coredns/coredns
   * quay.io/coreos/etcd
-  * docker.io/openstackmagnum/flannel
   * docker.io/openstackmagnum/kubernetes-apiserver
   * docker.io/openstackmagnum/kubernetes-controller-manager
   * docker.io/openstackmagnum/kubernetes-kubelet
@@ -1219,6 +1218,8 @@ _`container_infra_prefix`
   * quay.io/calico/pod2daemon-flexvol:v3.13.1
   * quay.io/calico/kube-controllers:v3.13.1
   * quay.io/calico/node:v3.13.1
+  * quay.io/coreos/flannel-cni:v0.3.0
+  * quay.io/coreos/flannel:v0.12.0-amd64
 
   Images that might be needed if 'cinder_csi_enabled' is 'true':
   * docker.io/k8scloudprovider/cinder-csi-plugin:v1.16.0
@@ -1291,8 +1292,9 @@ _`flannel_tag`
   Queens <https://hub.docker.com/r/openstackmagnum/flannel/tags/>`_
   Rocky <https://quay.io/repository/coreos/flannel?tab=tags>`_
   If unset, the default version will be used.
-  For queens, v0.9.0
-  For stein, v0.10.0-amd64
+  Stein default: v0.10.0-amd64
+  Train default: v0.11.0-amd64
+  Ussuri default: v0.12.0-amd64
 
 _`flannel_cni_tag`
   This label allows users to select `a specific flannel_cni version,
@@ -1300,7 +1302,9 @@ _`flannel_cni_tag`
   the host under /opt/cni/bin
   <https://quay.io/repository/coreos/flannel-cni?tab=tags>`_.
   If unset, the current Magnum version's a default flannel version.
-  For stein, v0.3.0
+  Stein default: v0.3.0
+  Train default: v0.3.0
+  Ussuri default: v0.3.0
 
 _`heat_container_agent_tag`
   This label allows users to select `a specific heat_container_agent
