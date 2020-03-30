@@ -1,4 +1,14 @@
-heat_template_version: 2014-10-16
+heat_template_version: queens
+
+conditions:
+  allowed_cidrs_enabled:
+    not:
+      allowed_cidrs_disabled
+
+  allowed_cidrs_disabled:
+      equals:
+      - get_param: allowed_cidrs
+      - []
 
 parameters:
 
@@ -17,6 +27,10 @@ parameters:
   port:
     type: number
 
+  allowed_cidrs:
+    type: comma_delimited_list
+    description: The allowed CIDR list for master load balancer
+
 resources:
   loadbalancer:
     type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
@@ -24,17 +38,27 @@ resources:
       vip_subnet: {get_param: fixed_subnet}
 
   listener:
+    condition: allowed_cidrs_disabled
     type: Magnum::Optional::Neutron::LBaaS::Listener
     properties:
       loadbalancer: {get_resource: loadbalancer}
       protocol: {get_param: protocol}
       protocol_port: {get_param: port}
 
+  listener_with_allowed_cidrs:
+    condition: allowed_cidrs_enabled
+    type: Magnum::Optional::Neutron::LBaaS::Listener
+    properties:
+      loadbalancer: {get_resource: loadbalancer}
+      protocol: {get_param: protocol}
+      protocol_port: {get_param: port}
+      allowed_cidrs: {get_param: allowed_cidrs}
+
   pool:
     type: Magnum::Optional::Neutron::LBaaS::Pool
     properties:
       lb_algorithm: ROUND_ROBIN
-      listener: {get_resource: listener}
+      listener: {if: ["allowed_cidrs_enabled", {get_resource: listener_with_allowed_cidrs}, {get_resource: listener}]}
       protocol: {get_param: protocol}
 
   monitor:
