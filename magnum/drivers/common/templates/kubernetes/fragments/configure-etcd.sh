@@ -66,7 +66,7 @@ ExecStart=/bin/podman run \\
     --volume /etc/etcd:/etc/etcd:ro,z \\
     --volume /var/lib/etcd:/var/lib/etcd:rshared,z \\
     --net=host \\
-    ${CONTAINER_INFRA_PREFIX:-"k8s.gcr.io/"}etcd:${ETCD_TAG} \\
+    ${CONTAINER_INFRA_PREFIX:-"quay.io/coreos/"}etcd:${ETCD_TAG} \\
     /usr/local/bin/etcd \\
     --config-file /etc/etcd/etcd.conf.yaml
 ExecStop=/bin/podman stop etcd

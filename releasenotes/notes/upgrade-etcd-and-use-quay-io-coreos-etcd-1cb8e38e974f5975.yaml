@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    Upgrade etcd to v3.4.6 and use quay.io/coreos/etcd since the tags on follow
+    the same format as https://github.com/etcd-io/etcd/releases compared to
+    k8s.gcr.io which modifies the canonical version tag. Users will need to pay
+    attention to the format of etcd_tag, e.g. v3.4.5 is valid whereas 3.4.5 is
+    not. Existing cluster templates and clusters which which use the latter will
+    fail to complete.
