@@ -139,13 +139,14 @@ spec:
           readOnly: true
       serviceAccountName: tiller
       tolerations:
-      # make runnable on master nodes
-      - key: dedicated
-        value: master
-        effect: NoSchedule
+      # Make sure the pod can be scheduled on master kubelet.
+      - effect: NoSchedule
+        operator: Exists
+      # Mark the pod as a critical add-on for rescheduling.
       - key: CriticalAddonsOnly
-        value: "True"
-        effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
       # run only on master nodes
       nodeSelector:
         node-role.kubernetes.io/master: ""
