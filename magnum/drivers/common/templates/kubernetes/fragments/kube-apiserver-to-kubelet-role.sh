@@ -378,14 +378,14 @@ spec:
       - key: node.cloudprovider.kubernetes.io/uninitialized
         value: "true"
         effect: NoSchedule
-      # this is to have the daemonset runnable on master nodes
-      # the taint may vary depending on your cluster setup
-      - key: dedicated
-        value: master
-        effect: NoSchedule
+      # Make sure the pod can be scheduled on master kubelet.
+      - effect: NoSchedule
+        operator: Exists
+      # Mark the pod as a critical add-on for rescheduling.
       - key: CriticalAddonsOnly
-        value: "True"
-        effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
       # this is to restrict CCM to only run on master nodes
       # the node selector may vary depending on your cluster setup
       nodeSelector:
