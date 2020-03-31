@@ -21,8 +21,8 @@ Create Date: 2016-09-02 09:43:41.485934
 revision = '720f640f43d1'
 down_revision = 'fb03fdef8919'
 
-from alembic import op
-import sqlalchemy as sa
+from alembic import op  # noqa: E402
+import sqlalchemy as sa  # noqa: E402
 
 
 def upgrade():

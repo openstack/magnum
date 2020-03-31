@@ -640,7 +640,7 @@ class TestPost(api_base.FunctionalTest):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         for k, v in baymodel_config_dict.items():
-                    CONF.set_override(k, v, 'cluster_template')
+            CONF.set_override(k, v, 'cluster_template')
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:

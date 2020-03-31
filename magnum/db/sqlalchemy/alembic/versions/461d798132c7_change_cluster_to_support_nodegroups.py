@@ -25,15 +25,15 @@ Create Date: 2019-02-06 14:32:40.316528
 revision = '461d798132c7'
 down_revision = 'ac92cbae311c'
 
-from alembic import op
+from alembic import op  # noqa: E402
 
-import sqlalchemy as sa
+import sqlalchemy as sa  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String
-from oslo_serialization import jsonutils
-from oslo_utils import uuidutils
+from oslo_db.sqlalchemy.types import String  # noqa: E402
+from oslo_serialization import jsonutils  # noqa: E402
+from oslo_utils import uuidutils  # noqa: E402
 
-from magnum.db.sqlalchemy import models
+from magnum.db.sqlalchemy import models  # noqa: E402
 
 
 def _handle_json_columns(value, default=None):

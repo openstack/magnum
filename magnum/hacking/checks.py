@@ -15,7 +15,7 @@
 
 import re
 
-import pep8  # noqa
+from hacking import core
 
 """
 Guidelines for writing new hacking checks
@@ -42,7 +42,7 @@ assert_equal_with_is_not_none_re = re.compile(
     r"assertEqual\(.*?\s+is+\s+not+\s+None\)$")
 assert_true_isinstance_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
-    "(\w|\.|\'|\"|\[|\])+\)\)")
+    r"(\w|\.|\'|\"|\[|\])+\)\)")
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
 assert_xrange_re = re.compile(
     r"\s*xrange\s*\(")
@@ -58,16 +58,18 @@ custom_underscore_check = re.compile(r"(.)*_\s*=\s*(.)*")
 underscore_import_check = re.compile(r"(.)*import _(.)*")
 translated_log = re.compile(
     r"(.)*LOG\.(audit|error|info|critical|exception)"
-    "\(\s*_\(\s*('|\")")
+    r"\(\s*_\(\s*('|\")")
 string_translation = re.compile(r"[^_]*_\(\s*('|\")")
 
 
+@core.flake8ext
 def no_mutable_default_args(logical_line):
     msg = "M322: Method's default argument shouldn't be mutable!"
     if mutable_default_args.match(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def assert_equal_not_none(logical_line):
     """Check for assertEqual(A is not None) sentences M302"""
     msg = "M302: assertEqual(A is not None) sentences not allowed."
@@ -76,6 +78,7 @@ def assert_equal_not_none(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def assert_true_isinstance(logical_line):
     """Check for assertTrue(isinstance(a, b)) sentences
 
@@ -85,6 +88,7 @@ def assert_true_isinstance(logical_line):
         yield (0, "M316: assertTrue(isinstance(a, b)) sentences not allowed")
 
 
+@core.flake8ext
 def assert_equal_in(logical_line):
     """Check for assertEqual(True|False, A in B), assertEqual(A in B, True|False)
 
@@ -98,6 +102,7 @@ def assert_equal_in(logical_line):
                   "contents.")
 
 
+@core.flake8ext
 def no_xrange(logical_line):
     """Disallow 'xrange()'
 
@@ -107,6 +112,7 @@ def no_xrange(logical_line):
         yield(0, "M339: Do not use xrange().")
 
 
+@core.flake8ext
 def use_timeutils_utcnow(logical_line, filename):
     # tools are OK to use the standard datetime module
     if "/tools/" in filename:
@@ -120,6 +126,7 @@ def use_timeutils_utcnow(logical_line, filename):
             yield (pos, msg % f)
 
 
+@core.flake8ext
 def dict_constructor_with_list_copy(logical_line):
     msg = ("M336: Must use a dict comprehension instead of a dict constructor"
            " with a sequence of key-value pairs."
@@ -128,6 +135,7 @@ def dict_constructor_with_list_copy(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def no_log_warn(logical_line):
     """Disallow 'LOG.warn('
 
@@ -142,6 +150,7 @@ def no_log_warn(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def check_explicit_underscore_import(logical_line, filename):
     """Check for explicit import of the _ function
 
@@ -161,15 +170,3 @@ def check_explicit_underscore_import(logical_line, filename):
     elif (translated_log.match(logical_line) or
           string_translation.match(logical_line)):
         yield(0, "M340: Found use of _() without explicit import of _ !")
-
-
-def factory(register):
-    register(no_mutable_default_args)
-    register(assert_equal_not_none)
-    register(assert_true_isinstance)
-    register(assert_equal_in)
-    register(use_timeutils_utcnow)
-    register(dict_constructor_with_list_copy)
-    register(no_xrange)
-    register(no_log_warn)
-    register(check_explicit_underscore_import)

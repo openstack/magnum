@@ -25,13 +25,13 @@ Create Date: 2018-09-20 15:26:00.869885
 revision = 'ac92cbae311c'
 down_revision = '87e62e3c7abc'
 
-from alembic import op
+from alembic import op  # noqa: E402
 
-import sqlalchemy as sa
+import sqlalchemy as sa  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String
+from oslo_db.sqlalchemy.types import String  # noqa: E402
 
-from magnum.db.sqlalchemy import models
+from magnum.db.sqlalchemy import models  # noqa: E402
 
 
 def upgrade():

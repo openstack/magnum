@@ -21,8 +21,8 @@ Create Date: 2016-03-07 19:00:28.738486
 revision = 'a1136d335540'
 down_revision = 'd072f58ab240'
 
-from alembic import op
-import sqlalchemy as sa
+from alembic import op  # noqa: E402
+import sqlalchemy as sa  # noqa: E402
 
 
 docker_storage_driver_enum = sa.Enum('devicemapper', 'overlay',

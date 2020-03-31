@@ -103,7 +103,7 @@ class CertManager(cert_manager.CertManager):
 
         return cert_ref
 
-    @staticmethod
+    @staticmethod  # noqa: C901
     def get_cert(cert_ref, **kwargs):
         """Retrieves the specified cert.
 
