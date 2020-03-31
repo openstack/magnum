@@ -42,7 +42,7 @@ Overview
 
 Magnum is an OpenStack API service developed by the OpenStack Containers Team
 making container orchestration engines (COE) such as Docker Swarm, Kubernetes
-and Apache Mesos available as the first class resources in OpenStack.
+and Apache Mesos available as first class resources in OpenStack.
 
 Magnum uses Heat to orchestrate an OS image which contains Docker and COE
 and runs that image in either virtual machines or bare metal in a cluster
