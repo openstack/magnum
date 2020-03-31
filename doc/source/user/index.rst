@@ -753,9 +753,9 @@ Install using distribution packages for Ubuntu/Debian::
 
     $ sudo apt-get install python-magnumclient
 
-Install using distribution packages for OpenSuSE and SuSE Enterprise Linux::
+Install using distribution packages for openSUSE and SUSE Enterprise Linux::
 
-    $ sudo zypper install python-magnumclient
+    $ sudo zypper install python3-magnumclient
 
 Verifying installation
 ----------------------
