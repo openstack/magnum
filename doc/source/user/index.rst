@@ -36,6 +36,7 @@ created and managed by Magnum to support the COE's.
 #. `Kubernetes External Load Balancer`_
 #. `Rolling Upgrade`_
 #. `Keystone Authentication and Authorization for Kubernetes`_
+#. `Node Groups`_
 
 Overview
 ========
@@ -3462,3 +3463,8 @@ Keystone Authentication and Authorization for Kubernetes
 ========================================================
 
 .. include:: k8s-keystone-authN-authZ.rst
+
+Node Groups
+===========
+
+.. include:: node-groups.rst
