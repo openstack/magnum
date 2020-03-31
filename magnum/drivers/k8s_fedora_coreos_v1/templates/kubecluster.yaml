@@ -474,7 +474,7 @@ parameters:
   coredns_tag:
     type: string
     description: tag for coredns
-    default: 1.3.1
+    default: 1.6.6
 
   flannel_tag:
     type: string
@@ -938,6 +938,9 @@ resources:
         - protocol: tcp
           port_range_min: 22
           port_range_max: 22
+        - protocol: tcp
+          port_range_min: 53
+          port_range_max: 53
         - protocol: tcp
           port_range_min: 7080
           port_range_max: 7080

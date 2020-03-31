@@ -110,8 +110,14 @@ spec:
       priorityClassName: system-cluster-critical
       serviceAccountName: coredns
       tolerations:
-        - key: "CriticalAddonsOnly"
-          operator: "Exists"
+        # Make sure the pod can be scheduled on master kubelet.
+        - effect: NoSchedule
+          operator: Exists
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
       nodeSelector:
         beta.kubernetes.io/os: linux
       containers:

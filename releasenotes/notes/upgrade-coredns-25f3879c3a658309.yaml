@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The default CoreDNS version has been upgraded to 1.6.6 and now
+    it can be schedule to master nodes.

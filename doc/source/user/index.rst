@@ -1180,7 +1180,7 @@ _`container_infra_prefix`
 
   Images that must be mirrored:
 
-  * docker.io/coredns/coredns:1.3.1
+  * docker.io/coredns/coredns
   * docker.io/openstackmagnum/etcd
   * docker.io/openstackmagnum/flannel
   * docker.io/openstackmagnum/kubernetes-apiserver
@@ -1268,7 +1268,9 @@ _`coredns_tag`
   based on its container tag
   <https://hub.docker.com/r/coredns/coredns/tags/>`_.
   If unset, the current Magnum version's a default etcd version.
-  For stein, 1.3.1
+  Stein Default: 1.3.1
+  Train Default: 1.3.1
+  Ussuri Default: 1.6.6
 
 _`flannel_tag`
   This label allows users to select `a specific flannel version,
