@@ -22,13 +22,13 @@ Create Date: 2016-01-12 06:21:24.880838
 revision = '05d3e97de9ee'
 down_revision = '57fbdf2327a2'
 
-from alembic import op
+from alembic import op  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String
+from oslo_db.sqlalchemy.types import String  # noqa: E402
 
-import sqlalchemy as sa
+import sqlalchemy as sa  # noqa: E402
 
-from sqlalchemy.dialects.mysql import TINYTEXT
+from sqlalchemy.dialects.mysql import TINYTEXT  # noqa: E402
 
 
 def upgrade():

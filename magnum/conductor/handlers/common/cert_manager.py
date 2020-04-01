@@ -233,11 +233,11 @@ def delete_certificates_from_cluster(cluster, context=None):
 
 
 def delete_client_files(cluster, context=None):
-        cached_cert_dir = os.path.join(CONF.cluster.temp_cache_dir,
-                                       cluster.uuid)
-        try:
-            if os.path.isdir(cached_cert_dir):
-                shutil.rmtree(cached_cert_dir)
-        except Exception:
-            LOG.warning("Deleting client files failed for Cluster %s",
-                        cluster.uuid)
+    cached_cert_dir = os.path.join(CONF.cluster.temp_cache_dir,
+                                   cluster.uuid)
+    try:
+        if os.path.isdir(cached_cert_dir):
+            shutil.rmtree(cached_cert_dir)
+    except Exception:
+        LOG.warning("Deleting client files failed for Cluster %s",
+                    cluster.uuid)

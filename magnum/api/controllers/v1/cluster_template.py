@@ -414,7 +414,7 @@ class ClusterTemplatesController(base.Controller):
                                                  new_cluster_template.uuid)
         return ClusterTemplate.convert_with_links(new_cluster_template)
 
-    @wsme.validate(types.uuid_or_name, [ClusterTemplatePatchType])
+    @wsme.validate(types.uuid_or_name, [ClusterTemplatePatchType])  # noqa
     @expose.expose(ClusterTemplate, types.uuid_or_name,
                    body=[ClusterTemplatePatchType])
     @validation.enforce_network_driver_types_update()

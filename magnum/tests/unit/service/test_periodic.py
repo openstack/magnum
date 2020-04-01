@@ -36,6 +36,7 @@ class fake_stack(object):
         for key, val in kw.items():
             setattr(self, key, val)
 
+
 # This dictionary will be populated by setUp to help mock
 # the nodegroup list magnum.db.api.get_cluster_nodergoups.
 cluster_ngs = {}

@@ -32,14 +32,12 @@ eventlet==0.18.2
 extras==1.0.0
 fasteners==0.14.1
 fixtures==3.0.0
-flake8==2.5.5
 future==0.16.0
 futurist==1.6.0
 gitdb2==2.0.3
 GitPython==2.1.8
 google-auth==1.4.1
 greenlet==0.4.13
-hacking==0.12.0
 idna==2.6
 imagesize==1.0.0
 ipaddress==1.0.19
@@ -98,7 +96,6 @@ Paste==2.0.3
 PasteDeploy==1.5.2
 pbr==2.0.0
 pecan==1.0.0
-pep8==1.5.7
 pika-pool==0.1.3
 pika==0.10.0
 prettytable==0.7.2
@@ -107,7 +104,6 @@ pyasn1-modules==0.2.1
 pyasn1==0.4.2
 pycadf==1.1.0
 pycparser==2.18
-pyflakes==0.8.1
 Pygments==2.2.0
 pyinotify==0.9.6
 pyOpenSSL==17.5.0

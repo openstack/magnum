@@ -366,7 +366,7 @@ class FedoraKubernetesDriver(KubernetesDriver):
             new_labels.update({'kube_tag': new_kube_tag})
         return new_labels
 
-    def upgrade_cluster(self, context, cluster, cluster_template,
+    def upgrade_cluster(self, context, cluster, cluster_template,  # noqa: C901
                         max_batch_size, nodegroup, scale_manager=None,
                         rollback=False):
         osc = clients.OpenStackClients(context)

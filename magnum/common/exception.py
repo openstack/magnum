@@ -37,7 +37,7 @@ CONF = magnum.conf.CONF
 try:
     CONF.import_opt('fatal_exception_format_errors',
                     'oslo_versionedobjects.exception')
-except cfg.NoSuchOptError as e:
+except cfg.NoSuchOptError:
     # Note:work around for magnum run against master branch
     # in devstack gate job, as magnum not branched yet
     # verisonobjects kilo/master different version can
