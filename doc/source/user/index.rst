@@ -1188,7 +1188,7 @@ _`container_infra_prefix`
   Images that must be mirrored:
 
   * docker.io/coredns/coredns
-  * docker.io/openstackmagnum/etcd
+  * quay.io/coreos/etcd
   * docker.io/openstackmagnum/flannel
   * docker.io/openstackmagnum/kubernetes-apiserver
   * docker.io/openstackmagnum/kubernetes-controller-manager
@@ -1270,9 +1270,11 @@ _`cloud_provider_tag`
 _`etcd_tag`
   This label allows users to select `a specific etcd version,
   based on its container tag
-  <https://hub.docker.com/r/openstackmagnum/etcd/tags/>`_.
+  <https://quay.io/repository/coreos/etcd?tab=tags>`_.
   If unset, the current Magnum version's a default etcd version.
-  For queens, v3.2.7
+  Stein default: v3.2.7
+  Train default: 3.2.26
+  Ussuri default: v3.4.6
 
 _`coredns_tag`
   This label allows users to select `a specific coredns version,
