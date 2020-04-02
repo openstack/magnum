@@ -1,0 +1,5 @@
+features:
+  - |
+    Magnum now cascade deletes all the load balancers before deleting the
+    cluster, not only including load balancers for the cluster services and
+    ingresses, but also those for Kubernetes API/etcd endpoints.

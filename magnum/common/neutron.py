@@ -47,8 +47,8 @@ def delete_floatingip(context, fix_port_id, cluster):
         id = fips["floatingips"][0]["id"]
 
         if re.match(pattern, desc):
-            LOG.debug("Deleting floating ip %s for cluster %s", id,
-                      cluster.uuid)
+            LOG.info("Deleting floating ip %s for cluster %s", id,
+                     cluster.uuid)
             n_client.delete_floatingip(id)
     except Exception as e:
         raise exception.PreDeletionFailed(cluster_uuid=cluster.uuid,
