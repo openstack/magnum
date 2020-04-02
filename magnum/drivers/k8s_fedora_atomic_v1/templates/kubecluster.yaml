@@ -36,6 +36,12 @@ conditions:
     - create_cluster_resources
     - is_worker
 
+  calico_v3_3:
+    yaql:
+      expression: $.data.calico_tag.startsWith("v3.3.")
+      data:
+        calico_tag: {get_param: calico_tag}
+
 parameters:
 
   # needs to become a list if we want to join master nodes?
@@ -1232,7 +1238,10 @@ resources:
           -
             - get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh
             - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
-            - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
+            - if:
+                - calico_v3_3
+                - get_file: ../../common/templates/kubernetes/fragments/calico-service-v3-3-x.sh
+                - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-helm-tiller.sh
             - str_replace:
