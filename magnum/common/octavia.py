@@ -11,13 +11,15 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
-from oslo_config import cfg
-from oslo_log import log as logging
 import re
 import time
 
+from osc_lib import exceptions as osc_exc
+from oslo_config import cfg
+from oslo_log import log as logging
+
 from magnum.common import clients
+from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.common import neutron
 
@@ -51,48 +53,72 @@ def wait_for_lb_deleted(octavia_client, deleted_lbs):
         time.sleep(1)
 
 
+def _delete_loadbalancers(context, lbs, cluster, octavia_client,
+                          remove_fip=False, cascade=True):
+    candidates = set()
+
+    for lb in lbs:
+        status = lb["provisioning_status"]
+        if status not in ["PENDING_DELETE", "DELETED"]:
+            LOG.info("Deleting load balancer %s for cluster %s",
+                     lb["id"], cluster.uuid)
+            octavia_client.load_balancer_delete(lb["id"], cascade=cascade)
+            candidates.add(lb["id"])
+
+            if remove_fip:
+                neutron.delete_floatingip(context, lb["vip_port_id"], cluster)
+
+    return candidates
+
+
 def delete_loadbalancers(context, cluster):
-    """Delete loadbalancers for kubernetes resources.
+    """Delete loadbalancers for the cluster.
 
-    This method only works for the k8s cluster with
-    cloud-provider-openstack manager or controller-manager patched with
-    this PR:
-    https://github.com/kubernetes/cloud-provider-openstack/pull/223
-
-    The load balancers created for kubernetes services and ingresses are
-    deleted.
+    The following load balancers are deleted:
+    - The load balancers created for Kubernetes services and ingresses in
+      the Kubernetes cluster.
+    - The load balancers created for Kubernetes API and etcd for HA cluster.
     """
     pattern = (r'Kubernetes .+ from cluster %s' % cluster.uuid)
-    valid_status = ["ACTIVE", "ERROR", "PENDING_DELETE", "DELETED"]
+    lb_resource_type = "Magnum::Optional::Neutron::LBaaS::LoadBalancer"
+
+    adm_ctx = magnum_context.get_admin_context()
+    adm_clients = clients.OpenStackClients(adm_ctx)
+    user_clients = clients.OpenStackClients(context)
+    candidates = set()
 
     try:
-        o_client = clients.OpenStackClients(context).octavia()
-        lbs = o_client.load_balancer_list().get("loadbalancers", [])
+        octavia_client_adm = adm_clients.octavia()
+        heat_client = user_clients.heat()
+        octavia_client = user_clients.octavia()
 
-        candidates = set()
-        invalids = set()
-        for lb in lbs:
-            if re.match(pattern, lb["description"]):
-                if lb["provisioning_status"] not in valid_status:
-                    invalids.add(lb["id"])
-                    continue
-                if lb["provisioning_status"] in ["ACTIVE", "ERROR"]:
-                    # Delete VIP floating ip if needed.
-                    neutron.delete_floatingip(context, lb["vip_port_id"],
-                                              cluster)
+        # Get load balancers created for service/ingress
+        lbs = octavia_client.load_balancer_list().get("loadbalancers", [])
+        lbs = [lb for lb in lbs if re.match(pattern, lb["description"])]
+        deleted = _delete_loadbalancers(context, lbs, cluster,
+                                        octavia_client_adm, remove_fip=True)
+        candidates.update(deleted)
 
-                    LOG.debug("Deleting load balancer %s for cluster %s",
-                              lb["id"], cluster.uuid)
-                    o_client.load_balancer_delete(lb["id"], cascade=True)
-                candidates.add(lb["id"])
+        # Get load balancers created for Kubernetes api/etcd
+        lbs = []
+        lb_resources = heat_client.resources.list(
+            cluster.stack_id, nested_depth=2,
+            filters={"type": lb_resource_type})
+        for lb_res in lb_resources:
+            lb_id = lb_res.physical_resource_id
+            try:
+                lb = octavia_client.load_balancer_show(lb_id)
+                lbs.append(lb)
+            except osc_exc.NotFound:
+                continue
+        deleted = _delete_loadbalancers(context, lbs, cluster,
+                                        octavia_client_adm, remove_fip=False)
+        candidates.update(deleted)
 
-        if invalids:
-            raise Exception("Cannot delete load balancers %s in transitional "
-                            "status." % invalids)
         if not candidates:
             return
 
-        wait_for_lb_deleted(o_client, candidates)
+        wait_for_lb_deleted(octavia_client, candidates)
     except Exception as e:
         raise exception.PreDeletionFailed(cluster_uuid=cluster.uuid,
                                           msg=str(e))
