@@ -1,55 +1,37 @@
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
-configure_storage_driver_generic() {
-
-    cat > /etc/systemd/system/var-lib-docker.mount <<EOF
-[Unit]
-Description=Mount ephemeral to /var/lib/docker
-
-[Mount]
-What=/dev/vdb
-Where=/var/lib/docker
-Type=ext4
-
-[Install]
-WantedBy=local-fs.target
-EOF
-
-
-    cat > /etc/sysconfig/enable-docker-mount.sh <<EOF
-#!/bin/sh
-. /etc/sysconfig/heat-params
-if [  -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
-    if [[ "$(blkid -o value -s TYPE /dev/vdb)" -eq 0 ]]; then
-        systemctl daemon-reload
-        systemctl start var-lib-docker.mount
-        systemctl enable var-lib-docker.mount
-    else
-        mkfs -t ext4 /dev/vdb
-        systemctl daemon-reload
-        systemctl start var-lib-docker.mount
-        systemctl enable var-lib-docker.mount
-    fi
+runtime=${CONTAINER_RUNTIME}
+if [ ${CONTAINER_RUNTIME} = "containerd"  ] ; then
+    storage_dir="/var/lib/containerd"
+else
+    storage_dir="/var/lib/docker"
+    runtime="docker"
 fi
-EOF
 
-    chmod +x /etc/sysconfig/enable-docker-mount.sh
+clear_docker_storage () {
+    # stop docker
+    $ssh_cmd systemctl stop ${runtime}
+    # clear storage graph
+    $ssh_cmd rm -rf ${storage_dir}
+    $ssh_cmd mkdir -p ${storage_dir}
+}
 
-    cat > /etc/systemd/system/enable-docker-mount.service <<EOF
-[Unit]
-Description=Mount docker volume
+# Configure generic docker storage driver.
+configure_storage_driver_generic() {
+    clear_docker_storage
 
-[Service]
-Type=oneshot
-EnvironmentFile=/etc/sysconfig/heat-params
-ExecStart=/etc/sysconfig/enable-docker-mount.sh
-
-[Install]
-RequiredBy=multi-user.target
-EOF
-
+    if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
+        $ssh_cmd mkfs.xfs -f ${device_path}
+        echo "${device_path} ${storage_dir} xfs defaults 0 0" >> /etc/fstab
+        $ssh_cmd mount -a
+        $ssh_cmd restorecon -R ${storage_dir}
+    fi
+    if [ ${CONTAINER_RUNTIME} = "host-docker"  ] ; then
+        sed -i -E 's/^OPTIONS=("|'"'"')/OPTIONS=\1--storage-driver='$1' /' /etc/sysconfig/docker
+    fi
 }
 
 configure_devicemapper() {
     configure_storage_driver_generic
 }
+
