@@ -269,7 +269,9 @@ parameters:
   docker_storage_driver:
     type: string
     description: docker storage driver name
-    default: "devicemapper"
+    default: "overlay2"
+    constraints:
+      - allowed_pattern: "^(?!devicemapper$).*"
 
   cgroup_driver:
     type: string
