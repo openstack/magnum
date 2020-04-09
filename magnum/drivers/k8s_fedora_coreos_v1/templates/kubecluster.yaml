@@ -941,6 +941,9 @@ resources:
         - protocol: tcp
           port_range_min: 53
           port_range_max: 53
+        - protocol: udp
+          port_range_min: 53
+          port_range_max: 53
         - protocol: tcp
           port_range_min: 179
           port_range_max: 179
