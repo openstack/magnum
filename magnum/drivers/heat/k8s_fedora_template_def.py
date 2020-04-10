@@ -102,6 +102,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'prometheus_adapter_enabled',
                       'prometheus_adapter_chart_tag',
                       'prometheus_adapter_configmap',
+                      'selinux_mode',
                       'tiller_enabled',
                       'tiller_tag',
                       'tiller_namespace',

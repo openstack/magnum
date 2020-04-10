@@ -858,6 +858,14 @@ parameters:
     constraints:
       - allowed_values: [true]
 
+  selinux_mode:
+    type: string
+    description: >
+      Choose SELinux mode
+    default: "enforcing"
+    constraints:
+      - allowed_values: ["enforcing", "permissive", "disabled"]
+
   kube_image_digest:
     type: string
     description: >
@@ -1230,6 +1238,7 @@ resources:
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
           use_podman: {get_param: use_podman}
+          selinux_mode: {get_param: selinux_mode}
           kube_image_digest: {get_param: kube_image_digest}
           container_runtime: {get_param: container_runtime}
           containerd_version: {get_param: containerd_version}
@@ -1404,6 +1413,7 @@ resources:
           ostree_remote: {get_param: ostree_remote}
           ostree_commit: {get_param: ostree_commit}
           use_podman: {get_param: use_podman}
+          selinux_mode: {get_param: selinux_mode}
           container_runtime: {get_param: container_runtime}
           containerd_version: {get_param: containerd_version}
           containerd_tarball_url: {get_param: containerd_tarball_url}

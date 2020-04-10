@@ -1,8 +1,7 @@
 #cloud-boothook
 #!/bin/sh
 
-setenforce 0
-
+setenforce `[[ "$SELINUX_MODE" == "enforcing" ]] && echo 1 || echo 0`
 sed -i '
-    /^SELINUX=/ s/=.*/=permissive/
+    /^SELINUX=/ s/=.*/=$SELINUX_MODE/
 ' /etc/selinux/config

@@ -35,6 +35,27 @@ storage:
       group:
         name: root
   files:
+    - path: /etc/selinux/config
+      # 420 (decimal) == 644 (octal)
+      mode: 420
+      group:
+        name: root
+      user:
+        name: root
+      contents:
+        inline: |
+          # This file controls the state of SELinux on the system.
+          # SELINUX= can take one of these three values:
+          #     enforcing - SELinux security policy is enforced.
+          #     permissive - SELinux prints warnings instead of enforcing.
+          #     disabled - No SELinux policy is loaded.
+          SELINUX=__SELINUX_MODE__
+          # SELINUXTYPE= can take one of these three values:
+          #     targeted - Targeted processes are protected,
+          #     minimum - Modification of targeted policy. Only selected processes are protected.
+          #     mls - Multi Level Security protection.
+          SELINUXTYPE=targeted
+      overwrite: true
     - path: /etc/containers/libpod.conf
       # 420 (decimal) == 644 (octal)
       mode: 420
@@ -58,6 +79,7 @@ storage:
       contents:
         inline: |
           __HOSTNAME__
+      overwrite: true
     - path: /etc/pki/ca-trust/source/anchors/openstack-ca.pem
       # 420 (decimal) == 644 (octal)
       mode: 420
