@@ -2,7 +2,7 @@
 - hosts: all
   roles:
     - configure-swap
-    - install-docker
+    - ensure-docker
   tasks:
     - name: Create logging folders
       file:
