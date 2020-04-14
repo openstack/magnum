@@ -65,7 +65,7 @@ class ServerAddressOutputMapping(template_def.NodeGroupOutputMapping):
         self.is_stack_param = False
 
     def set_output(self, stack, cluster_template, cluster):
-        if not cluster_template.floating_ip_enabled:
+        if not cluster.floating_ip_enabled:
             self.heat_output = self.private_ip_output_key
 
         LOG.debug("Using heat_output: %s", self.heat_output)
