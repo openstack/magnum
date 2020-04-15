@@ -589,6 +589,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_tag')
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
+        helm_client_url = mock_cluster.labels.get(
+            'helm_client_url')
+        helm_client_sha256 = mock_cluster.labels.get(
+            'helm_client_sha256')
         helm_client_tag = mock_cluster.labels.get(
             'helm_client_tag')
         npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
@@ -712,6 +716,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_enabled': tiller_enabled,
             'tiller_tag': tiller_tag,
             'tiller_namespace': tiller_namespace,
+            'helm_client_url': helm_client_url,
+            'helm_client_sha256': helm_client_sha256,
             'helm_client_tag': helm_client_tag,
             'node_problem_detector_tag': npd_tag,
             'auto_healing_enabled': auto_healing_enabled,
@@ -1097,6 +1103,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_tag')
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
+        helm_client_url = mock_cluster.labels.get(
+            'helm_client_url')
+        helm_client_sha256 = mock_cluster.labels.get(
+            'helm_client_sha256')
         helm_client_tag = mock_cluster.labels.get(
             'helm_client_tag')
         npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
@@ -1222,6 +1232,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_enabled': tiller_enabled,
             'tiller_tag': tiller_tag,
             'tiller_namespace': tiller_namespace,
+            'helm_client_url': helm_client_url,
+            'helm_client_sha256': helm_client_sha256,
             'helm_client_tag': helm_client_tag,
             'node_problem_detector_tag': npd_tag,
             'auto_healing_enabled': auto_healing_enabled,
