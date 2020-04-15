@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    A new boolean flag is introduced in the CLuster and Nodegroup create API
+    calls. Using this flag, users can override label values when clusters or
+    nodegroups are created without having to specify all the inherited values.
+    To do that, users have to specify the labels with their new values and use
+    the flag --merge-labels. At the same time, three new fields are added in
+    the cluster and nodegroup show outputs, showing the differences between the
+    actual and the iherited labels.

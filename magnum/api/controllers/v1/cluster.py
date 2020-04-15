@@ -182,6 +182,24 @@ class Cluster(base.APIBase):
     floating_ip_enabled = wsme.wsattr(types.boolean)
     """Indicates whether created clusters should have a floating ip or not."""
 
+    merge_labels = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the labels will be merged with the CT labels."""
+
+    labels_overridden = wtypes.DictType(
+            wtypes.text, types.MultiType(
+                wtypes.text, six.integer_types, bool, float))
+    """Contains labels that have a value different than the parent labels."""
+
+    labels_added = wtypes.DictType(
+            wtypes.text, types.MultiType(
+                wtypes.text, six.integer_types, bool, float))
+    """Contains labels that do not exist in the parent."""
+
+    labels_skipped = wtypes.DictType(
+            wtypes.text, types.MultiType(
+                wtypes.text, six.integer_types, bool, float))
+    """Contains labels that exist in the parent but were not inherited."""
+
     def __init__(self, **kwargs):
         super(Cluster, self).__init__()
         self.fields = []
@@ -198,7 +216,7 @@ class Cluster(base.APIBase):
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
     @staticmethod
-    def _convert_with_links(cluster, url, expand=True):
+    def _convert_with_links(cluster, url, expand=True, parent_labels=None):
         if not expand:
             cluster.unset_fields_except(['uuid', 'name', 'cluster_template_id',
                                          'keypair', 'docker_volume_size',
@@ -206,6 +224,12 @@ class Cluster(base.APIBase):
                                          'master_flavor_id', 'flavor_id',
                                          'create_timeout', 'master_count',
                                          'stack_id', 'health_status'])
+        else:
+            overridden, added, skipped = api_utils.get_labels_diff(
+                parent_labels, cluster.labels)
+            cluster.labels_overridden = overridden
+            cluster.labels_added = added
+            cluster.labels_skipped = skipped
 
         cluster.links = [link.Link.make_link('self', url,
                                              'clusters', cluster.uuid),
@@ -217,7 +241,9 @@ class Cluster(base.APIBase):
     @classmethod
     def convert_with_links(cls, rpc_cluster, expand=True):
         cluster = Cluster(**rpc_cluster.as_dict())
-        return cls._convert_with_links(cluster, pecan.request.host_url, expand)
+        parent_labels = rpc_cluster.cluster_template.labels
+        return cls._convert_with_links(cluster, pecan.request.host_url, expand,
+                                       parent_labels)
 
     @classmethod
     def sample(cls, expand=True):
@@ -474,6 +500,13 @@ class ClustersController(base.Controller):
         # If labels is not present, use cluster_template value
         if cluster.labels == wtypes.Unset:
             cluster.labels = cluster_template.labels
+        else:
+            # If labels are provided check if the user wishes to merge
+            # them with the values from the cluster template.
+            if cluster.merge_labels:
+                labels = cluster_template.labels
+                labels.update(cluster.labels)
+                cluster.labels = labels
 
         # If floating_ip_enabled is not present, use cluster_template value
         if cluster.floating_ip_enabled == wtypes.Unset:

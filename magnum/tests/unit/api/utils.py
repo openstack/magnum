@@ -57,6 +57,7 @@ def cluster_post_data(**kw):
     kw.update({'for_api_use': True})
     cluster = utils.get_test_cluster(**kw)
     cluster['create_timeout'] = kw.get('create_timeout', 15)
+    cluster['merge_labels'] = kw.get('merge_labels', False)
     internal = cluster_controller.ClusterPatchType.internal_attrs()
     return remove_internal(cluster, internal)
 
@@ -102,4 +103,5 @@ def nodegroup_post_data(**kw):
                 '/created_at', '/updated_at', '/status', '/status_reason',
                 '/version', '/stack_id']
     nodegroup = utils.get_test_nodegroup(**kw)
+    nodegroup['merge_labels'] = kw.get('merge_labels', False)
     return remove_internal(nodegroup, internal)

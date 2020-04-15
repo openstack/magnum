@@ -176,6 +176,45 @@ class TestListNodegroups(NodeGroupControllerTest):
         self.assertEqual(worker.name, response['name'])
         self._verify_attrs(self._nodegroup_attrs, response)
         self._verify_attrs(self._expanded_attrs, response)
+        self.assertEqual({}, response['labels_overridden'])
+        self.assertEqual({}, response['labels_skipped'])
+        self.assertEqual({}, response['labels_added'])
+
+    def test_get_one_non_default(self):
+        self.cluster.labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster.save()
+        ng_name = 'non_default_ng'
+        ng_labels = {
+            'label1': 'value3', 'label2': 'value2', 'label4': 'value4'
+        }
+        db_utils.create_test_nodegroup(cluster_id=self.cluster.uuid,
+                                       name=ng_name, labels=ng_labels)
+        url = '/clusters/%s/nodegroups/%s' % (self.cluster.uuid, ng_name)
+        response = self.get_json(url)
+        self._verify_attrs(self._nodegroup_attrs, response)
+        self._verify_attrs(self._expanded_attrs, response)
+        self.assertEqual(ng_labels, response['labels'])
+        overridden_labels = {'label1': 'value1'}
+        self.assertEqual(overridden_labels, response['labels_overridden'])
+        self.assertEqual({'label4': 'value4'}, response['labels_added'])
+        self.assertEqual({}, response['labels_skipped'])
+
+    def test_get_one_non_default_skipped_labels(self):
+        self.cluster.labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster.save()
+        ng_name = 'non_default_ng'
+        ng_labels = {'label1': 'value3', 'label4': 'value4'}
+        db_utils.create_test_nodegroup(cluster_id=self.cluster.uuid,
+                                       name=ng_name, labels=ng_labels)
+        url = '/clusters/%s/nodegroups/%s' % (self.cluster.uuid, ng_name)
+        response = self.get_json(url)
+        self._verify_attrs(self._nodegroup_attrs, response)
+        self._verify_attrs(self._expanded_attrs, response)
+        self.assertEqual(ng_labels, response['labels'])
+        overridden_labels = {'label1': 'value1'}
+        self.assertEqual(overridden_labels, response['labels_overridden'])
+        self.assertEqual({'label4': 'value4'}, response['labels_added'])
+        self.assertEqual({'label2': 'value2'}, response['labels_skipped'])
 
     def test_get_one_non_existent_ng(self):
         url = '/clusters/%s/nodegroups/not-here' % self.cluster.uuid
@@ -380,6 +419,45 @@ class TestPost(NodeGroupControllerTest):
         response = self.post_json(self.url, ng_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(409, response.status_int)
+
+    def test_create_ng_with_labels(self):
+        cluster_labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster.labels = cluster_labels
+        self.cluster.save()
+        ng_labels = {'label3': 'value3'}
+        ng_dict = apiutils.nodegroup_post_data(labels=ng_labels)
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        (cluster, ng), _ = self.mock_ng_create.call_args
+        self.assertEqual(ng_labels, ng.labels)
+
+    def test_create_ng_with_merge_labels(self):
+        cluster_labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster.labels = cluster_labels
+        self.cluster.save()
+        ng_labels = {'label1': 'value3', 'label4': 'value4'}
+        ng_dict = apiutils.nodegroup_post_data(labels=ng_labels,
+                                               merge_labels=True)
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        (cluster, ng), _ = self.mock_ng_create.call_args
+        expected_labels = cluster.labels
+        expected_labels.update(ng_labels)
+        self.assertEqual(expected_labels, ng.labels)
+
+    def test_create_ng_with_merge_labels_no_labels(self):
+        cluster_labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster.labels = cluster_labels
+        self.cluster.save()
+        ng_dict = apiutils.nodegroup_post_data(merge_labels=True)
+        ng_dict.pop('labels')
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        (cluster, ng), _ = self.mock_ng_create.call_args
+        self.assertEqual(cluster.labels, ng.labels)
 
 
 class TestDelete(NodeGroupControllerTest):
