@@ -350,7 +350,7 @@ spec:
           name: grafana
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: $ADMIN_PASSWD
+              value: ${GRAFANA_ADMIN_PASSWD}
             - name: GF_DASHBOARDS_JSON_ENABLED
               value: "true"
             - name: GF_DASHBOARDS_JSON_PATH

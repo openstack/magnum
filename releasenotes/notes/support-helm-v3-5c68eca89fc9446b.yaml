@@ -1,0 +1,19 @@
+---
+features:
+  - |
+    Support Helm v3 client to install helm charts. To use this feature, users
+    will need to use helm_client_tag>=v3.0.0 (default helm_client_tag=v3.2.1).
+    All the existing chart used to depend on Helm v2, e.g. nginx ingress
+    controller, metrics server, prometheus operator and prometheus adapter are
+    now also installable using v3 client. Also introduce helm_client_sha256 and
+    helm_client_url that users can specify to install non-default helm client
+    version (https://github.com/helm/helm/releases).
+upgrade:
+  - |
+    Default tiller_tag is set to v2.16.7. The charts remain compatible but
+    helm_client_tag will also need to be set to the same value as tiller_tag,
+    i.e. v2.16.7. In this case, the user will also need to provide
+    helm_client_sha256 for the helm client binary intended for use.
+deprecations:
+  - |
+    Support for Helm v2 client will be removed in X release.
