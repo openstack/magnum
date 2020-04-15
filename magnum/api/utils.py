@@ -136,3 +136,24 @@ def get_openstack_resource(manager, resource_ident, resource_type):
             raise exception.Conflict(msg)
         resource_data = matches[0]
     return resource_data
+
+
+def get_labels_diff(parent_labels, labels):
+    # Overriddent are the labels that exist in both the parent and the object
+    # but have a different value.
+    labels_overridden = {}
+    # Added are the labels that exist in the object and not in the parent.
+    labels_added = {}
+    # We consider as skipped, the labels that exist in the parent but not in
+    # the object's labels.
+    labels_skipped = {
+        k: v for k, v in parent_labels.items() if k not in labels
+    }
+    for key, value in labels.items():
+        try:
+            parent_value = parent_labels[key]
+            if parent_value != value:
+                labels_overridden[key] = parent_value
+        except KeyError:
+            labels_added[key] = value
+    return labels_overridden, labels_added, labels_skipped

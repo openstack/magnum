@@ -116,9 +116,27 @@ class TestListCluster(api_base.FunctionalTest):
     def test_get_one_by_uuid(self):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=temp_uuid)
-        response = self.get_json(
-            '/clusters/%s' % temp_uuid)
+        response = self.get_json('/clusters/%s' % temp_uuid)
         self.assertEqual(temp_uuid, response['uuid'])
+        self.assertIn('labels_overridden', response)
+        self.assertIn('labels_added', response)
+        self.assertIn('labels_skipped', response)
+
+    def test_get_one_merged_labels(self):
+        ct_uuid = uuidutils.generate_uuid()
+        ct_labels = {'label1': 'value1', 'label2': 'value2'}
+        obj_utils.create_test_cluster_template(self.context, uuid=ct_uuid,
+                                               labels=ct_labels)
+        c_uuid = uuidutils.generate_uuid()
+        c_labels = {'label1': 'value3', 'label4': 'value4'}
+        obj_utils.create_test_cluster(self.context, uuid=c_uuid,
+                                      labels=c_labels,
+                                      cluster_template_id=ct_uuid)
+        response = self.get_json('/clusters/%s' % c_uuid)
+        self.assertEqual(c_labels, response['labels'])
+        self.assertEqual({'label1': 'value1'}, response['labels_overridden'])
+        self.assertEqual({'label2': 'value2'}, response['labels_skipped'])
+        self.assertEqual({'label4': 'value4'}, response['labels_added'])
 
     def test_get_one_by_uuid_not_found(self):
         temp_uuid = uuidutils.generate_uuid()
@@ -910,6 +928,42 @@ class TestPost(api_base.FunctionalTest):
         cluster, timeout = self.mock_cluster_create.call_args
         # Verify flavor_id from ClusterTemplate is used
         self.assertEqual('m1.small', cluster[0].flavor_id)
+
+    def test_create_cluster_without_merge_labels(self):
+        self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster_template.save()
+        cluster_labels = {'label2': 'value3', 'label4': 'value4'}
+        bdict = apiutils.cluster_post_data(labels=cluster_labels)
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        self.assertEqual(cluster_labels, cluster[0].labels)
+
+    def test_create_cluster_with_merge_labels(self):
+        self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster_template.save()
+        cluster_labels = {'label2': 'value3', 'label4': 'value4'}
+        bdict = apiutils.cluster_post_data(labels=cluster_labels,
+                                           merge_labels=True)
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        expected = self.cluster_template.labels
+        expected.update(cluster_labels)
+        self.assertEqual(expected, cluster[0].labels)
+
+    def test_create_cluster_with_merge_labels_no_labels(self):
+        self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
+        self.cluster_template.save()
+        bdict = apiutils.cluster_post_data(merge_labels=True)
+        del bdict['labels']
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        self.assertEqual(self.cluster_template.labels, cluster[0].labels)
 
 
 class TestDelete(api_base.FunctionalTest):
