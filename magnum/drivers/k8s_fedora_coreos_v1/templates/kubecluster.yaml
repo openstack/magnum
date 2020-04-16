@@ -446,27 +446,31 @@ parameters:
 
   kube_tag:
     type: string
-    description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.15.7
+    description:
+      tag of the k8s containers used to provision the kubernetes cluster
+      https://github.com/kubernetes/kubernetes/releases
+    default: v1.18.2
 
   master_kube_tag:
     type: string
-    description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.15.7
+    description:
+      tag of the k8s containers used to provision the kubernetes cluster
+      https://github.com/kubernetes/kubernetes/releases
+    default: v1.18.2
 
   minion_kube_tag:
     type: string
-    description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.15.7
+    description:
+      tag of the k8s containers used to provision the kubernetes cluster
+      https://github.com/kubernetes/kubernetes/releases
+    default: v1.18.2
 
-  # FIXME update cloud_provider_tag when a fix for PVC is released
-  # https://github.com/kubernetes/cloud-provider-openstack/pull/405
   cloud_provider_tag:
     type: string
     description:
-      tag of the kubernetes/cloud-provider-openstack
+      tag of the k8scloudprovider/openstack-cloud-controller-manager
       https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/
-    default: v1.15.0
+    default: v1.18.0
 
   cloud_provider_enabled:
     type: boolean
@@ -495,7 +499,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.15.7
+    default: v1.18.2
 
   kube_dashboard_version:
     type: string
@@ -599,7 +603,9 @@ parameters:
   octavia_ingress_controller_tag:
     type: string
     description: Octavia ingress controller docker image tag.
-    default: "v1.15.0"
+      tag of the k8scloudprovider/octavia-ingress-controller container
+      https://hub.docker.com/r/k8scloudprovider/octavia-ingress-controller/tags/
+    default: v1.18.0
 
   kubelet_options:
     type: string
@@ -680,8 +686,10 @@ parameters:
 
   k8s_keystone_auth_tag:
     type: string
-    description: tag of the k8s_keystone_auth container
-    default: v1.15.0
+    description:
+      tag of the k8scloudprovider/k8s-keystone-auth container
+      https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags/
+    default: v1.18.0
 
   monitoring_enabled:
     type: boolean
@@ -743,8 +751,10 @@ parameters:
 
   magnum_auto_healer_tag:
     type: string
-    description: tag of the magnum-auto-healer service.
-    default: "v1.15.0"
+    description:
+      tag of the k8scloudprovider/magnum-auto-healer container
+      https://hub.docker.com/r/k8scloudprovider/magnum-auto-healer/tags/
+    default: v1.18.0
 
   auto_scaling_enabled:
     type: boolean
@@ -763,7 +773,9 @@ parameters:
   cinder_csi_plugin_tag:
     type: string
     description: tag of cinder csi plugin
-    default: v1.16.0
+      tag of the k8scloudprovider/cinder-csi-plugin container
+      https://hub.docker.com/r/k8scloudprovider/cinder-csi-plugin/tags/
+    default: v1.18.0
 
   csi_attacher_tag:
     type: string
@@ -813,7 +825,9 @@ parameters:
   autoscaler_tag:
     type: string
     description: tag of the autoscaler container
-    default: v1.0
+      tag of the openstackmagnum/cluster-autoscaler container
+      https://hub.docker.com/r/openstackmagnum/cluster-autoscaler/tags/
+    default: v1.18.1
 
   min_node_count:
     type: number
