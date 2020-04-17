@@ -524,8 +524,12 @@ class ClustersController(base.Controller):
         :param cluster_ident: UUID or logical name of a cluster.
         :param patch: a json PATCH document to apply to this cluster.
         """
-        cluster, node_count = self._patch(cluster_ident, patch)
-        pecan.request.rpcapi.cluster_update_async(cluster, node_count)
+        (cluster, node_count,
+         health_status,
+         health_status_reason) = self._patch(cluster_ident, patch)
+        pecan.request.rpcapi.cluster_update_async(cluster, node_count,
+                                                  health_status,
+                                                  health_status_reason)
         return ClusterID(cluster.uuid)
 
     @base.Controller.api_version("1.3")  # noqa
@@ -539,8 +543,12 @@ class ClustersController(base.Controller):
         :param rollback: whether to rollback cluster on update failure.
         :param patch: a json PATCH document to apply to this cluster.
         """
-        cluster, node_count = self._patch(cluster_ident, patch)
+        (cluster, node_count,
+         health_status,
+         health_status_reason) = self._patch(cluster_ident, patch)
         pecan.request.rpcapi.cluster_update_async(cluster, node_count,
+                                                  health_status,
+                                                  health_status_reason,
                                                   rollback)
         return ClusterID(cluster.uuid)
 
@@ -554,6 +562,8 @@ class ClustersController(base.Controller):
         cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:update', cluster.as_dict(),
                        action='cluster:update')
+        policy.enforce(context, "cluster:update_health_status",
+                       action="cluster:update_health_status")
         try:
             cluster_dict = cluster.as_dict()
             new_cluster = Cluster(**api_utils.apply_jsonpatch(cluster_dict,
@@ -571,7 +581,8 @@ class ClustersController(base.Controller):
                 delta.add(field)
 
         validation.validate_cluster_properties(delta)
-        return cluster, new_cluster.node_count
+        return (cluster, new_cluster.node_count,
+                new_cluster.health_status, new_cluster.health_status_reason)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, cluster_ident):

@@ -116,7 +116,7 @@ def get_test_cluster(**kw):
         if attr in kw:
             attrs[attr] = kw[attr]
     # Required only in PeriodicTestCase, may break other tests
-    for attr in ['keypair', 'health_status']:
+    for attr in ['keypair', 'health_status', 'health_status_reason']:
         if attr in kw:
             attrs[attr] = kw[attr]
 

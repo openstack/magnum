@@ -97,7 +97,8 @@ class Handler(object):
 
         return cluster
 
-    def cluster_update(self, context, cluster, node_count, rollback=False):
+    def cluster_update(self, context, cluster, node_count,
+                       health_status, health_status_reason, rollback=False):
         LOG.debug('cluster_heat cluster_update')
 
         osc = clients.OpenStackClients(context)
@@ -122,8 +123,20 @@ class Handler(object):
         # Updates will be only reflected to the default worker
         # nodegroup.
         worker_ng = cluster.default_ng_worker
-        if worker_ng.node_count == node_count:
+        if (worker_ng.node_count == node_count and
+                cluster.health_status == health_status and
+                cluster.health_status_reason == health_status_reason):
             return
+
+        cluster.health_status = health_status
+        cluster.health_status_reason = health_status_reason
+
+        # It's not necessary to trigger driver's cluster update if it's
+        # only health status update
+        if worker_ng.node_count == node_count:
+            cluster.save()
+            return cluster
+
         # Backup the old node count so that we can restore it
         # in case of an exception.
         old_node_count = worker_ng.node_count

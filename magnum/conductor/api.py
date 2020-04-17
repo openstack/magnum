@@ -49,13 +49,21 @@ class API(rpc_service.API):
     def cluster_delete_async(self, uuid):
         self._cast('cluster_delete', uuid=uuid)
 
-    def cluster_update(self, cluster, node_count):
+    def cluster_update(self, cluster, node_count,
+                       health_status, health_status_reason):
         return self._call(
-            'cluster_update', cluster=cluster, node_count=node_count)
+            'cluster_update', cluster=cluster, node_count=node_count,
+            health_status=health_status,
+            health_status_reason=health_status_reason)
 
-    def cluster_update_async(self, cluster, node_count, rollback=False):
+    def cluster_update_async(self, cluster, node_count,
+                             health_status, health_status_reason,
+                             rollback=False):
         self._cast('cluster_update', cluster=cluster,
-                   node_count=node_count, rollback=rollback)
+                   node_count=node_count,
+                   health_status=health_status,
+                   health_status_reason=health_status_reason,
+                   rollback=rollback)
 
     def cluster_resize(self, cluster, node_count, nodes_to_remove,
                        nodegroup, rollback=False):

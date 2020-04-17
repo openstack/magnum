@@ -29,7 +29,8 @@ from magnum import objects
 
 CONF = magnum.conf.CONF
 
-cluster_update_allowed_properties = set(['node_count'])
+cluster_update_allowed_properties = set(['node_count', 'health_status',
+                                         'health_status_reason'])
 federation_update_allowed_properties = set(['member_ids', 'properties'])
 
 

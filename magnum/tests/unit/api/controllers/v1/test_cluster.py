@@ -259,13 +259,15 @@ class TestPatch(api_base.FunctionalTest):
         self.cluster_template_obj = obj_utils.create_test_cluster_template(
             self.context)
         self.cluster_obj = obj_utils.create_test_cluster(
-            self.context, name='cluster_example_A', node_count=3)
+            self.context, name='cluster_example_A', node_count=3,
+            health_status='UNKNOWN', health_status_reason={})
         p = mock.patch.object(rpcapi.API, 'cluster_update_async')
         self.mock_cluster_update = p.start()
         self.mock_cluster_update.side_effect = self._sim_rpc_cluster_update
         self.addCleanup(p.stop)
 
-    def _sim_rpc_cluster_update(self, cluster, node_count, rollback=False):
+    def _sim_rpc_cluster_update(self, cluster, node_count, health_status,
+                                health_status_reason, rollback=False):
         cluster.status = 'UPDATE_IN_PROGRESS'
         default_ng_worker = cluster.default_ng_worker
         default_ng_worker.node_count = node_count
@@ -434,7 +436,8 @@ class TestPatch(api_base.FunctionalTest):
             headers={'OpenStack-API-Version': 'container-infra 1.3'})
 
         self.mock_cluster_update.assert_called_once_with(
-            mock.ANY, node_count, True)
+            mock.ANY, node_count, self.cluster_obj.health_status,
+            self.cluster_obj.health_status_reason, True)
         self.assertEqual(202, response.status_code)
 
     def test_update_cluster_with_rollback_disabled(self):
@@ -446,7 +449,8 @@ class TestPatch(api_base.FunctionalTest):
             headers={'OpenStack-API-Version': 'container-infra 1.3'})
 
         self.mock_cluster_update.assert_called_once_with(
-            mock.ANY, node_count, False)
+            mock.ANY, node_count, self.cluster_obj.health_status,
+            self.cluster_obj.health_status_reason, False)
         self.assertEqual(202, response.status_code)
 
     def test_remove_ok(self):
