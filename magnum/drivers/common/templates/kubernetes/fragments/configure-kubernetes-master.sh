@@ -172,6 +172,8 @@ EOF
     cat > /etc/systemd/system/kubelet.service <<EOF
 [Unit]
 Description=Kubelet via Hyperkube (System Container)
+Wants=rpc-statd.service
+
 [Service]
 EnvironmentFile=/etc/sysconfig/heat-params
 EnvironmentFile=/etc/kubernetes/config
