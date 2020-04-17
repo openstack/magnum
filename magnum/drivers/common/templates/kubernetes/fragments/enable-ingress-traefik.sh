@@ -12,6 +12,9 @@ data:
   traefik.toml: |-
     logLevel = "INFO"
     defaultEntryPoints = ["http", "https"]
+    [metrics]
+      [metrics.prometheus]
+        entryPoint = "metrics"
     [api]
     [kubernetes]
     [entryPoints]
@@ -19,6 +22,8 @@ data:
         address = ":80"
       [entryPoints.https]
         address = ":443"
+      [entryPoints.metrics]
+        address = ":8082"
         [entryPoints.https.tls]
           cipherSuites = [
             "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
@@ -73,6 +78,8 @@ spec:
           hostPort: 443
         - name: admin
           containerPort: 8080
+        - name: metrics
+          containerPort: 8082
         securityContext:
           capabilities:
             drop:
@@ -95,6 +102,8 @@ apiVersion: v1
 metadata:
   name: ingress-traefik
   namespace: kube-system
+  labels:
+    k8s-app: traefik
 spec:
   selector:
     k8s-app: ingress-traefik-backend
@@ -108,6 +117,10 @@ spec:
     - name: admin
       protocol: TCP
       port: 8080
+    - name: metrics
+      port: 9100
+      protocol: TCP
+      targetPort: metrics
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -153,6 +166,7 @@ metadata:
   namespace: kube-system
 EOF
 )
+
 writeFile $INGRESS_TRAEFIK_MANIFEST "$INGRESS_TRAEFIK_MANIFEST_CONTENT"
 
 INGRESS_TRAEFIK_BIN="/srv/magnum/kubernetes/bin/ingress-traefik"
