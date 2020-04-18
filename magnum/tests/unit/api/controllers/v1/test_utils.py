@@ -14,7 +14,8 @@
 #    under the License.
 
 import jsonpatch
-import mock
+from unittest import mock
+
 from oslo_utils import uuidutils
 import wsme
 

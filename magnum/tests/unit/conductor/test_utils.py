@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 from mock import patch
+from unittest import mock
 
 from magnum.conductor import utils
 from magnum import objects

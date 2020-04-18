@@ -14,8 +14,8 @@
 
 
 from glanceclient import exc as glance_exception
-import mock
 from novaclient import exceptions as nova_exc
+from unittest import mock
 
 from magnum.api import attr_validator
 from magnum.common import exception

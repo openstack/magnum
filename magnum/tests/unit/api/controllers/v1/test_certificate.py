@@ -10,7 +10,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import mock
+from unittest import mock
+
 from oslo_utils import uuidutils
 
 from magnum.api.controllers.v1 import certificate as api_cert

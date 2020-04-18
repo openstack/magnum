@@ -14,7 +14,7 @@
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-import mock
+from unittest import mock
 
 from magnum.common.x509 import operations
 from magnum.tests import base

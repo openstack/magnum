@@ -15,9 +15,9 @@
 
 import copy
 import os
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging

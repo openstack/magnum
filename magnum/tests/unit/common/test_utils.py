@@ -18,8 +18,8 @@ import os
 import os.path
 import shutil
 import tempfile
+from unittest import mock
 
-import mock
 from oslo_concurrency import processutils
 from oslo_utils import netutils
 

@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import mock
+from unittest import mock
 
 from magnum.common import exception
 from magnum.common import octavia

@@ -14,10 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from unittest import mock
+
 import six
 
 from heatclient import exc
-import mock
 from mock import patch
 from oslo_service import loopingcall
 from pycadf import cadftaxonomy as taxonomy

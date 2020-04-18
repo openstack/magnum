@@ -13,9 +13,9 @@
 from barbicanclient.v1 import client as barbicanclient
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient
-import mock
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
+from unittest import mock
 
 from magnum.common import clients
 from magnum.common import exception
