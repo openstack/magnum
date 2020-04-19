@@ -1239,10 +1239,13 @@ _`kube_tag`
   container tag for `Fedora Atomic
   <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_ or
   `Fedora CoreOS and Fedora Atomic (with use_podman=true label)
-  <https://github.com/kubernetes/kubernetes/releases>`_.  If unset, the current
+  <https://github.com/kubernetes/kubernetes/releases>`_. If unset, the current
   Magnum version's default Kubernetes release is installed. `Take a look at
   the Wiki for a compatibility matrix between Kubernetes and Magnum Releases
   <https://wiki.openstack.org/wiki/Magnum#Compatibility_Matrix>`_.
+  Stein default: v1.11.6
+  Train default: v1.15.7
+  Ussuri default: v1.18.2
 
 _`heapster_enabled`
   heapster_enabled is used to enable disable the installation of heapster.
@@ -1261,17 +1264,13 @@ _`metrics_server_enabled`
   Stein default: true
 
 _`cloud_provider_tag`
-  This label allows users to select `a specific release for the openstack
-  cloud provider
-  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
-  If unset, the current Magnum version's default
-  kubernetes/cloud-provider-openstack release is installed.
-  For version compatibility, please consult the `release page
-  <https://github.com/kubernetes/cloud-provider-openstack/releases>`_ of
-  the cloud-provider. The images are hosted `here
-  <https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/>`_.
+  This label allows users to override the default
+  openstack-cloud-controller-manager container image tag. Refer to
+  `openstack-cloud-controller-manager page for available tags
+  <https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags>`_.
   Stein default: v0.2.0
   Train default: v1.15.0
+  Ussuri default: v1.18.0
 
 _`etcd_tag`
   This label allows users to select `a specific etcd version,
@@ -1324,6 +1323,7 @@ _`kube_dashboard_enabled`
 _`cert_manager_api`
   This label enables the kubernetes `certificate manager api
   <https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/>`_.
+
 _`kubelet_options`
   This label can hold any additional options to be passed to the kubelet.
   For more details, refer to the `kubelet admin guide
@@ -1380,10 +1380,11 @@ _`cinder_csi_enabled`
   Default: false
 
 _`cinder_csi_plugin_tag`
-  This label allows users to override the default container tag for Cinder CSI plugin.
-  For additional tags, `refer to Cinder CSI plugin page
+  This label allows users to override the default cinder-csi-plugin container
+  image tag. Refer to `cinder-csi-plugin page for available tags
   <https://hub.docker.com/r/k8scloudprovider/cinder-csi-plugin/tags>`_.
-  Ussuri-default: v1.16.0
+  Train default: v1.16.0
+  Ussuri default: v1.18.0
 
 _`csi_attacher_tag`
   This label allows users to override the default container tag for CSI attacher.
@@ -1421,12 +1422,12 @@ _`keystone_auth_enabled`
   authorization and authentication.
 
 _`k8s_keystone_auth_tag`
-  This label allows users to select `a specific k8s_keystone_auth
-  version, based on its container tag
-  <https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags/>`_.
-  Stein-default: v1.13.0
-  Train-default: v1.14.0
-  Ussuri-default: v1.15.0
+  This label allows users to override the default k8s-keystone-auth container
+  image tag. Refer to `k8s-keystone-auth page for available tags
+  <https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags>`_.
+  Stein default: v1.13.0
+  Train default: v1.14.0
+  Ussuri default: v1.18.0
 
 _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the
@@ -1498,11 +1499,20 @@ _`draino_tag`
   This label allows users to select a specific Draino version.
 
 _`magnum_auto_healer_tag`
-  This label allows users to select a specific magnum-auto-healer version.
-  The default value for Train: v1.15.0
+  This label allows users to override the default magnum-auto-healer container
+  image tag. Refer to `magnum-auto-healer page for available tags
+  <https://hub.docker.com/r/k8scloudprovider/magnum-auto-healer/tags>`_.
+  Stein default: v1.15.0
+  Train default: v1.15.0
+  Ussuri default: v1.18.0
 
 _`autoscaler_tag`
-  This label allows users to select a specific Cluster Autoscaler version.
+  This label allows users to override the default cluster-autoscaler container
+  image tag. Refer to `cluster-autoscaler page for available tags
+  <https://hub.docker.com/r/openstackmagnum/cluster-autoscaler/tags>`_.
+  Stein default: v1.0
+  Train default: v1.0
+  Ussuri default: v1.18.1
 
 _`min_node_count`
   The minmium node count of the cluster when doing auto scaling or auto

@@ -1,0 +1,11 @@
+---
+upgrade:
+  - |
+    Bump up default versions for fedora-coreos driver
+    kube_tag: v1.18.2
+    autoscaler_tag: v1.18.1
+    cloud_provider_tag: v1.18.0
+    cinder_csi_plugin_tag: v1.18.0
+    k8s_keystone_auth_tag: v1.18.0
+    magnum_auto_healer_tag: v1.18.0
+    octavia_ingress_controller_tag: v1.18.0
