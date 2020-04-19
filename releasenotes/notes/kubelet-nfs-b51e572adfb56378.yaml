@@ -1,0 +1,10 @@
+---
+fixes:
+  - |
+    For fcos-kubelet, add rpc-statd dependency.
+    To mount nfs volumes with the embedded volume
+    pkg [0], rpc-statd is required and should be
+    started by mount.nfs. When running kubelet
+    in a chroot this fails. With atomic containers
+    it used to work.
+    [0] https://github.com/kubernetes/kubernetes/tree/master/pkg/volume/nfs
