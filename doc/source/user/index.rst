@@ -1471,6 +1471,12 @@ _`tiller_namespace`
   Configure in which namespace tiller is going to be installed.
   Default: magnum-tiller
 
+_`helm_client_tag`
+  The version of the helm client to use.
+  The image can be stored in a private registry and the
+  cluster can pull it using the container_infra_prefix label.
+  Default: dev
+
 _`master_lb_floating_ip_enabled`
   Controls if Magnum allocates floating IP for the load balancer of master
   nodes. This label only takes effect when the template property

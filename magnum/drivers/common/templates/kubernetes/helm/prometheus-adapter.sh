@@ -89,7 +89,7 @@ spec:
       serviceAccountName: tiller
       containers:
       - name: config-helm
-        image: ${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}helm-client:dev
+        image: ${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}helm-client:${HELM_CLIENT_TAG}
         command:
         - bash
         args:

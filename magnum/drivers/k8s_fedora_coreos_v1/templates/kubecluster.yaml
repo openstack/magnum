@@ -736,6 +736,11 @@ parameters:
     description: namespace where tiller will be installed.
     default: "magnum-tiller"
 
+  helm_client_tag:
+    type: string
+    description: tag of helm container
+    default: "dev"
+
   auto_healing_enabled:
     type: boolean
     description: >
@@ -1233,6 +1238,7 @@ resources:
           tiller_enabled: {get_param: tiller_enabled}
           tiller_tag: {get_param: tiller_tag}
           tiller_namespace: {get_param: tiller_namespace}
+          helm_client_tag: {get_param: helm_client_tag}
           node_problem_detector_tag: {get_param: node_problem_detector_tag}
           nginx_ingress_controller_tag: {get_param: nginx_ingress_controller_tag}
           nginx_ingress_controller_chart_tag: {get_param: nginx_ingress_controller_chart_tag}
