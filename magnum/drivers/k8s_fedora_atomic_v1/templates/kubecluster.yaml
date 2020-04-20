@@ -691,7 +691,7 @@ parameters:
   prometheus_operator_chart_tag:
     type: string
     description: The stable/prometheus-operator chart version to use.
-    default: v8.2.2
+    default: v8.12.13
 
   prometheus_adapter_enabled:
     type: boolean
