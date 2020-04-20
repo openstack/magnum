@@ -100,12 +100,6 @@
       devstack_python3: 1
 
 - job:
-    name: magnum-functional-api
-    parent: magnum-functional-base
-    vars:
-      coe: api
-
-- job:
     name: magnum-functional-coe
     parent: magnum-functional-base
     nodeset:
@@ -298,14 +292,14 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - magnum-functional-api:
-           voting: false
         - openstack-tox-cover:
            voting: false
+        - magnum-tempest-plugin-tests-api
         - magnum-container-build
     gate:
       queue: magnum
-      jobs: []
+      jobs:
+        - magnum-tempest-plugin-tests-api
     experimental:
       jobs:
         - magnum-functional-dcos
