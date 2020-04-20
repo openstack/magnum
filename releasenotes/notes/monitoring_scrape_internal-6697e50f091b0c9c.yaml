@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Scrape metrics from kube-{controller-manager,scheduler}.
+    Disable PrometheusRule for etcd.
