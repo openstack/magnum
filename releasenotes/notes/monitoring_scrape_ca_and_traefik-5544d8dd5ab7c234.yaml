@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Prometheus server now scrape metrics from traefik proxy.
+    Prometheus server now scrape metrics from cluster autoscaler.
