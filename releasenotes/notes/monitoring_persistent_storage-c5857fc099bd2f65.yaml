@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Added metrics_retention_days magnum label allowing user to specify
+    prometheus server scraped metrics retention days (default: 14).
+    Added metrics_retention_size_gi magnum label allowing user to specify
+    prometheus server metrics storage maximum size in Gi (default: 14).
+    Added metrics_interval_seconds allowing user to specify prometheus
+    scrape frequency in seconds (default: 30).
+    Added metrics_storage_class_name allowing user to specify the
+    storageClass to use as external retention for pod fail-over data
+    persistency.

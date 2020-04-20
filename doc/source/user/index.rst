@@ -320,6 +320,14 @@ the table are linked to more details elsewhere in the user guide.
 | `monitoring_enabled`_                 | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `monitoring_retention_days`_          | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `monitoring_retention_size`_          | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `monitoring_storage_class_name`_      | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `monitoring_interval_seconds`_        | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `prometheus_operator_chart_tag`_      | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `prometheus_adapter_enabled`_         | - true             | true          |
@@ -1474,6 +1482,25 @@ _`monitoring_enabled`
   To use this service tiller_enabled must be true when using
   helm_client_tag<v3.0.0.
   Default: false
+
+_`monitoring_retention_days`
+  The number of time (in days) that prometheus metrics should be kept.
+  Default: 14
+
+_`monitoring_retention_size`
+  The maximum memory (in GiB) allowed to be used by prometheus server to
+  store metrics.
+  Default: 14
+
+_`monitoring_interval_seconds`
+  The time interval (in seconds) between consecutive metric scrapings.
+  Default: 30
+
+_`monitoring_storage_class_name`
+  The kubernetes storage class name to use for the prometheus pvc.
+  Using this label will activate the usage of a pvc instead of local
+  disk space.
+  Default: ""
 
 _`prometheus_adapter_enabled`
   Enable installation of cluster custom metrics provided by the

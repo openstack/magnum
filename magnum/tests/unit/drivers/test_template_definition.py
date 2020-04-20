@@ -539,6 +539,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'k8s_keystone_auth_tag')
         monitoring_enabled = mock_cluster.labels.get(
             'monitoring_enabled')
+        monitoring_retention_days = mock_cluster.labels.get(
+            'monitoring_retention_days')
+        monitoring_retention_size = mock_cluster.labels.get(
+            'monitoring_retention_size')
+        monitoring_interval_seconds = mock_cluster.labels.get(
+            'monitoring_interval_seconds')
+        monitoring_storage_class_name = mock_cluster.labels.get(
+            'monitoring_storage_class_name')
         prometheus_operator_chart_tag = mock_cluster.labels.get(
             'prometheus_operator_chart_tag')
         prometheus_adapter_enabled = mock_cluster.labels.get(
@@ -674,6 +682,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'monitoring_enabled': monitoring_enabled,
+            'monitoring_retention_days': monitoring_retention_days,
+            'monitoring_retention_size': monitoring_retention_size,
+            'monitoring_interval_seconds': monitoring_interval_seconds,
+            'monitoring_storage_class_name': monitoring_storage_class_name,
             'prometheus_operator_chart_tag': prometheus_operator_chart_tag,
             'prometheus_adapter_enabled': prometheus_adapter_enabled,
             'prometheus_adapter_chart_tag': prometheus_adapter_chart_tag,
@@ -1070,6 +1082,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'k8s_keystone_auth_tag')
         monitoring_enabled = mock_cluster.labels.get(
             'monitoring_enabled')
+        monitoring_retention_days = mock_cluster.labels.get(
+            'monitoring_retention_days')
+        monitoring_retention_size = mock_cluster.labels.get(
+            'monitoring_retention_size')
+        monitoring_interval_seconds = mock_cluster.labels.get(
+            'monitoring_interval_seconds')
+        monitoring_storage_class_name = mock_cluster.labels.get(
+            'monitoring_storage_class_name')
         prometheus_operator_chart_tag = mock_cluster.labels.get(
             'prometheus_operator_chart_tag')
         prometheus_adapter_enabled = mock_cluster.labels.get(
@@ -1208,6 +1228,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'monitoring_enabled': monitoring_enabled,
+            'monitoring_retention_days': monitoring_retention_days,
+            'monitoring_retention_size': monitoring_retention_size,
+            'monitoring_interval_seconds': monitoring_interval_seconds,
+            'monitoring_storage_class_name': monitoring_storage_class_name,
             'prometheus_operator_chart_tag': prometheus_operator_chart_tag,
             'prometheus_adapter_enabled': prometheus_adapter_enabled,
             'prometheus_adapter_chart_tag': prometheus_adapter_chart_tag,
