@@ -41,8 +41,6 @@ if [[ -e /etc/ci/mirror_info.sh ]]; then
     source /etc/ci/mirror_info.sh
 fi
 
-NODEPOOL_ATOMIC_MIRROR=${NODEPOOL_FEDORA_MIRROR:-https://download.fedoraproject.org/pub/alt}
-
 if [ "$coe" = "mesos" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-ocata.qcow2"
 elif [ "$coe" = "k8s-coreos" ]; then
@@ -88,8 +86,8 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SPECS_DISK=10"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_EPHEMERAL_DISK=5"
 else
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='${NODEPOOL_ATOMIC_MIRROR}/atomic/stable/Fedora-29-updates-20190820.0/AtomicHost/x86_64/images/Fedora-AtomicHost-29-20190820.0.x86_64.qcow2'"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='Fedora-AtomicHost-29-20190820.0.x86_64'"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/31.20200323.3.2/x86_64/fedora-coreos-31.20200323.3.2-openstack.x86_64.qcow2.xz'"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-coreos-31.20200323.3.2-openstack.x86_64'"
 fi
 
 # Enable magnum plugin in the last step

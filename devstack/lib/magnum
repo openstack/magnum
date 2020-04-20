@@ -280,9 +280,13 @@ function magnum_register_image {
     if [ ! -z "$ubuntu" ]; then
         magnum_image_property=$magnum_image_property"ubuntu"
     fi
-    local coreos="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "coreos" || true;)"
+    local coreos="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "^coreos" || true;)"
     if [ ! -z "$coreos" ]; then
         magnum_image_property=$magnum_image_property"coreos"
+    fi
+    local fedora_coreos="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "fedora-coreos" || true;)"
+    if [ ! -z "$fedora_coreos" ]; then
+        magnum_image_property=$magnum_image_property"fedora-coreos"
     fi
     # os_distro property for fedora ironic image
     local fedora_ironic="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -i "ironic" \
@@ -294,7 +298,7 @@ function magnum_register_image {
     # get the image name
     local image_filename=$(basename "$MAGNUM_GUEST_IMAGE_URL")
     local image_name=""
-    for extension in "tgz" "img" "qcow2" "iso" "vhd" "vhdx" "tar.gz" "img.gz" "img.bz2" "vhd.gz" "vhdx.gz"
+    for extension in "tgz" "img" "qcow2" "iso" "vhd" "vhdx" "tar.gz" "img.gz" "img.bz2" "vhd.gz" "vhdx.gz" "qcow2.xz"
     do
         if [ $(expr match "${image_filename}" ".*\.${extension}$") -ne 0 ]; then
             image_name=$(basename "$image_filename" ".${extension}")
@@ -302,7 +306,7 @@ function magnum_register_image {
         fi
     done
     if [ -z ${image_name} ]; then
-        echo "Unknown image extension in $image_filename, supported extensions: tgz, img, qcow2, iso, vhd, vhdx, tar.gz, img.gz, img.bz2, vhd.gz, vhdx.gz"; false
+        echo "Unknown image extension in $image_filename, supported extensions: tgz, img, qcow2, iso, vhd, vhdx, tar.gz, img.gz, img.bz2, vhd.gz, vhdx.gz, qcow2.xz"; false
     fi
 
     openstack image set $image_name $magnum_image_property
