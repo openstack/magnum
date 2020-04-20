@@ -547,6 +547,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'monitoring_interval_seconds')
         monitoring_storage_class_name = mock_cluster.labels.get(
             'monitoring_storage_class_name')
+        monitoring_ingress_enabled = mock_cluster.labels.get(
+            'monitoring_ingress_enabled')
+        cluster_basic_auth_secret = mock_cluster.labels.get(
+            'cluster_basic_auth_secret')
+        cluster_root_domain_name = mock_cluster.labels.get(
+            'cluster_root_domain_name')
         prometheus_operator_chart_tag = mock_cluster.labels.get(
             'prometheus_operator_chart_tag')
         prometheus_adapter_enabled = mock_cluster.labels.get(
@@ -686,6 +692,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'monitoring_retention_size': monitoring_retention_size,
             'monitoring_interval_seconds': monitoring_interval_seconds,
             'monitoring_storage_class_name': monitoring_storage_class_name,
+            'monitoring_ingress_enabled': monitoring_ingress_enabled,
+            'cluster_basic_auth_secret': cluster_basic_auth_secret,
+            'cluster_root_domain_name': cluster_root_domain_name,
             'prometheus_operator_chart_tag': prometheus_operator_chart_tag,
             'prometheus_adapter_enabled': prometheus_adapter_enabled,
             'prometheus_adapter_chart_tag': prometheus_adapter_chart_tag,
@@ -1090,6 +1099,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'monitoring_interval_seconds')
         monitoring_storage_class_name = mock_cluster.labels.get(
             'monitoring_storage_class_name')
+        monitoring_ingress_enabled = mock_cluster.labels.get(
+            'monitoring_ingress_enabled')
+        cluster_basic_auth_secret = mock_cluster.labels.get(
+            'cluster_basic_auth_secret')
+        cluster_root_domain_name = mock_cluster.labels.get(
+            'cluster_root_domain_name')
         prometheus_operator_chart_tag = mock_cluster.labels.get(
             'prometheus_operator_chart_tag')
         prometheus_adapter_enabled = mock_cluster.labels.get(
@@ -1232,6 +1247,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'monitoring_retention_size': monitoring_retention_size,
             'monitoring_interval_seconds': monitoring_interval_seconds,
             'monitoring_storage_class_name': monitoring_storage_class_name,
+            'monitoring_ingress_enabled': monitoring_ingress_enabled,
+            'cluster_basic_auth_secret': cluster_basic_auth_secret,
+            'cluster_root_domain_name': cluster_root_domain_name,
             'prometheus_operator_chart_tag': prometheus_operator_chart_tag,
             'prometheus_adapter_enabled': prometheus_adapter_enabled,
             'prometheus_adapter_chart_tag': prometheus_adapter_chart_tag,
