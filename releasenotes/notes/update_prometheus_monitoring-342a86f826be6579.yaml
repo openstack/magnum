@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add to prometheus federation exported metrics the cluster_uuid label.
+upgrade:
+  - |
+    Bumped prometheus-operator chart tag to 8.12.13.
+    Added container_infra_prefix to missing prometheusOperator images.

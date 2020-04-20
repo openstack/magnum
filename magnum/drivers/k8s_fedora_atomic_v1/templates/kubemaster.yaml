@@ -468,12 +468,10 @@ parameters:
   monitoring_enabled:
     type: boolean
     description: Enable or disable prometheus-operator monitoring solution.
-    default: false
 
   prometheus_operator_chart_tag:
     type: string
     description: The stable/prometheus-operator chart version to use.
-    default: 5.12.3
 
   prometheus_adapter_enabled:
     type: boolean
