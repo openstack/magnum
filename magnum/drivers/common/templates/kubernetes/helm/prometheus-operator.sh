@@ -13,6 +13,7 @@ CHART_NAME="prometheus-operator"
 
 if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
 
+    #######################
     # Calculate resources needed to run the Prometheus Monitoring Solution
     # MAX_NODE_COUNT so we can have metrics even if cluster scales
     PROMETHEUS_SERVER_CPU=$(expr 128 + 7 \* ${MAX_NODE_COUNT} )
@@ -29,6 +30,47 @@ if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; th
     if [ "$(echo ${VERIFY_CA} | tr '[:upper:]' '[:lower:]')" == "false" ]; then
         INSECURE_SKIP_VERIFY="True"
     fi
+
+    #######################
+    # Set up definitions for ingress objects
+
+    # Ensure name conformity
+    INGRESS_CONTROLLER=$(echo ${INGRESS_CONTROLLER} | tr '[:upper:]' '[:lower:]')
+    if [ "${INGRESS_CONTROLLER}" == "nginx" ]; then
+        :
+    elif [ "${INGRESS_CONTROLLER}" == "traefik" ]; then
+        APP_ADDITIONAL_SERVICE_MONITORS=$(cat << EOF
+      additionalServiceMonitors:
+      - name: prometheus-traefik-metrics
+        selector:
+          matchLabels:
+            k8s-app: traefik
+        namespaceSelector:
+          matchNames:
+          - kube-system
+        endpoints:
+        - path: /metrics
+          port: metrics
+EOF
+        )
+    fi #END INGRESS
+
+    if [ "$(echo ${AUTO_SCALING_ENABLED } | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+        APP_ADDITIONAL_POD_MONITORS=$(cat << EOF
+      additionalPodMonitors:
+      - name: prometheus-cluster-autoscaler
+        podMetricsEndpoints:
+        - port: metrics
+          scheme: http
+        namespaceSelector:
+          matchNames:
+          - kube-system
+        selector:
+          matchLabels:
+            app: cluster-autoscaler
+EOF
+        )
+    fi #END AUTOSCALING
 
     HELM_MODULE_CONFIG_FILE="/srv/magnum/kubernetes/helm/${CHART_NAME}.yaml"
     [ -f ${HELM_MODULE_CONFIG_FILE} ] || {
@@ -66,6 +108,7 @@ data:
     fi
 
   install-${CHART_NAME}-values.yaml:  |
+    ---
     nameOverride: prometheus
     fullnameOverride: prometheus
 
@@ -156,6 +199,8 @@ data:
         # secrets:
         # - etcd-certificates
         priorityClassName: "system-cluster-critical"
+${APP_ADDITIONAL_SERVICE_MONITORS}
+${APP_ADDITIONAL_POD_MONITORS}
 
 ---
 apiVersion: batch/v1
