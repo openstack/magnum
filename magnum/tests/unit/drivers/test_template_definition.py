@@ -369,6 +369,7 @@ class BaseK8sTemplateDefinitionTestCase(base.TestCase):
         mock_stack.to_dict.return_value = {'outputs': outputs}
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.floating_ip_enabled = floating_ip_enabled
+        self.mock_cluster.floating_ip_enabled = floating_ip_enabled
 
         definition.update_outputs(mock_stack, mock_cluster_template,
                                   self.mock_cluster)
@@ -1643,6 +1644,7 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
         mock_stack.to_dict.return_value = {'outputs': outputs}
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.floating_ip_enabled = floating_ip_enabled
+        self.mock_cluster.floating_ip_enabled = floating_ip_enabled
 
         definition.update_outputs(mock_stack, mock_cluster_template,
                                   self.mock_cluster)

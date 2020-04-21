@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fix an issue with private clusters getting stuck in CREATE_IN_PROGRESS
+    status where floating_ip_enabled=True in the cluster template but this is
+    disabled when the cluster is created.

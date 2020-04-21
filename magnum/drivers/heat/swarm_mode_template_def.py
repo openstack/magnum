@@ -57,7 +57,7 @@ class MasterAddressOutputMapping(ServerAddressOutputMapping):
                              'swarm_secondary_masters_private']
 
     def set_output(self, stack, cluster_template, cluster):
-        if not cluster_template.floating_ip_enabled:
+        if not cluster.floating_ip_enabled:
             self.heat_output = self.private_ip_output_key
 
         LOG.debug("Using heat_output: %s", self.heat_output)
@@ -76,7 +76,7 @@ class NodeAddressOutputMapping(ServerAddressOutputMapping):
     private_ip_output_key = 'swarm_nodes_private'
 
     def set_output(self, stack, cluster_template, cluster):
-        if not cluster_template.floating_ip_enabled:
+        if not cluster.floating_ip_enabled:
             self.heat_output = self.private_ip_output_key
 
         LOG.debug("Using heat_output: %s", self.heat_output)
