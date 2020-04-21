@@ -1,4 +1,1 @@
-============
-Contributing
-============
 .. include:: ../../../CONTRIBUTING.rst
