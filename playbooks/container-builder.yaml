@@ -100,10 +100,11 @@
         - docker_image:
             path: "{{ magnum_src_dir }}/dockerfiles/helm-client"
             name: "{{ magnum_repository }}/helm-client"
-            tag: "{{ helm_version }}"
+            tag: "{{ item.version }}"
             buildargs:
-              HELM_VERSION: "{{ helm_version }}"
+              HELM_VERSION: "{{ item.version }}"
             push: no
+          with_items: "{{ helm_versions }}"
           retries: 10
 
     - name: "Build cluster-autoscaler image"
