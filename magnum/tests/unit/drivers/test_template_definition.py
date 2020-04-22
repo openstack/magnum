@@ -311,6 +311,28 @@ class TemplateDefinitionTestCase(base.TestCase):
             env_files
         )
 
+    def test_add_fip_master_lb_fip_disabled_cluster_fip_enabled(self):
+        mock_cluster_template = mock.MagicMock(
+            floating_ip_enabled=False,
+            master_lb_enabled=True,
+            labels={"master_lb_floating_ip_enabled": "false"}
+        )
+        mock_cluster = mock.MagicMock(
+            labels={"master_lb_floating_ip_enabled": "false"},
+            floating_ip_enabled=True,)
+        env_files = []
+
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
+                                  mock_cluster)
+
+        self.assertEqual(
+            [
+                cmn_tdef.COMMON_ENV_PATH + 'enable_floating_ip.yaml',
+                cmn_tdef.COMMON_ENV_PATH + 'enable_lb_floating_ip.yaml'
+            ],
+            env_files
+        )
+
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_base_get_scale_params(self, mock_driver):
         mock_context = mock.MagicMock()
