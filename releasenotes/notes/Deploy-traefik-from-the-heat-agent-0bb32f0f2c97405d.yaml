@@ -1,0 +1,18 @@
+---
+fixes:
+  - |
+    Deploy traefik from the heat-agent
+
+    Use kubectl from the heat agent to apply the
+    traefik deployment. Current behaviour was to
+    create a systemd unit to send the manifests
+    to the API.
+
+    This way we will have only one way for applying
+    manifests to the API.
+
+    This change is triggered to adddress the kubectl
+    change [0] that is not using 127.0.0.1:8080 as
+    the default kubernetes API.
+
+    [0] https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.18.md#kubectl
