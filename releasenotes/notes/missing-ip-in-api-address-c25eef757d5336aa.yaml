@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    There was a corner case that when floating_ip_enabled=False,
+    master_lb_enabled=True,master_lb_floating_ip_enabled=False in
+    cluster template, but setting floating_ip_enabled=True when
+    creating the cluster, which causes missing IP address in the
+    api_address of cluster. Now the isssue has been fixed.
