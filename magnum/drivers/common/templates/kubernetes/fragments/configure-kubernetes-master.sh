@@ -380,6 +380,32 @@ sed -i '
     /^KUBE_ADMISSION_CONTROL=/ s/=.*/="'"${KUBE_ADMISSION_CONTROL}"'"/
 ' /etc/kubernetes/apiserver
 
+ADMIN_KUBECONFIG=/etc/kubernetes/admin.conf
+cat << EOF >> ${ADMIN_KUBECONFIG}
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: ${CERT_DIR}/ca.crt
+    server: https://127.0.0.1:$KUBE_API_PORT
+  name: ${CLUSTER_UUID}
+contexts:
+- context:
+    cluster: ${CLUSTER_UUID}
+    user: admin
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: admin
+  user:
+    as-user-extra: {}
+    client-certificate: ${CERT_DIR}/admin.crt
+    client-key: ${CERT_DIR}/admin.key
+EOF
+echo "export KUBECONFIG=${ADMIN_KUBECONFIG}" >> /etc/bashrc
+chown root:root ${ADMIN_KUBECONFIG}
+chmod 600 ${ADMIN_KUBECONFIG}
 
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true"
