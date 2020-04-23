@@ -78,7 +78,6 @@ ExecStartPre=/bin/mkdir -p /var/lib/containerd
 ExecStartPre=/bin/mkdir -p /var/lib/docker
 ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
 ExecStartPre=/bin/mkdir -p /opt/cni/bin
-ExecStartPre=-/bin/bash -c '/usr/bin/podman run --privileged --user root --net host --entrypoint /bin/bash --rm --volume /usr/local/bin:/host/usr/local/bin \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} -c "cp /usr/local/bin/kubectl /host/usr/local/bin/kubectl"'
 ExecStartPre=-/usr/bin/podman rm kubelet
 ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --privileged \\
