@@ -24,7 +24,12 @@ EOF
     # Because the PVC and Prometheus use different scales for the volume size
     # conversion is needed. The prometheus-monitoring value (in GB) is the conversion
     # with a ratio of (1 GiB = 1.073741824 GB) and then rounded to int
+
     MONITORING_RETENTION_SIZE_GB=$(echo | awk "{print int(${MONITORING_RETENTION_SIZE}*1.073741824)}")
+    APP_GRAFANA_PERSISTENT_STORAGE="false"
+    if [ "${MONITORING_STORAGE_CLASS_NAME}" != "" ]; then
+        APP_GRAFANA_PERSISTENT_STORAGE="true"
+    fi
 
     # Validate if communication node <-> master is secure or insecure
     PROTOCOL="https"
@@ -71,6 +76,10 @@ prometheus-operator:
         cpu: 100m
         memory: 128Mi
     adminPassword: ${GRAFANA_ADMIN_PASSWD}
+    persistence:
+      enabled: ${APP_GRAFANA_PERSISTENT_STORAGE}
+      storageClassName: ${MONITORING_STORAGE_CLASS_NAME}
+      size: 1Gi
 
   kubeApiServer:
     tlsConfig:

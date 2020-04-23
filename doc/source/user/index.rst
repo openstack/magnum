@@ -1500,6 +1500,9 @@ _`monitoring_storage_class_name`
   The kubernetes storage class name to use for the prometheus pvc.
   Using this label will activate the usage of a pvc instead of local
   disk space.
+  When using monitoring_storage_class_name 2 pvcs will be created.
+  One for the prometheus server which size is set by
+  monitoring_retention_size and one for grafana which is fixed at 1Gi.
   Default: ""
 
 _`prometheus_adapter_enabled`
