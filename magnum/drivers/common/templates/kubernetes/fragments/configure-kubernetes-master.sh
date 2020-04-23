@@ -87,7 +87,6 @@ EnvironmentFile=/etc/kubernetes/config
 EnvironmentFile=/etc/kubernetes/apiserver
 ExecStartPre=/bin/mkdir -p /etc/kubernetes/
 ExecStartPre=-/usr/bin/podman rm kube-apiserver
-ExecStartPre=-/bin/bash -c '/usr/bin/podman run --privileged --user root --net host --entrypoint /bin/bash --rm --volume /usr/local/bin:/host/usr/local/bin \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} -c "cp /usr/local/bin/kubectl /host/usr/local/bin/kubectl"'
 ExecStart=/bin/bash -c '/usr/bin/podman run --name kube-apiserver \\
     --net host \\
     --entrypoint /hyperkube \\
