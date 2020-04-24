@@ -26,6 +26,7 @@ RUN dnf -y --setopt=tsflags=nodocs --nogpgcheck install \
         python-lxml \
         python-pip \
         python-psutil \
+        hostname \
         redhat-rpm-config && \
     pip install --no-cache --no-cache-dir \
         dib-utils \
