@@ -555,11 +555,9 @@ def add_etcd_volume_env_file(env_files, cluster):
 
 
 def add_fip_env_file(env_files, cluster_template, cluster):
-    lb_fip_enabled = cluster.labels.get(
-        "master_lb_floating_ip_enabled",
-        cluster.floating_ip_enabled
-    )
-    master_lb_fip_enabled = strutils.bool_from_string(lb_fip_enabled)
+    lb_fip_enabled = cluster.labels.get("master_lb_floating_ip_enabled")
+    master_lb_fip_enabled = (strutils.bool_from_string(lb_fip_enabled) or
+                             cluster.floating_ip_enabled)
 
     if cluster.floating_ip_enabled:
         env_files.append(COMMON_ENV_PATH + 'enable_floating_ip.yaml')
