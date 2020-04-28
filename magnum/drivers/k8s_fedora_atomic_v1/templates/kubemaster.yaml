@@ -825,6 +825,7 @@ resources:
                   "$CONTAINERD_TARBALL_SHA256": {get_param: containerd_tarball_sha256}
                   "$POST_INSTALL_MANIFEST_URL": {get_param: post_install_manifest_url}
             - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
+            - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
