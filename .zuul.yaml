@@ -298,14 +298,14 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - magnum-functional-api
+        - magnum-functional-api:
+           voting: false
         - openstack-tox-cover:
            voting: false
         - magnum-container-build
     gate:
       queue: magnum
-      jobs:
-        - magnum-functional-api
+      jobs: []
     experimental:
       jobs:
         - magnum-functional-dcos

@@ -47,7 +47,7 @@ function create_test_data {
         openstack subnet set private-subnet --dns-nameserver 8.8.8.8
         local container_format="ami"
     else
-        local image_name="atomic"
+        local image_name="fedora-coreos"
         local container_format="bare"
     fi
 
