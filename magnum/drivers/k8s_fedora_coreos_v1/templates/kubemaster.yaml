@@ -1006,12 +1006,16 @@ resources:
       - name: kube_image_digest_input
       - name: ostree_remote_input
       - name: ostree_commit_input
+      - name: kube_service_account_key_input
+      - name: kube_service_account_private_key_input
       config:
         list_join:
           - "\n"
           -
             - "#!/bin/bash"
             - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
+            - get_file: ../../common/templates/kubernetes/fragments/rotate-kubernetes-ca-certs-master.sh
 
   upgrade_kubernetes_deployment:
     type: OS::Heat::SoftwareDeployment
@@ -1025,6 +1029,8 @@ resources:
         kube_image_digest_input: {get_param: kube_image_digest}
         ostree_remote_input: {get_param: ostree_remote}
         ostree_commit_input: {get_param: ostree_commit}
+        kube_service_account_key_input: {get_param: kube_service_account_key}
+        kube_service_account_private_key_input: {get_param: kube_service_account_private_key}
 
 outputs:
 

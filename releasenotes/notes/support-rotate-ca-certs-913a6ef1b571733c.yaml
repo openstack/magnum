@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Kubernetes cluster owner can now do CA cert rotate to re-generate CA of
+    the cluster, service account keys and the certs of all nodes will
+    be regenerated as well. Cluster user needs to get a new kubeconfig
+    to access kubernetes API. This function is only supported by
+    Fedora CoreOS driver.

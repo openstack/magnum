@@ -27,6 +27,21 @@ from magnum.common import policy
 from magnum import objects
 
 
+class ClusterID(wtypes.Base):
+    """API representation of a cluster ID
+
+    This class enforces type checking and value constraints, and converts
+    between the internal object model and the API representation of a cluster
+    ID.
+    """
+
+    uuid = types.uuid
+    """Unique UUID for this cluster"""
+
+    def __init__(self, uuid):
+        self.uuid = uuid
+
+
 class Certificate(base.APIBase):
     """API representation of a certificate.
 
@@ -167,7 +182,7 @@ class CertificateController(base.Controller):
                                                          cert_obj)
         return Certificate.convert_with_links(new_cert)
 
-    @expose.expose(None, types.uuid_or_name, status_code=202)
+    @expose.expose(ClusterID, types.uuid_or_name, status_code=202)
     def patch(self, cluster_ident):
         context = pecan.request.context
         cluster = api_utils.get_resource('Cluster', cluster_ident)
@@ -176,4 +191,7 @@ class CertificateController(base.Controller):
         if cluster.cluster_template.tls_disabled:
             raise exception.NotSupported("Rotating the CA certificate on a "
                                          "non-TLS cluster is not supported")
+
         pecan.request.rpcapi.rotate_ca_certificate(cluster)
+
+        return ClusterID(cluster.uuid)

@@ -350,6 +350,21 @@ parameters:
     type: string
     description: sha256 of the target containerd tarball.
 
+  kube_service_account_key:
+    type: string
+    hidden: true
+    description: >
+      The signed cert will be used to verify the k8s service account tokens
+      during authentication.
+      NOTE: This is used for worker nodes to trigger certs rotate.
+
+  kube_service_account_private_key:
+    type: string
+    hidden: true
+    description: >
+      The private key will be used to sign generated k8s service account
+      tokens.
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -582,12 +597,16 @@ resources:
       - name: kube_tag_input
       - name: ostree_remote_input
       - name: ostree_commit_input
+      - name: kube_service_account_key_input
+      - name: kube_service_account_private_key_input
       config:
         list_join:
           - "\n"
           -
             - "#!/bin/bash"
             - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
+            - get_file: ../../common/templates/kubernetes/fragments/rotate-kubernetes-ca-certs-worker.sh
 
   upgrade_kubernetes_deployment:
     type: OS::Heat::SoftwareDeployment
@@ -600,6 +619,8 @@ resources:
         kube_tag_input: {get_param: kube_tag}
         ostree_remote_input: {get_param: ostree_remote}
         ostree_commit_input: {get_param: ostree_commit}
+        kube_service_account_key_input: {get_param: kube_service_account_key}
+        kube_service_account_private_key_input: {get_param: kube_service_account_private_key}
 
 outputs:
 

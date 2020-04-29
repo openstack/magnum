@@ -2467,6 +2467,9 @@ Rotate Certificate
 
       openstack coe ca rotate secure-k8s-cluster
 
+  Please note that now the CA rotate function is only supported
+  by Fedora CoreOS driver.
+
 User Examples
 -------------
 

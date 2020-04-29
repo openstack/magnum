@@ -1472,7 +1472,8 @@ resources:
           containerd_version: {get_param: containerd_version}
           containerd_tarball_url: {get_param: containerd_tarball_url}
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
-
+          kube_service_account_key: {get_param: kube_service_account_key}
+          kube_service_account_private_key: {get_param: kube_service_account_private_key}
 outputs:
 
   api_address:
