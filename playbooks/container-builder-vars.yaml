@@ -18,7 +18,9 @@ magnum_images:
   - name: heat-container-agent
     tag: ussuri-dev
 
-helm_version: v2.12.3
+helm_versions:
+  - version: v2.16.6
+  - version: v3.2.0
 
 cluster_autoscaler_versions:
   - version: 1.16.5
