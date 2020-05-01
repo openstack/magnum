@@ -359,6 +359,10 @@ the table are linked to more details elsewhere in the user guide.
 | `kube_dashboard_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `kube_dashboard_version`_             | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `metrics_scraper_tag`_                | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `influx_grafana_dashboard_enabled`_   | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1577,6 +1581,15 @@ _`containerd_tarball_url`
 _`containerd_tarball_sha256`
   sha256 of the tarball fetched with containerd_tarball_url or from
   https://storage.googleapis.com/cri-containerd-release/.
+
+_`kube_dashboard_version`
+  Default version of Kubernetes dashboard.
+  Train default: v1.8.3
+  Ussuri default: v2.0.0
+
+_`metrics_scraper_tag`
+  The version of metrics-scraper used by kubernetes dashboard.
+  Ussuri default: v1.0.4
 
 External load balancer for services
 -----------------------------------

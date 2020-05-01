@@ -636,6 +636,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         containerd_tarball_sha256 = mock_cluster.labels.get(
             'containerd_tarball_sha256')
         kube_image_digest = mock_cluster.labels.get('kube_image_digest')
+        metrics_scraper_tag = mock_cluster.labels.get('metrics_scraper_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -747,6 +748,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'containerd_tarball_url': containerd_tarball_url,
             'containerd_tarball_sha256': containerd_tarball_sha256,
             'post_install_manifest_url': '',
+            'metrics_scraper_tag': metrics_scraper_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1142,6 +1144,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         containerd_tarball_sha256 = mock_cluster.labels.get(
             'containerd_tarball_sha256')
         kube_image_digest = mock_cluster.labels.get('kube_image_digest')
+        metrics_scraper_tag = mock_cluster.labels.get('metrics_scraper_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1255,6 +1258,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'containerd_tarball_url': containerd_tarball_url,
             'containerd_tarball_sha256': containerd_tarball_sha256,
             'post_install_manifest_url': '',
+            'metrics_scraper_tag': metrics_scraper_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
