@@ -14,8 +14,8 @@
 
 import datetime
 import gettext
+from unittest import mock
 
-import mock
 from oslo_versionedobjects import exception as object_exception
 from oslo_versionedobjects import fields
 from oslo_versionedobjects import fixture

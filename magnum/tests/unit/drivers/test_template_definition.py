@@ -13,8 +13,9 @@
 # under the License.
 
 import abc
-import mock
 from neutronclient.common import exceptions as n_exception
+from unittest import mock
+
 import six
 
 from magnum.common import exception

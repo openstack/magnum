@@ -18,8 +18,9 @@
 # https://bugs.launchpad.net/ironic/+bug/1255115.
 
 # NOTE(deva): import auth_token so we can override a config option
+from unittest import mock
+
 from keystonemiddleware import auth_token  # noqa
-import mock
 from oslo_config import cfg
 import pecan
 import pecan.testing

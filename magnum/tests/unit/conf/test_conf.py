@@ -13,7 +13,8 @@
 # under the License.
 
 import collections
-import mock
+from unittest import mock
+
 from oslo_config import cfg
 import six
 

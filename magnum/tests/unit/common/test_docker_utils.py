@@ -13,7 +13,7 @@
 # under the License.
 
 import docker
-import mock
+from unittest import mock
 
 from magnum.common import docker_utils
 import magnum.conf

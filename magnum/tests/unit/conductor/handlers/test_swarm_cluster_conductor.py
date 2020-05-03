@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 from mock import patch
+from unittest import mock
 
 import magnum.conf
 from magnum.drivers.heat import driver as heat_driver

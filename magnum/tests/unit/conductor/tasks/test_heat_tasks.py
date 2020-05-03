@@ -12,9 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 from taskflow import engines
 from taskflow.patterns import linear_flow
+from unittest import mock
 
 from magnum.conductor.tasks import heat_tasks
 from magnum.tests import base

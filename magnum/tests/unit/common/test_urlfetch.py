@@ -10,8 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 from mock import patch
+from unittest import mock
+
 from oslo_config import cfg
 
 from magnum.common import urlfetch

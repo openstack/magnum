@@ -14,7 +14,7 @@
 #    under the License.
 
 import inspect
-import mock
+from unittest import mock
 
 from oslo_config import cfg
 from oslo_utils import importutils

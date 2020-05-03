@@ -10,8 +10,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from unittest import mock
+
 import fixtures
-import mock
 from oslo_config import cfg
 from webob import exc as webob_exc
 

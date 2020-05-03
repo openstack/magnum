@@ -10,10 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 from mock import patch
+from unittest import mock
 
 from heatclient import exc as heatexc
+from oslo_utils import uuidutils
 
 import magnum.conf
 from magnum.drivers.heat import driver as heat_driver
@@ -87,7 +88,8 @@ class TestHeatPoller(base.TestCase):
         if default_stack_status is None:
             default_stack_status = cluster_status.CREATE_COMPLETE
 
-        cluster = mock.MagicMock(nodegroups=list())
+        cluster = mock.MagicMock(nodegroups=list(),
+                                 uuid=uuidutils.generate_uuid())
 
         def_worker = self._create_nodegroup(cluster, 'worker_ng', 'stack1',
                                             name='worker_ng', role='worker',

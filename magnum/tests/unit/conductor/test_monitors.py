@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from collections import namedtuple
+from unittest import mock
 
-import mock
 from oslo_serialization import jsonutils
 
 from magnum.common import exception

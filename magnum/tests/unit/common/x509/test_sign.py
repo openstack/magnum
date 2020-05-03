@@ -18,7 +18,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography import x509 as c_x509
 from cryptography.x509.oid import NameOID
-import mock
+from unittest import mock
+
 import six
 
 from magnum.common import exception

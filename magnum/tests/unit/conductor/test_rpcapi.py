@@ -14,8 +14,8 @@ Unit Tests for :py:class:`magnum.conductor.rpcapi.API`.
 """
 
 import copy
+from unittest import mock
 
-import mock
 
 from magnum.conductor import api as conductor_rpcapi
 from magnum import objects

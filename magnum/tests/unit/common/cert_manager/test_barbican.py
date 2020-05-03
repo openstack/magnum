@@ -12,12 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from unittest import mock
 import uuid
 
 from barbicanclient.v1 import client as barbican_client
 from barbicanclient.v1 import containers
 from barbicanclient.v1 import secrets
-import mock
 from mock import patch
 
 from magnum.common.cert_manager import barbican_cert_manager as bcm

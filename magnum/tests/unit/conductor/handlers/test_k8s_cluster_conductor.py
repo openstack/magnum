@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 from mock import patch
+from unittest import mock
 
 import magnum.conf
 from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
