@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    The devicemapper and overlay storage driver is deprecated in favor
+    of overlay2 in docker, and will be removed in a future release from
+    docker. Users of the devicemapper and overlay storage driver are
+    recommended to migrate to a different storage driver, such as overlay2.
+    overlay2 will be set as the default storage driver from Victoria cycle.

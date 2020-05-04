@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
 import six
@@ -32,6 +33,8 @@ from magnum.common import name_generator
 from magnum.common import policy
 from magnum import objects
 from magnum.objects import fields
+
+LOG = logging.getLogger(__name__)
 
 
 class ClusterTemplate(base.APIBase):
@@ -252,6 +255,14 @@ class ClusterTemplatesController(base.Controller):
         'detail': ['GET'],
     }
 
+    _devicemapper_overlay_deprecation = (
+        "The devicemapper and overlay storage "
+        "drivers are deprecated in favor of overlay2 in docker, and will be "
+        "removed in a future release from docker. Users of the devicemapper "
+        "and overlay storage drivers are recommended to migrate to a "
+        "different storage driver, such as overlay2. overlay2 will be set "
+        "as the default storage driver from Victoria cycle in Magnum.")
+
     def _generate_name_for_cluster_template(self, context):
         """Generate a random name like: zeta-22-model."""
 
@@ -400,6 +411,10 @@ class ClusterTemplatesController(base.Controller):
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
 
+        if (cluster_template_dict.get('docker_storage_driver')
+                in ('devicemapper', 'overlay')):
+            LOG.warning(self._devicemapper_overlay_deprecation)
+
         # NOTE(yuywz): We will generate a random human-readable name for
         # cluster_template if the name is not specified by user.
         arg_name = cluster_template_dict.get('name')
@@ -466,6 +481,10 @@ class ClusterTemplatesController(base.Controller):
                 patch_val = None
             if cluster_template[field] != patch_val:
                 cluster_template[field] = patch_val
+
+        if (cluster_template.docker_storage_driver in ('devicemapper',
+                                                       'overlay')):
+            LOG.warning(self._devicemapper_overlay_deprecation)
 
         cluster_template.save()
         return ClusterTemplate.convert_with_links(cluster_template)
