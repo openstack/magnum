@@ -1112,7 +1112,7 @@ Network driver (network-driver)
   `Networking`_ section for more details.
 
 Volume driver (volume-driver)
-  Specified in the ClusterTemplate to select the volume driver.  The supported
+  Specified in the ClusterTemplate to select the volume driver. The supported
   volume driver is 'cinder', allowing Cinder volumes to be mounted in
   containers for use as persistent storage.  Data written to these volumes
   will persist after the container exits and can be accessed again from other
@@ -1120,9 +1120,11 @@ Volume driver (volume-driver)
   will be deleted.  Refer to the `Storage`_ section for more details.
 
 Storage driver (docker-storage-driver)
-  Specified in the ClusterTemplate to select the Docker storage driver.  The
+  Specified in the ClusterTemplate to select the Docker storage driver. The
   default is 'devicemapper'. Refer to the `Storage`_ section for more
   details.
+
+  **NOTE:** For Fedora CoreOS driver, devicemapper is not supported.
 
 Image (image)
   Specified in the ClusterTemplate to indicate the image to boot the servers.
@@ -2928,6 +2930,12 @@ of Docker storage drivers available.
   4.9, SELinux must be disabled inside the containers resulting in worse
   container isolation, although it still runs in enforcing mode on the
   cluster compute instances.
+
+* 'overlay2' is the preferred storage driver, for all currently supported
+  Linux distributions, and requires no extra configuration. When possible,
+  overlay2 is the recommended storage driver. When installing Docker for
+  the first time, overlay2 is used by default.
+
 
 Persistent storage
 ------------------
