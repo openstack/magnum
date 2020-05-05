@@ -20,56 +20,68 @@ if [[ "${auto_scaling_enabled}" = "true" || ("${auto_healing_enabled}" = "true" 
         mkdir -p $(dirname ${AUTOSCALER_DEPLOY})
         cat << EOF > ${AUTOSCALER_DEPLOY}
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cluster-autoscaler-role
 rules:
-  - apiGroups: [""]
-    resources: ["events", "endpoints"]
-    verbs: ["create", "patch"]
-  - apiGroups: [""]
-    resources: ["pods/eviction"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
     verbs: ["create"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    resourceNames: ["cluster-autoscaler"]
+    verbs: ["get", "update", "patch", "delete"]
+  # TODO: remove in 1.18; CA uses lease objects for leader election since 1.17
   - apiGroups: [""]
-    resources: ["pods/status"]
-    verbs: ["update"]
+    resources: ["endpoints"]
+    verbs: ["create"]
   - apiGroups: [""]
     resources: ["endpoints"]
     resourceNames: ["cluster-autoscaler"]
-    verbs: ["get", "update"]
+    verbs: ["get", "update", "patch", "delete"]
+  # accessing & modifying cluster state (nodes & pods)
   - apiGroups: [""]
     resources: ["nodes"]
-    verbs: ["watch", "list", "get", "update"]
+    verbs: ["get", "list", "watch", "update", "patch"]
   - apiGroups: [""]
-    resources:
-      - "pods"
-      - "services"
-      - "replicationcontrollers"
-      - "persistentvolumeclaims"
-      - "persistentvolumes"
-    verbs: ["watch", "list", "get"]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/eviction"]
+    verbs: ["create"]
+  # read-only access to cluster state
+  - apiGroups: [""]
+    resources: ["services", "replicationcontrollers", "persistentvolumes", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
     resources: ["jobs"]
-    verbs: ["watch", "list", "get"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["policy"]
     resources: ["poddisruptionbudgets"]
-    verbs: ["watch", "list"]
-  - apiGroups: ["apps"]
-    resources: ["daemonsets", "replicasets", "statefulsets"]
-    verbs: ["watch", "list", "get"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["watch", "list", "get"]
+    resources: ["storageclasses", "csinodes"]
+    verbs: ["get", "list", "watch"]
+  # misc access
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "update", "patch"]
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["create"]
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ["cluster-autoscaler-status"]
-    verbs: ["delete", "get", "update"]
+    verbs: ["get", "update", "patch", "delete"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cluster-autoscaler-rolebinding
