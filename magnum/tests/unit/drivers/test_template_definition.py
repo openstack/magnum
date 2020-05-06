@@ -184,13 +184,9 @@ class TemplateDefinitionTestCase(base.TestCase):
                       definition.output_mappings)
 
     def test_add_fip_env_lb_disabled_with_fp(self):
-        mock_cluster_template = mock.MagicMock(floating_ip_enabled=True,
-                                               master_lb_enabled=False,
-                                               labels={})
-        mock_cluster = mock.MagicMock(labels={})
+        mock_cluster = mock.MagicMock(master_lb_enabled=False, labels={})
         env_files = []
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
         self.assertEqual(
             [
                 cmn_tdef.COMMON_ENV_PATH + 'enable_floating_ip.yaml',
@@ -200,13 +196,11 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_env_lb_enabled_with_fp(self):
-        mock_cluster_template = mock.MagicMock(floating_ip_enabled=True,
-                                               master_lb_enabled=True,
-                                               labels={})
-        mock_cluster = mock.MagicMock(floating_ip_enabled=True, labels={})
+        mock_cluster = mock.MagicMock(floating_ip_enabled=True,
+                                      master_lb_enabled=True,
+                                      labels={})
         env_files = []
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
         self.assertEqual(
             [
                 cmn_tdef.COMMON_ENV_PATH + 'enable_floating_ip.yaml',
@@ -216,13 +210,9 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_env_lb_disabled_without_fp(self):
-        mock_cluster_template = mock.MagicMock(floating_ip_enabled=False,
-                                               master_lb_enabled=False,
-                                               labels={})
         mock_cluster = mock.MagicMock(labels={}, floating_ip_enabled=False)
         env_files = []
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
         self.assertEqual(
             [
                 cmn_tdef.COMMON_ENV_PATH + 'disable_floating_ip.yaml',
@@ -232,13 +222,9 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_env_lb_enabled_without_fp(self):
-        mock_cluster_template = mock.MagicMock(floating_ip_enabled=False,
-                                               master_lb_enabled=True,
-                                               labels={})
         mock_cluster = mock.MagicMock(labels={}, floating_ip_enabled=False,)
         env_files = []
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
         self.assertEqual(
             [
                 cmn_tdef.COMMON_ENV_PATH + 'disable_floating_ip.yaml',
@@ -248,17 +234,11 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_env_lb_fip_enabled_without_fp(self):
-        mock_cluster_template = mock.MagicMock(
-            floating_ip_enabled=False,
-            master_lb_enabled=True,
-            labels={"master_lb_floating_ip_enabled": "true"}
-        )
         mock_cluster = mock.MagicMock(
             labels={"master_lb_floating_ip_enabled": "true"},
             floating_ip_enabled=False,)
         env_files = []
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
         self.assertEqual(
             [
                 cmn_tdef.COMMON_ENV_PATH + 'disable_floating_ip.yaml',
@@ -268,18 +248,12 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_env_lb_enable_lbfip_disable(self):
-        mock_cluster_template = mock.MagicMock(
-            floating_ip_enabled=False,
-            master_lb_enabled=True,
-            labels={"master_lb_floating_ip_enabled": "false"}
-        )
         mock_cluster = mock.MagicMock(
             labels={"master_lb_floating_ip_enabled": "false"},
             floating_ip_enabled=False,)
         env_files = []
 
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
 
         self.assertEqual(
             [
@@ -290,18 +264,12 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_env_lb_enable_lbfip_template_disable_cluster_enable(self):
-        mock_cluster_template = mock.MagicMock(
-            floating_ip_enabled=False,
-            master_lb_enabled=True,
-            labels={}
-        )
         mock_cluster = mock.MagicMock(
             floating_ip_enabled=True,
             labels={})
         env_files = []
 
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
 
         self.assertEqual(
             [
@@ -312,18 +280,12 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
     def test_add_fip_master_lb_fip_disabled_cluster_fip_enabled(self):
-        mock_cluster_template = mock.MagicMock(
-            floating_ip_enabled=False,
-            master_lb_enabled=True,
-            labels={"master_lb_floating_ip_enabled": "false"}
-        )
         mock_cluster = mock.MagicMock(
             labels={"master_lb_floating_ip_enabled": "false"},
             floating_ip_enabled=True,)
         env_files = []
 
-        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template,
-                                  mock_cluster)
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster)
 
         self.assertEqual(
             [

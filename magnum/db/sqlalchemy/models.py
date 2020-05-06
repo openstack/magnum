@@ -148,6 +148,7 @@ class Cluster(Base):
     fixed_network = Column(String(255, mysql_ndb_type=TINYTEXT))
     fixed_subnet = Column(String(255, mysql_ndb_type=TINYTEXT))
     floating_ip_enabled = Column(Boolean, default=True)
+    master_lb_enabled = Column(Boolean, default=False)
 
 
 class ClusterTemplate(Base):

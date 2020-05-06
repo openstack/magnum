@@ -75,6 +75,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'fixed_network': '',
             'fixed_subnet': '',
             'floating_ip_enabled': False,
+            'master_lb_enabled': False,
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
@@ -276,6 +277,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
+        self.cluster_dict["master_lb_enabled"] = True
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
@@ -347,6 +349,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
+        self.cluster_dict["master_lb_enabled"] = True
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
@@ -424,6 +427,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
+        self.cluster_dict["master_lb_enabled"] = True
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)

@@ -200,6 +200,11 @@ class Cluster(base.APIBase):
                 wtypes.text, six.integer_types, bool, float))
     """Contains labels that exist in the parent but were not inherited."""
 
+    master_lb_enabled = wsme.wsattr(types.boolean)
+    """Indicates whether created clusters should have a load balancer for master
+       nodes or not.
+       """
+
     def __init__(self, **kwargs):
         super(Cluster, self).__init__()
         self.fields = []
@@ -273,7 +278,8 @@ class Cluster(base.APIBase):
                      container_version=None,
                      fixed_network=None,
                      fixed_subnet=None,
-                     floating_ip_enabled=True)
+                     floating_ip_enabled=True,
+                     master_lb_enabled=True)
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -511,6 +517,10 @@ class ClustersController(base.Controller):
         # If floating_ip_enabled is not present, use cluster_template value
         if cluster.floating_ip_enabled == wtypes.Unset:
             cluster.floating_ip_enabled = cluster_template.floating_ip_enabled
+
+        # If master_lb_enabled is not present, use cluster_template value
+        if cluster.master_lb_enabled == wtypes.Unset:
+            cluster.master_lb_enabled = cluster_template.master_lb_enabled
 
         attributes = ["docker_volume_size", "master_flavor_id", "flavor_id",
                       "fixed_network", "fixed_subnet"]

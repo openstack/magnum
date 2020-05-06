@@ -122,6 +122,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'c2a6c8b0-a3c2-42a3-b3f4-01400a30896f',
             'floating_ip_enabled': False,
+            'master_lb_enabled': False,
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
