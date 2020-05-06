@@ -151,6 +151,11 @@ class Bay(base.APIBase):
     floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
     """Indicates whether created clusters should have a floating ip or not."""
 
+    master_lb_enabled = wsme.wsattr(types.boolean)
+    """Indicates whether created clusters should have a load balancer for master
+       nodes or not.
+       """
+
     def __init__(self, **kwargs):
         super(Bay, self).__init__()
 

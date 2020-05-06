@@ -124,7 +124,7 @@ class DcosCentosTemplateDefinition(template_def.BaseTemplateDefinition):
         # By default, master_discovery is set to 'static'
         # If --master-lb-enabled is specified,
         # master_discovery will be set to 'master_http_loadbalancer'
-        if cluster_template.master_lb_enabled:
+        if cluster.master_lb_enabled:
             extra_params['master_discovery'] = 'master_http_loadbalancer'
 
         if 'true' == extra_params['dcos_overlay_enable']:
@@ -157,7 +157,7 @@ class DcosCentosTemplateDefinition(template_def.BaseTemplateDefinition):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster)
-        template_def.add_lb_env_file(env_files, cluster_template)
-        template_def.add_fip_env_file(env_files, cluster_template, cluster)
+        template_def.add_lb_env_file(env_files, cluster)
+        template_def.add_fip_env_file(env_files, cluster)
 
         return env_files

@@ -534,8 +534,8 @@ class BaseTemplateDefinition(TemplateDefinition):
         return dict()
 
 
-def add_lb_env_file(env_files, cluster_template):
-    if cluster_template.master_lb_enabled:
+def add_lb_env_file(env_files, cluster):
+    if cluster.master_lb_enabled:
         if keystone.is_octavia_enabled():
             env_files.append(COMMON_ENV_PATH + 'with_master_lb_octavia.yaml')
         else:
@@ -562,7 +562,7 @@ def add_etcd_volume_env_file(env_files, cluster):
         env_files.append(COMMON_ENV_PATH + 'with_etcd_volume.yaml')
 
 
-def add_fip_env_file(env_files, cluster_template, cluster):
+def add_fip_env_file(env_files, cluster):
     lb_fip_enabled = cluster.labels.get("master_lb_floating_ip_enabled")
     master_lb_fip_enabled = (strutils.bool_from_string(lb_fip_enabled) or
                              cluster.floating_ip_enabled)
@@ -572,7 +572,7 @@ def add_fip_env_file(env_files, cluster_template, cluster):
     else:
         env_files.append(COMMON_ENV_PATH + 'disable_floating_ip.yaml')
 
-    if cluster_template.master_lb_enabled and master_lb_fip_enabled:
+    if cluster.master_lb_enabled and master_lb_fip_enabled:
         env_files.append(COMMON_ENV_PATH + 'enable_lb_floating_ip.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'disable_lb_floating_ip.yaml')

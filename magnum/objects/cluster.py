@@ -52,8 +52,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.20: Fields node_count, master_count, node_addresses,
     #               master_addresses are now properties.
     # Version 1.21  Added fixed_network, fixed_subnet, floating_ip_enabled
+    # Version 1.22  Added master_lb_enabled
 
-    VERSION = '1.21'
+    VERSION = '1.22'
 
     dbapi = dbapi.get_instance()
 
@@ -89,6 +90,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'fixed_network': fields.StringField(nullable=True),
         'fixed_subnet': fields.StringField(nullable=True),
         'floating_ip_enabled': fields.BooleanField(default=True),
+        'master_lb_enabled': fields.BooleanField(default=False),
     }
 
     @staticmethod
