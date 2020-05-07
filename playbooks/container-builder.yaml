@@ -13,6 +13,21 @@
           with_items: "{{ magnum_images }}"
           retries: 10
 
+    - name: "Build kubernetes images"
+      block:
+        - name: "Build {{ magnum_repository }}/{{ item[1].name }}:{{ item[0].version }} image"
+          docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/{{ item[1].name }}"
+            name: "{{ magnum_repository }}/{{ item[1].name }}"
+            tag: "{{ item[0].version }}"
+            buildargs:
+              KUBE_VERSION: "{{ item[0].version }}"
+            push: no
+          with_nested:
+            - "{{ kubernetes_versions }}"
+            - "{{ kubernetes_images }}"
+          retries: 10
+
     - name: "Build helm-client image"
       block:
         - docker_image:
