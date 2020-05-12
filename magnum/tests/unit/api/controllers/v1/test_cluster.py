@@ -226,9 +226,9 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
         self.assertIn(uuid, response['links'][0]['href'])
-        for l in response['links']:
-            bookmark = l['rel'] == 'bookmark'
-            self.assertTrue(self.validate_link(l['href'],
+        for link in response['links']:
+            bookmark = link['rel'] == 'bookmark'
+            self.assertTrue(self.validate_link(link['href'],
                                                bookmark=bookmark))
 
     def test_collection_links(self):

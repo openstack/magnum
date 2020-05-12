@@ -115,9 +115,10 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
         self.assertIn(self.cluster.uuid, response['links'][0]['href'])
-        for l in response['links']:
-            bookmark = l['rel'] == 'bookmark'
-            self.assertTrue(self.validate_link(l['href'], bookmark=bookmark))
+        for link in response['links']:
+            bookmark = link['rel'] == 'bookmark'
+            self.assertTrue(self.validate_link(link['href'],
+                                               bookmark=bookmark))
 
 
 class TestPost(api_base.FunctionalTest):
