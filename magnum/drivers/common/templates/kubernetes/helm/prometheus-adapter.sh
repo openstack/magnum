@@ -8,6 +8,7 @@ step="prometheus-adapter"
 printf "Starting to run ${step}\n"
 
 ### Configuration
+# This configuration is dependent on the helm installed prometheus-operator.
 ###############################################################################
 CHART_NAME="prometheus-adapter"
 

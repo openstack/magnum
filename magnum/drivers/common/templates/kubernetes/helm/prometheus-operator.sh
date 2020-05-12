@@ -176,6 +176,19 @@ data:
 
     prometheusOperator:
       priorityClassName: "system-cluster-critical"
+      tlsProxy:
+        image:
+          repository: ${CONTAINER_INFRA_PREFIX:-squareup/}ghostunnel
+      admissionWebhooks:
+        patch:
+          image:
+            repository: ${CONTAINER_INFRA_PREFIX:-jettech/}kube-webhook-certgen
+          priorityClassName: "system-cluster-critical"
+
+      resources: {}
+      # requests:
+      #   cpu: 5m
+      #   memory: 10Mi
       image:
         repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-operator
       configmapReloadImage:
@@ -183,7 +196,7 @@ data:
       prometheusConfigReloaderImage:
         repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-config-reloader
       hyperkubeImage:
-        repository: ${CONTAINER_INFRA_PREFIX:-gcr.io/google-containers/}hyperkube
+        repository: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube
 
     prometheus:
       prometheusSpec:
@@ -192,6 +205,8 @@ data:
         image:
           repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}prometheus
         retention: 14d
+        externalLabels:
+          cluster_uuid: ${CLUSTER_UUID}
         resources:
           requests:
             cpu: ${PROMETHEUS_SERVER_CPU}m

@@ -1217,11 +1217,6 @@ _`container_infra_prefix`
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google-containers/hyperkube:v1.12.1
   * gcr.io/google_containers/metrics-server-amd64:v0.3.6
-  * quay.io/coreos/configmap-reload:v0.0.1
-  * quay.io/coreos/prometheus-config-reloader:v0.30.1
-  * quay.io/coreos/prometheus-operator:v0.30.1
-  * quay.io/prometheus/alertmanager:v0.17.0
-  * quay.io/prometheus/prometheus:v2.9.1
   * k8s.gcr.io/node-problem-detector:v0.6.2
   * docker.io/planetlabs/draino:abf028a
   * docker.io/openstackmagnum/cluster-autoscaler:v1.0
@@ -1231,6 +1226,15 @@ _`container_infra_prefix`
   * quay.io/calico/node:v3.13.1
   * quay.io/coreos/flannel-cni:v0.3.0
   * quay.io/coreos/flannel:v0.12.0-amd64
+
+  Images that might be needed if 'monitoring_enabled' is 'true':
+  * quay.io/prometheus/alertmanager:v0.20.0
+  * docker.io/squareup/ghostunnel:v1.5.2
+  * docker.io/jettech/kube-webhook-certgen:v1.0.0
+  * quay.io/coreos/prometheus-operator:v0.37.0
+  * quay.io/coreos/configmap-reload:v0.0.1
+  * quay.io/coreos/prometheus-config-reloader:v0.37.0
+  * quay.io/prometheus/prometheus:v2.15.2
 
   Images that might be needed if 'cinder_csi_enabled' is 'true':
   * docker.io/k8scloudprovider/cinder-csi-plugin:v1.16.0
