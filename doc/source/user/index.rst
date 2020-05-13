@@ -392,6 +392,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `nginx_ingress_controller_tag`_       | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `nginx_ingress_controller_chart_tag`_ | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kubelet_options`_                    | extra kubelet args | ""            |
 +---------------------------------------+--------------------+---------------+
 | `kubeapi_options`_                    | extra kubeapi args | ""            |
@@ -1669,10 +1671,21 @@ _`octavia_ingress_controller_tag`
   The image tag for octavia-ingress-controller. Train-default: v1.15.0
 
 _`nginx_ingress_controller_tag`
-  The image tag for nginx-ingress-controller. Stein-default: 0.23.0
+  The image tag for nginx-ingress-controller.
+  Stein-default: 0.23.0
+  Train-default: 0.26.1
+  Ussuru-default: 0.26.1
+  Victoria-default: 0.32.0
+
+_`nginx_ingress_controller_chart_tag`
+  The chart version for nginx-ingress-controller.
+  Train-default: v1.24.7
+  Ussuru-default: v1.24.7
+  Victoria-default: v1.36.3
 
 _`traefik_ingress_controller_tag`
-  The image tag for traefik_ingress_controller_tag. Stein-default: v1.7.10
+  The image tag for traefik_ingress_controller_tag.
+  Stein-default: v1.7.10
 
 DNS
 ---

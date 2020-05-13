@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set +x
 . /etc/sysconfig/heat-params
 
 set -ex
@@ -55,7 +56,6 @@ data:
         repository: ${CONTAINER_INFRA_PREFIX:-quay.io/kubernetes-ingress-controller/}nginx-ingress-controller
         tag: ${NGINX_INGRESS_CONTROLLER_TAG}
         pullPolicy: IfNotPresent
-        runAsUser: 33
       config: {}
       headers: {}
       hostNetwork: true
