@@ -823,12 +823,12 @@ parameters:
   nginx_ingress_controller_tag:
     type: string
     description: nginx ingress controller docker image tag
-    default: 0.26.1
+    default: 0.32.0
 
   nginx_ingress_controller_chart_tag:
     type: string
     description: nginx ingress controller helm chart tag
-    default: v1.24.7
+    default: v1.36.3
 
   draino_tag:
     type: string
