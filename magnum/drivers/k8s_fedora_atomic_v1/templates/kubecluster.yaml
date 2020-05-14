@@ -769,7 +769,7 @@ parameters:
     description: >
       true if the cinder csi feature should be enabled
     default:
-      false
+      true
 
   cinder_csi_plugin_tag:
     type: string

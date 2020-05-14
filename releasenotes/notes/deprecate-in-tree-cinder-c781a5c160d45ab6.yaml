@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    Label cinder_csi_enabled defaults to True from V cycle.
+deprecations:
+  - |
+    Deprecate in-tree Cinder volume driver for removal in X cycle in favour of
+    out-of-tree Cinder CSI plugin.

@@ -929,6 +929,17 @@ class TestPost(api_base.FunctionalTest):
         # Verify flavor_id from ClusterTemplate is used
         self.assertEqual('m1.small', cluster[0].flavor_id)
 
+    def test_create_cluster_with_cinder_csi_disabled(self):
+        self.cluster_template.volume_driver = 'cinder'
+        self.cluster_template.save()
+        cluster_labels = {'cinder_csi_enabled': 'false'}
+        bdict = apiutils.cluster_post_data(labels=cluster_labels)
+        note = 'in-tree Cinder volume driver is deprecated'
+        with self.assertWarnsRegex(DeprecationWarning, note):
+            response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+
     def test_create_cluster_without_merge_labels(self):
         self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
         self.cluster_template.save()
