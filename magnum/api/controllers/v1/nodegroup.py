@@ -126,6 +126,24 @@ class NodeGroup(base.APIBase):
     version = wtypes.text
     """Version of the nodegroup"""
 
+    merge_labels = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the labels will be merged with the cluster labels."""
+
+    labels_overridden = wtypes.DictType(
+            wtypes.text, types.MultiType(
+                wtypes.text, six.integer_types, bool, float))
+    """Contains labels that have a value different than the parent labels."""
+
+    labels_added = wtypes.DictType(
+            wtypes.text, types.MultiType(
+                wtypes.text, six.integer_types, bool, float))
+    """Contains labels that do not exist in the parent."""
+
+    labels_skipped = wtypes.DictType(
+            wtypes.text, types.MultiType(
+                wtypes.text, six.integer_types, bool, float))
+    """Contains labels that exist in the parent but were not inherited."""
+
     def __init__(self, **kwargs):
         super(NodeGroup, self).__init__()
         self.fields = []
@@ -153,6 +171,14 @@ class NodeGroup(base.APIBase):
                         link.Link.make_link('bookmark', url,
                                             cluster_path, nodegroup_path,
                                             bookmark=True)]
+            cluster = api_utils.get_resource('Cluster', ng.cluster_id)
+
+            overridden, added, skipped = api_utils.get_labels_diff(
+                    cluster.labels, ng.labels)
+            ng.labels_overridden = overridden
+            ng.labels_added = added
+            ng.labels_skipped = skipped
+
         return ng
 
 
@@ -314,6 +340,13 @@ class NodeGroupController(base.Controller):
             nodegroup.flavor_id = cluster.flavor_id
         if nodegroup.labels is None or nodegroup.labels == wtypes.Unset:
             nodegroup.labels = cluster.labels
+        else:
+            # If labels are provided check if the user wishes to merge
+            # them with the values from the cluster.
+            if nodegroup.merge_labels:
+                labels = cluster.labels
+                labels.update(nodegroup.labels)
+                nodegroup.labels = labels
 
         nodegroup_dict = nodegroup.as_dict()
         nodegroup_dict['cluster_id'] = cluster.uuid
