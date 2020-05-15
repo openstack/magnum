@@ -87,9 +87,14 @@ def main(argv=sys.argv):
     logger = dict(stdout=lambda line: log.info(line),
                   stderr=lambda line: log.debug(line))
     with open(lp, 'w') as fd:
-        for label in ['stdout', 'stderr']:
-            threading.Thread(target=consumer, args=[label, fd]).start()
+        threads = []
+        for lb in ['stdout', 'stderr']:
+            t = threading.Thread(target=consumer, args=[lb, fd])
+            threads.append(t)
+            t.start()
         deploy_status_code = subproc.wait()
+        for t in threads:
+            t.join()
 
     if deploy_status_code:
         log.error("Error running %s. [%s]\n" % (fn, deploy_status_code))
