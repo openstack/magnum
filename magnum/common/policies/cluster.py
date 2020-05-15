@@ -172,7 +172,19 @@ rules = [
                 'method': 'POST'
             }
         ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=CLUSTER % 'upgrade_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Upgrade an existing cluster across all projects.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}/actions/upgrade',
+                'method': 'POST'
+            }
+        ]
     )
+
 ]
 
 
