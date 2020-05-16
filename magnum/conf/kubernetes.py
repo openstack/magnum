@@ -22,6 +22,11 @@ kubernetes_opts = [
                     'Keystone auth policy for Kubernetes cluster when '
                     'the Keystone auth is enabled. Vendors can put their '
                     'specific default policy here'),
+    cfg.IntOpt('health_polling_interval',
+               default=60,
+               help=('The default polling interval for Kubernetes cluster '
+                     'health. If this number is negative the periodic task '
+                     'will be disabled.')),
 ]
 
 
