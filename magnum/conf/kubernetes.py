@@ -28,6 +28,11 @@ kubernetes_opts = [
                     'the Kubernetes cluster created. For exmaple, this '
                     'could be a file including the vendor specific '
                     'storage class.'),
+    cfg.IntOpt('health_polling_interval',
+               default=60,
+               help=('The default polling interval for Kubernetes cluster '
+                     'health. If this number is negative the periodic task '
+                     'will be disabled.')),
 ]
 
 
