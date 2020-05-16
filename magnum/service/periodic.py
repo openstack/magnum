@@ -152,7 +152,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         super(MagnumPeriodicTasks, self).__init__(conf)
         self.notifier = rpc.get_notifier()
 
-    @periodic_task.periodic_task(spacing=10, run_immediately=True)
+    @periodic_task.periodic_task(
+        spacing=CONF.kubernetes.health_polling_interval,
+        run_immediately=True)
     @set_context
     def sync_cluster_status(self, ctx):
         try:
