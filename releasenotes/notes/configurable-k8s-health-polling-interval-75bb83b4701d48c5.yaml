@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    The default 10 seconds health polling interval is too frequent for most of
+    the cases. Now it has been changed to 60s. A new config
+    `health_polling_interval` is supported to make the interval configurable.
+    Cloud admin can totally disable the health polling by set a negative value
+    for the config.
+upgrade:
+  - |
+    If it's still preferred to have 10s health polling interval for Kubernetes
+    cluster. It can be set by config `health_polling_interval` under
+    `kubernetes` section.
