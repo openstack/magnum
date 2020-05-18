@@ -6,6 +6,16 @@ magnum_images:
   - name: heat-container-agent
     tag: ussuri-dev
 
+kubernetes_versions:
+  - version: v1.15.12
+
+kubernetes_images:
+  - name: kubernetes-apiserver
+  - name: kubernetes-controller-manager
+  - name: kubernetes-kubelet
+  - name: kubernetes-scheduler
+  - name: kubernetes-proxy
+
 helm_versions:
   - version: v2.16.6
   - version: v3.2.0
