@@ -99,6 +99,11 @@ def delete_loadbalancers(context, cluster):
                                         octavia_client_adm, remove_fip=True)
         candidates.update(deleted)
 
+        # NOTE (brtknr): If stack has been deleted, cluster fails to delete
+        # because stack_id resolves to None. Return if that is the case.
+        if not cluster.stack_id:
+            return
+
         # Get load balancers created for Kubernetes api/etcd
         lbs = []
         lb_resources = heat_client.resources.list(
