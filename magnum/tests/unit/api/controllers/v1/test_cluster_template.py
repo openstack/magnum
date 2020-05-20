@@ -390,6 +390,18 @@ class TestPatch(api_base.FunctionalTest):
                                  self.cluster_template.uuid)
         self.assertEqual(response['hidden'], True)
 
+    def test_update_cluster_template_with_devicemapper(self):
+        cluster_template = obj_utils.create_test_cluster_template(self.context)
+        note = 'deprecated in favor of overlay2'
+        with self.assertWarnsRegex(DeprecationWarning, note):
+            response = self.patch_json('/clustertemplates/%s' %
+                                       cluster_template.uuid,
+                                       [{'path': '/docker_storage_driver',
+                                         'value': 'devicemapper',
+                                         'op': 'replace'}],
+                                       expect_errors=True)
+        self.assertEqual(200, response.status_int)
+
     def test_update_cluster_template_replace_labels_success(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
         response = self.patch_json('/clustertemplates/%s' %
@@ -773,7 +785,9 @@ class TestPost(api_base.FunctionalTest):
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.cluster_template_post_data(
                 docker_volume_size=1, docker_storage_driver="overlay")
-            response = self.post_json('/clustertemplates', bdict)
+            note = 'deprecated in favor of overlay2'
+            with self.assertWarnsRegex(DeprecationWarning, note):
+                response = self.post_json('/clustertemplates', bdict)
             self.assertEqual(bdict['docker_volume_size'],
                              response.json['docker_volume_size'])
             cc_mock.assert_called_once_with(mock.ANY)

@@ -1391,7 +1391,8 @@ _`cinder_csi_enabled`
   When 'true', out-of-tree Cinder CSI driver will be enabled. Requires 'cinder'
   to be selected as a 'volume_driver' and consequently also requires label
   'cloud_provider_enabled' to be 'true' (see 'cloud_provider_enabled' section).
-  Default: false
+  Ussuri default: false
+  Victoria default: true
 
 _`cinder_csi_plugin_tag`
   This label allows users to override the default cinder-csi-plugin container

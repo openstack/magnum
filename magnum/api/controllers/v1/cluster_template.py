@@ -16,6 +16,7 @@ from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
 import six
+import warnings
 import wsme
 from wsme import types as wtypes
 
@@ -255,7 +256,7 @@ class ClusterTemplatesController(base.Controller):
         'detail': ['GET'],
     }
 
-    _devicemapper_overlay_deprecation = (
+    _devicemapper_overlay_deprecation_note = (
         "The devicemapper and overlay storage "
         "drivers are deprecated in favor of overlay2 in docker, and will be "
         "removed in a future release from docker. Users of the devicemapper "
@@ -411,9 +412,11 @@ class ClusterTemplatesController(base.Controller):
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
 
-        if (cluster_template_dict.get('docker_storage_driver')
-                in ('devicemapper', 'overlay')):
-            LOG.warning(self._devicemapper_overlay_deprecation)
+        if (cluster_template.docker_storage_driver in ('devicemapper',
+                                                       'overlay')):
+            warnings.warn(self._devicemapper_overlay_deprecation_note,
+                          DeprecationWarning)
+            LOG.warning(self._devicemapper_overlay_deprecation_note)
 
         # NOTE(yuywz): We will generate a random human-readable name for
         # cluster_template if the name is not specified by user.
@@ -484,7 +487,9 @@ class ClusterTemplatesController(base.Controller):
 
         if (cluster_template.docker_storage_driver in ('devicemapper',
                                                        'overlay')):
-            LOG.warning(self._devicemapper_overlay_deprecation)
+            warnings.warn(self._devicemapper_overlay_deprecation_note,
+                          DeprecationWarning)
+            LOG.warning(self._devicemapper_overlay_deprecation_note)
 
         cluster_template.save()
         return ClusterTemplate.convert_with_links(cluster_template)

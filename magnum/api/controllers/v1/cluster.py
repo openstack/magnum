@@ -16,9 +16,11 @@
 import uuid
 
 from oslo_log import log as logging
+from oslo_utils import strutils
 from oslo_utils import timeutils
 import pecan
 import six
+import warnings
 import wsme
 from wsme import types as wtypes
 
@@ -325,6 +327,12 @@ class ClustersController(base.Controller):
         'detail': ['GET'],
     }
 
+    _in_tree_cinder_volume_driver_deprecation_note = (
+        "The in-tree Cinder volume driver is deprecated and will be removed "
+        "in X cycle in favour of out-of-tree Cinder CSI driver which requires "
+        "the label cinder_csi_enabled set to True (default behaviour from "
+        "V cycle) when volume_driver is cinder.")
+
     actions = cluster_actions.ActionsController()
 
     def _generate_name_for_cluster(self, context):
@@ -498,7 +506,7 @@ class ClustersController(base.Controller):
             cluster.keypair = cluster_template.keypair_id
 
         # If labels is not present, use cluster_template value
-        if cluster.labels == wtypes.Unset:
+        if cluster.labels == wtypes.Unset or not cluster.labels:
             cluster.labels = cluster_template.labels
         else:
             # If labels are provided check if the user wishes to merge
@@ -507,6 +515,13 @@ class ClustersController(base.Controller):
                 labels = cluster_template.labels
                 labels.update(cluster.labels)
                 cluster.labels = labels
+
+        cinder_csi_enabled = cluster.labels.get('cinder_csi_enabled', True)
+        if (cluster_template.volume_driver == 'cinder' and
+                not strutils.bool_from_string(cinder_csi_enabled)):
+            warnings.warn(self._in_tree_cinder_volume_driver_deprecation_note,
+                          DeprecationWarning)
+            LOG.warning(self._in_tree_cinder_volume_driver_deprecation_note)
 
         # If floating_ip_enabled is not present, use cluster_template value
         if cluster.floating_ip_enabled == wtypes.Unset:
