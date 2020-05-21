@@ -88,11 +88,11 @@ add_module_names = False
 show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # openstackdocstheme options
-repository_name = 'openstack/magnum'
-use_storyboard = True
+openstackdocs_repo_name = 'openstack/magnum'
+openstackdocs_use_storyboard = True
 
 # -- Options for man page output ----------------------------------------------
 
