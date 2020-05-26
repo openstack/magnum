@@ -43,6 +43,7 @@ def setup_app(config=None):
         app_conf.pop('root'),
         logging=getattr(config, 'logging', {}),
         wrap_app=middleware.ParsableErrorMiddleware,
+        guess_content_type_from_ext=False,
         **app_conf
     )
 
