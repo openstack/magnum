@@ -434,6 +434,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         expected_scale_params = {'minions_to_remove': ['node1', 'node2']}
         self.assertEqual(scale_params, expected_scale_params)
 
+    @mock.patch('magnum.common.neutron.get_subnet')
     @mock.patch('magnum.drivers.heat.k8s_template_def.K8sTemplateDefinition'
                 '._set_master_lb_allowed_cidrs')
     @mock.patch('magnum.common.neutron.get_fixed_network_name')
@@ -454,7 +455,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                             mock_get_discovery_url, mock_osc_class,
                             mock_enable_octavia,
                             mock_get_fixed_network_name,
-                            mock_set_master_lb_allowed_cidrs):
+                            mock_set_master_lb_allowed_cidrs,
+                            mock_get_subnet):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -486,6 +488,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
         mock_context.user_name = 'fake_user'
+        mock_get_subnet.return_value = '20.200.0.0/16'
 
         flannel_cidr = mock_cluster.labels.get('flannel_network_cidr')
         flannel_subnet = mock_cluster.labels.get(
@@ -762,6 +765,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'post_install_manifest_url': '',
             'metrics_scraper_tag': metrics_scraper_tag,
             'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
+            'fixed_subnet_cidr': '20.200.0.0/16',
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -788,6 +792,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             mock_cluster.fixed_network
         )
 
+    @mock.patch('magnum.common.neutron.get_subnet')
     @mock.patch('magnum.common.neutron.get_external_network_id')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -805,7 +810,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                                 mock_get_discovery_url,
                                                 mock_osc_class,
                                                 mock_enable_octavia,
-                                                mock_get_external_network_id):
+                                                mock_get_external_network_id,
+                                                mock_get_subnet):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -849,6 +855,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             mock_cluster_template.external_network_id
         )
 
+    @mock.patch('magnum.common.neutron.get_subnet')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -864,7 +871,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                              mock_get_params,
                                              mock_get_discovery_url,
                                              mock_osc_class,
-                                             mock_enable_octavia):
+                                             mock_enable_octavia,
+                                             mock_get_subnet):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -904,6 +912,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             mock_cluster,
         )
 
+    @mock.patch('magnum.common.neutron.get_subnet')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -919,7 +928,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                             mock_get_params,
                                             mock_get_discovery_url,
                                             mock_osc_class,
-                                            mock_enable_octavia):
+                                            mock_enable_octavia,
+                                            mock_get_subnet):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -958,6 +968,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             actual_params.get("ingress_controller")
         )
 
+    @mock.patch('magnum.common.neutron.get_subnet')
     @mock.patch('magnum.drivers.heat.k8s_template_def.K8sTemplateDefinition'
                 '._set_master_lb_allowed_cidrs')
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
@@ -976,7 +987,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                      mock_get_output, mock_get_params,
                                      mock_get_discovery_url, mock_osc_class,
                                      mock_enable_octavia,
-                                     mock_set_master_lb_allowed_cidrs):
+                                     mock_set_master_lb_allowed_cidrs,
+                                     mock_get_subnet):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
                                                   'private_key': 'private_key',
                                                   'public_key': 'public_key'}
@@ -1006,6 +1018,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
         mock_context.user_name = 'fake_user'
+        mock_get_subnet.return_value = "20.200.0.0/16"
 
         flannel_cidr = mock_cluster.labels.get('flannel_network_cidr')
         flannel_subnet = mock_cluster.labels.get(
@@ -1285,6 +1298,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'post_install_manifest_url': '',
             'metrics_scraper_tag': metrics_scraper_tag,
             'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
+            'fixed_subnet_cidr': '20.200.0.0/16',
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1561,12 +1575,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         self.assertEqual(extra_params["master_lb_allowed_cidrs"],
                          "192.168.0.0/16,10.0.0.0/24")
 
-    def test_set_master_lb_allowed_cidrs_fixed_network_cidr(self):
+    def test_set_master_lb_allowed_cidrs_fixed_subnet_cidr(self):
         definition = self.get_definition()
         extra_params = {"master_lb_allowed_cidrs": "192.168.0.0/16"}
         mock_cluster = mock.MagicMock()
         mock_context = mock.MagicMock()
-        mock_cluster.labels = {"fixed_network_cidr": "100.0.0.0/24"}
+        mock_cluster.labels = {"fixed_subnet_cidr": "100.0.0.0/24"}
 
         definition._set_master_lb_allowed_cidrs(mock_context,
                                                 mock_cluster, extra_params)
