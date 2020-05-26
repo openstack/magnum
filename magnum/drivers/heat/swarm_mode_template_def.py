@@ -193,3 +193,9 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         template_def.add_fip_env_file(env_files, cluster_template, cluster)
 
         return env_files
+
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
+        scale_params = dict()
+        scale_params['number_of_nodes'] = node_count
+        return scale_params
