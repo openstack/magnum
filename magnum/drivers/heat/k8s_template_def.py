@@ -267,8 +267,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_scale_params(self, context, cluster, scale_manager=None,
-                         nodes_to_remove=None):
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
         scale_params = dict()
         if nodes_to_remove:
             scale_params['minions_to_remove'] = nodes_to_remove
@@ -276,4 +276,5 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             hosts = self.get_output('kube_minions_private')
             scale_params['minions_to_remove'] = (
                 scale_manager.get_removal_nodes(hosts))
+        scale_params['number_of_minions'] = node_count
         return scale_params

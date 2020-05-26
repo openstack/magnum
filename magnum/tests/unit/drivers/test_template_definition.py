@@ -311,18 +311,6 @@ class TemplateDefinitionTestCase(base.TestCase):
             env_files
         )
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_base_get_scale_params(self, mock_driver):
-        mock_context = mock.MagicMock()
-        mock_cluster = mock.MagicMock()
-        mock_driver.return_value = swarm_v2_dr.Driver()
-        cluster_driver = driver.Driver.get_driver('vm',
-                                                  'fedora-atomic',
-                                                  'swarm-mode')
-        definition = cluster_driver.get_template_definition()
-        self.assertEqual(definition.get_scale_params(mock_context,
-                                                     mock_cluster), {})
-
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseK8sTemplateDefinitionTestCase(base.TestCase):
@@ -401,14 +389,19 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
 
         removal_nodes = ['node1', 'node2']
+        node_count = 5
         mock_scale_manager = mock.MagicMock()
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
 
         definition = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         scale_params = definition.get_scale_params(mock_context, mock_cluster,
+                                                   node_count,
                                                    mock_scale_manager)
-        expected_scale_params = {'minions_to_remove': ['node1', 'node2']}
+        expected_scale_params = {
+            'minions_to_remove': ['node1', 'node2'],
+            'number_of_minions': 5
+        }
         self.assertEqual(scale_params, expected_scale_params)
 
     @mock.patch('magnum.common.neutron.get_fixed_network_name')
@@ -1703,6 +1696,13 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
         heat_param = swarm_def.get_heat_param(cluster_attr='uuid')
         self.assertEqual('cluster_uuid', heat_param)
 
+    def test_swarm_get_scale_params(self):
+        mock_context = mock.MagicMock()
+        swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
+        self.assertEqual(
+            swarm_def.get_scale_params(mock_context, self.mock_cluster, 7),
+            {'number_of_nodes': 7})
+
     def test_update_outputs(self):
         swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
 
@@ -2037,14 +2037,19 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
 
         removal_nodes = ['node1', 'node2']
+        node_count = 7
         mock_scale_manager = mock.MagicMock()
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
 
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
-        scale_params = mesos_def.get_scale_params(mock_context, mock_cluster,
-                                                  mock_scale_manager)
-        expected_scale_params = {'slaves_to_remove': ['node1', 'node2']}
+        scale_params = mesos_def.get_scale_params(
+            mock_context,
+            mock_cluster,
+            node_count,
+            mock_scale_manager)
+        expected_scale_params = {'slaves_to_remove': ['node1', 'node2'],
+                                 'number_of_slaves': 7}
         self.assertEqual(scale_params, expected_scale_params)
 
     def test_mesos_get_heat_param(self):
