@@ -166,3 +166,9 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
         template_def.add_lb_env_file(env_files, cluster_template)
 
         return env_files
+
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
+        scale_params = dict()
+        scale_params['number_of_nodes'] = node_count
+        return scale_params

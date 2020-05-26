@@ -1281,13 +1281,14 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_cluster.cluster_template = mock_template
         self.worker_ng_dict['node_count'] = 2
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        worker_ng.stack_id = mock_stack_id
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         k8s_dr.Driver().update_cluster({}, mock_cluster)
 
         expected_args = {
-            'parameters': {'number_of_minions': '2'},
+            'parameters': {'number_of_minions': 2},
             'existing': True,
             'disable_rollback': True
         }
