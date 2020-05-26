@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Cloud admin user now can do rolling upgrade on behalf of end
+    user so as to do urgent security patching when it's necessary.

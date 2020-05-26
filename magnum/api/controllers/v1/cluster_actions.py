@@ -135,6 +135,11 @@ class ActionsController(base.Controller):
         :param cluster_ident: UUID of a cluster or logical name of the cluster.
         """
         context = pecan.request.context
+        if context.is_admin:
+            policy.enforce(context, "cluster:upgrade_all_projects",
+                           action="cluster:upgrade_all_projects")
+            context.all_tenants = True
+
         cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:upgrade', cluster,
                        action='cluster:upgrade')
