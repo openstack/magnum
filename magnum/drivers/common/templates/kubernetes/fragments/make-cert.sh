@@ -167,8 +167,26 @@ keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=clientAuth,serverAuth
 EOF
 
+#admin Certs
+cat > ${cert_dir}/admin.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = admin
+O = system:masters
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
+[req_ext]
+extendedKeyUsage= clientAuth
+EOF
+
 generate_certificates server ${cert_dir}/server.conf
 generate_certificates kubelet ${cert_dir}/kubelet.conf
+generate_certificates admin ${cert_dir}/admin.conf
 
 # Generate service account key and private key
 echo -e "${KUBE_SERVICE_ACCOUNT_KEY}" > ${cert_dir}/service_account.key
