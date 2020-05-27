@@ -420,12 +420,18 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `k8s_keystone_auth_tag`_              | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| `tiller_enabled`_                     | - true             | true          |
+| `tiller_enabled`_                     | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
 | `tiller_tag`_                         | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
 | `tiller_namespace`_                   | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `helm_client_url`_                    | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `helm_client_sha256`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `helm_client_tag`_                    | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `master_lb_floating_ip_enabled`_      | - true             | see below     |
 |                                       | - false            |               |
@@ -1273,7 +1279,9 @@ _`metrics_server_chart_tag`
 
 _`metrics_server_enabled`
   metrics_server_enabled is used to enable disable the installation of
-  the metrics server. To use this service tiller_enabled must be true.
+  the metrics server.
+  To use this service tiller_enabled must be true when using
+  helm_client_tag<v3.0.0.
   Train default: true
   Stein default: true
 
@@ -1447,6 +1455,8 @@ _`k8s_keystone_auth_tag`
 _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the
   stable/prometheus-operator helm chart.
+  To use this service tiller_enabled must be true when using
+  helm_client_tag<v3.0.0.
   Default: false
 
 _`prometheus_adapter_enabled`
@@ -1473,24 +1483,34 @@ _`prometheus_operator_chart_tag`
 
 _`tiller_enabled`
   If set to true, tiller will be deployed in the kube-system namespace.
-  Ussuri default: true
+  Ussuri default: false
   Train default: false
 
 _`tiller_tag`
-  Add tiller_tag label to select the version of tiller. If the tag is not set
-  the tag that matches the helm client version in the heat-agent will be
-  picked. The tiller image can be stored in a private registry and the
-  cluster can pull it using the container_infra_prefix label.
+  This label allows users to override the default container tag for Tiller.
+  For additional tags, `refer to Tiller page
+  <https://github.com/helm/helm/tags>`_ and look for tags<v3.0.0.
+  Train default: v2.12.3
+  Ussuri default: v2.16.7
 
 _`tiller_namespace`
-  Configure in which namespace tiller is going to be installed.
+  The namespace in which Tiller and Helm v2 chart install jobs are installed.
   Default: magnum-tiller
 
+_`helm_client_url`
+  URL of the helm client binary.
+  Default: ''
+
+_`helm_client_sha256`
+  SHA256 checksum of the helm client binary.
+  Ussuri default: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+
 _`helm_client_tag`
-  The version of the helm client to use.
-  The image can be stored in a private registry and the
-  cluster can pull it using the container_infra_prefix label.
-  Default: dev
+  This label allows users to override the default container tag for Helm
+  client.  For additional tags, `refer to Helm client page
+  <https://github.com/helm/helm/tags>`_. You must use identical tiller_tag if
+  you wish to use Tiller (for helm_client_tag<v3.0.0).
+  Ussuri default: v3.2.1
 
 _`master_lb_floating_ip_enabled`
   Controls if Magnum allocates floating IP for the load balancer of master
@@ -1664,6 +1684,8 @@ _`ingress_controller`
   Controller is configured. For more details about octavia-ingress-controller
   please refer to `cloud-provider-openstack document
   <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-octavia-ingress-controller.md>`_
+  To use 'nginx' ingress controller, tiller_enabled must be true when using
+  helm_client_tag<v3.0.0.
 
 _`ingress_controller_role`
   This label defines the role nodes should have to run an instance of the
