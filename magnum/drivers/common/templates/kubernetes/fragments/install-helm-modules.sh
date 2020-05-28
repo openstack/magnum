@@ -7,6 +7,18 @@ set +x
 . /etc/sysconfig/heat-params
 set -ex
 
+if [ ! -z "$HTTP_PROXY" ]; then
+    export HTTP_PROXY
+fi
+
+if [ ! -z "$HTTPS_PROXY" ]; then
+    export HTTPS_PROXY
+fi
+
+if [ ! -z "$NO_PROXY" ]; then
+    export NO_PROXY
+fi
+
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
 echo "Waiting for Kubernetes API..."
