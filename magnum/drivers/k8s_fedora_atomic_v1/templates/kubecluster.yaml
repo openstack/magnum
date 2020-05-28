@@ -727,17 +727,29 @@ parameters:
   tiller_tag:
     type: string
     description: tag of tiller container
-    default: "v2.12.3"
+    default: "v2.16.7"
 
   tiller_namespace:
     type: string
     description: namespace where tiller will be installed.
     default: "magnum-tiller"
 
+  helm_client_url:
+    type: string
+    description: url of helm client tarball
+    default: ""
+
+  helm_client_sha256:
+    type: string
+    description: sha256 of helm client tarball
+    default: "018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b"
+
   helm_client_tag:
     type: string
-    description: tag of helm container
-    default: "dev"
+    description: >
+      release tag of helm client
+      https://github.com/helm/helm/releases
+    default: "v3.2.1"
 
   auto_healing_enabled:
     type: boolean
@@ -1119,7 +1131,6 @@ resources:
           metrics_server_enabled: {get_param: metrics_server_enabled}
           metrics_server_chart_tag: {get_param: metrics_server_chart_tag}
           prometheus_monitoring: {get_param: prometheus_monitoring}
-          grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}
           api_private_address: {get_attr: [api_lb, address]}
           ssh_key_name: {get_param: ssh_key_name}
@@ -1218,6 +1229,8 @@ resources:
           tiller_enabled: {get_param: tiller_enabled}
           tiller_tag: {get_param: tiller_tag}
           tiller_namespace: {get_param: tiller_namespace}
+          helm_client_url: {get_param: helm_client_url}
+          helm_client_sha256: {get_param: helm_client_sha256}
           helm_client_tag: {get_param: helm_client_tag}
           node_problem_detector_tag: {get_param: node_problem_detector_tag}
           nginx_ingress_controller_tag: {get_param: nginx_ingress_controller_tag}
@@ -1269,7 +1282,7 @@ resources:
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
                 params:
-                  "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
+                  "${GRAFANA_ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
             - str_replace:
                 params:
                   $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}
@@ -1286,9 +1299,9 @@ resources:
             # Helm Based Installation Configuration Scripts
             - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
             - str_replace:
-                template: {get_file:  ../../common/templates/kubernetes/helm/prometheus-operator.sh}
+                template: {get_file: ../../common/templates/kubernetes/helm/prometheus-operator.sh}
                 params:
-                  "${ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
+                  "${GRAFANA_ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
                   "${KUBE_MASTERS_PRIVATE}": {get_attr: [kube_masters, kube_master_external_ip]}
             - get_file: ../../common/templates/kubernetes/helm/prometheus-adapter.sh
             - get_file: ../../common/templates/kubernetes/helm/ingress-nginx.sh
