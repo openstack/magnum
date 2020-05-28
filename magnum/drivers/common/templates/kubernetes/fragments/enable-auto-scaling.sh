@@ -150,6 +150,10 @@ spec:
             - --scale-down-unneeded-time=10m
             - --scale-down-delay-after-failure=3m
             - --scale-down-delay-after-add=10m
+          ports:
+          - containerPort: 8085
+            name: metrics
+            protocol: TCP
           volumeMounts:
             - name: ca-bundle
               mountPath: /etc/kubernetes
