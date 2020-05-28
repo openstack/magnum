@@ -26,6 +26,8 @@ if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; th
         PROTOCOL="http"
         INSECURE_SKIP_VERIFY="True"
     fi
+    # FIXME: Force protocol to http as we don't want to use the cluster certs
+    USE_HTTPS="False"
 
     if [ "$(echo ${VERIFY_CA} | tr '[:upper:]' '[:lower:]')" == "false" ]; then
         INSECURE_SKIP_VERIFY="True"
@@ -112,6 +114,11 @@ data:
     nameOverride: prometheus
     fullnameOverride: prometheus
 
+    defaultRules:
+      rules:
+        #TODO: To enable this we need firstly take care of exposing certs
+        etcd: false
+
     alertmanager:
       alertmanagerSpec:
         image:
@@ -135,11 +142,29 @@ data:
 
     kubeApiServer:
       tlsConfig:
-        insecureSkipVerify: ${INSECURE_SKIP_VERIFY}
+        insecureSkipVerify: "False"
 
     kubelet:
       serviceMonitor:
-        https: ${PROTOCOL}
+        https: "True"
+
+    kubeControllerManager:
+      ## If your kube controller manager is not deployed as a pod, specify IPs it can be found on
+      endpoints: ${KUBE_MASTERS_PRIVATE}
+      ## If using kubeControllerManager.endpoints only the port and targetPort are used
+      service:
+        port: 10252
+        targetPort: 10252
+        # selector:
+        #   component: kube-controller-manager
+      serviceMonitor:
+        ## Enable scraping kube-controller-manager over https.
+        ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
+        https: ${USE_HTTPS}
+        # Skip TLS certificate validation when scraping
+        insecureSkipVerify: null
+        # Name of the server to use when validating TLS certificate
+        serverName: null
 
     coreDns:
       enabled: true
@@ -150,13 +175,48 @@ data:
           k8s-app: kube-dns
 
     kubeEtcd:
+      ## If your etcd is not deployed as a pod, specify IPs it can be found on
+      endpoints: ${KUBE_MASTERS_PRIVATE}
+      ## Etcd service. If using kubeEtcd.endpoints only the port and targetPort are used
+      service:
+        port: 2379
+        targetPort: 2379
+        # selector:
+        #   component: etcd
+      ## Configure secure access to the etcd cluster by loading a secret into prometheus and
+      ## specifying security configuration below. For example, with a secret named etcd-client-cert
       serviceMonitor:
-        scheme: ${PROTOCOL}
+        scheme: https
         insecureSkipVerify: true
-        ##  If Protocol is http this files should be neglected
         caFile: /etc/prometheus/secrets/etcd-certificates/ca.crt
         certFile: /etc/prometheus/secrets/etcd-certificates/kubelet.crt
         keyFile: /etc/prometheus/secrets/etcd-certificates/kubelet.key
+
+    kubeScheduler:
+      ## If your kube scheduler is not deployed as a pod, specify IPs it can be found on
+      endpoints: ${KUBE_MASTERS_PRIVATE}
+      ## If using kubeScheduler.endpoints only the port and targetPort are used
+      service:
+        port: 10251
+        targetPort: 10251
+        # selector:
+        #   component: kube-scheduler
+      serviceMonitor:
+        ## Enable scraping kube-scheduler over https.
+        ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
+        https: ${USE_HTTPS}
+        ## Skip TLS certificate validation when scraping
+        insecureSkipVerify: null
+        ## Name of the server to use when validating TLS certificate
+        serverName: null
+
+    # kubeProxy:
+    #   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
+    #   endpoints: [] # masters + minions
+    #   serviceMonitor:
+    #     ## Enable scraping kube-proxy over https.
+    #     ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
+    #     https: ${USE_HTTPS}
 
     kube-state-metrics:
       priorityClassName: "system-cluster-critical"
@@ -173,6 +233,12 @@ data:
         limits:
           cpu: 20m
           memory: 20M
+      extraArgs:
+        - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+        - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+      sidecars: []
+      ##  - name: nvidia-dcgm-exporter
+      ##    image: nvidia/dcgm-exporter:1.4.3
 
     prometheusOperator:
       priorityClassName: "system-cluster-critical"
@@ -207,12 +273,19 @@ data:
         retention: 14d
         externalLabels:
           cluster_uuid: ${CLUSTER_UUID}
+        ## Secrets is a list of Secrets in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
+        ## The Secrets are mounted into /etc/prometheus/secrets/. Secrets changes after initial creation of a Prometheus object are not
+        ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
+        ## with the new list of secrets.
+        # secrets:
+        # - etcd-certificates
+        # - kube-controller-manager-certificates
+        # - kube-scheduler-certificates
+        # - kube-proxy-manager-certificates
         resources:
           requests:
             cpu: ${PROMETHEUS_SERVER_CPU}m
             memory: ${PROMETHEUS_SERVER_RAM}M
-        # secrets:
-        # - etcd-certificates
         priorityClassName: "system-cluster-critical"
 ${APP_ADDITIONAL_SERVICE_MONITORS}
 ${APP_ADDITIONAL_POD_MONITORS}
