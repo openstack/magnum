@@ -6,6 +6,17 @@ printf "Starting to run ${step}\n"
 . /etc/sysconfig/heat-params
 
 set -ex
+if [ ! -z "$HTTP_PROXY" ]; then
+    export HTTP_PROXY
+fi
+
+if [ ! -z "$HTTPS_PROXY" ]; then
+    export HTTPS_PROXY
+fi
+
+if [ ! -z "$NO_PROXY" ]; then
+    export NO_PROXY
+fi
 
 echo "Waiting for Kubernetes API..."
 until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
