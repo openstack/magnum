@@ -12,6 +12,9 @@
 
 import mock
 
+from oslo_utils import uuidutils
+
+from magnum.common import context as magnum_context
 from magnum.conductor import api as rpcapi
 import magnum.conf
 from magnum.tests.unit.api import base as api_base
@@ -143,8 +146,8 @@ class TestClusterUpgrade(api_base.FunctionalTest):
             project_id=self.cluster_obj.project_id,
             is_default=False)
         p = mock.patch.object(rpcapi.API, 'cluster_upgrade')
-        self.mock_cluster_resize = p.start()
-        self.mock_cluster_resize.side_effect = self._sim_rpc_cluster_upgrade
+        self.mock_cluster_upgrade = p.start()
+        self.mock_cluster_upgrade.side_effect = self._sim_rpc_cluster_upgrade
         self.addCleanup(p.stop)
 
     def _sim_rpc_cluster_upgrade(self, cluster, cluster_template, batch_size,
@@ -161,6 +164,38 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   headers={"Openstack-Api-Version":
                                            "container-infra latest"})
         self.assertEqual(202, response.status_code)
+
+    def test_upgrade_cluster_as_admin(self):
+        token_info = {
+            'token': {
+                'project': {'id': 'fake_project_1'},
+                'user': {'id': 'fake_user_1'}
+            }
+        }
+        user_context = magnum_context.RequestContext(
+            auth_token_info=token_info,
+            project_id='fake_project_1',
+            user_id='fake_user_1',
+            is_admin=False)
+        cluster_uuid = uuidutils.generate_uuid()
+        cluster_template_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster_template(
+            user_context,
+            public=True, uuid=cluster_template_uuid)
+        obj_utils.create_test_cluster(
+            user_context,
+            uuid=cluster_uuid,
+            cluster_template_id=cluster_template_uuid)
+
+        cluster_upgrade_req = {"cluster_template": "test_2"}
+        self.context.is_admin = True
+        response = self.post_json(
+            '/clusters/%s/actions/upgrade' %
+            cluster_uuid,
+            cluster_upgrade_req,
+            headers={"Openstack-Api-Version": "container-infra latest"})
+
+        self.assertEqual(202, response.status_int)
 
     def test_upgrade_default_worker(self):
         cluster_upgrade_req = {
