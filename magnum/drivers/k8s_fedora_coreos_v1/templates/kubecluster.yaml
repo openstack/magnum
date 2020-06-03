@@ -678,7 +678,7 @@ parameters:
   heat_container_agent_tag:
     type: string
     description: tag of the heat_container_agent system container
-    default: ussuri-dev
+    default: victoria-dev
 
   keystone_auth_enabled:
     type: boolean
