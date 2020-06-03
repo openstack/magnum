@@ -6,7 +6,7 @@ set -x
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 KUBECONFIG="/etc/kubernetes/kubelet-config.yaml"
 if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    kubecontrol="/usr/local/bin/kubectl --kubeconfig $KUBECONFIG"
+    kubecontrol="/srv/magnum/bin/kubectl --kubeconfig $KUBECONFIG"
 else
     kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig $KUBECONFIG"
 fi
@@ -46,7 +46,16 @@ if [ "${new_kube_tag}" != "${KUBE_TAG}" ]; then
             ${ssh_cmd} systemctl start ${service}
         done
 
-        KUBE_DIGEST=$($ssh_cmd podman image inspect hyperkube:${new_kube_tag} --format "{{.Digest}}")
+        i=0
+        until [ "`${ssh_cmd} podman image exists ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:${new_kube_tag} && echo $?`" = 0 ]
+        do
+            i=$((i+1))
+            [ $i -lt 30 ] || break;
+            echo "Pulling image: hyperkube:${new_kube_tag}"
+            sleep 5s
+        done
+
+        KUBE_DIGEST=$($ssh_cmd podman image inspect ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:${new_kube_tag} --format "{{.Digest}}")
         if [ -n "${new_kube_image_digest}"  ] && [ "${new_kube_image_digest}" != "${KUBE_DIGEST}" ]; then
             printf "The sha256 ${KUBE_DIGEST} of current hyperkube image cannot match the given one: ${new_kube_image_digest}."
             exit 1
@@ -113,23 +122,27 @@ EOF
     fi
 }
 
-remote_list=`${ssh_cmd} ostree remote list`
-# Fedora Atomic 29 will be the last release before migrating to Fedora CoreOS, so we're OK to add 28 and 29 remotes directly
-if [[ ! " ${remote_list[@]} " =~ "fedora-atomic-28" ]]; then
-    ${ssh_cmd} ostree remote add --set=gpgkeypath=/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-28-primary --contenturl=mirrorlist=https://ostree.fedoraproject.org/mirrorlist fedora-atomic-28 https://kojipkgs.fedoraproject.org/atomic/repo/
-fi
-if [[ ! " ${remote_list[@]} " =~ "fedora-atomic-29" ]]; then
-    ${ssh_cmd} ostree remote add --set=gpgkeypath=/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-29-primary --contenturl=mirrorlist=https://ostree.fedoraproject.org/mirrorlist fedora-atomic-29 https://kojipkgs.fedoraproject.org/atomic/repo/
-fi
-# The uri of existing Fedora Atomic 27 remote is not accessible now, so replace it with correct uri
-if [[ " ${remote_list[@]} " =~ "fedora-atomic" ]]; then
-    sed -i '
-        /^url=/ s|=.*|=https://kojipkgs.fedoraproject.org/atomic/repo/|
-    ' /etc/ostree/remotes.d/fedora-atomic.conf
-fi
-
-current_ostree_commit=`${ssh_cmd} rpm-ostree status | grep Commit | awk '{print $2}'`
+# NOTE(flwang): Record starts with "*" means the current one
+current_ostree_commit=`${ssh_cmd} rpm-ostree status | grep -A 3 "* ostree://" | grep Commit | awk '{print $2}'`
 current_ostree_remote=`${ssh_cmd} rpm-ostree status | awk '/* ostree/{print $0}' | awk '{match($0,"* ostree://([^ ]+)",a)}END{print a[1]}'`
+remote_list=`${ssh_cmd} ostree remote list`
+
+# NOTE(flwang): This part is only applicable for fedora atomic
+if [[ $current_ostree_remote == *"fedora-atomic"* ]]; then
+    # Fedora Atomic 29 will be the last release before migrating to Fedora CoreOS, so we're OK to add 28 and 29 remotes directly
+    if [[ ! " ${remote_list[@]} " =~ "fedora-atomic-28" ]]; then
+        ${ssh_cmd} ostree remote add --set=gpgkeypath=/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-28-primary --contenturl=mirrorlist=https://ostree.fedoraproject.org/mirrorlist fedora-atomic-28 https://kojipkgs.fedoraproject.org/atomic/repo/
+    fi
+    if [[ ! " ${remote_list[@]} " =~ "fedora-atomic-29" ]]; then
+        ${ssh_cmd} ostree remote add --set=gpgkeypath=/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-29-primary --contenturl=mirrorlist=https://ostree.fedoraproject.org/mirrorlist fedora-atomic-29 https://kojipkgs.fedoraproject.org/atomic/repo/
+    fi
+    # The uri of existing Fedora Atomic 27 remote is not accessible now, so replace it with correct uri
+    if [[ " ${remote_list[@]} " =~ "fedora-atomic" ]]; then
+        sed -i '
+            /^url=/ s|=.*|=https://kojipkgs.fedoraproject.org/atomic/repo/|
+        ' /etc/ostree/remotes.d/fedora-atomic.conf
+    fi
+fi
 
 # NOTE(flwang): 1. Either deploy or rebase for only one upgrade
 #               2. Using rpm-ostree command instead of atomic command to keep the possibility of supporting fedora coreos 30
