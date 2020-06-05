@@ -700,17 +700,19 @@ follows.
   'discovery_url' cannot be replaced or delete.  The table below
   summarizes the possible change to a cluster.
 
-  +---------------+-----+------------------+-----------------------+
-  | Attribute     | add | replace          | remove                |
-  +===============+=====+==================+=======================+
-  | node_count    | no  | add/remove nodes | reset to default of 1 |
-  +---------------+-----+------------------+-----------------------+
-  | master_count  | no  | no               |  no                   |
-  +---------------+-----+------------------+-----------------------+
-  | name          | no  | no               |  no                   |
-  +---------------+-----+------------------+-----------------------+
-  | discovery_url | no  | no               |  no                   |
-  +---------------+-----+------------------+-----------------------+
+  +---------------+-----+-------------------+-----------------------+
+  | Attribute     | add | replace           | remove                |
+  +===============+=====+===================+=======================+
+  | node_count    | no  | add/remove nodes  | reset to default of 1 |
+  |               |     | in default-worker |                       |
+  |               |     | nodegroup.        |                       |
+  +---------------+-----+-------------------+-----------------------+
+  | master_count  | no  | no                |  no                   |
+  +---------------+-----+-------------------+-----------------------+
+  | name          | no  | no                |  no                   |
+  +---------------+-----+-------------------+-----------------------+
+  | discovery_url | no  | no                |  no                   |
+  +---------------+-----+-------------------+-----------------------+
 
 The 'cluster-update' operation cannot be initiated when another operation
 is in progress.

@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes an edge case where when a cluster with additional nodegroups is
+    patched with health_status and health_status_reason, it was leading to the
+    default-worker nodegroup being resized.
