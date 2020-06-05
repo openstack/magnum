@@ -1334,7 +1334,8 @@ _`heat_container_agent_tag`
   This label allows users to select `a specific heat_container_agent
   version, based on its container tag
   <https://hub.docker.com/r/openstackmagnum/heat-container-agent/tags/>`_.
-  Train-default: train-dev
+  Train-default: train-stable-3
+  Ussuri-default: ussuri-stable-1
 
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.
