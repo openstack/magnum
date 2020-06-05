@@ -614,7 +614,17 @@ class ClustersController(base.Controller):
                 delta.add(field)
 
         validation.validate_cluster_properties(delta)
-        return (cluster, new_cluster.node_count,
+
+        # NOTE(brtknr): cluster.node_count is the size of the whole cluster
+        # which includes non-default nodegroups. However cluster_update expects
+        # node_count to be the size of the default_ng_worker therefore return
+        # this value unless the patch object says otherwise.
+        node_count = cluster.default_ng_worker.node_count
+        for p in patch:
+            if p['path'] == '/node_count':
+                node_count = p.get('value') or new_cluster.node_count
+
+        return (cluster, node_count,
                 new_cluster.health_status, new_cluster.health_status_reason)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
