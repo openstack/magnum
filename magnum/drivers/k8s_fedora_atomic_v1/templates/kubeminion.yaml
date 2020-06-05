@@ -509,7 +509,6 @@ resources:
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_resource: kube_minion_eth0}
-    depends_on: kube-minion
 
   ######################################################################
   #
