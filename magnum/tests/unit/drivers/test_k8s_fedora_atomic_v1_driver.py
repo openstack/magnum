@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import patch
+from unittest.mock import patch
 
 from magnum.common import exception
 from magnum.drivers.k8s_fedora_atomic_v1 import driver

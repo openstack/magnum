@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from mock import patch
 from unittest import mock
+from unittest.mock import patch
 
 from magnum.drivers.heat import driver as heat_driver
 from magnum.drivers.mesos_ubuntu_v1 import driver as mesos_dr
