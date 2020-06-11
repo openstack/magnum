@@ -483,6 +483,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `calico_ipv4pool_ipip`_               | see below          | Off           |
 +---------------------------------------+--------------------+---------------+
+| `fixed_subnet_cidr`_                  | see below          | ""            |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1629,6 +1631,11 @@ _`kube_dashboard_version`
 _`metrics_scraper_tag`
   The version of metrics-scraper used by kubernetes dashboard.
   Ussuri default: v1.0.4
+
+_`fixed_subnet_cidr`
+  CIDR of the fixed subnet created by Magnum when a user has not
+  specified an existing fixed_subnet during cluster creation.
+  Ussuri default: 10.0.0.0/24
 
 External load balancer for services
 -----------------------------------
