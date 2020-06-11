@@ -2,15 +2,29 @@
   tasks:
     - include_vars: container-builder-vars.yaml
 
-    - name: "Build magnum images"
+    # NOTE: By default, stable images are not built if they already exist.
+    # Assigning dev=true property for heat container agent images means that a new
+    # image is re-built and pushed under the same tag every time.
+    - name: "Build heat-container-agent images"
       block:
-        - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
+        - name: "Check if {{ magnum_repository }}/heat-container-agent:{{ item.tag }} exists"
           docker_image:
-            path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
-            name: "{{ magnum_repository }}/{{ item.name }}"
+            name: "{{ magnum_repository }}/heat-container-agent"
             tag: "{{ item.tag }}"
+            pull: yes
+          register: docker_output
+          when: not (item.dev | default(false) | bool)
+          ignore_errors: true
+          with_items: "{{ heat_container_agent_images }}"
+        - name: "Build {{ magnum_repository }}/heat-container-agent:{{ item.item.tag }} image"
+          docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/heat-container-agent"
+            name: "{{ magnum_repository }}/heat-container-agent"
+            tag: "{{ item.item.tag }}"
             push: no
-          with_items: "{{ magnum_images }}"
+            source: build
+          with_items: "{{ docker_output.results }}"
+          when: (item is failed) or (item.item.dev | default(false) | bool)
           retries: 10
 
     - name: "Build kubernetes images"

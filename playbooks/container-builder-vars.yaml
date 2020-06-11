@@ -2,9 +2,13 @@ magnum_src_dir: "src/opendev.org/openstack/magnum"
 
 magnum_repository: openstackmagnum
 
-magnum_images:
-  - name: heat-container-agent
-    tag: victoria-dev
+# NOTE: By default, stable images are not built if they already exist.
+# Assigning dev=true property for heat container agent images means that a new
+# image is re-built and pushed under the same tag every time.
+heat_container_agent_images:
+  - tag: victoria-stable-1
+  - tag: wallaby-dev
+    dev: true
 
 kubernetes_versions:
   - version: v1.15.12
