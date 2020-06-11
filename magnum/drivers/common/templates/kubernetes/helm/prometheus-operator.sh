@@ -50,6 +50,16 @@ data:
     mkdir -p \${HELM_HOME}
     cp /etc/helm/* \${HELM_HOME}
 
+    if [ ! -z "${HTTP_PROXY}" ]; then
+        export HTTP_PROXY=${HTTP_PROXY}
+    fi
+    if [ ! -z "${HTTPS_PROXY}" ]; then
+        export HTTPS_PROXY=${HTTPS_PROXY}
+    fi
+    if [ ! -z "${NO_PROXY}" ]; then
+        export NO_PROXY=${NO_PROXY}
+    fi
+
     # HACK - Force wait because of bug https://github.com/helm/helm/issues/5170
     until helm init --client-only --wait
     do
