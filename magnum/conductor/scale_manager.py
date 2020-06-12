@@ -47,7 +47,7 @@ class ScaleManager(object):
 
         cluster = self.new_cluster
         stack = self.osclient.heat().stacks.get(cluster.stack_id)
-        hosts = hosts_output.get_output_value(stack)
+        hosts = hosts_output.get_output_value(stack, cluster)
         if hosts is None:
             raise exception.MagnumException(_(
                 "Output key '%(output_key)s' is missing from stack "

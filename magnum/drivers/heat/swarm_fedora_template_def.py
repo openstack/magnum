@@ -24,7 +24,7 @@ class SwarmApiAddressOutputMapping(template_def.OutputMapping):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack)
+        output_value = self.get_output_value(stack, cluster)
         if output_value is not None:
             # Note(rocha): protocol should always be tcp as the docker
             # command client does not handle https (see bug #1604812).
