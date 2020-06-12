@@ -150,24 +150,25 @@ class TemplateDefinitionTestCase(base.TestCase):
         ]
 
         mock_stack = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': heat_outputs}
 
         output = cmn_tdef.OutputMapping('key1')
-        value = output.get_output_value(mock_stack)
+        value = output.get_output_value(mock_stack, mock_cluster)
         self.assertEqual('value1', value)
 
         output = cmn_tdef.OutputMapping('key2')
-        value = output.get_output_value(mock_stack)
+        value = output.get_output_value(mock_stack, mock_cluster)
         self.assertEqual(["value2", "value3"], value)
 
         output = cmn_tdef.OutputMapping('key3')
-        value = output.get_output_value(mock_stack)
+        value = output.get_output_value(mock_stack, mock_cluster)
         self.assertIsNone(value)
 
         # verify stack with no 'outputs' attribute
         mock_stack.to_dict.return_value = {}
         output = cmn_tdef.OutputMapping('key1')
-        value = output.get_output_value(mock_stack)
+        value = output.get_output_value(mock_stack, mock_cluster)
         self.assertIsNone(value)
 
     def test_add_output_with_mapping_type(self):
