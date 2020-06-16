@@ -1,4 +1,3 @@
-#!/bin/bash
 step="install-clients"
 printf "Starting to run ${step}\n"
 

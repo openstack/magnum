@@ -1,5 +1,3 @@
-#!/bin/bash
-
 step="install-helm-modules"
 echo "START: ${step}"
 

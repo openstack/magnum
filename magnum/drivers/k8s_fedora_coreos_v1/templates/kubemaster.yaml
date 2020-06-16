@@ -717,6 +717,7 @@ resources:
         list_join:
           - "\n"
           -
+            - "#!/bin/bash"
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh}
                 params:
@@ -1006,7 +1007,11 @@ resources:
       - name: ostree_remote_input
       - name: ostree_commit_input
       config:
-        get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+        list_join:
+          - "\n"
+          -
+            - "#!/bin/bash"
+            - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
 
   upgrade_kubernetes_deployment:
     type: OS::Heat::SoftwareDeployment

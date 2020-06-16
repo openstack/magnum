@@ -1,5 +1,3 @@
-#!/bin/bash
-
 . /etc/sysconfig/heat-params
 
 step="enable-helm-tiller"
