@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="kube-dashboard-service"
 printf "Starting to run ${step}\n"
 

@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="enable-cert-api-manager"
 printf "Starting to run ${step}\n"
 

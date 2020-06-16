@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="calico-service-v3-3-x"
 printf "Starting to run ${step}\n"
 

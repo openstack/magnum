@@ -1,5 +1,3 @@
-#!/bin/sh
-
 set +x
 . /etc/sysconfig/heat-params
 set -x

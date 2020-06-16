@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="enable-cinder-csi"
 printf "Starting to run ${step}\n"
 

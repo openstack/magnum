@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set +x
 . /etc/sysconfig/heat-params
 set -x
@@ -401,6 +399,7 @@ EOF
 echo "export KUBECONFIG=${ADMIN_KUBECONFIG}" >> /etc/bashrc
 chown root:root ${ADMIN_KUBECONFIG}
 chmod 600 ${ADMIN_KUBECONFIG}
+export KUBECONFIG=${ADMIN_KUBECONFIG}
 
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true --kubeconfig=/etc/kubernetes/admin.conf"

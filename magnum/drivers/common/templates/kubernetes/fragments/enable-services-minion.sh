@@ -1,5 +1,3 @@
-#!/bin/sh
-
 set -x
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"

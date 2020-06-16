@@ -1,5 +1,3 @@
-#!/bin/sh
-
 . /etc/sysconfig/heat-params
 
 step="enable-keystone-auth"
