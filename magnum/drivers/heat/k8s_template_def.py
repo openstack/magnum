@@ -35,7 +35,7 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack)
+        output_value = self.get_output_value(stack, cluster)
         if output_value is not None:
             # TODO(yuanying): port number is hardcoded, this will be fix
             protocol = 'https'
