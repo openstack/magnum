@@ -75,3 +75,12 @@ user documentation.
 
   An admin user can set/update/delete/list quotas for the given tenant.
   A non-admin user can get self quota information.
+
+
+1.10
+---
+
+  Allow nodegroups with 0 nodes
+
+  Allow the cluster to be created with node_count = 0 as well as to update
+  existing nodegroups to have 0 nodes.

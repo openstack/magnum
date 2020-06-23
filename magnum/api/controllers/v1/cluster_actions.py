@@ -44,7 +44,7 @@ class ClusterResizeRequest(base.APIBase):
     This class enforces type checking and value constraints.
     """
 
-    node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), mandatory=True)
+    node_count = wsme.wsattr(wtypes.IntegerType(minimum=0), mandatory=True)
     """The expected node count after resize."""
 
     nodes_to_remove = wsme.wsattr([wtypes.text], mandatory=False,

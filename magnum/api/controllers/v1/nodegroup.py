@@ -98,18 +98,18 @@ class NodeGroup(base.APIBase):
     node_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of nodegroup nodes"""
 
-    node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    node_count = wsme.wsattr(wtypes.IntegerType(minimum=0), default=1)
     """The node count for this nodegroup. Default to 1 if not set"""
 
     role = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
                        default='worker')
     """The role of the nodes included in this nodegroup"""
 
-    min_node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
-    """The minimum allowed nodes for this nodegroup. Default to 1 if not set"""
+    min_node_count = wsme.wsattr(wtypes.IntegerType(minimum=0), default=0)
+    """The minimum allowed nodes for this nodegroup. Default to 0 if not set"""
 
-    max_node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=None)
-    """The maximum allowed nodes for this nodegroup. Default to 1 if not set"""
+    max_node_count = wsme.wsattr(wtypes.IntegerType(minimum=0), default=None)
+    """The maximum allowed nodes for this nodegroup."""
 
     is_default = types.BooleanType()
     """Specifies is a nodegroup was created by default or not"""

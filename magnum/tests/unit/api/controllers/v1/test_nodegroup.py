@@ -40,7 +40,7 @@ class TestNodegroupObject(base.TestCase):
         del nodegroup_dict['max_node_count']
         nodegroup = api_nodegroup.NodeGroup(**nodegroup_dict)
         self.assertEqual(1, nodegroup.node_count)
-        self.assertEqual(1, nodegroup.min_node_count)
+        self.assertEqual(0, nodegroup.min_node_count)
         self.assertIsNone(nodegroup.max_node_count)
 
 
@@ -294,6 +294,20 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual(1, response.json['node_count'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_with_zero_nodes(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data()
+        ng_dict['node_count'] = 0
+        ng_dict['min_node_count'] = 0
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        # Verify node_count is set to zero
+        self.assertEqual(0, response.json['node_count'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_nodegroup_with_max_node_count(self, mock_utcnow):
         ng_dict = apiutils.nodegroup_post_data(max_node_count=5)
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -366,7 +380,7 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual(self.cluster.project_id, response.json['project_id'])
         self.assertEqual(self.cluster.labels, response.json['labels'])
         self.assertEqual('worker', response.json['role'])
-        self.assertEqual(1, response.json['min_node_count'])
+        self.assertEqual(0, response.json['min_node_count'])
         self.assertEqual(1, response.json['node_count'])
         self.assertIsNone(response.json['max_node_count'])
 
@@ -662,7 +676,7 @@ class TestPatch(NodeGroupControllerTest):
 
         response = self.get_json(self.url + self.nodegroup.uuid)
         # Removing the min_node_count just restores the default value
-        self.assertEqual(1, response['min_node_count'])
+        self.assertEqual(0, response['min_node_count'])
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)

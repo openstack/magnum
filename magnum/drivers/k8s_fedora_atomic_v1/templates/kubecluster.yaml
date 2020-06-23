@@ -842,7 +842,7 @@ parameters:
     type: number
     description: >
       minimum node count of cluster workers when doing scale down
-    default: 1
+    default: 0
 
   max_node_count:
     type: number

@@ -18,6 +18,7 @@ from pycadf import cadftaxonomy as taxonomy
 from pycadf import cadftype
 from pycadf import eventfactory
 from pycadf import resource
+from wsme import types as wtypes
 
 from magnum.common import clients
 from magnum.common import rpc
@@ -176,6 +177,7 @@ def _get_nodegroup_object(context, cluster, node_count, is_master=False):
     ng.image_id = cluster.cluster_template.image_id
     ng.docker_volume_size = (cluster.docker_volume_size or
                              cluster.cluster_template.docker_volume_size)
+
     if is_master:
         ng.flavor_id = (cluster.master_flavor_id or
                         cluster.cluster_template.master_flavor_id)
@@ -183,6 +185,11 @@ def _get_nodegroup_object(context, cluster, node_count, is_master=False):
     else:
         ng.flavor_id = cluster.flavor_id or cluster.cluster_template.flavor_id
         ng.role = "worker"
+    if (cluster.labels != wtypes.Unset and cluster.labels is not None
+       and 'min_node_count' in cluster.labels):
+        ng.min_node_count = cluster.labels['min_node_count']
+    else:
+        ng.min_node_count = 0
     ng.name = "default-%s" % ng.role
     ng.is_default = True
     ng.status = fields.ClusterStatus.CREATE_IN_PROGRESS

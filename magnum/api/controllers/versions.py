@@ -17,16 +17,6 @@ from webob import exc
 
 from magnum.i18n import _
 
-# NOTE(yuntong): v1.0 is reserved to indicate Kilo's API, but is not presently
-#             supported by the API service. All changes between Kilo and the
-#             point where we added microversioning are considered backwards-
-#             compatible, but are not specifically discoverable at this time.
-#
-#             The v1.1 version indicates this "initial" version as being
-#             different from Kilo (v1.0), and includes the following changes:
-#
-#             Add details of new api versions here:
-
 #
 # For each newly added microversion change, update the API version history
 # string below with a one or two line description. Also update
@@ -42,10 +32,11 @@ REST_API_VERSION_HISTORY = """REST API Version History:
     * 1.7 - Add resize API
     * 1.8 - Add upgrade API
     * 1.9 - Add nodegroup API
+    * 1.10 - Allow nodegroups with 0 nodes
 """
 
 BASE_VER = '1.1'
-CURRENT_MAX_VER = '1.9'
+CURRENT_MAX_VER = '1.10'
 
 
 class Version(object):

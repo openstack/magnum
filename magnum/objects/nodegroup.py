@@ -26,8 +26,9 @@ from magnum.objects import fields as m_fields
 class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
                 base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
+    # Version 1.1: min_node_count defaults to 0
 
-    VERSION = '1.0'
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -45,7 +46,7 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         'node_count': fields.IntegerField(nullable=False, default=1),
         'role': fields.StringField(),
         'max_node_count': fields.IntegerField(nullable=True),
-        'min_node_count': fields.IntegerField(nullable=False, default=1),
+        'min_node_count': fields.IntegerField(nullable=False, default=0),
         'is_default': fields.BooleanField(default=False),
         'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),

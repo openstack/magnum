@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Clusters can now be created with empty nodegroups. Existing nodegroups
+    can be set to node_count = 0. min_node_count defaults to 0.
+    This is usefull for HA or special hardware clusters with multiple
+    nodegroups managed by the cluster auto-scaller.

@@ -683,8 +683,7 @@ class TestPost(api_base.FunctionalTest):
         bdict['node_count'] = 0
         response = self.post_json('/clusters', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
+        self.assertEqual(202, response.status_int)
 
     def test_create_cluster_with_node_count_negative(self):
         bdict = apiutils.cluster_post_data()

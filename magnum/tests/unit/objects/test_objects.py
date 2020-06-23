@@ -364,7 +364,7 @@ object_data = {
     'Stats': '1.0-73a1cd6e3c0294c932a66547faba216c',
     'Quota': '1.0-94e100aebfa88f7d8428e007f2049c18',
     'Federation': '1.0-166da281432b083f0e4b851336e12e20',
-    'NodeGroup': '1.0-8cb4544a28a49860d816158a7c3060b1'
+    'NodeGroup': '1.1-70211d19fcf53903a470607f1f4a784f'
 }
 
 
