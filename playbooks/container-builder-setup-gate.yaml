@@ -18,8 +18,8 @@
         dest: "{{ zuul.project.src_dir }}/logs"
         state: link
 
-    - name: Install dependencies
+    - name: Install python3-docker
       become: true
-      pip:
-        name: docker
+      package:
+        name: python3-docker
         state: present
