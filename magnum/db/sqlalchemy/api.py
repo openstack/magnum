@@ -389,7 +389,8 @@ class Connection(api.Connection):
     def _is_publishing_cluster_template(self, values):
         if (len(values) == 1 and (
                 ('public' in values and values['public'] is True) or
-                ('hidden' in values))):
+                ('hidden' in values) or
+                ('tags' in values and values['tags'] is not None))):
             return True
         return False
 

@@ -57,6 +57,7 @@ Request
   - dns_nameserver: dns_nameserver
   - floating_ip_enabled: floating_ip_enabled
   - hidden: hidden
+  - tags: tags
 
 Request Example
 ----------------
@@ -102,6 +103,7 @@ Response
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
   - hidden: hidden
+  - tags: tags
 
 Response Example
 ----------------
@@ -167,6 +169,7 @@ Response
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
   - hidden: hidden
+  - tags: tags
 
 Response Example
 ----------------
@@ -240,6 +243,7 @@ Response
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
   - hidden: hidden
+  - tags: tags
 
 Response Example
 ----------------
@@ -364,6 +368,7 @@ Return new cluster templates with updated attributes.
   - master_lb_enabled: master_lb_enabled
   - dns_nameserver: dns_nameserver
   - hidden: hidden
+  - tags: tags
 
 Response Example
 ----------------

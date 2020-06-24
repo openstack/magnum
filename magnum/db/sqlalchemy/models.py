@@ -191,6 +191,7 @@ class ClusterTemplate(Base):
     master_lb_enabled = Column(Boolean, default=False)
     floating_ip_enabled = Column(Boolean, default=True)
     hidden = Column(Boolean, default=False)
+    tags = Column(String(255))
 
 
 class X509KeyPair(Base):
