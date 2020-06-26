@@ -1,5 +1,3 @@
-#!/bin/sh
-
 . /etc/sysconfig/heat-params
 
 if [ "$VERIFY_CA" == "True" ]; then

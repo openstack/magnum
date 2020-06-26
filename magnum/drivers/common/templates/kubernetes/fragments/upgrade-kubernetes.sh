@@ -1,5 +1,3 @@
-#!/bin/bash
-
 . /etc/sysconfig/heat-params
 set -x
 

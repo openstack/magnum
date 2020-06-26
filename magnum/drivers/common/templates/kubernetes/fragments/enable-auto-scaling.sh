@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="enable-auto-scaling"
 printf "Starting to run ${step}\n"
 

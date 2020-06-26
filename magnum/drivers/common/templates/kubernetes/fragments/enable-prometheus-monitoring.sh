@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="enable-prometheus-monitoring"
 printf "Starting to run ${step}\n"
 
