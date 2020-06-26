@@ -117,7 +117,16 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
         osc = self.get_osc(context)
-        extra_params['magnum_url'] = osc.magnum_url()
+        # NOTE: Sometimes, version discovery fails when Magnum cannot talk to
+        # Keystone via specified magnum_client.endpoint_type intended for
+        # cluster instances either because it is not unreachable from the
+        # controller or CA certs are missing for TLS enabled interface and the
+        # returned auth_url may not be suffixed with /v1 in which case append
+        # the url with the suffix so that instances can still talk to Magnum.
+        magnum_url = osc.magnum_url()
+        extra_params['magnum_url'] = magnum_url + ('' if
+                                                   magnum_url.endswith('/v1')
+                                                   else '/v1')
 
         label_list = ['rexray_preempt', 'availability_zone']
 
