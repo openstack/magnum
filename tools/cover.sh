@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-ALLOWED_EXTRA_MISSING=0
+ALLOWED_EXTRA_MISSING_PERCENT=1
 
 show_diff () {
-    head -1 $1
-    diff -U 0 $1 $2 | sed 1,2d
+    result=`diff -U 0 $1 $2 | sed 1,2d`
+    [[ -n "$result" ]] && head -1 $1 || echo "No diff to display"
+    echo "$result"
 }
 
 if ! git diff --exit-code || ! git diff --cached --exit-code
@@ -31,38 +32,49 @@ git checkout HEAD^
 
 base_op_count=`grep "op\." -R magnum/db/sqlalchemy/alembic/versions/ | wc -l`
 baseline_report=$(mktemp -t magnum_coverageXXXXXXX)
-find . -type f -name "*.pyc" -delete && python setup.py testr --coverage --testr-args="$*"
+coverage erase
+find . -type f -name "*.pyc" -delete
+stestr run --no-subunit-trace $*
+coverage combine
 coverage report > $baseline_report
-mv cover cover-master
 cat $baseline_report
-baseline_missing=$(awk 'END { print $3 }' $baseline_report)
+coverage html -d cover-master
+coverage xml -o cover-master/coverage.xml
 
 # Checkout back and save coverage report
 git checkout -
 
 current_op_count=`grep "op\." -R magnum/db/sqlalchemy/alembic/versions/ | wc -l`
 current_report=$(mktemp -t magnum_coverageXXXXXXX)
-find . -type f -name "*.pyc" -delete && python setup.py testr --coverage --testr-args="$*"
-coverage report > $current_report
-current_missing=$(awk 'END { print $3 }' $current_report)
+coverage erase
+find . -type f -name "*.pyc" -delete
+stestr run --no-subunit-trace $*
+coverage combine
+coverage report --fail-under=90 > $current_report
+cat $current_report
+coverage html -d cover
+coverage xml -o cover/coverage.xml
 
 # Show coverage details
-allowed_missing=$((baseline_missing+ALLOWED_EXTRA_MISSING+current_op_count-base_op_count))
+show_diff $baseline_report $current_report > cover/coverage.diff
+cat cover/coverage.diff
+baseline_missing=$(awk 'END { print $3 }' $baseline_report)
+current_missing=$(awk 'END { print $3 }' $current_report)
+allowed_extra_missing=$((baseline_missing*ALLOWED_EXTRA_MISSING_PERCENT/100))
+allowed_missing=$((baseline_missing+allowed_extra_missing+current_op_count-base_op_count))
 
-echo "Allowed to introduce missing lines : ${ALLOWED_EXTRA_MISSING}"
-echo "Missing lines in master            : ${baseline_missing}"
+echo "Allowed to introduce missing lines : ${allowed_extra_missing}"
+echo "Missing lines in baseline          : ${baseline_missing}"
 echo "Missing lines in proposed change   : ${current_missing}"
 
 if [ $allowed_missing -ge $current_missing ]; then
     if [ $baseline_missing -lt $current_missing ]; then
-        show_diff $baseline_report $current_report
         echo "We believe you can test your code with 100% coverage!"
     else
         echo "Thank you! You are awesome! Keep writing unit tests! :)"
     fi
     exit_code=0
 else
-    show_diff $baseline_report $current_report
     echo "Please write more unit tests, we must maintain our test coverage :( "
     exit_code=1
 fi
