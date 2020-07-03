@@ -46,7 +46,7 @@ else
     $ssh_cmd tar xzvf /srv/magnum/helm-client.tar.gz linux-amd64/helm -O > /srv/magnum/bin/helm
     $ssh_cmd chmod +x /srv/magnum/bin/helm
 
-    helm_install_cmd="helm install magnum . --namespace kube-system --values values.yaml --render-subchart-notes"
+    helm_install_cmd="helm upgrade --install magnum . --namespace kube-system --values values.yaml --render-subchart-notes"
     helm_history_cmd="helm history magnum --namespace kube-system"
     if [[ "${HELM_CLIENT_TAG}" == v2.* ]]; then
         CERTS_DIR="/etc/kubernetes/helm/certs"
@@ -62,7 +62,7 @@ else
         until helm init --client-only --wait; do
             sleep 5s
         done
-        helm_install_cmd="helm install --name magnum . --namespace kube-system --values values.yaml --render-subchart-notes"
+        helm_install_cmd="helm upgrade --install --name magnum . --namespace kube-system --values values.yaml --render-subchart-notes"
         helm_history_cmd="helm history magnum"
     fi
 
@@ -79,7 +79,7 @@ EOF
         sed -i '1i\dependencies:' requirements.yaml
 
         i=0
-        until ($helm_history_cmd | grep magnum) || (helm dep update && $helm_install_cmd); do
+        until ($helm_history_cmd | grep magnum | grep deployed) || (helm dep update && $helm_install_cmd); do
             i=$((i + 1))
             [ $i -lt 60 ] || break;
             sleep 5
