@@ -128,7 +128,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
 
         template_def.add_priv_net_env_file(env_files, cluster_template,
                                            cluster)
-        template_def.add_lb_env_file(env_files, cluster_template)
+        template_def.add_lb_env_file(env_files, cluster)
 
         return env_files
 

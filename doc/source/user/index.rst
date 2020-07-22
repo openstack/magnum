@@ -653,6 +653,10 @@ follows:
   reached during cluster-create, the operation will be aborted and the
   cluster status will be set to 'CREATE_FAILED'.
 
+--master-lb-enabled
+  Indicates whether created clusters should have a load balancer for
+  master nodes or not.
+
 List
 ++++
 

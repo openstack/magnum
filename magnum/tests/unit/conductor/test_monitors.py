@@ -536,7 +536,7 @@ class MonitorsTestCase(base.TestCase):
         mock_nodes.items = [mock_node]
         cluster = self.k8s_monitor.cluster
         cluster.floating_ip_enabled = True
-        cluster.cluster_template.master_lb_enabled = True
+        cluster.master_lb_enabled = True
         cluster.labels['master_lb_floating_ip_enabled'] = False
 
         self.k8s_monitor.poll_health_status()
