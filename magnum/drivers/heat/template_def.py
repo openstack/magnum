@@ -399,7 +399,15 @@ class BaseTemplateDefinition(TemplateDefinition):
         }
         if CONF.trust.trustee_keystone_region_name:
             kwargs['region_name'] = CONF.trust.trustee_keystone_region_name
-        extra_params['auth_url'] = osc.url_for(**kwargs).rstrip('/')
+        # NOTE: Sometimes, version discovery fails when Magnum cannot talk to
+        # Keystone via specified trustee_keystone_interface intended for
+        # cluster instances either because it is not unreachable from the
+        # controller or CA certs are missing for TLS enabled interface and the
+        # returned auth_url may not be suffixed with /v3 in which case append
+        # the url with the suffix so that instances can still talk to Keystone.
+        auth_url = osc.url_for(**kwargs).rstrip('/')
+        extra_params['auth_url'] = auth_url + ('' if auth_url.endswith('/v3')
+                                               else '/v3')
 
         return super(BaseTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
