@@ -65,5 +65,8 @@ etc/magnum/magnum.conf.sample
 # generated policy file
 etc/magnum/policy.yaml.sample
 
+# generated files from doc build
+doc/source/_static/
+
 # Files created by releasenotes build
 releasenotes/build
