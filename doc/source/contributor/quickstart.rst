@@ -256,27 +256,32 @@ For example::
     104.20.64.68
     104.20.65.68
 
-Building a Kubernetes Cluster - Based on Fedora Atomic
+Building a Kubernetes Cluster - Based on Fedora CoreOS
 ======================================================
 
-Create a ClusterTemplate. This is similar in nature to a flavor and describes
+Create a cluster template. This is similar in nature to a flavor and describes
 to magnum how to construct the cluster. The ClusterTemplate specifies a Fedora
-Atomic image so the clusters which use this ClusterTemplate will be based on
-Fedora Atomic::
+CoreOS image so the clusters which use this ClusterTemplate will be based on
+Fedora CoreOS
+\
+::
 
     openstack coe cluster template create k8s-cluster-template \
-                           --image Fedora-Atomic-27-20180419.0.x86_64 \
-                           --keypair testkey \
-                           --external-network public \
-                           --dns-nameserver 8.8.8.8 \
-                           --flavor m1.small \
-                           --docker-volume-size 5 \
-                           --network-driver flannel \
-                           --coe kubernetes
+        --image fedora-coreos-31.20200323.3.2-openstack.x86_64 \
+        --keypair testkey \
+        --external-network public \
+        --dns-nameserver 8.8.8.8 \
+        --flavor ds1G \
+        --master-flavor ds2G \
+        --docker-volume-size 5 \
+        --network-driver flannel \
+        --docker-storage-driver overlay2 \
+        --coe kubernetes
 
 Create a cluster. Use the ClusterTemplate name as a template for cluster
 creation. This cluster will result in one master kubernetes node and one minion
-node::
+node
+::
 
     openstack coe cluster create k8s-cluster \
                           --cluster-template k8s-cluster-template \
@@ -339,11 +344,64 @@ Monitoring cluster status in detail (e.g., creating, updating)::
     echo ${CLUSTER_HEAT_NAME}
     openstack stack resource list ${CLUSTER_HEAT_NAME}
 
-Building a Kubernetes Cluster - Based on CoreOS
-===============================================
+Building a Kubernetes Cluster - Based on Fedora Atomic [DEPRECATED]
+===================================================================
+
+`Fedora Atomic Deprecation Notice <https://docs.fedoraproject.org/en-US/fedora-coreos/faq/#_does_fedora_coreos_replace_fedora_atomic_host_what_happens_to_fedora_atomic_host_and_centos_atomic_host>`_:
+
+    Fedora CoreOS is the official successor to Fedora Atomic Host. The last
+    Fedora Atomic Host release was version 29, which has now reached
+    end-of-life.
+
+When building devstack from master, the Fedora atomic image is no longer
+created for us by default. We will need to create an image ourselves.
+::
+
+    wget https://dl.fedoraproject.org/pub/alt/atomic/stable/Fedora-Atomic-27-20180419.0/CloudImages/x86_64/images/Fedora-Atomic-27-20180419.0.x86_64.qcow2
+
+    openstack image create Fedora-Atomic-27-20180419.0.x86_64  \
+                           --public \
+                           --disk-format=qcow2 \
+                           --container-format=bare \
+                           --property os_distro=fedora-atomic \
+                           --file=Fedora-Atomic-27-20180419.0.x86_64.qcow2
+
+Create a ClusterTemplate. This is similar in nature to a flavor and describes
+to magnum how to construct the cluster. The ClusterTemplate specifies a Fedora
+Atomic image so the clusters which use this ClusterTemplate will be based on
+Fedora Atomic
+::
+
+    openstack coe cluster template create k8s-cluster-template \
+                           --image Fedora-Atomic-27-20180419.0.x86_64 \
+                           --keypair testkey \
+                           --external-network public \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor m1.small \
+                           --docker-volume-size 5 \
+                           --network-driver flannel \
+                           --coe kubernetes
+
+Create a cluster. Use the ClusterTemplate name as a template for cluster
+creation. This cluster will result in one master kubernetes node and one minion
+node::
+
+    openstack coe cluster create k8s-cluster \
+                          --cluster-template k8s-cluster-template \
+                          --node-count 1
+
+Building a Kubernetes Cluster - Based on CoreOS [DEPRECATED]
+============================================================
+
+`End-of-life announcement for CoreOS Container Linux <https://coreos.com/os/eol/>`_:
+
+    On May 26, 2020, CoreOS Container Linux will reach its end of life and will
+    no longer receive updates. We strongly recommend that users begin migrating
+    their workloads to another operating system as soon as possible. [...]
+    Fedora CoreOS is the official successor to CoreOS Container Linux
 
 You can create a Kubernetes cluster based on CoreOS as an alternative to
-Atomic. First, download the official CoreOS image::
+Atomic or Fedora CoreOS. First, download the official CoreOS image::
 
     wget http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
     bunzip2 coreos_production_openstack_image.img.bz2
