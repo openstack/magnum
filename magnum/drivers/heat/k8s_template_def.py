@@ -188,6 +188,10 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         else:
             extra_params['fixed_network_name'] = cluster.name
 
+        if cluster.labels.get('fixed_subnet_cidr'):
+            extra_params['fixed_subnet_cidr'] = cluster.labels.get(
+                'fixed_subnet_cidr')
+
         # NOTE(brtknr): Convert fixed subnet name to UUID. If fixed_subnet
         # is not specified in cluster template use 'private' as the default
         # value, which is the same as the heat template default value.
@@ -195,6 +199,12 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         subnet_id = neutron.get_fixed_subnet_id(context, fixed_subnet)
         if subnet_id:
             extra_params['fixed_subnet'] = subnet_id
+            # NOTE(flwang): If a fixed subnet is given, then the label
+            # fixed_subnet_cidr should be updated to reflect the correct
+            # setting.
+            extra_params['fixed_subnet_cidr'] = neutron.get_subnet(
+                context, subnet_id, "id", "cidr")
+
         return extra_params
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
@@ -272,7 +282,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
     def _set_master_lb_allowed_cidrs(self, context, cluster, extra_params):
         if extra_params.get("master_lb_allowed_cidrs"):
-            subnet_cidr = (cluster.labels.get("fixed_network_cidr") or
+            subnet_cidr = (cluster.labels.get("fixed_subnet_cidr") or
                            "10.0.0.0/24")
             if extra_params.get("fixed_subnet"):
                 subnet_cidr = neutron.get_subnet(context,

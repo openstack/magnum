@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Now the label `fixed_network_cidr` have been renamed with
+    `fixed_subnet_cidr`. And it can be passed in and set
+    correctly.

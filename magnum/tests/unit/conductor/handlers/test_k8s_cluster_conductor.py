@@ -187,7 +187,9 @@ class TestClusterConductorWithK8s(base.TestCase):
                           'lvmdriver-1', group='cinder')
         CONF.set_override('default_etcd_volume_type',
                           'lvmdriver-1', group='cinder')
+        self.fixed_subnet_cidr = '20.200.0.0/16'
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -202,11 +204,12 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         self._test_extract_template_definition(
             mock_generate_csr_and_key, mock_sign_node_certificate,
             mock_driver, mock_objects_cluster_template_get_by_uuid, mock_get,
-            mock_objects_nodegroup_list)
+            mock_objects_nodegroup_list, mock_get_subnet)
 
     def _test_extract_template_definition(
             self,
@@ -216,6 +219,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             mock_objects_nodegroup_list,
+            mock_get_subnet,
             missing_attr=None):
         if missing_attr in self.cluster_template_dict:
             self.cluster_template_dict[missing_attr] = None
@@ -243,6 +247,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_dr.Driver()
+
+        mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
          definition,
@@ -375,6 +381,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
+            'fixed_subnet_cidr': self.fixed_subnet_cidr,
         }
 
         if missing_attr is not None:
@@ -398,6 +405,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              ],
             env_files)
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -412,7 +420,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         self.cluster_template_dict['registry_enabled'] = True
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
@@ -432,6 +441,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_dr.Driver()
+        mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         CONF.set_override('swift_region',
                           'RegionOne',
@@ -528,6 +538,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
+            'fixed_subnet_cidr': self.fixed_subnet_cidr
         }
 
         self.assertEqual(expected, definition)
@@ -541,6 +552,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              ],
             env_files)
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -555,7 +567,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
                         'docker_volume_size', 'http_proxy',
@@ -587,6 +600,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         master_ng.image_id = None
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
+        mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
          definition,
@@ -662,6 +676,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
+            'fixed_subnet_cidr': self.fixed_subnet_cidr
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -674,6 +689,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              ],
             env_files)
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -683,7 +699,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
@@ -700,6 +717,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_coreos_dr.Driver()
+        mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
          definition,
@@ -775,6 +793,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'master_lb_allowed_cidrs': None,
+            'fixed_subnet_cidr': self.fixed_subnet_cidr,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -787,6 +806,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              ],
             env_files)
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -796,7 +816,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            reqget):
+            reqget,
+            mock_get_subnet):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
         self.cluster_dict['discovery_url'] = None
         mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3',
@@ -811,6 +832,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_coreos_dr.Driver()
+        mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
          definition,
@@ -886,6 +908,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'master_lb_allowed_cidrs': None,
+            'fixed_subnet_cidr': self.fixed_subnet_cidr,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -898,6 +921,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              ],
             env_files)
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -912,7 +936,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
             mock_generate_csr_and_key,
@@ -921,8 +946,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             mock_objects_nodegroup_list,
+            mock_get_subnet,
             missing_attr='dns_nameserver')
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -937,7 +964,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
             mock_generate_csr_and_key,
@@ -946,8 +974,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             mock_objects_nodegroup_list,
+            mock_get_subnet,
             missing_attr='image_id')
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -962,7 +992,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
             mock_generate_csr_and_key,
@@ -971,8 +1002,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             mock_objects_nodegroup_list,
+            mock_get_subnet,
             missing_attr='docker_storage_driver')
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -987,7 +1020,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            mock_get):
+            mock_get,
+            mock_get_subnet):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
             mock_generate_csr_and_key,
@@ -996,8 +1030,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             mock_objects_nodegroup_list,
+            mock_get_subnet,
             missing_attr='apiserver_port')
 
+    @patch('magnum.common.neutron.get_subnet')
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
@@ -1012,7 +1048,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
-            reqget):
+            reqget,
+            mock_get_subnet):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
@@ -1035,6 +1072,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_req = mock.MagicMock(text='https://address/token',
                                   status_code=200)
         reqget.return_value = mock_req
+        mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
          definition,
@@ -1121,6 +1159,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
+            'fixed_subnet_cidr': self.fixed_subnet_cidr,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
