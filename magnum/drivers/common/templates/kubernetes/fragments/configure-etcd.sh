@@ -58,6 +58,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+EnvironmentFile=/etc/sysconfig/heat-params
 ExecStartPre=mkdir -p /var/lib/etcd
 ExecStartPre=-/bin/podman rm etcd
 ExecStart=/bin/podman run \\

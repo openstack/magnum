@@ -119,6 +119,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                         cluster_attr=None)
         self.add_output('kube_masters_private',
                         cluster_attr=None)
+        self.default_subnet_cidr = '10.0.0.0/24'
 
     def get_nodegroup_param_maps(self, master_params=None, worker_params=None):
         master_params = master_params or dict()
@@ -205,6 +206,12 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             extra_params['fixed_subnet_cidr'] = neutron.get_subnet(
                 context, subnet_id, "id", "cidr")
 
+        if cluster_template.no_proxy:
+            extra_params["no_proxy"] = (
+                cluster_template.no_proxy + "," + (
+                    extra_params.get('fixed_subnet_cidr') or
+                    self.default_subnet_cidr))
+
         return extra_params
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
@@ -283,7 +290,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
     def _set_master_lb_allowed_cidrs(self, context, cluster, extra_params):
         if extra_params.get("master_lb_allowed_cidrs"):
             subnet_cidr = (cluster.labels.get("fixed_subnet_cidr") or
-                           "10.0.0.0/24")
+                           self.default_subnet_cidr)
             if extra_params.get("fixed_subnet"):
                 subnet_cidr = neutron.get_subnet(context,
                                                  extra_params["fixed_subnet"],
