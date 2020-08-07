@@ -920,6 +920,11 @@ parameters:
       specific configs
     default: ""
 
+  master_lb_allowed_cidrs:
+    type: comma_delimited_list
+    description: The allowed CIDR list for master load balancer
+    default: []
+
 resources:
 
   ######################################################################
@@ -949,6 +954,7 @@ resources:
       external_network: {get_param: external_network}
       protocol: {get_param: loadbalancing_protocol}
       port: {get_param: kubernetes_port}
+      allowed_cidrs: {get_param: master_lb_allowed_cidrs}
 
   etcd_lb:
     condition: create_cluster_resources
@@ -957,6 +963,7 @@ resources:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
       protocol: {get_param: loadbalancing_protocol}
       port: 2379
+      allowed_cidrs: {get_param: master_lb_allowed_cidrs}
 
   ######################################################################
   #
