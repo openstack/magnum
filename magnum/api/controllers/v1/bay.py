@@ -276,7 +276,8 @@ class BayPatchType(types.JsonPatchType):
                           '/master_addresses', '/stack_id',
                           '/ca_cert_ref', '/magnum_cert_ref',
                           '/trust_id', '/trustee_user_name',
-                          '/trustee_password', '/trustee_user_id']
+                          '/trustee_password', '/trustee_user_id',
+                          '/etcd_ca_cert_ref', '/front_proxy_ca_cert_ref']
         return types.JsonPatchType.internal_attrs() + internal_attrs
 
 

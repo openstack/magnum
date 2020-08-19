@@ -28,6 +28,7 @@ class TestSignConductor(base.TestCase):
         mock_cluster = mock.MagicMock()
         mock_certificate = mock.MagicMock()
         mock_certificate.csr = 'fake-csr'
+        mock_certificate.ca_cert_type = 'kubernetes'
         mock_cert_manager.sign_node_certificate.return_value = 'fake-pem'
 
         actual_cert = self.ca_handler.sign_certificate(self.context,
@@ -35,7 +36,7 @@ class TestSignConductor(base.TestCase):
                                                        mock_certificate)
 
         mock_cert_manager.sign_node_certificate.assert_called_once_with(
-            mock_cluster, 'fake-csr', context=self.context
+            mock_cluster, 'fake-csr', 'kubernetes', context=self.context
         )
         self.assertEqual('fake-pem', actual_cert.pem)
 

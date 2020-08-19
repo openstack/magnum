@@ -9,9 +9,10 @@ Generates and show CA certificates for bay/cluster.
 Show details about the CA certificate for a bay/cluster
 =======================================================
 
-.. rest_method:: GET /v1/certificates/{bay_uuid/cluster_uuid}
+.. rest_method:: GET /v1/certificates/{cluster_ident}?ca_cert_type={ca_cert_type}
 
-Show CA certificate details that are associated with the created bay/cluster.
+Show CA certificate details that are associated with the created bay/cluster based on the
+given CA certificate type.
 
 Response Codes
 --------------
@@ -30,7 +31,8 @@ Request
 
 .. rest_parameters:: parameters.yaml
 
-  - bay_uuid: bay_id
+  - cluster_ident: cluster_ident
+  - ca_cert_type: ca_cert_type
 
 .. note::
 

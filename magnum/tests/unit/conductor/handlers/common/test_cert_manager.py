@@ -131,8 +131,8 @@ class CertManagerTestCase(base.BaseTestCase):
         self.assertEqual(expected_ca_cert_ref, mock_cluster.ca_cert_ref)
         self.assertEqual(expected_cert_ref, mock_cluster.magnum_cert_ref)
 
-        mock_generate_ca_cert.assert_called_once_with(expected_ca_name,
-                                                      context=None)
+        mock_generate_ca_cert.assert_called_with(expected_ca_name,
+                                                 context=None)
         mock_generate_client_cert.assert_called_once_with(
             expected_ca_name, expected_ca_cert, expected_ca_password,
             context=None)
@@ -189,7 +189,6 @@ class CertManagerTestCase(base.BaseTestCase):
         self.CertManager.get_cert.return_value = mock_ca_cert
         mock_csr = mock.MagicMock()
         mock_x509_sign.return_value = mock.sentinel.signed_cert
-
         cluster_ca_cert = cert_manager.sign_node_certificate(mock_cluster,
                                                              mock_csr)
 
@@ -235,6 +234,20 @@ class CertManagerTestCase(base.BaseTestCase):
 
         self.CertManager.get_cert.assert_called_once_with(
             mock_cluster.ca_cert_ref, resource_ref=mock_cluster.uuid,
+            context=None)
+        self.assertEqual(mock_ca_cert, cluster_ca_cert)
+
+    def test_get_cluster_ca_certificate_ca_cert_type(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_ca_cert = mock.MagicMock()
+        self.CertManager.get_cert.return_value = mock_ca_cert
+
+        cluster_ca_cert = cert_manager.get_cluster_ca_certificate(
+            mock_cluster, ca_cert_type="front-proxy")
+
+        self.CertManager.get_cert.assert_called_once_with(
+            mock_cluster.front_proxy_ca_cert_ref, resource_ref=mock_cluster.uuid,
             context=None)
         self.assertEqual(mock_ca_cert, cluster_ca_cert)
 

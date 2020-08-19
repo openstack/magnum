@@ -43,8 +43,15 @@ class Handler(object):
 
     def sign_certificate(self, context, cluster, certificate):
         LOG.debug("Creating self signed x509 certificate")
+        try:
+            ca_cert_type = certificate.ca_cert_type
+        except Exception as e:
+            LOG.debug("There is no CA cert type specified for the CSR")
+            ca_cert_type = "kubernetes"
+
         signed_cert = cert_manager.sign_node_certificate(cluster,
                                                          certificate.csr,
+                                                         ca_cert_type,
                                                          context=context)
         if six.PY3 and isinstance(signed_cert, six.binary_type):
             certificate.pem = signed_cert.decode()
@@ -52,9 +59,9 @@ class Handler(object):
             certificate.pem = signed_cert
         return certificate
 
-    def get_ca_certificate(self, context, cluster):
-        ca_cert = cert_manager.get_cluster_ca_certificate(cluster,
-                                                          context=context)
+    def get_ca_certificate(self, context, cluster, ca_cert_type=None):
+        ca_cert = cert_manager.get_cluster_ca_certificate(
+            cluster, context=context, ca_cert_type=ca_cert_type)
         certificate = objects.Certificate.from_object_cluster(cluster)
         if six.PY3 and isinstance(ca_cert.get_certificate(), six.binary_type):
             certificate.pem = ca_cert.get_certificate().decode()

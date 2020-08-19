@@ -145,6 +145,8 @@ class Cluster(Base):
     # so, we use 512 chars to get some buffer.
     ca_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
     magnum_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
+    etcd_ca_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
+    front_proxy_ca_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
     fixed_network = Column(String(255, mysql_ndb_type=TINYTEXT))
     fixed_subnet = Column(String(255, mysql_ndb_type=TINYTEXT))
     floating_ip_enabled = Column(Boolean, default=True)

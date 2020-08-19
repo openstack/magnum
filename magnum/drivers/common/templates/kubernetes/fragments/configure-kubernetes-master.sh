@@ -317,10 +317,10 @@ KUBE_API_ARGS="$KUBE_API_ARGS --service-account-issuer=https://kubernetes.defaul
 KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-certificate-authority=${CERT_DIR}/ca.crt --kubelet-client-certificate=${CERT_DIR}/server.crt --kubelet-client-key=${CERT_DIR}/server.key --kubelet-https=true"
 # Allow for metrics-server/aggregator communication
 KUBE_API_ARGS="${KUBE_API_ARGS} \
-    --proxy-client-cert-file=${CERT_DIR}/server.crt \
-    --proxy-client-key-file=${CERT_DIR}/server.key \
-    --requestheader-allowed-names=front-proxy-client,kube,kubernetes \
-    --requestheader-client-ca-file=${CERT_DIR}/ca.crt \
+    --proxy-client-cert-file=${CERT_DIR}/front-proxy/server.crt \
+    --proxy-client-key-file=${CERT_DIR}/front-proxy/server.key \
+    --requestheader-allowed-names=front-proxy,kube,kubernetes \
+    --requestheader-client-ca-file=${CERT_DIR}/front-proxy/ca.crt \
     --requestheader-extra-headers-prefix=X-Remote-Extra- \
     --requestheader-group-headers=X-Remote-Group \
     --requestheader-username-headers=X-Remote-User"

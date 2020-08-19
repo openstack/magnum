@@ -103,6 +103,8 @@ def get_test_cluster(**kw):
         'fixed_subnet': kw.get('fixed_subnet', None),
         'floating_ip_enabled': kw.get('floating_ip_enabled', True),
         'master_lb_enabled': kw.get('master_lb_enabled', True),
+        'etcd_ca_cert_ref': kw.get('etcd_ca_cert_ref', None),
+        'front_proxy_ca_cert_ref': kw.get('front_proxy_ca_cert_ref', None)
     }
 
     if kw.pop('for_api_use', False):
