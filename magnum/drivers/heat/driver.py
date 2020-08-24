@@ -32,6 +32,7 @@ from magnum.common import exception
 from magnum.common import keystone
 from magnum.common import octavia
 from magnum.common import short_id
+from magnum.common.x509 import operations as x509
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import utils as conductor_utils
@@ -444,6 +445,32 @@ class FedoraKubernetesDriver(KubernetesDriver):
             'fixed_subnet': network.attributes['fixed_subnet'],
         }
         return extra_params
+
+    def rotate_ca_certificate(self, context, cluster):
+        cluster_template = conductor_utils.retrieve_cluster_template(context,
+                                                                     cluster)
+        if cluster_template.cluster_distro not in ["fedora-coreos"]:
+            raise exception.NotSupported("Rotating the CA certificate is "
+                                         "not supported for cluster with "
+                                         "cluster_distro: %s." %
+                                         cluster_template.cluster_distro)
+        osc = clients.OpenStackClients(context)
+        rollback = True
+        heat_params = {}
+
+        csr_keys = x509.generate_csr_and_key(u"Kubernetes Service Account")
+
+        heat_params['kube_service_account_key'] = \
+            csr_keys["public_key"].replace("\n", "\\n")
+        heat_params['kube_service_account_private_key'] = \
+            csr_keys["private_key"].replace("\n", "\\n")
+
+        fields = {
+            'existing': True,
+            'parameters': heat_params,
+            'disable_rollback': not rollback
+        }
+        osc.heat().stacks.update(cluster.stack_id, **fields)
 
 
 class HeatPoller(object):

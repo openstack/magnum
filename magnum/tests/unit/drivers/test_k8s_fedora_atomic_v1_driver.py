@@ -140,3 +140,14 @@ class K8sFedoraAtomicV1DriverTest(base.DbTestCase):
                           self.driver.upgrade_cluster, self.context,
                           self.cluster_obj, self.cluster_template, 1,
                           self.nodegroup_obj)
+
+    @patch('magnum.common.keystone.KeystoneClientV3')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_ca_rotate_not_supported(self, mock_osc, mock_keystone):
+        self.cluster_template.cluster_distro = 'fedora-atomic'
+        self.cluster_template.save()
+        mock_keystone.is_octavia_enabled.return_value = False
+        self.assertRaises(exception.NotSupported,
+                          self.driver.rotate_ca_certificate,
+                          self.context,
+                          self.cluster_obj)

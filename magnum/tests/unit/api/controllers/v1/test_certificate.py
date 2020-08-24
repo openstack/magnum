@@ -195,6 +195,8 @@ class TestRotateCaCertificate(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestRotateCaCertificate, self).setUp()
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context, cluster_distro='fedora-coreos')
         self.cluster = obj_utils.create_test_cluster(self.context)
 
         conductor_api_patcher = mock.patch('magnum.conductor.api.API')
