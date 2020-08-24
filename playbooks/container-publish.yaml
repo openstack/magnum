@@ -4,7 +4,7 @@
 
     - name: Push images to DockerHub
       block:
-        - command: docker login -u {{ magnum_docker_login.user }} -p {{ magnum_docker_login.password }}
+        - command: docker login -u {{ magnum_docker_login.user }} -p '{{ magnum_docker_login.password }}'
           no_log: True
           retries: 5
         - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ item.tag }}
