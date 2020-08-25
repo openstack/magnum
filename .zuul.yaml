@@ -59,8 +59,6 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - openstack-tox-cover:
-           voting: false
         - magnum-tempest-plugin-tests-api
         - magnum-container-build
     gate:
