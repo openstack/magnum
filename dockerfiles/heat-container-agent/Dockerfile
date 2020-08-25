@@ -1,4 +1,4 @@
-FROM fedora:32
+FROM fedora:rawhide
 
 ARG ARCH=x86_64
 
