@@ -548,7 +548,6 @@ resources:
       block_device_mapping_v2:
         - boot_index: 0
           volume_id: {get_resource: kube_node_volume}
-          delete_on_termination: true
 
   kube_minion_eth0:
     type: OS::Neutron::Port
