@@ -480,7 +480,6 @@ resources:
                   $CONTAINERD_TARBALL_SHA256: {get_param: containerd_tarball_sha256}
             - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
-            - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
             - get_file: ../../common/templates/fragments/configure-docker-registry.sh
             - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh
