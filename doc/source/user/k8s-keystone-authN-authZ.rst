@@ -176,10 +176,10 @@ user can update the default `keystone-sync-policy` configmap as follows.
     apiVersion: v1
     kind: ConfigMap
     metadata:
-    name: keystone-sync-policy
-    namespace: kube-system
+      name: keystone-sync-policy
+      namespace: kube-system
     data:
-    syncConfig: |
+      syncConfig: |
         role-mappings:
           - keystone-role: member
             groups: ["project-1"]
