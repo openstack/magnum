@@ -31,6 +31,10 @@ _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","opt
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
     echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf
+    # NOTE(flwang): The default value for vm.max_map_count is too low, update
+    # it to 262144 to meet the minium requirement of Elasticsearch
+    echo "vm.max_map_count = 262144" >> /etc/sysctl.conf
+
     $ssh_cmd sysctl -p
     if [ "$($ssh_cmd systemctl status NetworkManager.service | grep -o "Active: active")" = "Active: active" ]; then
         CALICO_NM=/etc/NetworkManager/conf.d/calico.conf
