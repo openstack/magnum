@@ -5,9 +5,9 @@
 #
 # You can use podman or docker to generate the ignition formatted json:
 # podman run --rm \
-# -v ./fcct-config.yaml:/config.fcc:z \
-# quay.io/coreos/fcct:release \
-# --pretty --strict --input /config.fcc > ./user_data.json
+#   -v $(pwd)/fcct-config.yaml:/config.fcc \
+#   quay.io/coreos/fcct:release \
+#   --pretty --strict /config.fcc > ./user_data.json
 #
 # [0] https://github.com/coreos/fcct
 # [1] https://github.com/coreos/fedora-coreos-docs/blob/master/modules/ROOT/pages/producing-ign.adoc
@@ -69,6 +69,18 @@ storage:
           # -1 is unlimited
           # 50m
           max_log_size = 52428800
+    - path: /etc/containers/__REGISTRIES_CONF__
+      # 420 (decimal) == 644 (octal)
+      mode: 420
+      user:
+        name: root
+      group:
+        name: root
+      append:
+        - inline: |
+            [[registry]]
+            location = "__INSECURE_REGISTRY_URL__"
+            insecure = true
     - path: /etc/hostname
       # 420 (decimal) == 644 (octal)
       mode: 420
