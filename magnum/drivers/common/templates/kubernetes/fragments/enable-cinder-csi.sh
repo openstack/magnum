@@ -486,9 +486,6 @@ metadata:
 spec:
   attachRequired: true
   podInfoOnMount: true
-  volumeLifecycleModes:
-  - Persistent
-  - Ephemeral
 EOF
 
     echo "Waiting for Kubernetes API..."
