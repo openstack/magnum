@@ -325,7 +325,7 @@ class TestController(test_base.TestCase):
                 return 'API1_1.0_1.1'
 
             @base.Controller.api_version('1.2', '1.3')  # noqa
-            def testapi1(self):
+            def testapi1(self):   # noqa
                 return 'API1_1.2_1.3'
 
             @base.Controller.api_version('2.1', '2.2')
@@ -333,7 +333,7 @@ class TestController(test_base.TestCase):
                 return 'API2_2.1_2.2'
 
             @base.Controller.api_version('1.0', '2.0')  # noqa
-            def testapi2(self):
+            def testapi2(self):  # noqa
                 return 'API2_1.0_2.0'
 
         controller = MyController()
@@ -376,7 +376,7 @@ class TestController(test_base.TestCase):
                 return 'API1_1.0_1.1'
 
             @base.Controller.api_version('1.2', '1.3')  # noqa
-            def testapi1(self):
+            def testapi1(self):  # noqa
                 return 'API1_1.2_1.3'
 
         controller = MyController()
@@ -398,7 +398,7 @@ class TestController(test_base.TestCase):
                 return 'API1_1.0_1.1'
 
             @base.Controller.api_version('1.3', '1.4')  # noqa
-            def testapi1(self):
+            def testapi1(self):  # noqa
                 return 'API1_1.3_1.4'
 
         controller = MyController()

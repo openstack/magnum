@@ -594,7 +594,7 @@ class ClustersController(base.Controller):
     @wsme.validate(types.uuid, bool, [ClusterPatchType])
     @expose.expose(ClusterID, types.uuid_or_name, types.boolean,
                    body=[ClusterPatchType], status_code=202)
-    def patch(self, cluster_ident, rollback=False, patch=None):
+    def patch(self, cluster_ident, rollback=False, patch=None):  # noqa
         """Update an existing Cluster.
 
         :param cluster_ident: UUID or logical name of a cluster.

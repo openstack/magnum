@@ -437,7 +437,7 @@ class ClusterTemplatesController(base.Controller):
                    body=[ClusterTemplatePatchType])
     @validation.enforce_network_driver_types_update()
     @validation.enforce_volume_driver_types_update()
-    def patch(self, cluster_template_ident, patch):
+    def patch(self, cluster_template_ident, patch):   # noqa
         """Update an existing ClusterTemplate.
 
         :param cluster_template_ident: UUID or logic name of a

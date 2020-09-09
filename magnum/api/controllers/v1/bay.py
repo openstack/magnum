@@ -441,7 +441,7 @@ class BaysController(base.Controller):
 
     @base.Controller.api_version("1.2")  # noqa
     @expose.expose(BayID, body=Bay, status_code=202)
-    def post(self, bay):
+    def post(self, bay):  # noqa
         """Create a new bay.
 
         :param bay: a bay within the request body.
@@ -513,7 +513,7 @@ class BaysController(base.Controller):
     @wsme.validate(types.uuid, [BayPatchType])
     @expose.expose(BayID, types.uuid_or_name, body=[BayPatchType],
                    status_code=202)
-    def patch(self, bay_ident, patch):
+    def patch(self, bay_ident, patch):  # noqa
         """Update an existing bay.
 
         :param bay_ident: UUID or logical name of a bay.
@@ -527,7 +527,7 @@ class BaysController(base.Controller):
     @wsme.validate(types.uuid, bool, [BayPatchType])
     @expose.expose(BayID, types.uuid_or_name, types.boolean,
                    body=[BayPatchType], status_code=202)
-    def patch(self, bay_ident, rollback=False, patch=None):
+    def patch(self, bay_ident, rollback=False, patch=None):  # noqa
         """Update an existing bay.
 
         :param bay_ident: UUID or logical name of a bay.
@@ -585,7 +585,7 @@ class BaysController(base.Controller):
 
     @base.Controller.api_version("1.2")  # noqa
     @expose.expose(None, types.uuid_or_name, status_code=204)
-    def delete(self, bay_ident):
+    def delete(self, bay_ident):   # noqa
         """Delete a bay.
 
         :param bay_ident: UUID of a bay or logical name of the bay.

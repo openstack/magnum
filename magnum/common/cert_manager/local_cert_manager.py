@@ -104,7 +104,7 @@ class CertManager(cert_manager.CertManager):
         return cert_ref
 
     @staticmethod  # noqa: C901
-    def get_cert(cert_ref, **kwargs):
+    def get_cert(cert_ref, **kwargs):  # noqa: C901
         """Retrieves the specified cert.
 
         :param cert_ref: the UUID of the cert to retrieve
