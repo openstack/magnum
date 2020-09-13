@@ -24,7 +24,7 @@ class SwarmApiAddressOutputMapping(template_def.OutputMapping):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack)
+        output_value = self.get_output_value(stack, cluster)
         if output_value is not None:
             # Note(rocha): protocol should always be tcp as the docker
             # command client does not handle https (see bug #1604812).
@@ -163,6 +163,12 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
                                            cluster)
         template_def.add_volume_env_file(env_files, cluster,
                                          nodegroup=nodegroup)
-        template_def.add_lb_env_file(env_files, cluster_template)
+        template_def.add_lb_env_file(env_files, cluster)
 
         return env_files
+
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
+        scale_params = dict()
+        scale_params['number_of_nodes'] = node_count
+        return scale_params

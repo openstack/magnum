@@ -2,11 +2,13 @@
   tasks:
     - include_vars: container-builder-vars.yaml
 
+    - name: Log into DockerHub
+      docker_login:
+        username: "{{ magnum_docker_login.user }}"
+        password: "{{ magnum_docker_login.password }}"
+
     - name: Push images to DockerHub
       block:
-        - command: docker login -u {{ magnum_docker_login.user }} -p {{ magnum_docker_login.password }}
-          no_log: True
-          retries: 5
         - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ item.tag }}
           with_items: "{{ magnum_images }}"
           retries: 10

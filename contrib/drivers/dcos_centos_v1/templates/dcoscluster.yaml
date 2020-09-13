@@ -66,7 +66,7 @@ parameters:
     description: uuid/name of an existing subnet to use to provision machines
     default: ""
 
-  fixed_network_cidr:
+  fixed_subnet_cidr:
     type: string
     description: network range for fixed ip network
     default: 10.0.0.0/24
@@ -347,7 +347,7 @@ resources:
     properties:
       existing_network: {get_param: fixed_network}
       existing_subnet: {get_param: fixed_subnet}
-      private_network_cidr: {get_param: fixed_network_cidr}
+      private_network_cidr: {get_param: fixed_subnet_cidr}
       dns_nameserver: {get_param: dns_nameserver}
       external_network: {get_param: external_network}
 

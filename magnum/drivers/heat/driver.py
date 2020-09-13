@@ -32,6 +32,7 @@ from magnum.common import exception
 from magnum.common import keystone
 from magnum.common import octavia
 from magnum.common import short_id
+from magnum.common.x509 import operations as x509
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import utils as conductor_utils
@@ -237,60 +238,49 @@ class HeatDriver(driver.Driver):
 
     def _update_stack(self, context, cluster, scale_manager=None,
                       rollback=False):
+        # update worked properly only for scaling nodes up and down
+        # before nodegroups. Maintain this logic until we deprecate
+        # and remove the command.
+        # Fixed behaviour Id84e5d878b21c908021e631514c2c58b3fe8b8b0
+        nodegroup = cluster.default_ng_worker
         definition = self.get_template_definition()
-
-        osc = clients.OpenStackClients(context)
-        heat_params = {}
-
-        # Find what changed checking the stack params
-        # against the ones in the template_def.
-        stack = osc.heat().stacks.get(cluster.stack_id,
-                                      resolve_outputs=True)
-        stack_params = stack.parameters
-        definition.add_nodegroup_params(cluster)
-        heat_params = definition.get_stack_diff(context, stack_params, cluster)
-        scale_params = definition.get_scale_params(context,
-                                                   cluster,
-                                                   scale_manager)
-        heat_params.update(scale_params)
+        scale_params = definition.get_scale_params(
+            context,
+            cluster,
+            nodegroup.node_count,
+            scale_manager,
+            nodes_to_remove=None)
 
         fields = {
-            'parameters': heat_params,
+            'parameters': scale_params,
             'existing': True,
             'disable_rollback': not rollback
         }
 
         LOG.info('Updating cluster %s stack %s with these params: %s',
-                 cluster.uuid, cluster.stack_id, heat_params)
-        osc.heat().stacks.update(cluster.stack_id, **fields)
+                 cluster.uuid, nodegroup.stack_id, scale_params)
+        osc = clients.OpenStackClients(context)
+        osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
     def _resize_stack(self, context, cluster, resize_manager,
                       node_count, nodes_to_remove, nodegroup=None,
                       rollback=False):
         definition = self.get_template_definition()
-        osc = clients.OpenStackClients(context)
+        scale_params = definition.get_scale_params(
+            context,
+            cluster,
+            nodegroup.node_count,
+            resize_manager,
+            nodes_to_remove=nodes_to_remove)
 
-        # Find what changed checking the stack params
-        # against the ones in the template_def.
-        stack = osc.heat().stacks.get(nodegroup.stack_id,
-                                      resolve_outputs=True)
-        stack_params = stack.parameters
-        definition.add_nodegroup_params(cluster, nodegroups=[nodegroup])
-        heat_params = definition.get_stack_diff(context, stack_params, cluster)
-
-        scale_params = definition.get_scale_params(context,
-                                                   cluster,
-                                                   resize_manager,
-                                                   nodes_to_remove)
-        heat_params.update(scale_params)
         fields = {
-            'parameters': heat_params,
+            'parameters': scale_params,
             'existing': True,
             'disable_rollback': not rollback
         }
 
         LOG.info('Resizing cluster %s stack %s with these params: %s',
-                 cluster.uuid, nodegroup.stack_id, heat_params)
+                 cluster.uuid, nodegroup.stack_id, scale_params)
         osc = clients.OpenStackClients(context)
         osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
@@ -455,6 +445,32 @@ class FedoraKubernetesDriver(KubernetesDriver):
             'fixed_subnet': network.attributes['fixed_subnet'],
         }
         return extra_params
+
+    def rotate_ca_certificate(self, context, cluster):
+        cluster_template = conductor_utils.retrieve_cluster_template(context,
+                                                                     cluster)
+        if cluster_template.cluster_distro not in ["fedora-coreos"]:
+            raise exception.NotSupported("Rotating the CA certificate is "
+                                         "not supported for cluster with "
+                                         "cluster_distro: %s." %
+                                         cluster_template.cluster_distro)
+        osc = clients.OpenStackClients(context)
+        rollback = True
+        heat_params = {}
+
+        csr_keys = x509.generate_csr_and_key(u"Kubernetes Service Account")
+
+        heat_params['kube_service_account_key'] = \
+            csr_keys["public_key"].replace("\n", "\\n")
+        heat_params['kube_service_account_private_key'] = \
+            csr_keys["private_key"].replace("\n", "\\n")
+
+        fields = {
+            'existing': True,
+            'parameters': heat_params,
+            'disable_rollback': not rollback
+        }
+        osc.heat().stacks.update(cluster.stack_id, **fields)
 
 
 class HeatPoller(object):

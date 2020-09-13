@@ -111,8 +111,8 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_scale_params(self, context, cluster, scale_manager=None,
-                         nodes_to_remove=None):
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
         scale_params = dict()
         if nodes_to_remove:
             scale_params['slaves_to_remove'] = nodes_to_remove
@@ -120,6 +120,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
             hosts = self.get_output('mesos_slaves_private')
             scale_params['slaves_to_remove'] = (
                 scale_manager.get_removal_nodes(hosts))
+        scale_params['number_of_slaves'] = node_count
         return scale_params
 
     def get_env_files(self, cluster_template, cluster, nodegroup=None):
@@ -127,7 +128,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
 
         template_def.add_priv_net_env_file(env_files, cluster_template,
                                            cluster)
-        template_def.add_lb_env_file(env_files, cluster_template)
+        template_def.add_lb_env_file(env_files, cluster)
 
         return env_files
 

@@ -717,6 +717,7 @@ resources:
         list_join:
           - "\n"
           -
+            - "#!/bin/bash"
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh}
                 params:
@@ -919,7 +920,6 @@ resources:
       block_device_mapping_v2:
         - boot_index: 0
           volume_id: {get_resource: kube_node_volume}
-          delete_on_termination: true
 
   kube_master_eth0:
     type: OS::Neutron::Port
@@ -1005,8 +1005,16 @@ resources:
       - name: kube_image_digest_input
       - name: ostree_remote_input
       - name: ostree_commit_input
+      - name: kube_service_account_key_input
+      - name: kube_service_account_private_key_input
       config:
-        get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+        list_join:
+          - "\n"
+          -
+            - "#!/bin/bash"
+            - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
+            - get_file: ../../common/templates/kubernetes/fragments/rotate-kubernetes-ca-certs-master.sh
 
   upgrade_kubernetes_deployment:
     type: OS::Heat::SoftwareDeployment
@@ -1020,6 +1028,8 @@ resources:
         kube_image_digest_input: {get_param: kube_image_digest}
         ostree_remote_input: {get_param: ostree_remote}
         ostree_commit_input: {get_param: ostree_commit}
+        kube_service_account_key_input: {get_param: kube_service_account_key}
+        kube_service_account_private_key_input: {get_param: kube_service_account_private_key}
 
 outputs:
 

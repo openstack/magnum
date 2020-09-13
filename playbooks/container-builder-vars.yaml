@@ -4,7 +4,7 @@ magnum_repository: openstackmagnum
 
 magnum_images:
   - name: heat-container-agent
-    tag: ussuri-dev
+    tag: victoria-dev
 
 kubernetes_versions:
   - version: v1.15.12
@@ -22,5 +22,6 @@ helm_versions:
 
 cluster_autoscaler_versions:
   - version: 1.16.5
-  - version: 1.17.2
-  - version: 1.18.1
+  - version: 1.17.3
+  - version: 1.18.2
+  - version: 1.19.0

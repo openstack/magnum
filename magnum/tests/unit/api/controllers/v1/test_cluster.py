@@ -14,6 +14,7 @@ import datetime
 from unittest import mock
 
 from oslo_config import cfg
+from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from wsme import types as wtypes
@@ -27,6 +28,7 @@ from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
+from magnum.tests.unit.db import utils as db_utils
 from magnum.tests.unit.objects import utils as obj_utils
 
 CONF = magnum.conf.CONF
@@ -287,6 +289,8 @@ class TestPatch(api_base.FunctionalTest):
     def _sim_rpc_cluster_update(self, cluster, node_count, health_status,
                                 health_status_reason, rollback=False):
         cluster.status = 'UPDATE_IN_PROGRESS'
+        cluster.health_status = health_status
+        cluster.health_status_reason = health_status_reason
         default_ng_worker = cluster.default_ng_worker
         default_ng_worker.node_count = node_count
         default_ng_worker.save()
@@ -308,6 +312,42 @@ class TestPatch(api_base.FunctionalTest):
 
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
         self.assertEqual(new_node_count, response['node_count'])
+        return_updated_at = timeutils.parse_isotime(
+            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+        # Assert nothing else was changed
+        self.assertEqual(self.cluster_obj.uuid, response['uuid'])
+        self.assertEqual(self.cluster_obj.cluster_template_id,
+                         response['cluster_template_id'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_health_status_ok(self, mock_utcnow):
+        new_health_status = 'HEALTHY'
+        new_health_status_reason = {'api': 'ok'}
+        health_status_reason_dumps = jsonutils.dumps(new_health_status_reason)
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+        old_node_count = self.cluster_obj.default_ng_worker.node_count
+        db_utils.create_test_nodegroup(cluster_id=self.cluster_obj.uuid,
+                                       name='non_default_ng')
+        response = self.patch_json('/clusters/%s' % self.cluster_obj.uuid,
+                                   [{'path': '/health_status',
+                                     'value': new_health_status,
+                                     'op': 'replace'},
+                                    {'path': '/health_status_reason',
+                                     'value': health_status_reason_dumps,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
+        self.assertEqual(new_health_status, response['health_status'])
+        self.assertEqual(new_health_status_reason,
+                         response['health_status_reason'])
+
+        new_node_count = self.cluster_obj.default_ng_worker.node_count
+        self.assertEqual(old_node_count, new_node_count)
+
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set +x
 . /etc/sysconfig/heat-params
 set -x
@@ -97,7 +95,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kube-apiserver \\
     --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
     \${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube:\${KUBE_TAG} \\
     kube-apiserver \\
-    \$KUBE_LOGTOSTDERR \$KUBE_LOG_LEVEL \$KUBE_ETCD_SERVERS \$KUBE_API_ADDRESS \$KUBE_API_PORT \$KUBELET_PORT \$KUBE_SERVICE_ADDRESSES \$KUBE_ADMISSION_CONTROL \$KUBE_API_ARGS'
+    \$KUBE_LOGTOSTDERR \$KUBE_LOG_LEVEL \$KUBE_ETCD_SERVERS \$KUBE_API_ADDRESS \$KUBELET_PORT \$KUBE_SERVICE_ADDRESSES \$KUBE_ADMISSION_CONTROL \$KUBE_API_ARGS'
 ExecStop=-/usr/bin/podman stop kube-apiserver
 Delegate=yes
 Restart=always
@@ -405,6 +403,7 @@ EOF
 echo "export KUBECONFIG=${ADMIN_KUBECONFIG}" >> /etc/bashrc
 chown root:root ${ADMIN_KUBECONFIG}
 chmod 600 ${ADMIN_KUBECONFIG}
+export KUBECONFIG=${ADMIN_KUBECONFIG}
 
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true"

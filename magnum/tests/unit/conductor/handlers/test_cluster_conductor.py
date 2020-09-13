@@ -15,11 +15,11 @@
 # under the License.
 
 from unittest import mock
+from unittest.mock import patch
 
 import six
 
 from heatclient import exc
-from mock import patch
 from oslo_service import loopingcall
 from pycadf import cadftaxonomy as taxonomy
 

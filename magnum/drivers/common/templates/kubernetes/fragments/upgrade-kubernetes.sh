@@ -1,5 +1,3 @@
-#!/bin/bash
-
 . /etc/sysconfig/heat-params
 set -x
 
@@ -11,7 +9,7 @@ else
     kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig $KUBECONFIG"
 fi
 new_kube_tag="$kube_tag_input"
-new_kube_image_digest="$kube_image_digest"
+new_kube_image_digest="$kube_image_digest_input"
 new_ostree_remote="$ostree_remote_input"
 new_ostree_commit="$ostree_commit_input"
 

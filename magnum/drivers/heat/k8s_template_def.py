@@ -35,7 +35,7 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack)
+        output_value = self.get_output_value(stack, cluster)
         if output_value is not None:
             # TODO(yuanying): port number is hardcoded, this will be fix
             protocol = 'https'
@@ -119,6 +119,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                         cluster_attr=None)
         self.add_output('kube_masters_private',
                         cluster_attr=None)
+        self.default_subnet_cidr = '10.0.0.0/24'
 
     def get_nodegroup_param_maps(self, master_params=None, worker_params=None):
         master_params = master_params or dict()
@@ -188,6 +189,10 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         else:
             extra_params['fixed_network_name'] = cluster.name
 
+        if cluster.labels.get('fixed_subnet_cidr'):
+            extra_params['fixed_subnet_cidr'] = cluster.labels.get(
+                'fixed_subnet_cidr')
+
         # NOTE(brtknr): Convert fixed subnet name to UUID. If fixed_subnet
         # is not specified in cluster template use 'private' as the default
         # value, which is the same as the heat template default value.
@@ -195,6 +200,18 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         subnet_id = neutron.get_fixed_subnet_id(context, fixed_subnet)
         if subnet_id:
             extra_params['fixed_subnet'] = subnet_id
+            # NOTE(flwang): If a fixed subnet is given, then the label
+            # fixed_subnet_cidr should be updated to reflect the correct
+            # setting.
+            extra_params['fixed_subnet_cidr'] = neutron.get_subnet(
+                context, subnet_id, "id", "cidr")
+
+        if cluster_template.no_proxy:
+            extra_params["no_proxy"] = (
+                cluster_template.no_proxy + "," + (
+                    extra_params.get('fixed_subnet_cidr') or
+                    self.default_subnet_cidr))
+
         return extra_params
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
@@ -202,7 +219,16 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
         extra_params['discovery_url'] = self.get_discovery_url(cluster)
         osc = self.get_osc(context)
-        extra_params['magnum_url'] = osc.magnum_url()
+        # NOTE: Sometimes, version discovery fails when Magnum cannot talk to
+        # Keystone via specified magnum_client.endpoint_type intended for
+        # cluster instances either because it is not unreachable from the
+        # controller or CA certs are missing for TLS enabled interface and the
+        # returned auth_url may not be suffixed with /v1 in which case append
+        # the url with the suffix so that instances can still talk to Magnum.
+        magnum_url = osc.magnum_url()
+        extra_params['magnum_url'] = magnum_url + ('' if
+                                                   magnum_url.endswith('/v1')
+                                                   else '/v1')
 
         if cluster_template.tls_disabled:
             extra_params['loadbalancing_protocol'] = 'HTTP'
@@ -272,16 +298,16 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
     def _set_master_lb_allowed_cidrs(self, context, cluster, extra_params):
         if extra_params.get("master_lb_allowed_cidrs"):
-            subnet_cidr = (cluster.labels.get("fixed_network_cidr") or
-                           "10.0.0.0/24")
+            subnet_cidr = (cluster.labels.get("fixed_subnet_cidr") or
+                           self.default_subnet_cidr)
             if extra_params.get("fixed_subnet"):
                 subnet_cidr = neutron.get_subnet(context,
                                                  extra_params["fixed_subnet"],
                                                  "id", "cidr")
             extra_params["master_lb_allowed_cidrs"] += "," + subnet_cidr
 
-    def get_scale_params(self, context, cluster, scale_manager=None,
-                         nodes_to_remove=None):
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
         scale_params = dict()
         if nodes_to_remove:
             scale_params['minions_to_remove'] = nodes_to_remove
@@ -289,4 +315,5 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             hosts = self.get_output('kube_minions_private')
             scale_params['minions_to_remove'] = (
                 scale_manager.get_removal_nodes(hosts))
+        scale_params['number_of_minions'] = node_count
         return scale_params

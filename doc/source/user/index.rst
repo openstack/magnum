@@ -483,6 +483,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `calico_ipv4pool_ipip`_               | see below          | Off           |
 +---------------------------------------+--------------------+---------------+
+| `fixed_subnet_cidr`_                  | see below          | ""            |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -651,6 +653,10 @@ follows:
   reached during cluster-create, the operation will be aborted and the
   cluster status will be set to 'CREATE_FAILED'.
 
+--master-lb-enabled
+  Indicates whether created clusters should have a load balancer for
+  master nodes or not.
+
 List
 ++++
 
@@ -700,17 +706,19 @@ follows.
   'discovery_url' cannot be replaced or delete.  The table below
   summarizes the possible change to a cluster.
 
-  +---------------+-----+------------------+-----------------------+
-  | Attribute     | add | replace          | remove                |
-  +===============+=====+==================+=======================+
-  | node_count    | no  | add/remove nodes | reset to default of 1 |
-  +---------------+-----+------------------+-----------------------+
-  | master_count  | no  | no               |  no                   |
-  +---------------+-----+------------------+-----------------------+
-  | name          | no  | no               |  no                   |
-  +---------------+-----+------------------+-----------------------+
-  | discovery_url | no  | no               |  no                   |
-  +---------------+-----+------------------+-----------------------+
+  +---------------+-----+-------------------+-----------------------+
+  | Attribute     | add | replace           | remove                |
+  +===============+=====+===================+=======================+
+  | node_count    | no  | add/remove nodes  | reset to default of 1 |
+  |               |     | in default-worker |                       |
+  |               |     | nodegroup.        |                       |
+  +---------------+-----+-------------------+-----------------------+
+  | master_count  | no  | no                |  no                   |
+  +---------------+-----+-------------------+-----------------------+
+  | name          | no  | no                |  no                   |
+  +---------------+-----+-------------------+-----------------------+
+  | discovery_url | no  | no                |  no                   |
+  +---------------+-----+-------------------+-----------------------+
 
 The 'cluster-update' operation cannot be initiated when another operation
 is in progress.
@@ -1208,28 +1216,32 @@ _`container_infra_prefix`
 
   Images that must be mirrored:
 
-  * docker.io/coredns/coredns
-  * quay.io/coreos/etcd
+  * docker.io/coredns/coredns:1.3.1
+  * quay.io/coreos/etcd:v3.4.6
+  * docker.io/k8scloudprovider/k8s-keystone-auth:v1.18.0
+  * docker.io/k8scloudprovider/openstack-cloud-controller-manager:v1.18.0
+  * gcr.io/google_containers/pause:3.1
+
+  Images that might be needed when 'use_podman' is 'false':
+
   * docker.io/openstackmagnum/kubernetes-apiserver
   * docker.io/openstackmagnum/kubernetes-controller-manager
   * docker.io/openstackmagnum/kubernetes-kubelet
   * docker.io/openstackmagnum/kubernetes-proxy
   * docker.io/openstackmagnum/kubernetes-scheduler
-  * docker.io/k8scloudprovider/k8s-keystone-auth
-  * gcr.io/google_containers/pause:3.1
 
   Images that might be needed:
 
+  * k8s.gcr.io/hyperkube:v1.18.2
   * docker.io/grafana/grafana:5.1.5
   * docker.io/prom/node-exporter:latest
   * docker.io/prom/prometheus:latest
   * docker.io/traefik:v1.7.10
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
-  * gcr.io/google-containers/hyperkube:v1.12.1
   * gcr.io/google_containers/metrics-server-amd64:v0.3.6
   * k8s.gcr.io/node-problem-detector:v0.6.2
   * docker.io/planetlabs/draino:abf028a
-  * docker.io/openstackmagnum/cluster-autoscaler:v1.0
+  * docker.io/openstackmagnum/cluster-autoscaler:v1.18.1
   * quay.io/calico/cni:v3.13.1
   * quay.io/calico/pod2daemon-flexvol:v3.13.1
   * quay.io/calico/kube-controllers:v3.13.1
@@ -1238,6 +1250,7 @@ _`container_infra_prefix`
   * quay.io/coreos/flannel:v0.12.0-amd64
 
   Images that might be needed if 'monitoring_enabled' is 'true':
+
   * quay.io/prometheus/alertmanager:v0.20.0
   * docker.io/squareup/ghostunnel:v1.5.2
   * docker.io/jettech/kube-webhook-certgen:v1.0.0
@@ -1247,7 +1260,8 @@ _`container_infra_prefix`
   * quay.io/prometheus/prometheus:v2.15.2
 
   Images that might be needed if 'cinder_csi_enabled' is 'true':
-  * docker.io/k8scloudprovider/cinder-csi-plugin:v1.16.0
+
+  * docker.io/k8scloudprovider/cinder-csi-plugin:v1.18.0
   * quay.io/k8scsi/csi-attacher:v2.0.0
   * quay.io/k8scsi/csi-provisioner:v1.4.0
   * quay.io/k8scsi/csi-snapshotter:v1.2.2
@@ -1308,9 +1322,9 @@ _`coredns_tag`
   based on its container tag
   <https://hub.docker.com/r/coredns/coredns/tags/>`_.
   If unset, the current Magnum version's a default etcd version.
-  Stein Default: 1.3.1
-  Train Default: 1.3.1
-  Ussuri Default: 1.6.6
+  Stein default: 1.3.1
+  Train default: 1.3.1
+  Ussuri default: 1.6.6
 
 _`flannel_tag`
   This label allows users to select `a specific flannel version,
@@ -1336,7 +1350,9 @@ _`heat_container_agent_tag`
   This label allows users to select `a specific heat_container_agent
   version, based on its container tag
   <https://hub.docker.com/r/openstackmagnum/heat-container-agent/tags/>`_.
-  Train-default: train-dev
+  Train-default: ussuri-dev
+  Ussuri-default: ussuri-dev
+  Victoria-default: victoria-dev
 
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.
@@ -1521,8 +1537,8 @@ _`master_lb_floating_ip_enabled`
 _`master_lb_allowed_cidrs`
   A CIDR list which can be used to control the access for the load balancer of
   master nodes. The input format is comma delimited list. For example,
-  192.168.0.0/16,10.0.0.0/24. Default value is "" which means opening to
-  0.0.0.0/0.
+  192.168.0.0/16,10.0.0.0/24.
+  Default: "" (which opens to 0.0.0.0/0)
 
 _`auto_healing_enabled`
   If set to true, auto healing feature will be enabled. Defaults to false.
@@ -1535,13 +1551,6 @@ _`auto_healing_controller`
   `magnum-auto-healer doc
   <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-magnum-auto-healer.md>`_.
 
-_`auto_scaling_enabled`
-  If set to true, auto scaling feature will be enabled. Defaults to true.
-
-_`node_problem_detector_tag`
-  This label allows users to select a specific Node Problem Detector
-  version.
-
 _`draino_tag`
   This label allows users to select a specific Draino version.
 
@@ -1553,6 +1562,10 @@ _`magnum_auto_healer_tag`
   Train default: v1.15.0
   Ussuri default: v1.18.0
 
+_`auto_scaling_enabled`
+  If set to true, auto scaling feature will be enabled.
+  Default: false.
+
 _`autoscaler_tag`
   This label allows users to override the default cluster-autoscaler container
   image tag. Refer to `cluster-autoscaler page for available tags
@@ -1561,16 +1574,22 @@ _`autoscaler_tag`
   Train default: v1.0
   Ussuri default: v1.18.1
 
+_`npd_enabled`
+  Set Node Problem Detector service enabled or disabled.
+  Default: true
+
+_`node_problem_detector_tag`
+  This label allows users to select a specific Node Problem Detector
+  version.
+
 _`min_node_count`
   The minmium node count of the cluster when doing auto scaling or auto
-  healing. Defaults to 1.
+  healing.
+  Default: 1
 
 _`max_node_count`
   The maxmium node count of the cluster when doing auto scaling or auto
   healing.
-
-_`npd_enabled`
-  Set Node Problem Detector service enabled or disabled. Default enabled.
 
 _`use_podman`
   Choose whether system containers etcd, kubernetes and the heat-agent will
@@ -1627,6 +1646,11 @@ _`kube_dashboard_version`
 _`metrics_scraper_tag`
   The version of metrics-scraper used by kubernetes dashboard.
   Ussuri default: v1.0.4
+
+_`fixed_subnet_cidr`
+  CIDR of the fixed subnet created by Magnum when a user has not
+  specified an existing fixed_subnet during cluster creation.
+  Ussuri default: 10.0.0.0/24
 
 External load balancer for services
 -----------------------------------
@@ -2442,6 +2466,9 @@ Rotate Certificate
   certificates, you can use the following command::
 
       openstack coe ca rotate secure-k8s-cluster
+
+  Please note that now the CA rotate function is only supported
+  by Fedora CoreOS driver.
 
 User Examples
 -------------

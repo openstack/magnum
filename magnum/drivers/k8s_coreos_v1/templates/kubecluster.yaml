@@ -104,7 +104,7 @@ parameters:
     description: how many kubernetes minions to spawn
     default: 1
 
-  fixed_network_cidr:
+  fixed_subnet_cidr:
     type: string
     description: network range for fixed ip network
     default: 10.0.0.0/24
@@ -413,12 +413,6 @@ parameters:
       domain name for cluster DNS
     default: "cluster.local"
 
-  etcd_volume_size:
-    type: number
-    description: >
-      size of the cinder volume for etcd storage
-    default: 0
-
   openstack_ca:
     type: string
     hidden: true
@@ -540,7 +534,7 @@ resources:
     properties:
       existing_network: {get_param: fixed_network}
       existing_subnet: {get_param: fixed_subnet}
-      private_network_cidr: {get_param: fixed_network_cidr}
+      private_network_cidr: {get_param: fixed_subnet_cidr}
       dns_nameserver: {get_param: dns_nameserver}
       external_network: {get_param: external_network}
       private_network_name: private

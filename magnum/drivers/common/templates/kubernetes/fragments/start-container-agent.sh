@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -x
 set +u
 HTTP_PROXY="$HTTP_PROXY"

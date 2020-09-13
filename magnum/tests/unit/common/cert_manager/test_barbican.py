@@ -18,7 +18,7 @@ import uuid
 from barbicanclient.v1 import client as barbican_client
 from barbicanclient.v1 import containers
 from barbicanclient.v1 import secrets
-from mock import patch
+from unittest.mock import patch
 
 from magnum.common.cert_manager import barbican_cert_manager as bcm
 from magnum.common.cert_manager import cert_manager

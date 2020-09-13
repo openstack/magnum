@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="kube-apiserver-to-kubelet-role"
 printf "Starting to run ${step}\n"
 

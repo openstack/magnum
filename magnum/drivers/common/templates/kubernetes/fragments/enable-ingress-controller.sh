@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="enable-ingress-controller"
 printf "Starting to run ${step}\n"
 

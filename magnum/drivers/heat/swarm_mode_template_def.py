@@ -26,7 +26,7 @@ class SwarmModeApiAddressOutputMapping(template_def.OutputMapping):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack)
+        output_value = self.get_output_value(stack, cluster)
         if output_value is not None:
             # Note(rocha): protocol should always be tcp as the docker
             # command client does not handle https (see bug #1604812).
@@ -117,7 +117,16 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
         osc = self.get_osc(context)
-        extra_params['magnum_url'] = osc.magnum_url()
+        # NOTE: Sometimes, version discovery fails when Magnum cannot talk to
+        # Keystone via specified magnum_client.endpoint_type intended for
+        # cluster instances either because it is not unreachable from the
+        # controller or CA certs are missing for TLS enabled interface and the
+        # returned auth_url may not be suffixed with /v1 in which case append
+        # the url with the suffix so that instances can still talk to Magnum.
+        magnum_url = osc.magnum_url()
+        extra_params['magnum_url'] = magnum_url + ('' if
+                                                   magnum_url.endswith('/v1')
+                                                   else '/v1')
 
         label_list = ['rexray_preempt', 'availability_zone']
 
@@ -189,7 +198,13 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
                                            cluster)
         template_def.add_volume_env_file(env_files, cluster,
                                          nodegroup=nodegroup)
-        template_def.add_lb_env_file(env_files, cluster_template)
-        template_def.add_fip_env_file(env_files, cluster_template, cluster)
+        template_def.add_lb_env_file(env_files, cluster)
+        template_def.add_fip_env_file(env_files, cluster)
 
         return env_files
+
+    def get_scale_params(self, context, cluster, node_count,
+                         scale_manager=None, nodes_to_remove=None):
+        scale_params = dict()
+        scale_params['number_of_nodes'] = node_count
+        return scale_params

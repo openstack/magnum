@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import patch
+from unittest.mock import patch
 
 from magnum.common import exception
 from magnum.drivers.k8s_fedora_atomic_v1 import driver
@@ -140,3 +140,14 @@ class K8sFedoraAtomicV1DriverTest(base.DbTestCase):
                           self.driver.upgrade_cluster, self.context,
                           self.cluster_obj, self.cluster_template, 1,
                           self.nodegroup_obj)
+
+    @patch('magnum.common.keystone.KeystoneClientV3')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_ca_rotate_not_supported(self, mock_osc, mock_keystone):
+        self.cluster_template.cluster_distro = 'fedora-atomic'
+        self.cluster_template.save()
+        mock_keystone.is_octavia_enabled.return_value = False
+        self.assertRaises(exception.NotSupported,
+                          self.driver.rotate_ca_certificate,
+                          self.context,
+                          self.cluster_obj)

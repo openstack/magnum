@@ -70,7 +70,7 @@ class K8sMonitor(monitors.MonitorBase):
         return (auto_healing_enabled and controller == "magnum-auto-healer")
 
     def _is_cluster_accessible(self):
-        if self.cluster.cluster_template.master_lb_enabled:
+        if self.cluster.master_lb_enabled:
             lb_fip = self.cluster.labels.get("master_lb_floating_ip_enabled",
                                              self.cluster.floating_ip_enabled)
             return strutils.bool_from_string(lb_fip)

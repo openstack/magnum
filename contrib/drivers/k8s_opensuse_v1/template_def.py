@@ -44,15 +44,15 @@ class JeOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, cluster_template, cluster):
+    def get_env_files(self, cluster):
         env_files = []
-        if cluster_template.master_lb_enabled:
+        if cluster.master_lb_enabled:
             env_files.append(
                 template_def.COMMON_ENV_PATH + 'with_master_lb.yaml')
         else:
             env_files.append(
                 template_def.COMMON_ENV_PATH + 'no_master_lb.yaml')
-        if cluster_template.floating_ip_enabled:
+        if cluster.floating_ip_enabled:
             env_files.append(
                 template_def.COMMON_ENV_PATH + 'enable_floating_ip.yaml')
         else:

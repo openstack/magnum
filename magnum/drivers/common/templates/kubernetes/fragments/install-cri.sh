@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set +x
 
 echo "START: install cri"

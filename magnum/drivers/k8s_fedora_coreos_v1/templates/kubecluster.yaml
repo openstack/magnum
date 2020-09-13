@@ -170,7 +170,7 @@ parameters:
     description: how many kubernetes minions to spawn
     default: 1
 
-  fixed_network_cidr:
+  fixed_subnet_cidr:
     type: string
     description: network range for fixed ip network
     default: 10.0.0.0/24
@@ -678,7 +678,7 @@ parameters:
   heat_container_agent_tag:
     type: string
     description: tag of the heat_container_agent system container
-    default: ussuri-dev
+    default: victoria-dev
 
   keystone_auth_enabled:
     type: boolean
@@ -959,7 +959,7 @@ resources:
     properties:
       existing_network: {get_param: fixed_network}
       existing_subnet: {get_param: fixed_subnet}
-      private_network_cidr: {get_param: fixed_network_cidr}
+      private_network_cidr: {get_param: fixed_subnet_cidr}
       dns_nameserver: {get_param: dns_nameserver}
       external_network: {get_param: external_network}
       private_network_name: {get_param: fixed_network_name}
@@ -1307,6 +1307,7 @@ resources:
         list_join:
           - "\n"
           -
+            - "#!/bin/bash"
             - get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh
             - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
             - if:
@@ -1471,7 +1472,8 @@ resources:
           containerd_version: {get_param: containerd_version}
           containerd_tarball_url: {get_param: containerd_tarball_url}
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
-
+          kube_service_account_key: {get_param: kube_service_account_key}
+          kube_service_account_private_key: {get_param: kube_service_account_private_key}
 outputs:
 
   api_address:

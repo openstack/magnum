@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Users can enable or disable master_lb_enabled when creating
+    a cluster.

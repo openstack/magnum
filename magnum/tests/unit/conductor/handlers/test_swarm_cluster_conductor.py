@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from mock import patch
 from unittest import mock
+from unittest.mock import patch
 
 import magnum.conf
 from magnum.drivers.heat import driver as heat_driver
@@ -85,6 +85,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'fixed_network': '',
             'fixed_subnet': '',
             'floating_ip_enabled': False,
+            'master_lb_enabled': False,
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
@@ -411,6 +412,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
+        self.cluster_dict["master_lb_enabled"] = True
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
@@ -495,6 +497,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
+        self.cluster_dict["master_lb_enabled"] = True
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
@@ -585,6 +588,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
+        self.cluster_dict["master_lb_enabled"] = True
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)

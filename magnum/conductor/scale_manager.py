@@ -27,11 +27,9 @@ LOG = logging.getLogger(__name__)
 def get_scale_manager(context, osclient, cluster):
     cluster_driver = Driver.get_driver_for_cluster(context, cluster)
     manager = cluster_driver.get_scale_manager(context, osclient, cluster)
-    if not manager:
-        LOG.warning(
-            "Currently only kubernetes and mesos cluster scale manager "
-            "are available")
 
+    # NOTE: Currently only kubernetes and mesos cluster scale managers
+    # are available.
     return manager
 
 
@@ -49,7 +47,7 @@ class ScaleManager(object):
 
         cluster = self.new_cluster
         stack = self.osclient.heat().stacks.get(cluster.stack_id)
-        hosts = hosts_output.get_output_value(stack)
+        hosts = hosts_output.get_output_value(stack, cluster)
         if hosts is None:
             raise exception.MagnumException(_(
                 "Output key '%(output_key)s' is missing from stack "

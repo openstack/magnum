@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from mock import patch
 from unittest import mock
+from unittest.mock import patch
 
 from magnum.common import exception
 from magnum.conductor.handlers.common import trust_manager
