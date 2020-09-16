@@ -342,6 +342,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `grafana_admin_passwd`_               | (any string)       | "admin"       |
 +---------------------------------------+--------------------+---------------+
+| `hyperkube_prefix`_                   | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kube_tag`_                           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `cloud_provider_tag`_                 | see below          | see below     |
@@ -1268,6 +1270,15 @@ _`container_infra_prefix`
   * quay.io/k8scsi/csi-resizer:v0.3.0
   * quay.io/k8scsi/csi-node-driver-registrar:v1.1.0
 
+_`hyperkube_prefix`
+  This label allows users to specify a custom prefix for Hyperkube container
+  source since official Hyperkube images have been discontinued for `kube_tag`
+  greater than 1.18.x. If you wish you use 1.19.x onwards, you may want to use
+  unofficial sources like `docker.io/rancher/`, `ghcr.io/openstackmagnum/` or
+  your own container registry. If `container_infra_prefix` label is defined, it
+  still takes precedence over this label.
+  Default: k8s.gcr.io/
+
 _`kube_tag`
   This label allows users to select a specific Kubernetes release based on its
   container tag for `Fedora Atomic
@@ -1280,6 +1291,7 @@ _`kube_tag`
   Stein default: v1.11.6
   Train default: v1.15.7
   Ussuri default: v1.18.2
+  Victoria default: v1.18.16
 
 _`heapster_enabled`
   heapster_enabled is used to enable disable the installation of heapster.

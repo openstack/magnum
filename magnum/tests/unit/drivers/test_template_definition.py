@@ -477,6 +477,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'boot_volume_size')
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
+        hyperkube_prefix = mock_cluster.labels.get('hyperkube_prefix')
         kube_tag = mock_cluster.labels.get('kube_tag')
         etcd_tag = mock_cluster.labels.get('etcd_tag')
         coredns_tag = mock_cluster.labels.get('coredns_tag')
@@ -641,6 +642,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
+            'hyperkube_prefix': hyperkube_prefix,
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
             'coredns_tag': coredns_tag,
@@ -1008,6 +1010,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'boot_volume_size')
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
+        hyperkube_prefix = mock_cluster.labels.get('hyperkube_prefix')
         kube_tag = mock_cluster.labels.get('kube_tag')
         etcd_tag = mock_cluster.labels.get('etcd_tag')
         coredns_tag = mock_cluster.labels.get('coredns_tag')
@@ -1177,6 +1180,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'region_name': mock_osc.cinder_region_name.return_value,
             'loadbalancing_protocol': 'HTTP',
             'kubernetes_port': 8080,
+            'hyperkube_prefix': hyperkube_prefix,
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
             'coredns_tag': coredns_tag,
