@@ -196,6 +196,10 @@ parameters:
     type: string
     description: no proxies for docker
 
+  hyperkube_prefix:
+    type: string
+    description: prefix to use for hyperkube images
+
   kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
@@ -434,6 +438,7 @@ resources:
                   $HTTP_PROXY: {get_param: http_proxy}
                   $HTTPS_PROXY: {get_param: https_proxy}
                   $NO_PROXY: {get_param: no_proxy}
+                  $HYPERKUBE_PREFIX: {get_param: hyperkube_prefix}
                   $KUBE_TAG: {get_param: kube_tag}
                   $FLANNEL_NETWORK_CIDR: {get_param: flannel_network_cidr}
                   $PODS_NETWORK_CIDR: {get_param: pods_network_cidr}
