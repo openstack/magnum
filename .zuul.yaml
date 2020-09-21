@@ -59,7 +59,7 @@
 - project:
     templates:
       - openstack-cover-jobs
-      - openstack-python3-victoria-jobs
+      - openstack-python3-yoga-jobs
       - check-requirements
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
