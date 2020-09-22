@@ -13,7 +13,7 @@ if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
     else
         attempts=60
         while [ ${attempts} -gt 0 ]; do
-            device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${DOCKER_VOLUME:0:20}$)
+            device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${DOCKER_VOLUME:0:20} | head -n1)
             if [ -n "${device_name}" ]; then
                 break
             fi
