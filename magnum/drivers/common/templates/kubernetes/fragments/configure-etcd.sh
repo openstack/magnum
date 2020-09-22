@@ -20,7 +20,7 @@ if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
 
     attempts=60
     while [ ${attempts} -gt 0 ]; do
-        device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${ETCD_VOLUME:0:20}$)
+        device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${ETCD_VOLUME:0:20} | head -n1)
         if [ -n "${device_name}" ]; then
             break
         fi
