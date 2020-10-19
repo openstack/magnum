@@ -246,6 +246,15 @@ spec:
         app: csi-cinder-controllerplugin
     spec:
       serviceAccount: csi-cinder-controller-sa
+      tolerations:
+        # Make sure the pod can be scheduled on master kubelet.
+        - effect: NoSchedule
+          operator: Exists
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
       containers:
         - name: csi-attacher
           image: ${CONTAINER_INFRA_PREFIX:-quay.io/k8scsi/}csi-attacher:${CSI_ATTACHER_TAG}
