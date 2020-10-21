@@ -802,7 +802,7 @@ class TestPost(api_base.FunctionalTest):
         cluster_template = obj_utils.create_test_cluster_template(
             self.context, name='foo', uuid='foo', master_lb_enabled=False)
         bdict = apiutils.bay_post_data(baymodel_id=cluster_template.name,
-                                       master_count=3)
+                                       master_count=3, master_lb_enabled=False)
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
