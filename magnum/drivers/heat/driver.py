@@ -520,15 +520,6 @@ class HeatPoller(object):
             stack = self.openstack_client.heat().stacks.get(
                 self.nodegroup.stack_id, resolve_outputs=False)
 
-            # poll_and_check is detached and polling long time to check
-            # status, so another user/client can call delete cluster/stack.
-            if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
-                if self.nodegroup.is_default:
-                    self._check_delete_complete()
-                else:
-                    self.nodegroup.destroy()
-                    return
-
             if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
                                       fields.ClusterStatus.UPDATE_COMPLETE):
                 # Resolve all outputs if the stack is COMPLETE
@@ -542,6 +533,15 @@ class HeatPoller(object):
                     stack, self.cluster_template, self.cluster,
                     nodegroups=[self.nodegroup])
                 self._sync_cluster_status(stack)
+
+            # poll_and_check is detached and polling long time to check
+            # status, so another user/client can call delete cluster/stack.
+            if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
+                if self.nodegroup.is_default:
+                    self._check_delete_complete()
+                else:
+                    self.nodegroup.destroy()
+                    return
 
             if stack.stack_status in (fields.ClusterStatus.CREATE_FAILED,
                                       fields.ClusterStatus.DELETE_FAILED,
