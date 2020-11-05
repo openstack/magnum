@@ -26,5 +26,7 @@ import sqlalchemy as sa  # noqa: E402
 
 
 def upgrade():
-    op.add_column('cluster_template', sa.Column('hidden', sa.Boolean(),
-                  default=False))
+    op.add_column('cluster_template',
+                  sa.Column('hidden',
+                            sa.Boolean(create_constraint=False),
+                            default=False))

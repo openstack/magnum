@@ -26,9 +26,14 @@ import sqlalchemy as sa  # noqa: E402
 
 
 def upgrade():
-    insecure_column = sa.Column('insecure', sa.Boolean(), default=False)
+    insecure_column = sa.Column('insecure',
+                                sa.Boolean(create_constraint=False),
+                                default=False)
     op.add_column('baymodel', insecure_column)
-    baymodel = sa.sql.table('baymodel', insecure_column)
+    baymodel = sa.sql.table('baymodel',
+                            sa.Column('insecure',
+                                      sa.Boolean(create_constraint=False),
+                                      default=False))
     op.execute(
         baymodel.update().values({'insecure': True})
     )

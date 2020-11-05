@@ -36,5 +36,5 @@ def upgrade():
                   String(255, mysql_ndb_type=TINYTEXT),
                   nullable=True))
     op.add_column('cluster', sa.Column('floating_ip_enabled',
-                  sa.Boolean(),
+                  sa.Boolean(create_constraint=False),
                   default=False))

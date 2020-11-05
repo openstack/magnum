@@ -29,4 +29,6 @@ import sqlalchemy as sa  # noqa: E402
 
 
 def upgrade():
-    op.add_column('baymodel', sa.Column('public', sa.Boolean(), default=False))
+    op.add_column('baymodel', sa.Column('public',
+                                        sa.Boolean(create_constraint=False),
+                                        default=False))
