@@ -2,27 +2,27 @@
     name: magnum_docker_login
     data:
       user: !encrypted/pkcs1-oaep
-        - mM1s+mysmyzj5pIxVhuGVkvOSmTPqJkYtnfngIyOhzJyAINIPw+CwoVVPBhVa0jXgoACq
-          s7a01eDSmyGjOtMVvCB1rpJMf9KlmIIs7wXa44VRvU6ZN1IHbmCHyK4cnGBDTNBktfSag
-          FLBJ0c8/QCATJeKBhK3ynwQPKTT6IHB38RsHE9kqU8RgUK95MvvUVIeEKC1fVvlETIS5x
-          kKty+NWaeLZGkLO4lbWlF+LlVcdgOthhp7OO2Ivjrbt9P+jCOiIliMKVM6lTuRTki3D7o
-          ucVeEM2SCfZXQGeMz5cZgyv/dD5krb2W+/VHHx/M3TVvNLwWPwcjl2fOCEh+HUEIAa3bW
-          muHPRHu8CirS5hIxjHIh1hsykwYtYCoZTFbTmJwjWD4URyev8fCEmbrMHD8KNi4cgWjos
-          nHlR7L79YVE6LaIOfxAe4OjBv48I+Mq2P/s84RgjAJyfp7TgR+mJ+wSW4W6SkM0PkfpHx
-          5gIQ1W8NLvEbHWul1P7kv5ikLr4wStNkEDc2VH1gflI7VSM4KLhANwedx3f6qVGBAPsrY
-          vw7QsmUHGUiunX1SABZf1nhc0Xu0FFCLujnMSuuccfC90RbYZk+4xIo6CRFKy+q9Ko4ju
-          pH1gUp+GKiHDXme61oI9M+rjy11MzzeaFHacOZbccZhJBy7EcnYvxPxH22nPds=
+        - jlvqCncV1yJNdDNydFdpAXM06vfvjRcgkgLyJyEY8X5MHOmf6VKL2RiR9nmZX4faDgGHr
+          797eFqJMOrWGc2iQGPmb2AwVkWSpMii3o/pV13jdIJBZ0RJ5g7kUXl8+anY27ZikwgmEM
+          ftad6SESr/PEv1G+35S/YEDveEDqY/6mXWOiO75N2QRrTsmgI9t2ItCS/sylWg+6wam0X
+          rpZHC7MyzMoLwi+ySDwjPDiQCskcwYxRwfwFcp2EPgc3cRx2V+YA1Y0Kaf42wCfSIswVC
+          YhljX2Zp9qWD/WULf3sH4pewfvWEwVojbNYOC99Jh/65i2Csynif7yoAAquY1qiPkXLRf
+          Plstz4UTpBsmx/6HSLAxaKp2gaxedrpeIM4+7lMldCQ+8Yx9ZbxXccINpDFznokHiaK60
+          EbjqQwNyjDeoOOO/gYytOZ8DZBFvxFHkQaiAZdS+icxSKzbl+7dZoqyET95LDnk4aIw9L
+          5fxIHHfpipvDrt3NGVmOaQiA9tBC5eCtCFlpJkJWFaz2ip7sqP8JlkZfWf2kr5ujK7s4B
+          VkiUuxIOBIIhc56XbgRoaFT8z23C357k7rNBDyFu6TPItx5OYXEtWU9hqJazl55EKbcfh
+          N7/a+zHNohrG4bLwjlwQ94AWBGkOxEbeZ2+ndK0SdhXTCtCCnu/0Xtxv3D8uSQ=
       password: !encrypted/pkcs1-oaep
-        - DeKrk9fGHRFpf1pGXCfX0gItAAUyS1ZmuRIqq7iMvioz8P6k0NdYaPRGtQG5f0ijJSaG0
-          /TTxKySQ5Dtnf7PumH5U2nXDQzi0oieH+u6h9Iu5x6sPDcOsO3XryPouQGhs+T1iqMd0j
-          cXnbhM4/0QxtMD3b9rxL4WAp16nJ0c1p8Nh0d7KxulhF2n0fNcHgCxSpDU09Ehf5z1X+r
-          z4fc9K7jxr/P5wJ5mTQ85NVEOGchMq5H2a3MuJGU7B7NViv3nBd8nd39sQrvsCMAD/es0
-          vABLC5HJyZj5wrjh2b0sgAbHdM89TXDXg6FAk3HlS0jXdu7Sd6BUEZuHcymd680qV+bui
-          gF6RT+qO9D3Q/9koGrNabi8VFUSNqOavBJVn0W/ZTG/vGy3DmgjtGtgQu+2Q1zuwodaa+
-          tiZwyrd2t9g33ePZgjBiCF8ehPgkkzgHmKEYDrc2itBb3T4PxcdMCfwt1KtmhNfYnSpSF
-          VY57IV7OGysaedKuYpb8aJ0ckj47lJLS669ZoOFGPIMTuVFpdFTILaQOPqws/HTZgKlTk
-          aidm/zvriGovFY8tAjcOnpbkJ44lGUPNH09aoMh47q7yfPoMJJ9QDVb3WLxhY18jfwfCY
-          eD4eIWo2s0YG37VX0N5lPeHR6Y5HZq9AI0oOTmXjmRKHkq2JdpeBz7avdZBu7M=
+        - uk0eQa5ozoUAM5Wc8qQeOjCxmGC/c74iq8EaMGTYtgpYm+teMR9CR0QcrSQA0g+1ZQnbD
+          kIRA/7/N1e6zp59GRrJe9y5Vs9cEvbzKrsRQgkubrYx6XpUVJxxuc5IbrFkiaCfrQkB0E
+          hIQ3RcTFVW6PBoldNGPHk3czvr0oFZbLmRZ44aOolTURFG5DUzFt5HUO4xXwTwCIxxJbO
+          Ch/cYVMzGZaRAi41j7F07b/48Ywg3TkZqy0aAvb/wmFdmlLDR0GlDJy1MdKnmmHNzvywF
+          bE1b4ljhSxhdeHxb5GDelHp+DLLxLAva65DcMQI58JMZiXo7THG49Ho+Msbr+2JCjSUKT
+          qJhH2ht7c6id/VRoPdFGRJbRPCYPraGe6IQs7FWfK0ELvEY8X3g5SSylYCGhr6TdcDFWm
+          nyRiMTuWG7n5j7V4fGnEhyqATNKV4zq5IDs08XxB0od24R346mkE75qzhnnKOi1tdfvPd
+          F443NmZCBRqxwmrUaPLFzzXD+O0xW3qAWxHOzlMGU/VnR4uRdOcyWbCdcO+N392jTiRMX
+          UbRYBPi1hBrBmd9/UjYVVaXESXkZEe81yDFwCR77eGQVVNSZljBJy+VErUv7+RgwTuN/z
+          CtGD6IpE16AHl3i31/1f00t5/t857qzVbdMLJBU8ivKbLPwGAjHMwM0f+y4Ogc=
 
 - job:
     name: magnum-container-build
