@@ -112,8 +112,7 @@ storage:
           done
 
           /usr/bin/update-ca-trust
-          cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
- 
+          
           HTTP_PROXY="__HTTP_PROXY__"
           HTTPS_PROXY="__HTTPS_PROXY__"
           NO_PROXY="__NO_PROXY__"
