@@ -28,6 +28,9 @@ configure_storage_driver_generic() {
     fi
     if [ ${CONTAINER_RUNTIME} = "host-docker"  ] ; then
         sed -i -E 's/^OPTIONS=("|'"'"')/OPTIONS=\1--storage-driver='$1' /' /etc/sysconfig/docker
+        # NOTE(flwang): The default nofile limit it too low, update it to
+        # match the default value in containerd
+        sed -i -E 's/--default-ulimit nofile=1024:1024/--default-ulimit nofile=1048576:1048576/' /etc/sysconfig/docker
     fi
 }
 
