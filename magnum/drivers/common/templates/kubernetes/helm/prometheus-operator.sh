@@ -15,7 +15,7 @@ if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; th
     cat << EOF >> ${HELM_CHART_DIR}/requirements.yaml
 - name: ${CHART_NAME}
   version: ${PROMETHEUS_OPERATOR_CHART_TAG}
-  repository: https://kubernetes-charts.storage.googleapis.com/
+  repository: https://prometheus-community.github.io/helm-charts
 EOF
 
     # Calculate resources needed to run the Prometheus Monitoring Solution
