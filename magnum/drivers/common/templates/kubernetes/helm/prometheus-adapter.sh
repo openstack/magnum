@@ -15,7 +15,7 @@ if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ] && 
     cat << EOF >> ${HELM_CHART_DIR}/requirements.yaml
 - name: ${CHART_NAME}
   version: ${PROMETHEUS_ADAPTER_CHART_TAG}
-  repository: https://kubernetes-charts.storage.googleapis.com/
+  repository: https://prometheus-community.github.io/helm-charts
 EOF
 
     cat << EOF >> ${HELM_CHART_DIR}/values.yaml
