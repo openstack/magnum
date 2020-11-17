@@ -2,3 +2,4 @@
 # see http://docs.openstack.org/infra/bindep/ for additional information.
 
 graphviz [doc test]
+vim
