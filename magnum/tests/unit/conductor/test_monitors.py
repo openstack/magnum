@@ -514,7 +514,7 @@ class MonitorsTestCase(base.TestCase):
                          m_fields.ClusterHealthStatus.UNHEALTHY)
         self.assertEqual(self.k8s_monitor.data['health_status_reason'],
                          {'api': 'ok', 'k8s-cluster-node-0.Ready': False,
-                          'api': 'ok', 'k8s-cluster-node-1.Ready': True})
+                          'k8s-cluster-node-1.Ready': True})
 
     @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
     def test_k8s_monitor_health_unreachable_cluster(self, mock_k8s_api):
