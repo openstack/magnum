@@ -54,10 +54,13 @@ prometheus-operator:
       #     memory: 256Mi
       priorityClassName: "system-cluster-critical"
 
-
   # Dashboard
   grafana:
+    image:
+      repository: ${CONTAINER_INFRA_PREFIX:-grafana/}grafana
     #enabled: ${ENABLE_GRAFANA}
+    sidecar:
+      image: ${CONTAINER_INFRA_PREFIX:-kiwigrid/}k8s-sidecar:0.1.99
     resources:
       requests:
         cpu: 100m
