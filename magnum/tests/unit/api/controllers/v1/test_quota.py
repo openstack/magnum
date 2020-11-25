@@ -222,6 +222,17 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
         self.assertEqual(quota_dict['project_id'], response.json['project_id'])
 
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_create_zero_quota(self, mock_keystone, mock_policy):
+        mock_policy.return_value = True
+        quota_dict = apiutils.quota_post_data(hard_limit=0)
+        response = self.post_json('/quotas', quota_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(quota_dict['project_id'], response.json['project_id'])
+        self.assertEqual(quota_dict['hard_limit'], response.json['hard_limit'])
+
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_create_quota_project_id_not_found(self, mock_keystone):
         keystone = mock.MagicMock()
