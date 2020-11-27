@@ -434,6 +434,11 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+
   kube_service_account_key:
     type: string
     hidden: true
@@ -882,6 +887,7 @@ resources:
                   "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
                   "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
                   "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
+                  "$OCTAVIA_PROVIDER": {get_param: octavia_provider}
                   "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
                   "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
                   "$PROMETHEUS_TAG": {get_param: prometheus_tag}

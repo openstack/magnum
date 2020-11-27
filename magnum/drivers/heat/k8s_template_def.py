@@ -257,7 +257,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'kubecontroller_options',
                       'kubescheduler_options',
                       'influx_grafana_dashboard_enabled',
-                      'master_lb_allowed_cidrs']
+                      'master_lb_allowed_cidrs',
+                      'octavia_provider']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 

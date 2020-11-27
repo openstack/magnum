@@ -508,6 +508,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `extra_security_group`_               | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `octavia_provider`_                   | see below          | amphora       |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1656,6 +1658,9 @@ _`extra_security_group`
   Optional additional group name or UUID to add to network port.
   Only used when 'extra_network' is defined. 
   Default: cluster node default security group.
+  
+_`octavia_provider`
+  Octavia provider driver to be used for creating load balancers.
 
 External load balancer for services
 -----------------------------------

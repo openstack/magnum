@@ -294,6 +294,12 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+    default: False
+
   cloud_provider_enabled:
     type: boolean
     description: Enable or disable the openstack kubernetes cloud provider
@@ -516,6 +522,7 @@ resources:
                   $KUBELET_OPTIONS: {get_param: kubelet_options}
                   $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
                   $OCTAVIA_ENABLED: {get_param: octavia_enabled}
+                  $OCTAVIA_PROVIDER: {get_param: octavia_provider}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
                   $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
                   $AUTO_HEALING_CONTROLLER: {get_param: auto_healing_controller}

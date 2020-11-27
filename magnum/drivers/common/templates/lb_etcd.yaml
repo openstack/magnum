@@ -29,10 +29,15 @@ parameters:
     type: comma_delimited_list
     description: The allowed CIDR list for master load balancer
 
+  octavia_provider:
+    type: string
+    description: Octavia provider to use for load balancer
+
 resources:
   loadbalancer:
     type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
     properties:
+      provider: {get_param: octavia_provider}
       vip_subnet: {get_param: fixed_subnet}
 
   listener:
