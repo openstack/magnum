@@ -502,6 +502,12 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `fixed_subnet_cidr`_                  | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
+| `octavia_provider`_                   | see below          | amphora       |
++---------------------------------------+--------------------+---------------+
+| `octavia_lb_algorithm`_               | see bellow         | ROUND_ROBIN   |
++---------------------------------------+--------------------+---------------+
+| `octavia_lb_healthcheck`_             | see bellow         | true          |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1634,6 +1640,17 @@ _`fixed_subnet_cidr`
   CIDR of the fixed subnet created by Magnum when a user has not
   specified an existing fixed_subnet during cluster creation.
   Ussuri default: 10.0.0.0/24
+
+_`octavia_provider`
+  Octavia provider driver to be used for creating load balancers.
+
+_`octavia_lb_algorithm`
+  Octavia Octavia lb algorithm to use for LoadBalancer type service
+  Default: ROUND_ROBIN
+
+_`octavia_lb_healthcheck`
+  If true, enable Octavia load balancer healthcheck
+  Default: true
 
 External load balancer for services
 -----------------------------------

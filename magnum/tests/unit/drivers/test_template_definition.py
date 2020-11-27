@@ -622,6 +622,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         metrics_scraper_tag = mock_cluster.labels.get('metrics_scraper_tag')
         master_lb_allowed_cidrs = mock_cluster.labels.get(
             'master_lb_allowed_cidrs')
+        octavia_provider = mock_cluster.labels.get('octavia_provider')
+        octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
+        octavia_lb_healthcheck = mock_cluster.labels.get('octavia_lb_healthcheck')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -746,6 +749,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'metrics_scraper_tag': metrics_scraper_tag,
             'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
             'fixed_subnet_cidr': '20.200.0.0/16',
+            'octavia_provider': octavia_provider,
+            'octavia_lb_algorithm': octavia_lb_algorithm,
+            'octavia_lb_healthcheck': octavia_lb_healthcheck,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1178,6 +1184,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         master_lb_allowed_cidrs = mock_cluster.labels.get(
             'master_lb_allowed_cidrs')
 
+        octavia_provider = mock_cluster.labels.get('octavia_provider')
+        octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
+        octavia_lb_healthcheck = mock_cluster.labels.get('octavia_lb_healthcheck')
+
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster)
@@ -1303,6 +1313,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'metrics_scraper_tag': metrics_scraper_tag,
             'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
             'fixed_subnet_cidr': '20.200.0.0/16',
+            'octavia_provider': octavia_provider,
+            'octavia_lb_algorithm': octavia_lb_algorithm,
+            'octavia_lb_healthcheck': octavia_lb_healthcheck,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
