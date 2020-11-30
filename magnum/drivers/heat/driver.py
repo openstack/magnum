@@ -332,6 +332,8 @@ class FedoraKubernetesDriver(KubernetesDriver):
                        "valid kube_tag"), cluster_template.name)
 
         for ostree_tag in ["ostree_commit", "ostree_remote"]:
+            if ostree_tag not in cluster_template.labels:
+                continue
             try:
                 ostree_param = {
                     ostree_tag: cluster_template.labels[ostree_tag]
