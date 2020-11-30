@@ -77,6 +77,26 @@ user documentation.
   A non-admin user can get self quota information.
 
 
+1.7
+---
+
+  Add resize API
+
+
+1.8
+---
+
+  Add upgrade API
+
+
+1.9
+---
+
+  Add nodegroup API
+
+  Allow create/update/delete/list of default-worker and additional nodegroups.
+
+
 1.10
 ---
 
