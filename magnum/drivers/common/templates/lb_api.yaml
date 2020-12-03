@@ -33,8 +33,11 @@ parameters:
 
   octavia_provider:
     type: string
-    default: amphora
     description: Octavia provider to use for load balancer
+
+  octavia_lb_algorithm:
+    type: string
+    description: Octavia load balancer algorithm to use
 
 resources:
   loadbalancer:
@@ -63,7 +66,7 @@ resources:
   pool:
     type: Magnum::Optional::Neutron::LBaaS::Pool
     properties:
-      lb_algorithm: ROUND_ROBIN
+      lb_algorithm: {get_param: octavia_lb_algorithm}
       listener: {if: ["allowed_cidrs_enabled", {get_resource: listener_with_allowed_cidrs}, {get_resource: listener}]}
       protocol: {get_param: protocol}
 

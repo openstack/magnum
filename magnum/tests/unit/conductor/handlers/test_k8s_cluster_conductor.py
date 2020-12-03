@@ -383,6 +383,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
             'octavia_provider': None,
+            'octavia_lb_algorithm': None,
         }
 
         if missing_attr is not None:
@@ -541,6 +542,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
             'octavia_provider': None,
+            'octavia_lb_algorithm': None,
         }
 
         self.assertEqual(expected, definition)
@@ -680,6 +682,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
             'octavia_provider': None,
+            'octavia_lb_algorithm': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -798,6 +801,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
             'octavia_provider': None,
+            'octavia_lb_algorithm': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -914,6 +918,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
             'octavia_provider': None,
+            'octavia_lb_algorithm': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1166,6 +1171,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
             'octavia_provider': None,
+            'octavia_lb_algorithm': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

@@ -626,6 +626,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         extra_subnet = mock_cluster.labels.get('extra_subnet')
         extra_security_group = mock_cluster.labels.get('extra_security_group')
         octavia_provider = mock_cluster.labels.get('octavia_provider')
+        octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -754,6 +755,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'extra_subnet': extra_subnet,
             'extra_security_group': extra_security_group,
             'octavia_provider': octavia_provider,
+            'octavia_lb_algorithm': octavia_lb_algorithm,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1189,6 +1191,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         extra_subnet = mock_cluster.labels.get('extra_subnet')
         extra_security_group = mock_cluster.labels.get('extra_security_group')
 
+        octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
 
         octavia_provider = mock_cluster.labels.get('octavia_provider')
 
@@ -1321,6 +1324,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'extra_subnet': extra_subnet,
             'extra_security_group': extra_security_group,
             'octavia_provider': octavia_provider,
+            'octavia_lb_algorithm': octavia_lb_algorithm,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,

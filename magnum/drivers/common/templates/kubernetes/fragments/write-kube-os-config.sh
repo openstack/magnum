@@ -21,6 +21,7 @@ use-octavia=$OCTAVIA_ENABLED
 subnet-id=$CLUSTER_SUBNET
 floating-network-id=$EXTERNAL_NETWORK_ID
 lb-provider=$OCTAVIA_PROVIDER
+lb-method=$OCTAVIA_LB_ALGORITHM
 create-monitor=yes
 monitor-delay=1m
 monitor-timeout=30s

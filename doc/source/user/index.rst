@@ -510,6 +510,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `octavia_provider`_                   | see below          | amphora       |
 +---------------------------------------+--------------------+---------------+
+| `octavia_lb_algorithm`_               | see bellow         | ROUND_ROBIN   |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1661,6 +1663,10 @@ _`extra_security_group`
   
 _`octavia_provider`
   Octavia provider driver to be used for creating load balancers.
+
+_`octavia_lb_algorithm`
+  Octavia Octavia lb algorithm to use for LoadBalancer type service
+  Default: ROUND_ROBIN
 
 External load balancer for services
 -----------------------------------

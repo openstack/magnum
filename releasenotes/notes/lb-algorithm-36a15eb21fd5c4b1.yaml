@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Added support for choosing Octavia LB algorithm by using
+    ``octavia_lb_algorithm`` tag.
