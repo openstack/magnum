@@ -443,7 +443,13 @@ parameters:
     type: string
     default: ROUND_ROBIN
     description: >
-      Octavia lb algorithm to use for LoadBalancer type service
+      Octavia lb algorithm to use for LoadBalancer type service.
+
+  octavia_lb_healthcheck:
+    type: boolean
+    default: True
+    description: >
+      Octavia lb healthcheck.
 
   kube_service_account_key:
     type: string
@@ -895,6 +901,7 @@ resources:
                   "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
                   "$OCTAVIA_PROVIDER": {get_param: octavia_provider}
                   "$OCTAVIA_LB_ALGORITHM": {get_param: octavia_lb_algorithm}
+                  "$OCTAVIA_LB_HEALTHCHECK": {get_param: octavia_lb_healthcheck}
                   "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
                   "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
                   "$PROMETHEUS_TAG": {get_param: prometheus_tag}

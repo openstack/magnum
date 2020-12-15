@@ -512,6 +512,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `octavia_lb_algorithm`_               | see bellow         | ROUND_ROBIN   |
 +---------------------------------------+--------------------+---------------+
+| `octavia_lb_healthcheck`_             | see bellow         | true          |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1667,6 +1669,10 @@ _`octavia_provider`
 _`octavia_lb_algorithm`
   Octavia Octavia lb algorithm to use for LoadBalancer type service
   Default: ROUND_ROBIN
+
+_`octavia_lb_healthcheck`
+  If true, enable Octavia load balancer healthcheck
+  Default: true
 
 External load balancer for services
 -----------------------------------

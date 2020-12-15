@@ -259,7 +259,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'influx_grafana_dashboard_enabled',
                       'master_lb_allowed_cidrs',
                       'octavia_provider',
-                      'octavia_lb_algorithm']
+                      'octavia_lb_algorithm',
+                      'octavia_lb_healthcheck']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 

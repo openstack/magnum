@@ -304,7 +304,13 @@ parameters:
     type: string
     default: ROUND_ROBIN
     description: >
-      Octavia lb algorithm to use for LoadBalancer type service
+      Octavia lb algorithm to use for LoadBalancer type service.
+
+  octavia_lb_healthcheck:
+    type: boolean
+    default: True
+    description: >
+      Octavia lb healthcheck.
 
   cloud_provider_enabled:
     type: boolean
@@ -530,6 +536,7 @@ resources:
                   $OCTAVIA_ENABLED: {get_param: octavia_enabled}
                   $OCTAVIA_PROVIDER: {get_param: octavia_provider}
                   $OCTAVIA_LB_ALGORITHM: {get_param: octavia_lb_algorithm}
+                  $OCTAVIA_LB_HEALTHCHECK: {get_param: octavia_lb_healthcheck}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
                   $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
                   $AUTO_HEALING_CONTROLLER: {get_param: auto_healing_controller}

@@ -10,6 +10,11 @@ conditions:
       - get_param: allowed_cidrs
       - []
 
+  octavia_lb_healthcheck_enabled:
+      equals:
+      - get_param: octavia_lb_healthcheck
+      - []
+
 parameters:
 
   fixed_subnet:
@@ -38,6 +43,10 @@ parameters:
   octavia_lb_algorithm:
     type: string
     description: Octavia load balancer algorithm to use
+
+  octavia_lb_healthcheck:
+    type: boolean
+    description: Octavia load balancer healthcheck
 
 resources:
   loadbalancer:
@@ -71,6 +80,7 @@ resources:
       protocol: {get_param: protocol}
 
   monitor:
+    condition: octavia_lb_healthcheck_enabled
     type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
     properties:
       type: TCP
