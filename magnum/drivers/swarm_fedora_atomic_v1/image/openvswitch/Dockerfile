@@ -9,7 +9,7 @@ RUN dnf -y install openvswitch \
     && dnf clean all
 RUN cd /opt \
     && git clone https://git.openstack.org/openstack/neutron \
-    && cp neutron/etc/policy.json /etc/neutron/. \
+    && cp neutron/etc/policy.yaml /etc/neutron/. \
     && rm -rf neutron \
     && dnf -y remove git
 VOLUME /var/run/openvswitch

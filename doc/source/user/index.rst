@@ -2782,12 +2782,12 @@ proceed as follows:
    (`False` by default).
 
 2. Update heat policy to allow magnum list stacks. To this end, edit your heat
-   policy file, usually etc/heat/policy.json``:
+   policy file, usually etc/heat/policy.yaml``:
 
    .. code-block:: ini
 
       ...
-      stacks:global_index: "rule:context_is_admin",
+      stacks:global_index: "rule:context_is_admin"
 
    Now restart heat.
 

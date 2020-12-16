@@ -115,7 +115,7 @@ EOF
 }
 
 function add_flavor {
-    # because of policy.json change in nova, flavor-create is now an admin-only feature
+    # because of policy.yaml change in nova, flavor-create is now an admin-only feature
     # moving this out to only be used by admins
 
     # Get admin credentials

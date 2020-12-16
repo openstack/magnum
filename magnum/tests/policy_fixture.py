@@ -14,7 +14,6 @@
 
 import fixtures
 from oslo_policy import _parser
-from oslo_policy import opts as policy_opts
 
 from magnum.common import policy as magnum_policy
 import magnum.conf
@@ -25,7 +24,7 @@ CONF = magnum.conf.CONF
 class PolicyFixture(fixtures.Fixture):
 
     def _setUp(self):
-        policy_opts.set_defaults(CONF)
+        CONF(args=[], project='magnum')
         magnum_policy._ENFORCER = None
         self.addCleanup(magnum_policy.init().clear)
 

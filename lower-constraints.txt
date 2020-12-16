@@ -78,11 +78,11 @@ oslo.i18n==5.0.0
 oslo.log==4.2.0
 oslo.messaging==12.2.0
 oslo.middleware==4.1.0
-oslo.policy==3.2.0
+oslo.policy==3.6.0
 oslo.reports==2.1.0
 oslo.serialization==3.2.0
 oslo.service==2.2.0
-oslo.upgradecheck==1.1.0
+oslo.upgradecheck==1.3.0
 oslo.utils==4.2.0
 oslo.versionedobjects==2.1.0
 oslotest==4.4.1

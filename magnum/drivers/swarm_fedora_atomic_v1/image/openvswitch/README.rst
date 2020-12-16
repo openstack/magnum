@@ -39,11 +39,11 @@ For the Neutron agent, you will need to provide 3 files at these
 locations:
 
 - /etc/neutron/neutron.conf
-- /etc/neutron/policy.json
+- /etc/neutron/policy.yaml
 - /etc/neutron/plugins/ml2/ml2_conf.ini
 
 These files are typically installed in the same locations on the
-Neutron controller node.  The policy.json file is copied into the
+Neutron controller node.  The policy.yaml file is copied into the
 Docker image because it is fairly static and does not require
 customization for the cluster.  If it is changed in the Neutron master
 repo, you just need to rebuild the Docker image to update the file.
