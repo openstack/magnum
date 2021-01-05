@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    The default containerd version is updated with 1.4.3.
