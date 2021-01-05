@@ -845,7 +845,8 @@ class TestPost(api_base.FunctionalTest):
         cluster_template = obj_utils.create_test_cluster_template(
             self.context, name='foo', uuid='foo', master_lb_enabled=False)
         bdict = apiutils.cluster_post_data(
-            cluster_template_id=cluster_template.name, master_count=3)
+            cluster_template_id=cluster_template.name, master_count=3,
+            master_lb_enabled=False)
         response = self.post_json('/clusters', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)

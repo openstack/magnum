@@ -209,7 +209,7 @@ def validate_os_resources(context, cluster_template, cluster=None):
 
 def validate_master_count(cluster, cluster_template):
     if cluster['master_count'] > 1 and \
-            not cluster_template['master_lb_enabled']:
+            not cluster['master_lb_enabled']:
         raise exception.InvalidParameterValue(_(
             "master_count must be 1 when master_lb_enabled is False"))
 
