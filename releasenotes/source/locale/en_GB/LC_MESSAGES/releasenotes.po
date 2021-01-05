@@ -1,14 +1,15 @@
 # Andi Chandler <andi@gowling.com>, 2018. #zanata
 # Andi Chandler <andi@gowling.com>, 2019. #zanata
+# Andi Chandler <andi@gowling.com>, 2020. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: magnum\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-23 19:23+0000\n"
+"POT-Creation-Date: 2021-01-04 11:11+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2019-12-21 02:40+0000\n"
+"PO-Revision-Date: 2020-12-13 12:43+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en_GB\n"
@@ -21,6 +22,12 @@ msgid ""
 msgstr ""
 "--keypair-id parameter in Magnum CLI cluster-template-create has been "
 "renamed to --keypair."
+
+msgid "10.0.0"
+msgstr "10.0.0"
+
+msgid "10.0.0-37"
+msgstr "10.0.0-37"
 
 msgid "3.0.0"
 msgstr "3.0.0"
@@ -67,6 +74,9 @@ msgstr "6.1.1"
 msgid "6.2.0"
 msgstr "6.2.0"
 
+msgid "6.3.0"
+msgstr "6.3.0"
+
 msgid "6.3.0-9"
 msgstr "6.3.0-9"
 
@@ -96,6 +106,21 @@ msgstr "8.2.0"
 
 msgid "9.0.0"
 msgstr "9.0.0"
+
+msgid "9.1.0"
+msgstr "9.1.0"
+
+msgid "9.2.0"
+msgstr "9.2.0"
+
+msgid "9.3.0"
+msgstr "9.3.0"
+
+msgid "9.4.0"
+msgstr "9.4.0"
+
+msgid "9.4.0-3"
+msgstr "9.4.0-3"
 
 msgid ":ref:`genindex`"
 msgstr ":ref:`genindex`"
@@ -208,6 +233,13 @@ msgstr ""
 "repurposed when the network driver is flannel. First, rename the label "
 "flannel_use_vxlan to flannel_backend. Second, redefine the value of this "
 "label from \"yes/no\" to \"udp/vxlan/host-gw\"."
+
+msgid ""
+"Add heat_container_agent_tag label to allow users select the heat-agent tag. "
+"Rocky default: rocky-stable"
+msgstr ""
+"Add heat_container_agent_tag label to allow users select the heat-agent tag. "
+"Rocky default: rocky-stable"
 
 msgid ""
 "Add microversion 1.5 to support rotation of a cluster's CA certificate.  "
