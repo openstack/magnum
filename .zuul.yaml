@@ -309,7 +309,6 @@
 - project:
     templates:
       - openstack-cover-jobs
-      - openstack-lower-constraints-jobs
       - openstack-python-jobs
       - openstack-python3-train-jobs
       - check-requirements
@@ -321,7 +320,6 @@
         - magnum-functional-api-python2
         - openstack-tox-cover:
            voting: false
-        - magnum-container-build
     gate:
       queue: magnum
       jobs:
