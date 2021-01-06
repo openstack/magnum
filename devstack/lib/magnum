@@ -50,19 +50,20 @@ MAGNUM_API_PASTE=$MAGNUM_CONF_DIR/api-paste.ini
 MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY=$MAGNUM_CONF_DIR/k8s_keystone_auth_default_policy.json
 MAGNUM_POLICY=$MAGNUM_CONF_DIR/policy.yaml
 
-if is_ssl_enabled_service "magnum" || is_service_enabled tls-proxy; then
-    MAGNUM_SERVICE_PROTOCOL="https"
-fi
+MAGNUM_UWSGI=$MAGNUM_BIN_DIR/magnum-api-wsgi
+MAGNUM_UWSGI_CONF=$MAGNUM_CONF_DIR/magnum-api-uwsgi.ini
 
 # Public facing bits
 MAGNUM_SERVICE_HOST=${MAGNUM_SERVICE_HOST:-$HOST_IP}
-MAGNUM_SERVICE_PORT=${MAGNUM_SERVICE_PORT:-9511}
-MAGNUM_SERVICE_PORT_INT=${MAGNUM_SERVICE_PORT_INT:-19511}
 MAGNUM_SERVICE_PROTOCOL=${MAGNUM_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
 MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD=${MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD:-secret}
 
 MAGNUM_SWIFT_REGISTRY_CONTAINER=${MAGNUM_SWIFT_REGISTRY_CONTAINER:-docker_registry}
+
+if is_service_enabled tls-proxy; then
+    MAGNUM_SERVICE_PROTOCOL="https"
+fi
 
 # Support entry points installation of console scripts
 if [[ -d $MAGNUM_DIR/bin ]]; then
@@ -86,6 +87,8 @@ function is_magnum_enabled {
 # runs that a clean run would need to clean up
 function cleanup_magnum {
     sudo rm -rf $MAGNUM_STATE_PATH $MAGNUM_AUTH_CACHE_DIR $MAGNUM_CERTIFICATE_CACHE_DIR
+    sudo rm -f $(apache_site_config_for magnum-api)
+    remove_uwsgi_config "$MAGNUM_UWSGI_CONF" "$MAGNUM_UWSGI"
 }
 
 # configure_magnum() - Set config files, create data dirs, etc
@@ -117,9 +120,9 @@ function create_magnum_accounts {
         "container-infra" "Container Infrastructure Management Service")
     get_or_create_endpoint $magnum_service \
         "$REGION_NAME" \
-        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
-        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
-        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1"
+        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST/container-infra/v1" \
+        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST/container-infra/v1" \
+        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST/container-infra/v1"
 
     # Create for Kubernetes Keystone auth
     get_or_create_role k8s_admin
@@ -139,12 +142,11 @@ function create_magnum_conf {
 
     iniset $MAGNUM_CONF database connection `database_connection_url magnum`
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
+
     if is_service_enabled tls-proxy; then
-        iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT_INT"
         iniset $MAGNUM_CONF drivers verify_ca true
         iniset $MAGNUM_CONF drivers openstack_ca_file $SSL_BUNDLE_FILE
     else
-        iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
         iniset $MAGNUM_CONF drivers verify_ca false
     fi
 
@@ -195,8 +197,6 @@ function create_magnum_conf {
 
         iniset $MAGNUM_CONF DEFAULT ssl_cert_file "$MAGNUM_SSL_CERT"
         iniset $MAGNUM_CONF DEFAULT ssl_key_file "$MAGNUM_SSL_KEY"
-
-        iniset $MAGNUM_CONF DEFAULT enabled_ssl_apis "$MAGNUM_ENABLED_APIS"
     fi
 
     if is_service_enabled ceilometer; then
@@ -234,6 +234,8 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF drivers send_cluster_metrics False
 
     iniset $MAGNUM_CONF kubernetes keystone_auth_default_policy $MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY
+
+    write_uwsgi_config "$MAGNUM_UWSGI_CONF" "$MAGNUM_UWSGI" "/container-infra"
 }
 
 function create_api_paste_conf {
@@ -333,32 +335,21 @@ function install_magnumclient {
 
 # install_magnum() - Collect source and prepare
 function install_magnum {
+    install_apache_uwsgi
+
     git_clone $MAGNUM_REPO $MAGNUM_DIR $MAGNUM_BRANCH
     setup_develop $MAGNUM_DIR
 }
 
 # start_magnum_api() - Start the API process ahead of other things
 function start_magnum_api {
-    # Get right service port for testing
-    local service_port=$MAGNUM_SERVICE_PORT
-    local service_protocol=$MAGNUM_SERVICE_PROTOCOL
-    if is_service_enabled tls-proxy; then
-        service_port=$MAGNUM_SERVICE_PORT_INT
-        service_protocol="http"
-    fi
+    run_process magnum-api "$(which uwsgi) --procname-prefix magnum-api --ini $MAGNUM_UWSGI_CONF"
 
-    run_process magnum-api "$MAGNUM_BIN_DIR/magnum-api"
     echo "Waiting for magnum-api to start..."
-    if ! wait_for_service $SERVICE_TIMEOUT $service_protocol://$MAGNUM_SERVICE_HOST:$service_port; then
+    if ! wait_for_service $SERVICE_TIMEOUT $service_protocol://$MAGNUM_SERVICE_HOST/container-infra; then
         die $LINENO "magnum-api did not start"
     fi
-
-    # Start proxies if enabled
-    if is_service_enabled tls-proxy; then
-        start_tls_proxy magnum '*' $MAGNUM_SERVICE_PORT $MAGNUM_SERVICE_HOST $MAGNUM_SERVICE_PORT_INT &
-    fi
 }
-
 
 # configure_iptables_magnum() - Configure the IP table rules for Magnum
 function configure_iptables_magnum {
@@ -366,14 +357,11 @@ function configure_iptables_magnum {
         ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
         OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
         sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
-        # bay nodes will access magnum-api (port $MAGNUM_SERVICE_PORT) to get CA certificate.
-        sudo iptables -I INPUT -d $HOST_IP -p tcp --dport $MAGNUM_SERVICE_PORT -j ACCEPT || true
-        # allow access to keystone etc (http and https)
+        # allow access to magnum, keystone etc (http and https) 
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 80 -j ACCEPT || true
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 443 -j ACCEPT || true
     fi
 }
-
 
 function configure_apache_magnum {
     # Set redirection for kubernetes openstack cloud provider
@@ -413,7 +401,6 @@ RewriteRule ^v3(.*) /identity/v3\$1
 EOF
     enable_apache_mod rewrite
 }
-
 
 # start_magnum() - Start running processes, including screen
 function start_magnum {
