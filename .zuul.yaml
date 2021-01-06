@@ -26,7 +26,6 @@
 - project:
     templates:
       - openstack-cover-jobs
-      - openstack-lower-constraints-jobs
       - openstack-python3-victoria-jobs
       - check-requirements
       - publish-openstack-docs-pti
