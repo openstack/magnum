@@ -180,18 +180,10 @@ ${APP_INGRESS_ANNOTATIONS}
     endpoints: ${KUBE_MASTERS_PRIVATE}
     ## If using kubeControllerManager.endpoints only the port and targetPort are used
     service:
-      port: 10252
-      targetPort: 10252
+      port: 10257
+      targetPort: 10257
       # selector:
       #   component: kube-controller-manager
-    serviceMonitor:
-      ## Enable scraping kube-controller-manager over https.
-      ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
-      https: "True"
-      # Skip TLS certificate validation when scraping
-      insecureSkipVerify: "True"
-      # Name of the server to use when validating TLS certificate
-      serverName: null
 
   coreDns:
     enabled: true
@@ -224,28 +216,17 @@ ${APP_INGRESS_ANNOTATIONS}
     endpoints: ${KUBE_MASTERS_PRIVATE}
     ## If using kubeScheduler.endpoints only the port and targetPort are used
     service:
-      port: 10251
-      targetPort: 10251
+      port: 10259
+      targetPort: 10259
       # selector:
       #   component: kube-scheduler
     serviceMonitor:
-      ## Enable scraping kube-scheduler over https.
-      ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
-      https: "True"
-      ## Skip TLS certificate validation when scraping
-      insecureSkipVerify: "True"
-      ## Name of the server to use when validating TLS certificate
-      serverName: null
+      scheme: https
+      insecureSkipVerify: true
 
   kubeProxy:
     ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
     endpoints: ${KUBE_MASTERS_PRIVATE} # masters + minions
-    serviceMonitor:
-      ## Enable scraping kube-proxy over https.
-      ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
-      https: "True"
-      ## Skip TLS certificate validation when scraping
-      insecureSkipVerify: "True"
 
   kube-state-metrics:
     priorityClassName: "system-cluster-critical"
@@ -272,7 +253,7 @@ ${APP_INGRESS_ANNOTATIONS}
           requests:
             cpu: 2m
           limits:
-            memory: 30M
+            memory: 64M
     # clusterDomain: ${CLUSTER_ROOT_DOMAIN_NAME}
     priorityClassName: "system-cluster-critical"
     logFormat: json
@@ -281,7 +262,7 @@ ${APP_INGRESS_ANNOTATIONS}
       requests:
         cpu: 2m
       limits:
-        memory: 32M
+        memory: 64M
     image:
       repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus-operator/}prometheus-operator
     prometheusDefaultBaseImage: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}prometheus
