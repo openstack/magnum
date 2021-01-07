@@ -1276,13 +1276,14 @@ _`container_infra_prefix`
 
   Images that might be needed if 'monitoring_enabled' is 'true':
 
-  * quay.io/prometheus/alertmanager:v0.20.0
-  * docker.io/squareup/ghostunnel:v1.5.2
-  * docker.io/jettech/kube-webhook-certgen:v1.0.0
-  * quay.io/coreos/prometheus-operator:v0.37.0
-  * quay.io/coreos/configmap-reload:v0.0.1
-  * quay.io/coreos/prometheus-config-reloader:v0.37.0
-  * quay.io/prometheus/prometheus:v2.15.2
+  * quay.io/prometheus/alertmanager:v0.21.0
+  * docker.io/jettech/kube-webhook-certgen:v1.5.0
+  * quay.io/prometheus-operator/prometheus-operator:v0.44.0
+  * docker.io/jimmidyson/configmap-reload:v0.4.0
+  * quay.io/prometheus-operator/prometheus-config-reloader:v0.44.0
+  * quay.io/prometheus/prometheus:v2.22.1
+  * quay.io/prometheus/node-exporter:v1.0.1
+  * docker.io/directxman12/k8s-prometheus-adapter:v0.8.2
 
   Images that might be needed if 'cinder_csi_enabled' is 'true':
 

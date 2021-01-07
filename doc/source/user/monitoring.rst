@@ -35,15 +35,15 @@ _`metrics_server_enabled`
 
 _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the
-  stable/prometheus-operator helm chart.
+  prometheus-community/kube-prometheus-stack helm chart.
   To use this service tiller_enabled must be true when using
   helm_client_tag<v3.0.0.
   Default: false
 
 _`prometheus_adapter_enabled`
   Enable installation of cluster custom metrics provided by the
-  stable/prometheus-adapter helm chart. This service depends on
-  monitoring_enabled.
+  prometheus-community/prometheus-adapter helm chart.
+  This service depends on monitoring_enabled.
   Default: true
 
 To control deployed versions, extra labels are available:
@@ -56,14 +56,17 @@ _`metrics_server_chart_tag`
 
 _`prometheus_operator_chart_tag`
   Add prometheus_operator_chart_tag to select version of the
-  stable/prometheus-operator chart to install. When installing the chart,
-  helm will use the default values of the tag defined and overwrite them based
-  on the prometheus-operator-config ConfigMap currently defined. You must
-  certify that the versions are compatible.
+  prometheus-community/kube-prometheus-stack chart to install.
+  When installing the chart, helm will use the default values of the tag
+  defined and overwrite them based on the prometheus-operator-config
+  ConfigMap currently defined.
+  You must certify that the versions are compatible.
+  Wallaby-default: 17.2.0
 
 _`prometheus_adapter_chart_tag`
-  The stable/prometheus-adapter helm chart version to use.
+  The prometheus-community/prometheus-adapter helm chart version to use.
   Train-default: 1.4.0
+  Wallaby-default: 2.12.1
 
 Full fledged cluster monitoring
 +++++++++++++++++++++++++++++++

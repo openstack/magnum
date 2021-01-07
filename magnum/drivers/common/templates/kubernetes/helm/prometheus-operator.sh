@@ -2,7 +2,7 @@ set +x
 . /etc/sysconfig/heat-params
 set -ex
 
-CHART_NAME="prometheus-operator"
+CHART_NAME="kube-prometheus-stack"
 
 if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
     echo "Writing ${CHART_NAME} config"
@@ -80,22 +80,18 @@ EOF
         PROTOCOL="http"
         INSECURE_SKIP_VERIFY="True"
     fi
-    # FIXME: Force protocol to http as we don't want to use the cluster certs
-    USE_HTTPS="False"
 
     if [ "$(echo ${VERIFY_CA} | tr '[:upper:]' '[:lower:]')" == "false" ]; then
         INSECURE_SKIP_VERIFY="True"
     fi
 
     cat << EOF >> ${HELM_CHART_DIR}/values.yaml
-prometheus-operator:
-
-  defaultRules:
-    rules:
-      #TODO: To enable this we need firstly take care of exposing certs
-      etcd: false
+kube-prometheus-stack:
 
   alertmanager:
+    podDisruptionBudget:
+      enabled: true
+    #config:
     ingress:
       enabled: ${MONITORING_INGRESS_ENABLED}
       annotations:
@@ -108,6 +104,7 @@ ${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
       - ${CLUSTER_ROOT_DOMAIN_NAME}
       paths:
       - /alertmanager${APP_INGRESS_PATH_APPEND}
+      pathType: ImplementationSpecific
       ## TLS configuration for Alertmanager Ingress
       ## Secret must be manually created in the namespace
       tls: []
@@ -118,8 +115,8 @@ ${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
       image:
         repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}alertmanager
       logFormat: json
+      routePrefix: /alertmanager
       externalUrl: https://${CLUSTER_ROOT_DOMAIN_NAME}/alertmanager
-      # routePrefix: /alertmanager
       # resources:
       #   requests:
       #     cpu: 100m
@@ -127,15 +124,7 @@ ${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
       priorityClassName: "system-cluster-critical"
 
   grafana:
-    image:
-      repository: ${CONTAINER_INFRA_PREFIX:-grafana/}grafana
     #enabled: ${ENABLE_GRAFANA}
-    sidecar:
-      image: ${CONTAINER_INFRA_PREFIX:-kiwigrid/}k8s-sidecar:0.1.99
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
     adminPassword: ${GRAFANA_ADMIN_PASSWD}
     ingress:
       enabled: ${MONITORING_INGRESS_ENABLED}
@@ -146,13 +135,24 @@ ${APP_INGRESS_ANNOTATIONS}
       ## Must be provided if Ingress is enable.
       hosts:
       - ${CLUSTER_ROOT_DOMAIN_NAME}
-      path: /grafana${APP_INGRESS_PATH_APPEND}
+      paths:
+      - /grafana${APP_INGRESS_PATH_APPEND}
+      pathType: ImplementationSpecific
       ## TLS configuration for grafana Ingress
       ## Secret must be manually created in the namespace
       tls: []
       # - secretName: grafana-general-tls
       #   hosts:
       #   - grafana.example.com
+    sidecar:
+      image:
+        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/kiwigrid/}k8s-sidecar
+    image:
+      repository: ${CONTAINER_INFRA_PREFIX:-grafana/}grafana
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
     persistence:
       enabled: ${APP_GRAFANA_PERSISTENT_STORAGE}
       storageClassName: ${MONITORING_STORAGE_CLASS_NAME}
@@ -162,21 +162,10 @@ ${APP_INGRESS_ANNOTATIONS}
         domain: ${CLUSTER_ROOT_DOMAIN_NAME}
         root_url: https://${CLUSTER_ROOT_DOMAIN_NAME}/grafana
         serve_from_sub_path: true
-      paths:
-        data: /var/lib/grafana/data
-        logs: /var/log/grafana
-        plugins: /var/lib/grafana/plugins
-        provisioning: /etc/grafana/provisioning
-      analytics:
-        check_for_updates: true
       log:
         mode: console
       log.console:
         format: json
-      grafana_net:
-        url: https://grafana.net
-    plugins:
-    - grafana-piechart-panel
 
   kubeApiServer:
     tlsConfig:
@@ -198,9 +187,9 @@ ${APP_INGRESS_ANNOTATIONS}
     serviceMonitor:
       ## Enable scraping kube-controller-manager over https.
       ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
-      https: ${USE_HTTPS}
+      https: "True"
       # Skip TLS certificate validation when scraping
-      insecureSkipVerify: null
+      insecureSkipVerify: "True"
       # Name of the server to use when validating TLS certificate
       serverName: null
 
@@ -242,19 +231,21 @@ ${APP_INGRESS_ANNOTATIONS}
     serviceMonitor:
       ## Enable scraping kube-scheduler over https.
       ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
-      https: ${USE_HTTPS}
+      https: "True"
       ## Skip TLS certificate validation when scraping
-      insecureSkipVerify: null
+      insecureSkipVerify: "True"
       ## Name of the server to use when validating TLS certificate
       serverName: null
 
-  # kubeProxy:
-  #   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
-  #   endpoints: [] # masters + minions
-  #   serviceMonitor:
-  #     ## Enable scraping kube-proxy over https.
-  #     ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
-  #     https: ${USE_HTTPS}
+  kubeProxy:
+    ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
+    endpoints: ${KUBE_MASTERS_PRIVATE} # masters + minions
+    serviceMonitor:
+      ## Enable scraping kube-proxy over https.
+      ## Requires proper certs (not self-signed) and delegated authentication/authorization checks
+      https: "True"
+      ## Skip TLS certificate validation when scraping
+      insecureSkipVerify: "True"
 
   kube-state-metrics:
     priorityClassName: "system-cluster-critical"
@@ -271,37 +262,34 @@ ${APP_INGRESS_ANNOTATIONS}
       limits:
         cpu: 20m
         memory: 20M
-    extraArgs:
-      - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
-      - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
-    sidecars: []
-    ##  - name: nvidia-dcgm-exporter
-    ##    image: nvidia/dcgm-exporter:1.4.3
 
   prometheusOperator:
-    priorityClassName: "system-cluster-critical"
-    tlsProxy:
-      image:
-        repository: ${CONTAINER_INFRA_PREFIX:-squareup/}ghostunnel
     admissionWebhooks:
       patch:
         image:
           repository: ${CONTAINER_INFRA_PREFIX:-jettech/}kube-webhook-certgen
-        priorityClassName: "system-cluster-critical"
-
-    resources: {}
-    # requests:
-    #   cpu: 5m
-    #   memory: 10Mi
+        resources:
+          requests:
+            cpu: 2m
+          limits:
+            memory: 30M
+    # clusterDomain: ${CLUSTER_ROOT_DOMAIN_NAME}
+    priorityClassName: "system-cluster-critical"
     logFormat: json
+    logLevel: info
+    resources:
+      requests:
+        cpu: 2m
+      limits:
+        memory: 32M
     image:
-      repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-operator
-    configmapReloadImage:
-      repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}configmap-reload
+      repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus-operator/}prometheus-operator
+    prometheusDefaultBaseImage: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}prometheus
+    alertmanagerDefaultBaseImage: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}alertmanager
     prometheusConfigReloaderImage:
-      repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-config-reloader
-    hyperkubeImage:
-      repository: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube
+      repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus-operator/}prometheus-config-reloader
+    thanosImage:
+      repository: ${CONTAINER_INFRA_PREFIX:-quay.io/thanos/}thanos
 
   prometheus:
     ingress:
@@ -317,6 +305,7 @@ ${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
       - ${CLUSTER_ROOT_DOMAIN_NAME}
       paths:
       - /prometheus${APP_INGRESS_PATH_APPEND}
+      pathType: ImplementationSpecific
       ## TLS configuration for Prometheus Ingress
       ## Secret must be manually created in the namespace
       tls: []
@@ -332,11 +321,13 @@ ${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
       bearerTokenFile:
     prometheusSpec:
       scrapeInterval: ${MONITORING_INTERVAL_SECONDS}s
-      scrapeInterval: 30s
       evaluationInterval: 30s
       image:
         repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}prometheus
-      retention: 14d
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
       externalLabels:
         cluster_uuid: ${CLUSTER_UUID}
       externalUrl: https://${CLUSTER_ROOT_DOMAIN_NAME}/prometheus
@@ -352,7 +343,16 @@ ${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
       retention: ${MONITORING_RETENTION_DAYS}d
       retentionSize: ${MONITORING_RETENTION_SIZE_GB}GB
       logFormat: json
-      #routePrefix: /prometheus
+      routePrefix: /prometheus
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: magnum.openstack.org/role
+                operator: In
+                values:
+                - master
       resources:
         requests:
           cpu: ${PROMETHEUS_SERVER_CPU}m

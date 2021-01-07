@@ -772,8 +772,8 @@ parameters:
 
   prometheus_operator_chart_tag:
     type: string
-    description: The stable/prometheus-operator chart version to use.
-    default: v8.12.13
+    description: The prometheus-community/kube-prometheus-stack chart version to use.
+    default: 33.0.0
 
   prometheus_adapter_enabled:
     type: boolean
@@ -782,8 +782,8 @@ parameters:
 
   prometheus_adapter_chart_tag:
     type: string
-    description: The stable/prometheus-adapter chart version to use.
-    default: 1.4.0
+    description: The prometheus-community/prometheus-adapter chart version to use.
+    default: 3.0.2
 
   prometheus_adapter_configmap:
     type: string
@@ -1125,6 +1125,10 @@ resources:
         - protocol: udp
           port_range_min: 8472
           port_range_max: 8472
+          # Prometheus Server
+        - protocol: tcp
+          port_range_min: 9090
+          port_range_max: 9090
 
   secgroup_kube_minion:
     condition: create_cluster_resources

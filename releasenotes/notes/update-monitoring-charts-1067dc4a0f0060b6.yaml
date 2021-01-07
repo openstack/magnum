@@ -1,0 +1,10 @@
+---
+upgrade:
+  - Prometheus-Adapter helm chart updated to 2.12.1 from 1.4.0.
+  - Prometheus-Operator helm chart updated to kube-prometheus-stack:17.2.0
+    from prometheus-operator:v8.12.13.
+  - Prometheus-server now runs only on master nodes
+
+deprecations:
+  - Enabling monitoring using the prometheus_monitoring label is deprecated
+    and will be removed in the X cycle.
