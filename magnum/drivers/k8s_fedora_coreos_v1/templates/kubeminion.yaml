@@ -434,7 +434,9 @@ resources:
                   $PODS_NETWORK_CIDR: {get_param: pods_network_cidr}
                   $KUBE_VERSION: {get_param: kube_version}
                   $TRUSTEE_USER_ID: {get_param: trustee_user_id}
+                  $TRUSTEE_USERNAME: {get_param: trustee_username}
                   $TRUSTEE_PASSWORD: {get_param: trustee_password}
+                  $TRUSTEE_DOMAIN_ID: {get_param: trustee_domain_id}
                   $TRUST_ID: {get_param: trust_id}
                   $AUTH_URL: {get_param: auth_url}
                   $CLOUD_PROVIDER_ENABLED: {get_param: cloud_provider_enabled}
