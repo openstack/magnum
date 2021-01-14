@@ -25,9 +25,8 @@ CONF = magnum.conf.CONF
 
 @profiler.trace_cls("rpc")
 class API(rpc_service.API):
-    def __init__(self, transport=None, context=None, topic=None):
-        super(API, self).__init__(transport, context,
-                                  topic=CONF.conductor.topic)
+    def __init__(self, context=None, topic=CONF.conductor.topic):
+        super(API, self).__init__(context=context, topic=topic)
 
     # Cluster Operations
 
