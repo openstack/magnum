@@ -79,20 +79,16 @@ class Service(service.Service):
 
 
 class API(object):
-    def __init__(self, transport=None, context=None, topic=None, server=None,
+    def __init__(self, context=None, topic=None, server=None,
                  timeout=None):
         serializer = _init_serializer()
-        if transport is None:
-            exmods = rpc.get_allowed_exmods()
-            transport = messaging.get_rpc_transport(
-                CONF, allowed_remote_exmods=exmods)
         self._context = context
         if topic is None:
             topic = ''
         target = messaging.Target(topic=topic, server=server)
-        self._client = messaging.RPCClient(transport, target,
-                                           serializer=serializer,
-                                           timeout=timeout)
+        self._client = rpc.get_client(target,
+                                      serializer=serializer,
+                                      timeout=timeout)
 
     def _call(self, method, *args, **kwargs):
         return self._client.call(self._context, method, *args, **kwargs)
