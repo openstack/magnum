@@ -45,6 +45,7 @@ Request
   - fixed_subnet: fixed_subnet
   - fixed_network: fixed_network
   - floating_ip_enabled: floating_ip_enabled_cluster
+  - master_lb_enabled: master_lb_enabled_cluster
 
 .. note::
 
@@ -163,6 +164,8 @@ Response
   - node_addresses: node_addresses
   - status_reason: status_reason
   - create_timeout: create_timeout
+  - floating_ip_enabled: floating_ip_enabled_cluster
+  - master_lb_enabled: master_lb_enabled_cluster
   - name: name
 
 Response Example

@@ -403,6 +403,18 @@ master_lb_enabled:
   in: body
   required: true
   type: boolean
+master_lb_enabled_cluster:
+  description: |
+    Since multiple masters may exist in a bay/cluster, a Neutron load balancer
+    is created to provide the API endpoint for the bay/cluster and to direct
+    requests to the masters. In some cases, such as when the LBaaS service is
+    not available, this option can be set to ``false`` to create a bay/cluster
+    without the load balancer. In this case, one of the masters will serve as
+    the API endpoint. The default is ``true``, i.e. to create the load
+    balancer for the bay.
+  in: body
+  required: false
+  type: boolean
 max_batch_size:
   description: |
     The max batch size each time when doing upgrade, default value is 1
