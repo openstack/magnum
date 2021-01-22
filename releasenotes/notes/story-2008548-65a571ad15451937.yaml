@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixes an issue with cluster deletion if load balancers do not exist. See
+    `story 2008548 <https://storyboard.openstack.org/#!/story/2008548>` for
+    details.
