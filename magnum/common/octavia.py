@@ -111,6 +111,8 @@ def delete_loadbalancers(context, cluster):
             filters={"type": lb_resource_type})
         for lb_res in lb_resources:
             lb_id = lb_res.physical_resource_id
+            if not lb_id:
+                continue
             try:
                 lb = octavia_client.load_balancer_show(lb_id)
                 lbs.append(lb)
