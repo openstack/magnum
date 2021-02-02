@@ -174,7 +174,7 @@ INGRESS_TRAEFIK_SERVICE="/etc/systemd/system/ingress-traefik.service"
 
 # Binary for ingress traefik
 INGRESS_TRAEFIK_BIN_CONTENT='''#!/bin/sh
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+until  [ "ok" = "$(kubectl get --raw='/healthz')" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5
