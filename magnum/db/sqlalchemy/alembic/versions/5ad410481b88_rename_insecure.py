@@ -28,4 +28,4 @@ import sqlalchemy as sa  # noqa: E402
 def upgrade():
     op.alter_column('baymodel', 'insecure',
                     new_column_name='tls_disabled',
-                    existing_type=sa.Boolean())
+                    existing_type=sa.Boolean(create_constraint=False))

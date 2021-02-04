@@ -27,4 +27,4 @@ import sqlalchemy as sa  # noqa: E402
 
 def upgrade():
     op.add_column('baymodel', sa.Column('registry_enabled',
-                  sa.Boolean(), default=False))
+                  sa.Boolean(create_constraint=False), default=False))

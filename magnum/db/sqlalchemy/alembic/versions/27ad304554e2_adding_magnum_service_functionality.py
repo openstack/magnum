@@ -35,14 +35,18 @@ def upgrade():
         sa.Column('report_count', sa.Integer(), nullable=False),
         sa.Column('host', sa.String(length=255), nullable=True),
         sa.Column('binary', sa.String(length=255), nullable=True),
-        sa.Column('disabled', sa.Boolean(), nullable=True),
+        sa.Column('disabled',
+                  sa.Boolean(create_constraint=False),
+                  nullable=True),
         sa.Column('disabled_reason', sa.String(length=255), nullable=True),
         # 'last_seen_up' has different purpose than 'updated_at'.
         # 'updated_at' refers to any modification of the entry, which can
         # be administrative too, whereas 'last_seen_up' is more related to
         # magnum_service. Modeled after nova/servicegroup
         sa.Column('last_seen_up', sa.DateTime(), nullable=True),
-        sa.Column('forced_down', sa.Boolean(), nullable=True),
+        sa.Column('forced_down',
+                  sa.Boolean(create_constraint=False),
+                  nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('host', 'binary',
                             name='uniq_magnum_service0host0binary')

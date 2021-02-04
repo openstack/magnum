@@ -27,4 +27,6 @@ import sqlalchemy as sa  # noqa: E402
 
 def upgrade():
     op.add_column('baymodel',
-                  sa.Column('master_lb_enabled', sa.Boolean(), default=False))
+                  sa.Column('master_lb_enabled',
+                            sa.Boolean(create_constraint=False),
+                            default=False))

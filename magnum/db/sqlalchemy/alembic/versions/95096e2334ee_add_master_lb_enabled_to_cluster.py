@@ -28,7 +28,9 @@ down_revision = 'c04e925e65c2'
 
 def upgrade():
     op.add_column('cluster',
-                  sa.Column('master_lb_enabled', sa.Boolean(), default=False))
+                  sa.Column('master_lb_enabled',
+                            sa.Boolean(create_constraint=False),
+                            default=False))
     # Populate existing cluster with the cluster template_id
     connection = op.get_bind()
     connection.execute(

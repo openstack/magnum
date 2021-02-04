@@ -60,7 +60,7 @@ def upgrade():
         sa.Column('max_node_count', sa.Integer, nullable=True),
         sa.Column('min_node_count', sa.Integer, nullable=True),
         sa.Column('role', String(length=255), nullable=True),
-        sa.Column('is_default', sa.Boolean())
+        sa.Column('is_default', sa.Boolean(create_constraint=False))
     )
 
     connection = op.get_bind()
