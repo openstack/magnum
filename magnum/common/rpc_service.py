@@ -15,7 +15,6 @@
 """Common RPC service and API tools for Magnum."""
 
 import oslo_messaging as messaging
-from oslo_messaging.rpc import dispatcher
 from oslo_service import service
 from oslo_utils import importutils
 
@@ -47,14 +46,11 @@ class Service(service.Service):
     def __init__(self, topic, server, handlers, binary):
         super(Service, self).__init__()
         serializer = _init_serializer()
-        transport = messaging.get_rpc_transport(CONF)
         # TODO(asalkeld) add support for version='x.y'
-        access_policy = dispatcher.DefaultRPCAccessPolicy
         target = messaging.Target(topic=topic, server=server)
-        self._server = messaging.get_rpc_server(transport, target, handlers,
-                                                executor='eventlet',
-                                                serializer=serializer,
-                                                access_policy=access_policy)
+        self._server = rpc.get_server(target, handlers,
+                                      serializer=serializer)
+
         self.binary = binary
         profiler.setup(binary, CONF.host)
 
