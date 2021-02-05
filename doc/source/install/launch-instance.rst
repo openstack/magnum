@@ -302,14 +302,14 @@ master and one node. Then, using Kubernetes's native client ``kubectl``, you
 will create a deployment.
 
 #. Create a cluster template for a Kubernetes cluster using the
-   ``fedora-atomic-latest`` image, ``m1.small`` as the flavor for the master
+   ``fedora-coreos-latest`` image, ``m1.small`` as the flavor for the master
    and the node, ``public`` as the external network and ``8.8.8.8`` for the
    DNS nameserver, using the following command:
 
    .. code-block:: console
 
       $ openstack coe cluster template create kubernetes-cluster-template \
-                           --image fedora-atomic-latest \
+                           --image fedora-coreos-latest \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
                            --master-flavor m1.small \
