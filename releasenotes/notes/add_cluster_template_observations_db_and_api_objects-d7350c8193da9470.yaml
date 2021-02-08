@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    When creating a cluster template the administrator can
+    use --tags <text> argument to add any information
+    that he considers important. The received text is a
+    comma separated list with the pretended tags.
+    This information is also shown when the user lists all
+    the available cluster templates.
+upgrade:
+  - |
+    A new column was added to the cluster_templates DB table.

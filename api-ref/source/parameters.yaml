@@ -559,6 +559,12 @@ status_reason:
   in: body
   required: true
   type: string
+tags:
+  description: |
+    Administrator tags for the cluster template.
+  in: body
+  required: false
+  type: array
 tls_disabled:
   description: |
     Transport Layer Security (TLS) is normally enabled to secure the

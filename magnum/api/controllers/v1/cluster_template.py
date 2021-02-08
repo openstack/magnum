@@ -156,6 +156,9 @@ class ClusterTemplate(base.APIBase):
     hidden = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the ClusterTemplate is hidden or not."""
 
+    tags = wtypes.StringType(min_length=0, max_length=255)
+    """A comma separated list of tags."""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.ClusterTemplate.fields:

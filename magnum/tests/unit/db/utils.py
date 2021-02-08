@@ -57,6 +57,7 @@ def get_test_cluster_template(**kw):
         'master_lb_enabled': kw.get('master_lb_enabled', True),
         'floating_ip_enabled': kw.get('floating_ip_enabled', True),
         'hidden': kw.get('hidden', False),
+        'tags': kw.get('tags', ""),
     }
 
 

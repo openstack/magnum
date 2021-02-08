@@ -43,7 +43,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.17: 'coe' field type change to ClusterTypeField
     # Version 1.18: DockerStorageDriver is a StringField (was an Enum)
     # Version 1.19: Added 'hidden' field
-    VERSION = '1.19'
+    # Version 1.20: Added 'tags' field
+    VERSION = '1.20'
 
     dbapi = dbapi.get_instance()
 
@@ -80,6 +81,7 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         'master_lb_enabled': fields.BooleanField(default=False),
         'floating_ip_enabled': fields.BooleanField(default=True),
         'hidden': fields.BooleanField(default=False),
+        'tags': fields.StringField(nullable=True),
     }
 
     @staticmethod
