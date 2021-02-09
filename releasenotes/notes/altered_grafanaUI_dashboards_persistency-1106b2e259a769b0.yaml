@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Add persistency for grafana UI altered dashboards. To enable this use
+    monitoring_storage_class_name label.
+    It is recommended that dashboards be persisted by other means, mainly
+    by using kubernetes configMaps. More info [0].
+
+    [0] https://github.com/helm/charts/tree/master/stable/grafana#sidecar-for-dashboards
