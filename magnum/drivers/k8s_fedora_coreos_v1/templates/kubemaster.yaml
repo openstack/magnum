@@ -467,6 +467,24 @@ parameters:
     type: boolean
     description: Enable or disable prometheus-operator monitoring solution.
 
+  monitoring_retention_days:
+    type: number
+    description: The number of time (in days) that prometheus metrics should be kept.
+
+  monitoring_retention_size:
+    type: number
+    description:  >
+      The maximum memory (in Gi) allowed to be used by prometheus server to store metrics.
+
+  monitoring_interval_seconds:
+    type: number
+    description: >
+      The time interval (in seconds) between consecutive metric scrapings.
+
+  monitoring_storage_class_name:
+    type: string
+    description: The kubernetes storage class name to use for the prometheus pvc.
+
   prometheus_operator_chart_tag:
     type: string
     description: The stable/prometheus-operator chart version to use.
@@ -814,6 +832,10 @@ resources:
                   "$KEYSTONE_AUTH_ENABLED": {get_param: keystone_auth_enabled}
                   "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
                   "$MONITORING_ENABLED": {get_param: monitoring_enabled}
+                  "$MONITORING_RETENTION_DAYS": {get_param: monitoring_retention_days}
+                  "$MONITORING_RETENTION_SIZE": {get_param: monitoring_retention_size}
+                  "$MONITORING_INTERVAL_SECONDS": {get_param: monitoring_interval_seconds}
+                  "$MONITORING_STORAGE_CLASS_NAME": {get_param: monitoring_storage_class_name}
                   "$PROMETHEUS_OPERATOR_CHART_TAG": {get_param: prometheus_operator_chart_tag}
                   "$PROMETHEUS_ADAPTER_ENABLED": {get_param: prometheus_adapter_enabled}
                   "$PROMETHEUS_ADAPTER_CHART_TAG": {get_param: prometheus_adapter_chart_tag}

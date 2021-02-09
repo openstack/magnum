@@ -21,6 +21,11 @@ EOF
     PROMETHEUS_SERVER_CPU=$(expr 128 + 7 \* ${MAX_NODE_COUNT} )
     PROMETHEUS_SERVER_RAM=$(expr 256 + 40 \* ${MAX_NODE_COUNT})
 
+    # Because the PVC and Prometheus use different scales for the volume size
+    # conversion is needed. The prometheus-monitoring value (in GB) is the conversion
+    # with a ratio of (1 GiB = 1.073741824 GB) and then rounded to int
+    MONITORING_RETENTION_SIZE_GB=$(echo | awk "{print int(${MONITORING_RETENTION_SIZE}*1.073741824)}")
+
     # Validate if communication node <-> master is secure or insecure
     PROTOCOL="https"
     INSECURE_SKIP_VERIFY="False"
@@ -193,6 +198,7 @@ prometheus-operator:
 
   prometheus:
     prometheusSpec:
+      scrapeInterval: ${MONITORING_INTERVAL_SECONDS}s
       scrapeInterval: 30s
       evaluationInterval: 30s
       image:
@@ -209,12 +215,29 @@ prometheus-operator:
       # - kube-controller-manager-certificates
       # - kube-scheduler-certificates
       # - kube-proxy-manager-certificates
+      retention: ${MONITORING_RETENTION_DAYS}d
+      retentionSize: ${MONITORING_RETENTION_SIZE_GB}GB
       resources:
         requests:
           cpu: ${PROMETHEUS_SERVER_CPU}m
           memory: ${PROMETHEUS_SERVER_RAM}M
       priorityClassName: "system-cluster-critical"
 EOF
+
+    #######################
+    # Set up definitions for persistent storage using k8s storageClass
+    if [ "${MONITORING_STORAGE_CLASS_NAME}" != "" ]; then
+        cat << EOF >> ${HELM_CHART_DIR}/values.yaml
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: ${MONITORING_STORAGE_CLASS_NAME}
+            accessModes: ["ReadWriteMany"]
+            resources:
+              requests:
+                storage: ${MONITORING_RETENTION_SIZE}Gi
+EOF
+    fi #END PERSISTENT STORAGE CONFIG
 
     #######################
     # Set up definitions for ingress objects
@@ -225,17 +248,17 @@ EOF
         :
     elif [ "${INGRESS_CONTROLLER}" == "traefik" ]; then
         cat << EOF >> ${HELM_CHART_DIR}/values.yaml
-   additionalServiceMonitors:
-   - name: prometheus-traefik-metrics
-     selector:
-       matchLabels:
-         k8s-app: traefik
-     namespaceSelector:
-       matchNames:
-       - kube-system
-     endpoints:
-     - path: /metrics
-       port: metrics
+    additionalServiceMonitors:
+    - name: prometheus-traefik-metrics
+      selector:
+        matchLabels:
+          k8s-app: traefik
+      namespaceSelector:
+        matchNames:
+        - kube-system
+      endpoints:
+      - path: /metrics
+        port: metrics
 EOF
     fi #END INGRESS
 
