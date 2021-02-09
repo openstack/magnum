@@ -726,6 +726,23 @@ parameters:
     description: The kubernetes storage class name to use for the prometheus pvc.
     default: ""
 
+  monitoring_ingress_enabled:
+    type: boolean
+    description: Enable/disable configuration of ingresses for the monitoring services.
+    default: false
+
+  cluster_basic_auth_secret:
+    type: string
+    description: >
+      The kubernetes secret name to use for the proxy basic auth username and password.
+    default: ""
+
+  cluster_root_domain_name:
+    type: string
+    description: >
+      The root domain name to use for the cluster automatically set up applications.
+    default: "localhost"
+
   prometheus_operator_chart_tag:
     type: string
     description: The stable/prometheus-operator chart version to use.
@@ -1282,6 +1299,9 @@ resources:
           monitoring_retention_size: {get_param: monitoring_retention_size}
           monitoring_interval_seconds: {get_param: monitoring_interval_seconds}
           monitoring_storage_class_name: {get_param: monitoring_storage_class_name}
+          monitoring_ingress_enabled: {get_param: monitoring_ingress_enabled}
+          cluster_basic_auth_secret: {get_param: cluster_basic_auth_secret}
+          cluster_root_domain_name: {get_param: cluster_root_domain_name}
           prometheus_operator_chart_tag: {get_param: prometheus_operator_chart_tag}
           prometheus_adapter_enabled: {get_param: prometheus_adapter_enabled}
           prometheus_adapter_chart_tag: {get_param: prometheus_adapter_chart_tag}

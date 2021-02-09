@@ -31,6 +31,48 @@ EOF
         APP_GRAFANA_PERSISTENT_STORAGE="true"
     fi
 
+    # Create services for grafana/prometheus/alermanager
+    APP_INGRESS_PATH_APPEND=""
+    APP_INGRESS_ANNOTATIONS=""
+    APP_INGRESS_ROUTE_ANNOTATIONS=""
+    APP_INGRESS_BASIC_AUTH_ANNOTATIONS=""
+    if [ "${INGRESS_CONTROLLER}" == "nginx" ]; then
+        APP_INGRESS_PATH_APPEND="(/|$)(.*)"
+        APP_INGRESS_ANNOTATIONS=$(cat << EOF
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+EOF
+        )
+        APP_INGRESS_ROUTE_ANNOTATIONS=$(cat << 'EOF'
+        nginx.ingress.kubernetes.io/rewrite-target: /$2
+EOF
+        )
+        if [ "${CLUSTER_BASIC_AUTH_SECRET}" != "" ]; then
+            APP_INGRESS_BASIC_AUTH_ANNOTATIONS=$(cat << EOF
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: ${CLUSTER_BASIC_AUTH_SECRET}
+EOF
+            )
+        fi #END BASIC AUTH
+    elif [ "${INGRESS_CONTROLLER}" == "traefik" ]; then
+        APP_INGRESS_ANNOTATIONS=$(cat << EOF
+        traefik.ingress.kubernetes.io/frontend-entry-points: https
+        traefik.ingress.kubernetes.io/protocol: http
+EOF
+        )
+        APP_INGRESS_ROUTE_ANNOTATIONS=$(cat << EOF
+        traefik.ingress.kubernetes.io/rule-type: PathPrefixStrip
+EOF
+        )
+        if [ "${CLUSTER_BASIC_AUTH_SECRET}" != "" ]; then
+            APP_INGRESS_BASIC_AUTH_ANNOTATIONS=$(cat << EOF
+        ingress.kubernetes.io/auth-type: basic
+        ingress.kubernetes.io/auth-secret: ${CLUSTER_BASIC_AUTH_SECRET}
+EOF
+            )
+        fi #END BASIC AUTH
+    fi
+
     # Validate if communication node <-> master is secure or insecure
     PROTOCOL="https"
     INSECURE_SKIP_VERIFY="False"
@@ -54,17 +96,36 @@ prometheus-operator:
       etcd: false
 
   alertmanager:
+    ingress:
+      enabled: ${MONITORING_INGRESS_ENABLED}
+      annotations:
+        kubernetes.io/ingress.class: ${INGRESS_CONTROLLER}
+${APP_INGRESS_ANNOTATIONS}
+${APP_INGRESS_ROUTE_ANNOTATIONS}
+${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
+      ## Hosts must be provided if Ingress is enabled.
+      hosts:
+      - ${CLUSTER_ROOT_DOMAIN_NAME}
+      paths:
+      - /alertmanager${APP_INGRESS_PATH_APPEND}
+      ## TLS configuration for Alertmanager Ingress
+      ## Secret must be manually created in the namespace
+      tls: []
+      # - secretName: alertmanager-general-tls
+      #   hosts:
+      #   - alertmanager.example.com
     alertmanagerSpec:
       image:
         repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}alertmanager
-      # # Needs testing
+      logFormat: json
+      externalUrl: https://${CLUSTER_ROOT_DOMAIN_NAME}/alertmanager
+      # routePrefix: /alertmanager
       # resources:
       #   requests:
       #     cpu: 100m
       #     memory: 256Mi
       priorityClassName: "system-cluster-critical"
 
-  # Dashboard
   grafana:
     image:
       repository: ${CONTAINER_INFRA_PREFIX:-grafana/}grafana
@@ -76,10 +137,46 @@ prometheus-operator:
         cpu: 100m
         memory: 128Mi
     adminPassword: ${GRAFANA_ADMIN_PASSWD}
+    ingress:
+      enabled: ${MONITORING_INGRESS_ENABLED}
+      annotations:
+        kubernetes.io/ingress.class: ${INGRESS_CONTROLLER}
+${APP_INGRESS_ANNOTATIONS}
+      ## Hostnames.
+      ## Must be provided if Ingress is enable.
+      hosts:
+      - ${CLUSTER_ROOT_DOMAIN_NAME}
+      path: /grafana${APP_INGRESS_PATH_APPEND}
+      ## TLS configuration for grafana Ingress
+      ## Secret must be manually created in the namespace
+      tls: []
+      # - secretName: grafana-general-tls
+      #   hosts:
+      #   - grafana.example.com
     persistence:
       enabled: ${APP_GRAFANA_PERSISTENT_STORAGE}
       storageClassName: ${MONITORING_STORAGE_CLASS_NAME}
       size: 1Gi
+    grafana.ini:
+      server:
+        domain: ${CLUSTER_ROOT_DOMAIN_NAME}
+        root_url: https://${CLUSTER_ROOT_DOMAIN_NAME}/grafana
+        serve_from_sub_path: true
+      paths:
+        data: /var/lib/grafana/data
+        logs: /var/log/grafana
+        plugins: /var/lib/grafana/plugins
+        provisioning: /etc/grafana/provisioning
+      analytics:
+        check_for_updates: true
+      log:
+        mode: console
+      log.console:
+        format: json
+      grafana_net:
+        url: https://grafana.net
+    plugins:
+    - grafana-piechart-panel
 
   kubeApiServer:
     tlsConfig:
@@ -196,6 +293,7 @@ prometheus-operator:
     # requests:
     #   cpu: 5m
     #   memory: 10Mi
+    logFormat: json
     image:
       repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-operator
     configmapReloadImage:
@@ -206,6 +304,32 @@ prometheus-operator:
       repository: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}hyperkube
 
   prometheus:
+    ingress:
+      enabled: ${MONITORING_INGRESS_ENABLED}
+      annotations:
+        kubernetes.io/ingress.class: ${INGRESS_CONTROLLER}
+${APP_INGRESS_ANNOTATIONS}
+${APP_INGRESS_ROUTE_ANNOTATIONS}
+${APP_INGRESS_BASIC_AUTH_ANNOTATIONS}
+      ## Hostnames.
+      ## Must be provided if Ingress is enabled.
+      hosts:
+      - ${CLUSTER_ROOT_DOMAIN_NAME}
+      paths:
+      - /prometheus${APP_INGRESS_PATH_APPEND}
+      ## TLS configuration for Prometheus Ingress
+      ## Secret must be manually created in the namespace
+      tls: []
+        # - secretName: prometheus-general-tls
+        #   hosts:
+        #     - prometheus.example.com
+    serviceMonitor:
+      ## scheme: HTTP scheme to use for scraping. Can be used with tlsConfig for example if using istio mTLS.
+      scheme: ""
+      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+      ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+      tlsConfig: {}
+      bearerTokenFile:
     prometheusSpec:
       scrapeInterval: ${MONITORING_INTERVAL_SECONDS}s
       scrapeInterval: 30s
@@ -215,6 +339,7 @@ prometheus-operator:
       retention: 14d
       externalLabels:
         cluster_uuid: ${CLUSTER_UUID}
+      externalUrl: https://${CLUSTER_ROOT_DOMAIN_NAME}/prometheus
       ## Secrets is a list of Secrets in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
       ## The Secrets are mounted into /etc/prometheus/secrets/. Secrets changes after initial creation of a Prometheus object are not
       ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
@@ -226,6 +351,8 @@ prometheus-operator:
       # - kube-proxy-manager-certificates
       retention: ${MONITORING_RETENTION_DAYS}d
       retentionSize: ${MONITORING_RETENTION_SIZE_GB}GB
+      logFormat: json
+      #routePrefix: /prometheus
       resources:
         requests:
           cpu: ${PROMETHEUS_SERVER_CPU}m

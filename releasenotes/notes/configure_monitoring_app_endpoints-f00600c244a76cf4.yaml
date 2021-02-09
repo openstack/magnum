@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    Added monitoring_ingress_enabled magnum label to set up ingress with
+    path based routing for all the configured services
+    {alertmanager,grafana,prometheus}. When using this,
+    cluster_root_domain_name magnum label must be used to setup base path
+    where this services are available.
+    Added cluster_basic_auth_secret magnum label to configure basic auth
+    on unprotected services {alertmanager and  prometheus}. This is only
+    in effect when app access is routed by ingress.
+upgrade:
+  - |
+    Configured {alertmanager,grafana,prometheus} services logFormat to
+    json to enable easier machine log parsing.

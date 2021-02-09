@@ -328,6 +328,13 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `monitoring_interval_seconds`_        | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `monitoring_ingress_enabled`_         | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `cluster_basic_auth_secret`_          | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `cluster_root_domain_name`_           | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `prometheus_operator_chart_tag`_      | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `prometheus_adapter_enabled`_         | - true             | true          |
@@ -1504,6 +1511,23 @@ _`monitoring_storage_class_name`
   One for the prometheus server which size is set by
   monitoring_retention_size and one for grafana which is fixed at 1Gi.
   Default: ""
+
+_`monitoring_ingress_enabled`
+  Enable configuration of ingresses for the enabled monitoring services
+  {alertmanager,grafana,prometheus}.
+  Default: false
+
+_`cluster_basic_auth_secret`
+  The kubernetes secret to use for the proxy basic auth username and password
+  for the unprotected services {alertmanager,prometheus}. Basic auth is only
+  set up if this file is specified.
+  The secret must be in the same namespace as the used proxy (kube-system).
+  Default: ""
+
+_`cluster_root_domain_name`
+  The root domain name to use for the cluster automatically set up
+  applications.
+  Default: "localhost"
 
 _`prometheus_adapter_enabled`
   Enable installation of cluster custom metrics provided by the
