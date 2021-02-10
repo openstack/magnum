@@ -108,7 +108,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ========== =====================
   COE        os_distro
   ========== =====================
-  Kubernetes fedora-atomic, coreos
+  Kubernetes fedora-coreos
   Swarm      fedora-atomic
   Mesos      ubuntu
   ========== =====================
@@ -877,9 +877,7 @@ COE and distro pairs:
 +------------+---------------+
 | COE        |  distro       |
 +============+===============+
-| Kubernetes | Fedora Atomic |
-+------------+---------------+
-| Kubernetes | CoreOS        |
+| Kubernetes | Fedora CoreOS |
 +------------+---------------+
 | Swarm      | Fedora Atomic |
 +------------+---------------+
@@ -1107,7 +1105,7 @@ When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
 
     openstack coe cluster template create k8s-cluster-template \
-                               --image fedora-atomic-latest \
+                               --image fedora-coreos-latest \
                                --keypair testkey \
                                --external-network public \
                                --dns-nameserver 8.8.8.8 \
@@ -1162,11 +1160,9 @@ Storage driver (docker-storage-driver)
 Image (image)
   Specified in the ClusterTemplate to indicate the image to boot the servers.
   The image binary is loaded in Glance with the attribute
-  'os_distro = fedora-atomic'.
-  Current supported images are Fedora Atomic (download from `Fedora
-  <https://dl.fedoraproject.org/pub/alt/atomic/stable/Fedora-Atomic-27-20180419.0/CloudImages/x86_64/images/>`__ )
-  and CoreOS (download from `CoreOS
-  <http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_ )
+  'os_distro = fedora-coreos'.
+  Current supported images is Fedora CoreOS (download from `Fedora CoreOS
+  <https://getfedora.org/en/coreos/download?tab=cloud_operators>`_ )
 
 TLS (tls-disabled)
   Transport Layer Security is enabled by default, so you need a key and
@@ -1285,9 +1281,7 @@ _`container_infra_prefix`
 
 _`kube_tag`
   This label allows users to select a specific Kubernetes release based on its
-  container tag for `Fedora Atomic
-  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_ or
-  `Fedora CoreOS and Fedora Atomic (with use_podman=true label)
+  container tag for `Fedora CoreOS image
   <https://github.com/kubernetes/kubernetes/releases>`_. If unset, the current
   Magnum version's default Kubernetes release is installed. `Take a look at
   the Wiki for a compatibility matrix between Kubernetes and Magnum Releases
@@ -2213,7 +2207,7 @@ Magnum, therefore it does not need to be specified via a parameter::
     openstack coe cluster template create secure-kubernetes \
                                --keypair default \
                                --external-network public \
-                               --image fedora-atomic-latest \
+                               --image fedora-coreos-latest \
                                --dns-nameserver 8.8.8.8 \
                                --flavor m1.small \
                                --docker-volume-size 3 \
@@ -2237,8 +2231,8 @@ Magnum, therefore it does not need to be specified via a parameter::
     | docker_volume_size    | 5                                    |
     | server_type           | vm                                   |
     | external_network_id   | public                               |
-    | cluster_distro        | fedora-atomic                        |
-    | image_id              | fedora-atomic-latest                 |
+    | cluster_distro        | fedora-coreos                        |
+    | image_id              | fedora-coreos-latest                 |
     | volume_driver         | None                                 |
     | registry_enabled      | False                                |
     | docker_storage_driver | devicemapper                         |
@@ -3231,83 +3225,24 @@ configuration utility:
 
 Additional software are described as follows.
 
-Kubernetes on Fedora Atomic
+Kubernetes on Fedora CoreOS
 ---------------------------
 
-This image can be downloaded from the `public Atomic site
-<https://dl.fedoraproject.org/pub/alt/atomic/stable/>`_
-or can be built locally using diskimagebuilder.  Details can be found in the
-``fedora-atomic element``. The image currently has the following OS/software:
-
-+--------------------------+-----------+
-| OS/software              | version   |
-+==========================+===========+
-| Fedora                   | 27        |
-+--------------------------+-----------+
-| Docker                   | 1.13.1    |
-+--------------------------+-----------+
-| Kubernetes               | 1.11.5    |
-+--------------------------+-----------+
-| etcd                     | v3.2.7    |
-+--------------------------+-----------+
-| Flannel                  | v0.9.0    |
-+--------------------------+-----------+
-| Cloud Provider OpenStack | v0.2.0    |
-+--------------------------+-----------+
-
-The following software are managed as systemd services:
-
-- kube-apiserver
-- kubelet
-- etcd
-- flannel (if specified as network driver)
-- docker
-
-The following software are managed as Docker containers:
-
-- kube-controller-manager
-- kube-scheduler
-- kube-proxy
-
-The login for this image is *fedora*.
-
-Kubernetes on CoreOS
---------------------
-
-CoreOS publishes a `stock image
-<http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_
+Fedoara CoreOS publishes a `stock OpenStack image
+<https://getfedora.org/en/coreos/download?tab=cloud_operators&stream=stable>`_
 that is being used to deploy Kubernetes.
-This image has the following OS/software:
-
-+-------------+-----------+
-| OS/software | version   |
-+=============+===========+
-| CoreOS      | 4.3.6     |
-+-------------+-----------+
-| Docker      | 1.9.1     |
-+-------------+-----------+
-| Kubernetes  | 1.0.6     |
-+-------------+-----------+
-| etcd        | 2.2.3     |
-+-------------+-----------+
-| Flannel     | 0.5.5     |
-+-------------+-----------+
 
 The following software are managed as systemd services:
-
-- kubelet
-- flannel (if specified as network driver)
-- docker
-- etcd
-
-The following software are managed as Docker containers:
 
 - kube-apiserver
 - kube-controller-manager
 - kube-scheduler
 - kube-proxy
+- kubelet
+- docker
+- etcd
 
-The login for this image is *core*.
+The login user for this image is *core*.
 
 Kubernetes on Ironic
 --------------------
@@ -3322,8 +3257,10 @@ provided when this driver has been fully tested.
 Swarm on Fedora Atomic
 ----------------------
 
-This image is the same as the image for `Kubernetes on Fedora Atomic`_
-described above.  The login for this image is *fedora*.
+This image can be downloaded from the `public Atomic site
+<https://dl.fedoraproject.org/pub/alt/atomic/stable/>`_
+or can be built locally using diskimagebuilder.
+The login for this image is *fedora*.
 
 Mesos on Ubuntu
 ---------------
