@@ -331,6 +331,7 @@ class FedoraKubernetesDriver(KubernetesDriver):
             LOG.debug(("Cluster template %s does not contain a "
                        "valid kube_tag"), cluster_template.name)
 
+        # If both keys are present, only ostree_commit is chosen.
         for ostree_tag in ["ostree_commit", "ostree_remote"]:
             if ostree_tag not in cluster_template.labels:
                 continue
@@ -339,9 +340,10 @@ class FedoraKubernetesDriver(KubernetesDriver):
                     ostree_tag: cluster_template.labels[ostree_tag]
                 }
                 heat_params.update(ostree_param)
+                break
             except KeyError:
                 LOG.debug("Cluster template %s does not define %s",
-                          (cluster_template.name, ostree_tag))
+                          cluster_template.name, ostree_tag)
 
         upgrade_labels = ['kube_tag', 'ostree_remote', 'ostree_commit']
         if not any([u in heat_params.keys() for u in upgrade_labels]):
