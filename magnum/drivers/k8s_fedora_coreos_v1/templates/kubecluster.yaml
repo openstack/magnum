@@ -1339,7 +1339,7 @@ resources:
                 template: {get_file: ../../common/templates/kubernetes/helm/prometheus-operator.sh}
                 params:
                   "${GRAFANA_ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
-                  "${KUBE_MASTERS_PRIVATE}": {get_attr: [kube_masters, kube_master_external_ip]}
+                  "${KUBE_MASTERS_PRIVATE}": {get_attr: [kube_masters, kube_master_ip]}
             - get_file: ../../common/templates/kubernetes/helm/prometheus-adapter.sh
             - get_file: ../../common/templates/kubernetes/helm/ingress-nginx.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
