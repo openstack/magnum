@@ -67,6 +67,21 @@
         "group": {
           "name": "root"
         },
+        "path": "/etc/containers/__REGISTRIES_CONF__",
+        "user": {
+          "name": "root"
+        },
+        "append": [
+          {
+            "source": "data:,%5B%5Bregistry%5D%5D%0Alocation%20%3D%20%22__INSECURE_REGISTRY_URL__%22%0Ainsecure%20%3D%20true%0A"
+          }
+        ],
+        "mode": 420
+      },
+      {
+        "group": {
+          "name": "root"
+        },
         "overwrite": true,
         "path": "/etc/hostname",
         "user": {
