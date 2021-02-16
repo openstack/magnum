@@ -81,10 +81,21 @@ class ActionsController(base.Controller):
         'upgrade': ['POST']
     }
 
-    @base.Controller.api_version("1.7")
+    @base.Controller.api_version("1.7", "1.9")
     @expose.expose(ClusterID, types.uuid_or_name,
                    body=ClusterResizeRequest, status_code=202)
     def resize(self, cluster_ident, cluster_resize_req):
+        if cluster_resize_req.node_count == 0:
+            raise exception.ZeroNodeCountNotSupported()
+        return self._resize(cluster_ident, cluster_resize_req)
+
+    @base.Controller.api_version("1.10")  # noqa
+    @expose.expose(ClusterID, types.uuid_or_name,
+                   body=ClusterResizeRequest, status_code=202)
+    def resize(self, cluster_ident, cluster_resize_req):  # noqa
+        return self._resize(cluster_ident, cluster_resize_req)
+
+    def _resize(self, cluster_ident, cluster_resize_req):
         """Resize a cluster.
 
         :param cluster_ident: UUID of a cluster or logical name of the cluster.
@@ -126,10 +137,19 @@ class ActionsController(base.Controller):
             nodegroup)
         return ClusterID(cluster.uuid)
 
-    @base.Controller.api_version("1.8")
+    @base.Controller.api_version("1.7", "1.7")
     @expose.expose(ClusterID, types.uuid_or_name,
                    body=ClusterUpgradeRequest, status_code=202)
     def upgrade(self, cluster_ident, cluster_upgrade_req):
+        raise exception.ClusterUpgradeNotSupported()
+
+    @base.Controller.api_version("1.8")  # noqa
+    @expose.expose(ClusterID, types.uuid_or_name,
+                   body=ClusterUpgradeRequest, status_code=202)
+    def upgrade(self, cluster_ident, cluster_upgrade_req):  # noqa
+        return self._upgrade(cluster_ident, cluster_upgrade_req)
+
+    def _upgrade(self, cluster_ident, cluster_upgrade_req):
         """Upgrade a cluster.
 
         :param cluster_ident: UUID of a cluster or logical name of the cluster.
