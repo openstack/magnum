@@ -984,12 +984,31 @@ parameters:
     description: >
       Post install manifest URL used to setup some cloud provider/vendor
       specific configs
-    default: ""
+    default: ''
 
   master_lb_allowed_cidrs:
     type: comma_delimited_list
     description: The allowed CIDR list for master load balancer
     default: []
+
+  extra_network:
+    type: string
+    description: >
+      Additional network to bind nodes to
+    default: ''
+
+  extra_subnet:
+    type: string
+    description: >
+      Subnet for additional network
+    default: ''
+
+  extra_security_group:
+    type: string
+    description: >
+      Additional security group name
+    default: ''
+
 
 resources:
 
@@ -1373,6 +1392,9 @@ resources:
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
           post_install_manifest_url: {get_param: post_install_manifest_url}
           metrics_scraper_tag: {get_param: metrics_scraper_tag}
+          extra_network: {get_param: extra_network}
+          extra_subnet: {get_param: extra_subnet}
+          extra_security_group: {get_param: extra_security_group}
 
   kube_cluster_config:
     condition: create_cluster_resources
@@ -1552,6 +1574,10 @@ resources:
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
           kube_service_account_key: {get_param: kube_service_account_key}
           kube_service_account_private_key: {get_param: kube_service_account_private_key}
+          extra_network: {get_param: extra_network}
+          extra_subnet: {get_param: extra_subnet}
+          extra_security_group: {get_param: extra_security_group}
+
 outputs:
 
   api_address:

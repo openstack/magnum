@@ -502,6 +502,12 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `fixed_subnet_cidr`_                  | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
+| `extra_network`_                      | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `extra_subnet`_                       | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `extra_security_group`_               | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 .. _cluster:
 
@@ -1635,6 +1641,22 @@ _`fixed_subnet_cidr`
   specified an existing fixed_subnet during cluster creation.
   Ussuri default: 10.0.0.0/24
 
+_`extra_network`
+  Optional additional network name or UUID to add to cluster nodes.
+  When not specified, additional networks are not added. Optionally specify
+  'extra_subnet' if you wish to use a specific subnet on the network.
+  Default: ""
+
+_`extra_subnet`
+  Optional additional subnet name or UUID to add to cluster nodes.
+  Only used when 'extra_network' is defined.
+  Default: ""
+
+_`extra_security_group`
+  Optional additional group name or UUID to add to network port.
+  Only used when 'extra_network' is defined. 
+  Default: cluster node default security group.
+
 External load balancer for services
 -----------------------------------
 
@@ -2722,7 +2744,6 @@ _`calico_tag`
   Ussuri default: v3.13.1
   Victoria default: v3.13.1
   Wallaby default: v3.13.1
-
 
 Besides, the Calico network driver needs kube_tag with v1.9.3 or later, because
 Calico needs extra mounts for the kubelet container. See `commit
