@@ -25,3 +25,4 @@ cluster_autoscaler_versions:
   - version: 1.17.3
   - version: 1.18.2
   - version: 1.19.0
+  - version: 1.20.0
