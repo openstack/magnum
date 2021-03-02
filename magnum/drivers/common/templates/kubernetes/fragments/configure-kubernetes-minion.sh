@@ -264,11 +264,11 @@ if [ -f /etc/sysconfig/docker ] ; then
     sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
     # json-file is required for conformance.
     # https://docs.docker.com/config/containers/logging/json-file/
-    sed -i -E 's/^OPTIONS=("|'"'"')/OPTIONS=\1--log-driver=json-file --log-opt max-size=10m --log-opt max-file=5 /' /etc/sysconfig/docker
-
+    DOCKER_OPTIONS="--log-driver=json-file --log-opt max-size=10m --log-opt max-file=5"
     if [ -n "${INSECURE_REGISTRY_URL}" ]; then
-        echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
+        DOCKER_OPTIONS="${DOCKER_OPTIONS} --insecure-registry ${INSECURE_REGISTRY_URL}"
     fi
+    sed -i -E 's/^OPTIONS=("|'"'"')/OPTIONS=\1'"${DOCKER_OPTIONS}"' /' /etc/sysconfig/docker
 fi
 
 KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}pause:3.1"

@@ -708,6 +708,14 @@ resources:
                   __HTTPS_PROXY__: {get_param: https_proxy}
                   __NO_PROXY__: {get_param: no_proxy}
                   __SELINUX_MODE__: {get_param: selinux_mode}
+                  __INSECURE_REGISTRY_URL__: {get_param: insecure_registry_url}
+                  __REGISTRIES_CONF__:
+                    if:
+                      - equals:
+                        - get_param: insecure_registry_url
+                        - ""
+                      - ".registries.conf"
+                      - "registries.conf"
 
   master_config:
     type: OS::Heat::SoftwareConfig
