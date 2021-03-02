@@ -169,7 +169,7 @@ EOF
 
 writeFile $INGRESS_TRAEFIK_MANIFEST "$INGRESS_TRAEFIK_MANIFEST_CONTENT"
 
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+until  [ "ok" = "$(kubectl get --raw='/healthz')" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5
