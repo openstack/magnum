@@ -101,7 +101,7 @@ def get_test_cluster(**kw):
         'fixed_network': kw.get('fixed_network', None),
         'fixed_subnet': kw.get('fixed_subnet', None),
         'floating_ip_enabled': kw.get('floating_ip_enabled', True),
-        'master_lb_enabled': kw.get('master_lb_enabled', False),
+        'master_lb_enabled': kw.get('master_lb_enabled', True),
     }
 
     if kw.pop('for_api_use', False):
