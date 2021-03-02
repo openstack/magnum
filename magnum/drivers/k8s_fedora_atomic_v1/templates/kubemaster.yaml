@@ -837,6 +837,7 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
                 params:
