@@ -5,7 +5,6 @@ set +x
 set -x
 
 $ssh_cmd mkdir -p /etc/kubernetes/
-$ssh_cmd cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
 if [ -n "${TRUST_ID}" ]; then
     KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/cloud-config
