@@ -152,11 +152,6 @@ def get_client(target, version_cap=None, serializer=None, timeout=None):
 def get_server(target, endpoints, serializer=None):
     assert TRANSPORT is not None
     access_policy = dispatcher.DefaultRPCAccessPolicy
-    if profiler:
-        serializer = ProfilerRequestContextSerializer(serializer)
-    else:
-        serializer = RequestContextSerializer(serializer)
-
     return messaging.get_rpc_server(TRANSPORT,
                                     target,
                                     endpoints,
