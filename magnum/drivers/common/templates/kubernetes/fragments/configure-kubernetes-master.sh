@@ -46,6 +46,7 @@ elif [ "$NETWORK_DRIVER" = "flannel" ]; then
 fi
 
 
+KUBE_MASTER_URI="https://127.0.0.1:$KUBE_API_PORT"
 mkdir -p /srv/magnum/kubernetes/
 cat > /etc/kubernetes/config <<EOF
 KUBE_LOGTOSTDERR="--logtostderr=true"
@@ -275,16 +276,16 @@ cat > /etc/kubernetes/proxy << EOF
 KUBE_PROXY_ARGS="${KUBE_PROXY_ARGS} ${KUBEPROXY_OPTIONS}"
 EOF
 
-cat > ${PROXY_KUBECONFIG} << EOF
+cat << EOF >> ${PROXY_KUBECONFIG}
 apiVersion: v1
 clusters:
 - cluster:
     certificate-authority: ${CERT_DIR}/ca.crt
-    server: http://127.0.0.1:8080
-  name: kubernetes
+    server: ${KUBE_MASTER_URI}
+  name: ${CLUSTER_UUID}
 contexts:
 - context:
-    cluster: kubernetes
+    cluster: ${CLUSTER_UUID}
     user: kube-proxy
   name: default
 current-context: default
@@ -294,6 +295,8 @@ users:
 - name: kube-proxy
   user:
     as-user-extra: {}
+    client-certificate: ${CERT_DIR}/proxy.crt
+    client-key: ${CERT_DIR}/proxy.key
 EOF
 
 sed -i '
@@ -376,7 +379,7 @@ apiVersion: v1
 clusters:
 - cluster:
     certificate-authority: ${CERT_DIR}/ca.crt
-    server: https://127.0.0.1:$KUBE_API_PORT
+    server: ${KUBE_MASTER_URI}
   name: ${CLUSTER_UUID}
 contexts:
 - context:
@@ -461,11 +464,11 @@ apiVersion: v1
 clusters:
 - cluster:
     certificate-authority: ${CERT_DIR}/ca.crt
-    server: http://127.0.0.1:8080
-  name: kubernetes
+    server: ${KUBE_MASTER_URI}
+  name: ${CLUSTER_UUID}
 contexts:
 - context:
-    cluster: kubernetes
+    cluster: ${CLUSTER_UUID}
     user: system:node:${INSTANCE_NAME}
   name: default
 current-context: default
@@ -475,8 +478,8 @@ users:
 - name: system:node:${INSTANCE_NAME}
   user:
     as-user-extra: {}
-    client-certificate: ${CERT_DIR}/server.crt
-    client-key: ${CERT_DIR}/server.key
+    client-certificate: ${CERT_DIR}/kubelet.crt
+    client-key: ${CERT_DIR}/kubelet.key
 EOF
 
 cat > /etc/kubernetes/get_require_kubeconfig.sh << EOF
