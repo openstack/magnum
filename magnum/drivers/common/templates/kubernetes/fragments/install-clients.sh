@@ -32,6 +32,7 @@ do
 done
 echo "INFO Installed kubectl."
 
-echo "PATH=/srv/magnum/bin:\$PATH" >> /etc/bashrc
+echo "export PATH=/srv/magnum/bin:\$PATH" >> /etc/bashrc
+export PATH=/srv/magnum/bin:$PATH
 
 printf "Finished running ${step}\n"
