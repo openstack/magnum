@@ -75,8 +75,8 @@ metadata:
 data:
   syncConfig: |
     role-mappings:
-      keystone-role: member
-      groups: []
+      - keystone-role: member
+        groups: []
 EOF
     }
 
