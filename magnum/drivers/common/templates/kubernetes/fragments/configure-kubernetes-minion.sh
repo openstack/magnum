@@ -57,7 +57,6 @@ mkdir -p /srv/magnum/kubernetes/
 cat > /etc/kubernetes/config <<EOF
 KUBE_LOGTOSTDERR="--logtostderr=true"
 KUBE_LOG_LEVEL="--v=3"
-KUBE_MASTER="--master=http://127.0.0.1:8080"
 EOF
 cat > /etc/kubernetes/kubelet <<EOF
 KUBELET_ARGS="--fail-swap-on=false"
