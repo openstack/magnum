@@ -169,54 +169,10 @@ EOF
 
 writeFile $INGRESS_TRAEFIK_MANIFEST "$INGRESS_TRAEFIK_MANIFEST_CONTENT"
 
-INGRESS_TRAEFIK_BIN="/srv/magnum/kubernetes/bin/ingress-traefik"
-INGRESS_TRAEFIK_SERVICE="/etc/systemd/system/ingress-traefik.service"
-
-# Binary for ingress traefik
-INGRESS_TRAEFIK_BIN_CONTENT='''#!/bin/sh
 until  [ "ok" = "$(kubectl get --raw='/healthz')" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5
 done
 
-# Check if all resources exist already before creating them
-kubectl -n kube-system get service ingress-traefik
-if [ "$?" != "0" ] && \
-        [ -f "'''${INGRESS_TRAEFIK_MANIFEST}'''" ]; then
-    kubectl create -f '''${INGRESS_TRAEFIK_MANIFEST}'''
-fi
-'''
-writeFile $INGRESS_TRAEFIK_BIN "$INGRESS_TRAEFIK_BIN_CONTENT"
-
-
-# Service for ingress traefik
-INGRESS_TRAEFIK_SERVICE_CONTENT='''[Unit]
-Requires=kube-apiserver.service
-
-[Service]
-User=root
-Group=root
-Type=simple
-Restart=on-failure
-EnvironmentFile=-/etc/kubernetes/config
-ExecStart=/bin/bash '''${INGRESS_TRAEFIK_BIN}'''
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-'''
-writeFile $INGRESS_TRAEFIK_SERVICE "$INGRESS_TRAEFIK_SERVICE_CONTENT"
-
-chown root:root ${INGRESS_TRAEFIK_BIN}
-chmod 0755 ${INGRESS_TRAEFIK_BIN}
-
-chown root:root ${INGRESS_TRAEFIK_SERVICE}
-chmod 0644 ${INGRESS_TRAEFIK_SERVICE}
-
-# Launch the ingress traefik service
-set -x
-ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
-$ssh_cmd systemctl daemon-reload
-$ssh_cmd systemctl enable ingress-traefik.service
-$ssh_cmd systemctl start --no-block ingress-traefik.service
+kubectl apply -f ${INGRESS_TRAEFIK_MANIFEST}
