@@ -1,5 +1,3 @@
-#!/bin/sh
-
 echo "START: write-heat-params"
 
 arch=$(uname -m)

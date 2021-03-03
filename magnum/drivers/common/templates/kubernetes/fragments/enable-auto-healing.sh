@@ -1,5 +1,3 @@
-#!/bin/sh
-
 step="enable-node-problem-detector"
 printf "Starting to run ${step}\n"
 
