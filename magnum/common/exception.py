@@ -441,6 +441,16 @@ class MasterNGResizeNotSupported(NotSupported):
     message = _("Resizing a master nodegroup is not supported.")
 
 
+class ZeroNodeCountNotSupported(NotSupported):
+    message = _("Resizing a nodegroup to zero is not supported in the "
+                "provided microversion.")
+
+
+class ClusterUpgradeNotSupported(NotSupported):
+    message = _("Cluster upgrade is not supported in the "
+                "provided microversion.")
+
+
 class NGResizeOutBounds(Invalid):
     message = _("Resizing %(nodegroup)s outside the allowed range: "
                 "min_node_count = %(min_nc)s, "

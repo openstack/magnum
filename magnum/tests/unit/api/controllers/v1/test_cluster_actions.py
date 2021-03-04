@@ -46,7 +46,7 @@ class TestClusterResize(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   {"node_count": new_node_count},
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"})
+                                           "container-infra 1.7"})
         self.assertEqual(202, response.status_code)
 
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
@@ -69,7 +69,7 @@ class TestClusterResize(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"})
+                                           "container-infra 1.9"})
         self.assertEqual(202, response.status_code)
 
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
@@ -89,7 +89,7 @@ class TestClusterResize(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.9"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)
 
@@ -106,7 +106,7 @@ class TestClusterResize(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.9"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)
 
@@ -123,9 +123,42 @@ class TestClusterResize(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.9"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)
+
+    def test_resize_with_zero_node_count_fail(self):
+        new_node_count = 0
+        nodegroup = self.cluster_obj.default_ng_worker
+        nodegroup.min_node_count = 0
+        nodegroup.save()
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.9"},
+                                  expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
+    def test_resize_with_zero_node_count(self):
+        new_node_count = 0
+        nodegroup = self.cluster_obj.default_ng_worker
+        nodegroup.min_node_count = 0
+        nodegroup.save()
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.10"})
+        self.assertEqual(202, response.status_code)
 
 
 class TestClusterUpgrade(api_base.FunctionalTest):
@@ -162,7 +195,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"})
+                                           "container-infra 1.8"})
         self.assertEqual(202, response.status_code)
 
     def test_upgrade_cluster_as_admin(self):
@@ -193,7 +226,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
             '/clusters/%s/actions/upgrade' %
             cluster_uuid,
             cluster_upgrade_req,
-            headers={"Openstack-Api-Version": "container-infra latest"})
+            headers={"Openstack-Api-Version": "container-infra 1.8"})
 
         self.assertEqual(202, response.status_int)
 
@@ -206,7 +239,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"})
+                                           "container-infra 1.9"})
         self.assertEqual(202, response.status_code)
 
     def test_upgrade_default_master(self):
@@ -218,7 +251,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"})
+                                           "container-infra 1.9"})
         self.assertEqual(202, response.status_code)
 
     def test_upgrade_non_default_ng(self):
@@ -230,7 +263,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"})
+                                           "container-infra 1.9"})
         self.assertEqual(202, response.status_code)
 
     def test_upgrade_cluster_not_found(self):
@@ -240,7 +273,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
         response = self.post_json('/clusters/not_there/actions/upgrade',
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.8"},
                                   expect_errors=True)
         self.assertEqual(404, response.status_code)
 
@@ -252,7 +285,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.8"},
                                   expect_errors=True)
         self.assertEqual(404, response.status_code)
 
@@ -265,7 +298,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.9"},
                                   expect_errors=True)
         self.assertEqual(404, response.status_code)
 
@@ -278,6 +311,6 @@ class TestClusterUpgrade(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_upgrade_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra latest"},
+                                           "container-infra 1.9"},
                                   expect_errors=True)
         self.assertEqual(409, response.status_code)

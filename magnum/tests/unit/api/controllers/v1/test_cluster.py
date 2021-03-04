@@ -511,6 +511,30 @@ class TestPatch(api_base.FunctionalTest):
             self.cluster_obj.health_status_reason, False)
         self.assertEqual(202, response.status_code)
 
+    def test_update_cluster_with_zero_node_count_fail(self):
+        node_count = 0
+        response = self.patch_json(
+            '/clusters/%s' % self.cluster_obj.uuid,
+            [{'path': '/node_count', 'value': node_count,
+              'op': 'replace'}],
+            headers={'OpenStack-API-Version': 'container-infra 1.9'},
+            expect_errors=True)
+
+        self.assertEqual(400, response.status_code)
+
+    def test_update_cluster_with_zero_node_count(self):
+        node_count = 0
+        response = self.patch_json(
+            '/clusters/%s' % self.cluster_obj.uuid,
+            [{'path': '/node_count', 'value': node_count,
+              'op': 'replace'}],
+            headers={'OpenStack-API-Version': 'container-infra 1.10'})
+
+        self.mock_cluster_update.assert_called_once_with(
+            mock.ANY, node_count, self.cluster_obj.health_status,
+            self.cluster_obj.health_status_reason, False)
+        self.assertEqual(202, response.status_code)
+
     def test_remove_ok(self):
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
         self.assertIsNotNone(response['name'])
@@ -678,10 +702,21 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
 
-    def test_create_cluster_with_node_count_zero(self):
+    def test_create_cluster_with_zero_node_count_fail(self):
         bdict = apiutils.cluster_post_data()
         bdict['node_count'] = 0
-        response = self.post_json('/clusters', bdict, expect_errors=True)
+        response = self.post_json('/clusters', bdict, expect_errors=True,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.9"})
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+
+    def test_create_cluster_with_zero_node_count(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['node_count'] = 0
+        response = self.post_json('/clusters', bdict,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.10"})
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
 
@@ -696,7 +731,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_with_no_node_count(self):
         bdict = apiutils.cluster_post_data()
         del bdict['node_count']
-        response = self.post_json('/clusters', bdict, expect_errors=True)
+        response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
 

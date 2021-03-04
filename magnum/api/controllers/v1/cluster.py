@@ -490,10 +490,23 @@ class ClustersController(base.Controller):
                     "one.") % cluster_limit
             raise exception.ResourceLimitExceeded(msg=msg)
 
+    @base.Controller.api_version("1.1", "1.9")
     @expose.expose(ClusterID, body=Cluster, status_code=202)
     @validation.enforce_cluster_type_supported()
     @validation.enforce_cluster_volume_storage_size()
     def post(self, cluster):
+        if cluster.node_count == 0:
+            raise exception.ZeroNodeCountNotSupported()
+        return self._post(cluster)
+
+    @base.Controller.api_version("1.10")  # noqa
+    @expose.expose(ClusterID, body=Cluster, status_code=202)
+    @validation.enforce_cluster_type_supported()
+    @validation.enforce_cluster_volume_storage_size()
+    def post(self, cluster):  # noqa
+        return self._post(cluster)
+
+    def _post(self, cluster):
         """Create a new cluster.
 
         :param cluster: a cluster within the request body.
@@ -585,12 +598,36 @@ class ClustersController(base.Controller):
         (cluster, node_count,
          health_status,
          health_status_reason) = self._patch(cluster_ident, patch)
+        if node_count == 0:
+            raise exception.ZeroNodeCountNotSupported()
         pecan.request.rpcapi.cluster_update_async(cluster, node_count,
                                                   health_status,
                                                   health_status_reason)
         return ClusterID(cluster.uuid)
 
-    @base.Controller.api_version("1.3")  # noqa
+    @base.Controller.api_version("1.3", "1.9")  # noqa
+    @wsme.validate(types.uuid, bool, [ClusterPatchType])
+    @expose.expose(ClusterID, types.uuid_or_name, types.boolean,
+                   body=[ClusterPatchType], status_code=202)
+    def patch(self, cluster_ident, rollback=False, patch=None):  # noqa
+        """Update an existing Cluster.
+
+        :param cluster_ident: UUID or logical name of a cluster.
+        :param rollback: whether to rollback cluster on update failure.
+        :param patch: a json PATCH document to apply to this cluster.
+        """
+        (cluster, node_count,
+         health_status,
+         health_status_reason) = self._patch(cluster_ident, patch)
+        if node_count == 0:
+            raise exception.ZeroNodeCountNotSupported()
+        pecan.request.rpcapi.cluster_update_async(cluster, node_count,
+                                                  health_status,
+                                                  health_status_reason,
+                                                  rollback)
+        return ClusterID(cluster.uuid)
+
+    @base.Controller.api_version("1.10")  # noqa
     @wsme.validate(types.uuid, bool, [ClusterPatchType])
     @expose.expose(ClusterID, types.uuid_or_name, types.boolean,
                    body=[ClusterPatchType], status_code=202)
