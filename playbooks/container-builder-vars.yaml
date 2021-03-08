@@ -7,8 +7,7 @@ magnum_repository: openstackmagnum
 # image is re-built and pushed under the same tag every time.
 heat_container_agent_images:
   - tag: victoria-stable-1
-  - tag: wallaby-dev
-    dev: true
+  - tag: wallaby-stable-1
 
 kubernetes_versions:
   - version: v1.15.12
