@@ -16,7 +16,6 @@
 
 import oslo_messaging as messaging
 from oslo_service import service
-from oslo_utils import importutils
 
 from magnum.common import profiler
 from magnum.common import rpc
@@ -26,30 +25,19 @@ from magnum.service import periodic
 from magnum.servicegroup import magnum_service_periodic as servicegroup
 
 
-osprofiler = importutils.try_import("osprofiler.profiler")
-
 CONF = magnum.conf.CONF
-
-
-def _init_serializer():
-    serializer = rpc.RequestContextSerializer(
-        objects_base.MagnumObjectSerializer())
-    if osprofiler:
-        serializer = rpc.ProfilerRequestContextSerializer(serializer)
-    else:
-        serializer = rpc.RequestContextSerializer(serializer)
-    return serializer
 
 
 class Service(service.Service):
 
     def __init__(self, topic, server, handlers, binary):
         super(Service, self).__init__()
-        serializer = _init_serializer()
         # TODO(asalkeld) add support for version='x.y'
         target = messaging.Target(topic=topic, server=server)
-        self._server = rpc.get_server(target, handlers,
-                                      serializer=serializer)
+        self._server = rpc.get_server(
+            target, handlers,
+            serializer=objects_base.MagnumObjectSerializer()
+        )
 
         self.binary = binary
         profiler.setup(binary, CONF.host)
@@ -77,14 +65,15 @@ class Service(service.Service):
 class API(object):
     def __init__(self, context=None, topic=None, server=None,
                  timeout=None):
-        serializer = _init_serializer()
         self._context = context
         if topic is None:
             topic = ''
         target = messaging.Target(topic=topic, server=server)
-        self._client = rpc.get_client(target,
-                                      serializer=serializer,
-                                      timeout=timeout)
+        self._client = rpc.get_client(
+            target,
+            serializer=objects_base.MagnumObjectSerializer(),
+            timeout=timeout
+        )
 
     def _call(self, method, *args, **kwargs):
         return self._client.call(self._context, method, *args, **kwargs)

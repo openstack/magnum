@@ -142,6 +142,10 @@ def get_transport_url(url_str=None):
 
 def get_client(target, version_cap=None, serializer=None, timeout=None):
     assert TRANSPORT is not None
+    if profiler:
+        serializer = ProfilerRequestContextSerializer(serializer)
+    else:
+        serializer = RequestContextSerializer(serializer)
     return messaging.RPCClient(TRANSPORT,
                                target,
                                version_cap=version_cap,
@@ -151,6 +155,10 @@ def get_client(target, version_cap=None, serializer=None, timeout=None):
 
 def get_server(target, endpoints, serializer=None):
     assert TRANSPORT is not None
+    if profiler:
+        serializer = ProfilerRequestContextSerializer(serializer)
+    else:
+        serializer = RequestContextSerializer(serializer)
     access_policy = dispatcher.DefaultRPCAccessPolicy
     return messaging.get_rpc_server(TRANSPORT,
                                     target,
