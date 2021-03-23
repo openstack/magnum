@@ -1610,13 +1610,16 @@ _`containerd_version`
   The containerd version to use as released in
   https://github.com/containerd/containerd/releases and
   https://storage.googleapis.com/cri-containerd-release/
+  Wallaby default: 1.4.4
+  Victoria default: 1.4.4
+  Ussuri default: 1.2.8
 
 _`containerd_tarball_url`
   Url with the tarball of containerd's binaries.
 
 _`containerd_tarball_sha256`
   sha256 of the tarball fetched with containerd_tarball_url or from
-  https://storage.googleapis.com/cri-containerd-release/.
+  https://github.com/containerd/containerd/releases.
 
 _`kube_dashboard_version`
   Default version of Kubernetes dashboard.
