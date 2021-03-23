@@ -10,7 +10,7 @@ ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 if [ "${CONTAINER_RUNTIME}" = "containerd"  ] ; then
     $ssh_cmd systemctl disable docker
     if [ -z "${CONTAINERD_TARBALL_URL}"  ] ; then
-        CONTAINERD_TARBALL_URL="https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz"
+        CONTAINERD_TARBALL_URL="https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/cri-containerd-cni-${CONTAINERD_VERSION}-linux-amd64.tar.gz"
     fi
     i=0
     until curl -o /srv/magnum/cri-containerd.tar.gz -L "${CONTAINERD_TARBALL_URL}"
