@@ -22,9 +22,8 @@ data:
         address = ":80"
       [entryPoints.https]
         address = ":443"
-      [entryPoints.metrics]
-        address = ":8082"
         [entryPoints.https.tls]
+          minVersion = "VersionTLS12"
           cipherSuites = [
             "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
             "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
@@ -44,6 +43,8 @@ data:
             "TLS_RSA_WITH_AES_256_CBC_SHA",
             "TLS_RSA_WITH_AES_128_CBC_SHA"
           ]
+      [entryPoints.metrics]
+        address = ":8082"
 ---
 kind: DaemonSet
 apiVersion: apps/v1

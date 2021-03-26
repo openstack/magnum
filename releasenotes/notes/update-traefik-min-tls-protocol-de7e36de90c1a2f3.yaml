@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Upgrade traefik version to v1.7.28
+security:
+  - |
+    Force traefik https port connections to use TLSv1.2 or greater

@@ -1247,7 +1247,7 @@ _`container_infra_prefix`
   * docker.io/grafana/grafana:5.1.5
   * docker.io/prom/node-exporter:latest
   * docker.io/prom/prometheus:latest
-  * docker.io/traefik:v1.7.10
+  * docker.io/traefik:v1.7.28
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google_containers/metrics-server-amd64:v0.3.6
   * k8s.gcr.io/node-problem-detector:v0.6.2
