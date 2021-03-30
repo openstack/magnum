@@ -402,7 +402,7 @@ chmod 600 ${ADMIN_KUBECONFIG}
 export KUBECONFIG=${ADMIN_KUBECONFIG}
 
 # Add controller manager args
-KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true --kubeconfig=/etc/kubernetes/admin.conf"
+KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true --kubeconfig=/etc/kubernetes/admin.conf --use-service-account-credentials=true"
 KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cluster-name=${CLUSTER_UUID}"
 KUBE_CONTROLLER_MANAGER_ARGS="${KUBE_CONTROLLER_MANAGER_ARGS} --allocate-node-cidrs=true"
 KUBE_CONTROLLER_MANAGER_ARGS="${KUBE_CONTROLLER_MANAGER_ARGS} --cluster-cidr=${PODS_NETWORK_CIDR}"
