@@ -126,8 +126,9 @@ class API(rpc_service.API):
         return self._call('sign_certificate', cluster=cluster,
                           certificate=certificate)
 
-    def get_ca_certificate(self, cluster):
-        return self._call('get_ca_certificate', cluster=cluster)
+    def get_ca_certificate(self, cluster, ca_cert_type=None):
+        return self._call('get_ca_certificate', cluster=cluster,
+                          ca_cert_type=ca_cert_type)
 
     def rotate_ca_certificate(self, cluster):
         return self._call('rotate_ca_certificate', cluster=cluster)

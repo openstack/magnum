@@ -110,6 +110,10 @@ def generate_certificates_to_cluster(cluster, context=None):
 
         ca_cert_ref, ca_cert, ca_password = _generate_ca_cert(issuer_name,
                                                               context=context)
+        etcd_ca_cert_ref, _, _ = _generate_ca_cert(issuer_name,
+                                                   context=context)
+        fp_ca_cert_ref, _, _ = _generate_ca_cert(issuer_name,
+                                                 context=context)
         magnum_cert_ref = _generate_client_cert(issuer_name,
                                                 ca_cert,
                                                 ca_password,
@@ -117,15 +121,23 @@ def generate_certificates_to_cluster(cluster, context=None):
 
         cluster.ca_cert_ref = ca_cert_ref
         cluster.magnum_cert_ref = magnum_cert_ref
+        cluster.etcd_ca_cert_ref = etcd_ca_cert_ref
+        cluster.front_proxy_ca_cert_ref = fp_ca_cert_ref
     except Exception:
         LOG.exception('Failed to generate certificates for Cluster: %s',
                       cluster.uuid)
         raise exception.CertificatesToClusterFailed(cluster_uuid=cluster.uuid)
 
 
-def get_cluster_ca_certificate(cluster, context=None):
+def get_cluster_ca_certificate(cluster, context=None, ca_cert_type=None):
+    ref = cluster.ca_cert_ref
+    if ca_cert_type == "etcd":
+        ref = cluster.etcd_ca_cert_ref
+    elif ca_cert_type in ["front_proxy", "front-proxy"]:
+        ref = cluster.front_proxy_ca_cert_ref
+
     ca_cert = cert_manager.get_backend().CertManager.get_cert(
-        cluster.ca_cert_ref,
+        ref,
         resource_ref=cluster.uuid,
         context=context
     )
@@ -202,9 +214,15 @@ def create_client_files(cluster, context=None):
     return ca_file, key_file, cert_file
 
 
-def sign_node_certificate(cluster, csr, context=None):
+def sign_node_certificate(cluster, csr, ca_cert_type=None, context=None):
+    ref = cluster.ca_cert_ref
+    if ca_cert_type == "etcd":
+        ref = cluster.etcd_ca_cert_ref
+    elif ca_cert_type in ["front_proxy", "front-proxy"]:
+        ref = cluster.front_proxy_ca_cert_ref
+
     ca_cert = cert_manager.get_backend().CertManager.get_cert(
-        cluster.ca_cert_ref,
+        ref,
         resource_ref=cluster.uuid,
         context=context
     )

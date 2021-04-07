@@ -82,6 +82,7 @@ function generate_certificates {
     _CSR=$cert_dir/${1}.csr
     _KEY=$cert_dir/${1}.key
     _CONF=$2
+    _CA_CERT_TYPE=$3
 
     #Get a token by user credentials and trust
     auth_json=$(cat << EOF
@@ -108,11 +109,11 @@ EOF
     USER_TOKEN=`curl $VERIFY_CA -s -i -X POST -H "$content_type" -d "$auth_json" $url \
         | grep -i X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
-    # Get CA certificate for this cluster
+    # Get CA certificate for this cluster. If the CA_CERT_TYPE is not etcd or front-proxy, it will return the default CA cert for kubelet
     curl $VERIFY_CA -X GET \
         -H "X-Auth-Token: $USER_TOKEN" \
         -H "OpenStack-API-Version: container-infra latest" \
-        $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' >> ${CA_CERT}
+        $MAGNUM_URL/certificates/$CLUSTER_UUID"?ca_cert_type="${_CA_CERT_TYPE} | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' > ${CA_CERT}
 
     # Generate server's private key and csr
     $ssh_cmd openssl genrsa -out "${_KEY}" 4096
@@ -124,7 +125,7 @@ EOF
             -config "${_CONF}"
 
     # Send csr to Magnum to have it signed
-    csr_req=$(python -c "import json; fp = open('${_CSR}'); print(json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()})); fp.close()")
+    csr_req=$(python -c "import json; fp = open('${_CSR}'); print(json.dumps({'ca_cert_type': '$_CA_CERT_TYPE', 'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()})); fp.close()")
     curl $VERIFY_CA -X POST \
         -H "X-Auth-Token: $USER_TOKEN" \
         -H "OpenStack-API-Version: container-infra latest" \
@@ -182,9 +183,9 @@ L=Austin
 extendedKeyUsage= clientAuth
 EOF
 
-generate_certificates server ${cert_dir}/server.conf
-generate_certificates kubelet ${cert_dir}/kubelet.conf
-generate_certificates admin ${cert_dir}/admin.conf
+generate_certificates server ${cert_dir}/server.conf kubelet
+generate_certificates kubelet ${cert_dir}/kubelet.conf kubelet
+generate_certificates admin ${cert_dir}/admin.conf kubelet
 
 # Generate service account key and private key
 echo -e "${KUBE_SERVICE_ACCOUNT_KEY}" > ${cert_dir}/service_account.key
@@ -199,6 +200,52 @@ if [ -z "`cat /etc/group | grep kube_etcd`" ]; then
     $ssh_cmd chmod 550 "${cert_dir}"
     $ssh_cmd chown -R kube:kube_etcd "${cert_dir}"
     $ssh_cmd chmod 440 "$cert_dir/server.key"
-    $ssh_cmd mkdir -p /etc/etcd/certs
-    $ssh_cmd cp ${cert_dir}/* /etc/etcd/certs
+fi
+
+# Create certs for etcd
+cert_dir=/etc/etcd/certs
+$ssh_cmd mkdir -p "$cert_dir"
+CA_CERT=${cert_dir}/ca.crt
+
+cat > ${cert_dir}/server.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = etcd
+[req_ext]
+subjectAltName = ${sans}
+extendedKeyUsage = clientAuth,serverAuth
+EOF
+
+generate_certificates server ${cert_dir}/server.conf etcd
+generate_certificates admin ${cert_dir}/server.conf etcd
+
+if [ -z "`cat /etc/group | grep kube_etcd`" ]; then
+    $ssh_cmd chown -R etcd:kube_etcd "${cert_dir}"
+fi
+
+# Create certs for front-proxy
+cert_dir=/etc/kubernetes/certs/front-proxy
+$ssh_cmd mkdir -p "$cert_dir"
+CA_CERT=${cert_dir}/ca.crt
+
+cat > ${cert_dir}/server.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = front-proxy
+[req_ext]
+subjectAltName = ${sans}
+extendedKeyUsage = clientAuth,serverAuth
+EOF
+
+generate_certificates server ${cert_dir}/server.conf front-proxy
+generate_certificates admin ${cert_dir}/server.conf front-proxy
+
+if [ -z "`cat /etc/group | grep kube_etcd`" ]; then
+    $ssh_cmd chown -R kube:kube_etcd "${cert_dir}"
 fi

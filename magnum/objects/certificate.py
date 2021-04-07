@@ -19,7 +19,10 @@ from magnum.objects import base
 class Certificate(base.MagnumPersistentObject, base.MagnumObject):
     # Version 1.0: Initial version
     # Version 1.1: Rename bay_uuid to cluster_uuid
-    VERSION = '1.1'
+    # Version 1.2: Add ca_cert_type to indicate what's the CA cert type the
+    #              CSR being signed
+
+    VERSION = '1.2'
 
     fields = {
         'project_id': fields.StringField(nullable=True),
@@ -27,6 +30,7 @@ class Certificate(base.MagnumPersistentObject, base.MagnumObject):
         'cluster_uuid': fields.StringField(nullable=True),
         'csr': fields.StringField(nullable=True),
         'pem': fields.StringField(nullable=True),
+        'ca_cert_type': fields.StringField(nullable=True),
     }
 
     @classmethod
@@ -40,3 +44,4 @@ class Certificate(base.MagnumPersistentObject, base.MagnumObject):
         return cls(project_id=cluster['project_id'],
                    user_id=cluster['user_id'],
                    cluster_uuid=cluster['uuid'])
+

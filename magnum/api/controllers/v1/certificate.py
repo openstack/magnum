@@ -88,6 +88,9 @@ class Certificate(base.APIBase):
     pem = wtypes.StringType()
     """"The Signed Certificate"""
 
+    ca_cert_type = wtypes.StringType()
+    """"The CA Certificate type the CSR will be signed by"""
+
     def __init__(self, **kwargs):
         super(Certificate, self).__init__()
 
@@ -113,7 +116,7 @@ class Certificate(base.APIBase):
     def _convert_with_links(certificate, url, expand=True):
         if not expand:
             certificate.unset_fields_except(['bay_uuid', 'cluster_uuid',
-                                             'csr', 'pem'])
+                                             'csr', 'pem', 'ca_cert_type'])
 
         certificate.links = [link.Link.make_link('self', url,
                                                  'certificates',
@@ -135,7 +138,8 @@ class Certificate(base.APIBase):
         sample = cls(bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                      cluster_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                      created_at=timeutils.utcnow(),
-                     csr='AAA....AAA')
+                     csr='AAA....AAA',
+                     ca_cert_type='kubernetes')
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -149,8 +153,8 @@ class CertificateController(base.Controller):
         'detail': ['GET'],
     }
 
-    @expose.expose(Certificate, types.uuid_or_name)
-    def get_one(self, cluster_ident):
+    @expose.expose(Certificate, types.uuid_or_name, wtypes.text)
+    def get_one(self, cluster_ident, ca_cert_type=None):
         """Retrieve CA information about the given cluster.
 
         :param cluster_ident: UUID of a cluster or
@@ -160,7 +164,8 @@ class CertificateController(base.Controller):
         cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'certificate:get', cluster.as_dict(),
                        action='certificate:get')
-        certificate = pecan.request.rpcapi.get_ca_certificate(cluster)
+        certificate = pecan.request.rpcapi.get_ca_certificate(cluster,
+                                                              ca_cert_type)
         return Certificate.convert_with_links(certificate)
 
     @expose.expose(Certificate, body=Certificate, status_code=201)

@@ -20,6 +20,12 @@ baymodel_ident:
   in: path
   required: true
   type: string
+ca_cert_type:
+  type: string
+  in: path
+  required: false
+  description: |
+    The CA certificate type. For Kubernetes, it could be kubelet, etcd or front-proxy.
 cluster_ident:
   type: string
   in: path
