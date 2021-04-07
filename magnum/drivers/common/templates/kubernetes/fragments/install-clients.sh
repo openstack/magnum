@@ -6,7 +6,7 @@ set +x
 . /etc/sysconfig/heat-params
 set -x
 
-hyperkube_image="${CONTAINER_INFRA_PREFIX:-"k8s.gcr.io/"}hyperkube:${KUBE_TAG}"
+hyperkube_image="${CONTAINER_INFRA_PREFIX:-${HYPERKUBE_PREFIX}}hyperkube:${KUBE_TAG}"
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 mkdir -p /srv/magnum/bin/
 i=0
