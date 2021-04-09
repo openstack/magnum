@@ -11,32 +11,35 @@
           docker_image:
             name: "{{ magnum_repository }}/heat-container-agent"
             tag: "{{ item.tag }}"
-            pull: yes
+            source: pull
           register: docker_output
           when: not (item.dev | default(false) | bool)
-          ignore_errors: true
+          failed_when: (docker_output is failed and "pull rate limit" in docker_output.msg)
           with_items: "{{ heat_container_agent_images }}"
         - name: "Build {{ magnum_repository }}/heat-container-agent:{{ item.item.tag }} image"
           docker_image:
-            path: "{{ magnum_src_dir }}/dockerfiles/heat-container-agent"
+            build:
+              path: "{{ magnum_src_dir }}/dockerfiles/heat-container-agent"
             name: "{{ magnum_repository }}/heat-container-agent"
             tag: "{{ item.item.tag }}"
             push: no
             source: build
           with_items: "{{ docker_output.results }}"
-          when: (item is failed) or (item.item.dev | default(false) | bool)
+          when: ("msg" in item and "not found" in item.msg) or (item.item.dev | default(false) | bool)
           retries: 10
 
     - name: "Build kubernetes images"
       block:
         - name: "Build {{ magnum_repository }}/{{ item[1].name }}:{{ item[0].version }} image"
           docker_image:
-            path: "{{ magnum_src_dir }}/dockerfiles/{{ item[1].name }}"
             name: "{{ magnum_repository }}/{{ item[1].name }}"
             tag: "{{ item[0].version }}"
-            buildargs:
-              KUBE_VERSION: "{{ item[0].version }}"
+            build:
+              path: "{{ magnum_src_dir }}/dockerfiles/{{ item[1].name }}"
+              args:
+                KUBE_VERSION: "{{ item[0].version }}"
             push: no
+            source: build
           with_nested:
             - "{{ kubernetes_versions }}"
             - "{{ kubernetes_images }}"
@@ -45,12 +48,14 @@
     - name: "Build helm-client image"
       block:
         - docker_image:
-            path: "{{ magnum_src_dir }}/dockerfiles/helm-client"
             name: "{{ magnum_repository }}/helm-client"
             tag: "{{ item.version }}"
-            buildargs:
-              HELM_VERSION: "{{ item.version }}"
+            build:
+              path: "{{ magnum_src_dir }}/dockerfiles/helm-client"
+              args:
+                HELM_VERSION: "{{ item.version }}"
             push: no
+            source: build
           with_items: "{{ helm_versions }}"
           retries: 10
 
@@ -58,11 +63,13 @@
       block:
         - name: "Build {{ magnum_repository }}/cluster-autoscaler:v{{ item.version }}"
           docker_image:
-            path: "{{ magnum_src_dir }}/dockerfiles/cluster-autoscaler"
             name: "{{ magnum_repository }}/cluster-autoscaler"
             tag: "v{{ item.version }}"
-            buildargs:
-              AUTOSCALER_VERSION: "cluster-autoscaler-{{ item.version }}"
+            build:
+              path: "{{ magnum_src_dir }}/dockerfiles/cluster-autoscaler"
+              args:
+                AUTOSCALER_VERSION: "cluster-autoscaler-{{ item.version }}"
             push: no
+            source: build
           with_items: "{{ cluster_autoscaler_versions }}"
           retries: 10
