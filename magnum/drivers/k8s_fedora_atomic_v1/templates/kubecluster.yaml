@@ -901,7 +901,7 @@ parameters:
   containerd_version:
     type: string
     description: The containerd version to download from https://storage.googleapis.com/cri-containerd-release/
-    default: '1.4.3'
+    default: '1.2.8'
 
   containerd_tarball_url:
     type: string
@@ -911,7 +911,7 @@ parameters:
   containerd_tarball_sha256:
     type: string
     description: sha256 of the target containerd tarball.
-    default: '34a161e3f459fd337b03141a339eeb1a56c5c811922fe72012d2dac9fa5542f1'
+    default: '1f2f0fb928179df90492a83c326a194b8e9d992538498efb44cbb6ef15465627'
 
   post_install_manifest_url:
     type: string
