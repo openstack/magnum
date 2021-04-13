@@ -446,26 +446,31 @@ parameters:
     type: string
     description: url for keystone
 
+  hyperkube_prefix:
+    type: string
+    description: prefix to use for hyperkube images
+    default: k8s.gcr.io/
+
   kube_tag:
     type: string
     description:
       tag of the k8s containers used to provision the kubernetes cluster
       https://github.com/kubernetes/kubernetes/releases
-    default: v1.18.2
+    default: v1.18.16
 
   master_kube_tag:
     type: string
     description:
       tag of the k8s containers used to provision the kubernetes cluster
       https://github.com/kubernetes/kubernetes/releases
-    default: v1.18.2
+    default: v1.18.16
 
   minion_kube_tag:
     type: string
     description:
       tag of the k8s containers used to provision the kubernetes cluster
       https://github.com/kubernetes/kubernetes/releases
-    default: v1.18.2
+    default: v1.18.16
 
   cloud_provider_tag:
     type: string
@@ -501,7 +506,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.18.2
+    default: v1.18.16
 
   kube_dashboard_version:
     type: string
@@ -1250,6 +1255,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          hyperkube_prefix: {get_param: hyperkube_prefix}
           kube_tag: {get_param: master_kube_tag}
           cloud_provider_tag: {get_param: cloud_provider_tag}
           cloud_provider_enabled: {get_param: cloud_provider_enabled}
@@ -1488,6 +1494,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          hyperkube_prefix: {get_param: hyperkube_prefix}
           kube_tag: {get_param: minion_kube_tag}
           kube_version: {get_param: kube_version}
           trustee_user_id: {get_param: trustee_user_id}
