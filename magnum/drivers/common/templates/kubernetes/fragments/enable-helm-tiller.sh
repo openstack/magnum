@@ -130,7 +130,9 @@ spec:
             port: 44135
           initialDelaySeconds: 1
           timeoutSeconds: 1
-        resources: {}
+        resources:
+          requests:
+            cpu: 25m
         volumeMounts:
         - mountPath: /etc/certs
           name: tiller-certs

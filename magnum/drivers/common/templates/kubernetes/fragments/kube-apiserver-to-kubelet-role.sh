@@ -370,6 +370,9 @@ spec:
         - --cluster-name=${CLUSTER_UUID}
         - --use-service-account-credentials=true
         - --bind-address=127.0.0.1
+        resources:
+          requests:
+            cpu: 200m
         volumeMounts:
         - name: cloudconfig
           mountPath: /etc/kubernetes
