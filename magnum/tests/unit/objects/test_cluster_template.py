@@ -52,7 +52,7 @@ class TestClusterTemplateObject(base.DbTestCase):
             self.assertEqual(self.context, cluster_template._context)
 
     def test_get_bad_id_and_uuid(self):
-        self.assertRaises(exception.InvalidIdentity,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           objects.ClusterTemplate.get, self.context,
                           'not-a-uuid')
 
