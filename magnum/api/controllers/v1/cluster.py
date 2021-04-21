@@ -68,25 +68,6 @@ class Cluster(base.APIBase):
     between the internal object model and the API representation of a Cluster.
     """
 
-    _cluster_template_id = None
-
-    def _get_cluster_template_id(self):
-        return self._cluster_template_id
-
-    def _set_cluster_template_id(self, value):
-        if value and self._cluster_template_id != value:
-            try:
-                cluster_template = api_utils.get_resource('ClusterTemplate',
-                                                          value)
-                self._cluster_template_id = cluster_template.uuid
-            except exception.ClusterTemplateNotFound as e:
-                # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Cluster
-                e.code = 400  # BadRequest
-                raise
-        elif value == wtypes.Unset:
-            self._cluster_template_id = wtypes.Unset
-
     uuid = types.uuid
     """Unique UUID for this cluster"""
 
@@ -95,10 +76,7 @@ class Cluster(base.APIBase):
     """Name of this cluster, max length is limited to 242 because of heat
      stack requires max length limit to 255, and Magnum amend a uuid length"""
 
-    cluster_template_id = wsme.wsproperty(wtypes.text,
-                                          _get_cluster_template_id,
-                                          _set_cluster_template_id,
-                                          mandatory=True)
+    cluster_template_id = wsme.wsattr(wtypes.text, mandatory=True)
     """The cluster_template UUID"""
 
     keypair = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
@@ -493,6 +471,7 @@ class ClustersController(base.Controller):
 
     @base.Controller.api_version("1.1", "1.9")
     @expose.expose(ClusterID, body=Cluster, status_code=202)
+    @validation.ct_not_found_to_bad_request()
     @validation.enforce_cluster_type_supported()
     @validation.enforce_cluster_volume_storage_size()
     def post(self, cluster):
@@ -519,8 +498,10 @@ class ClustersController(base.Controller):
         self._check_cluster_quota_limit(context)
 
         temp_id = cluster.cluster_template_id
-        cluster_template = objects.ClusterTemplate.get_by_uuid(context,
-                                                               temp_id)
+        cluster_template = objects.ClusterTemplate.get(context, temp_id)
+        # We are not sure if we got a uuid or name here. So just set
+        # explicitly the uuid of the cluster template in the cluster.
+        cluster.cluster_template_id = cluster_template.uuid
         # If keypair not present, use cluster_template value
         if cluster.keypair is None:
             cluster.keypair = cluster_template.keypair_id
