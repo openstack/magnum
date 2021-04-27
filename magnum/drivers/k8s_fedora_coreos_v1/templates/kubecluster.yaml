@@ -283,7 +283,7 @@ parameters:
   traefik_ingress_controller_tag:
     type: string
     description: tag of the traefik containers to be used.
-    default: v1.7.19
+    default: v1.7.28
 
   wait_condition_timeout:
     type: number
