@@ -7,6 +7,7 @@ set -x
 set -eu -o pipefail
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+export KUBECONFIG="/etc/kubernetes/admin.conf"
 
 service_account_key=$kube_service_account_key_input
 service_account_private_key=$kube_service_account_private_key_input
