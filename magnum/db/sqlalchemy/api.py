@@ -286,7 +286,7 @@ class Connection(api.Connection):
             query = model_query(models.Cluster, session=session)
             query = add_identity_filter(query, cluster_id)
             try:
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 raise exception.ClusterNotFound(cluster=cluster_id)
 
@@ -344,7 +344,7 @@ class Connection(api.Connection):
         query = self._add_tenant_filters(context, query)
         public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(id=cluster_template_id)
+        query = query.filter_by(cluster_template_id=cluster_template_id)
         try:
             return query.one()
         except NoResultFound:
@@ -356,7 +356,7 @@ class Connection(api.Connection):
         query = self._add_tenant_filters(context, query)
         public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(uuid=cluster_template_uuid)
+        query = query.filter_by(cluster_template_uuid=cluster_template_uuid)
         try:
             return query.one()
         except NoResultFound:
@@ -368,7 +368,7 @@ class Connection(api.Connection):
         query = self._add_tenant_filters(context, query)
         public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(name=cluster_template_name)
+        query = query.filter_by(cluster_template_name=cluster_template_name)
         try:
             return query.one()
         except MultipleResultsFound:
@@ -427,7 +427,7 @@ class Connection(api.Connection):
             query = model_query(models.ClusterTemplate, session=session)
             query = add_identity_filter(query, cluster_template_id)
             try:
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 raise exception.ClusterTemplateNotFound(
                     clustertemplate=cluster_template_id)
@@ -497,7 +497,7 @@ class Connection(api.Connection):
             query = model_query(models.X509KeyPair, session=session)
             query = add_identity_filter(query, x509keypair_id)
             try:
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 raise exception.X509KeyPairNotFound(x509keypair=x509keypair_id)
 
@@ -539,7 +539,7 @@ class Connection(api.Connection):
             query = model_query(models.MagnumService, session=session)
             query = add_identity_filter(query, magnum_service_id)
             try:
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 raise exception.MagnumServiceNotFound(
                     magnum_service_id=magnum_service_id)
@@ -623,7 +623,7 @@ class Connection(api.Connection):
             try:
                 query = query.filter_by(project_id=project_id).filter_by(
                     resource=resource)
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 msg = (_('project_id %(project_id)s resource %(resource)s.') %
                        {'project_id': project_id, 'resource': resource})
@@ -775,7 +775,7 @@ class Connection(api.Connection):
             query = model_query(models.Federation, session=session)
             query = add_identity_filter(query, federation_id)
             try:
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 raise exception.FederationNotFound(federation=federation_id)
 
@@ -837,7 +837,7 @@ class Connection(api.Connection):
             query = add_identity_filter(query, nodegroup_id)
             query = query.filter_by(cluster_id=cluster_id)
             try:
-                ref = query.with_lockmode('update').one()
+                ref = query.with_for_update().one()
             except NoResultFound:
                 raise exception.NodeGroupNotFound(nodegroup=nodegroup_id)
 
