@@ -344,7 +344,7 @@ class Connection(api.Connection):
         query = self._add_tenant_filters(context, query)
         public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(cluster_template_id=cluster_template_id)
+        query = query.filter(models.ClusterTemplate.id==cluster_template_id)
         try:
             return query.one()
         except NoResultFound:
@@ -356,7 +356,7 @@ class Connection(api.Connection):
         query = self._add_tenant_filters(context, query)
         public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(cluster_template_uuid=cluster_template_uuid)
+        query = query.filter(models.ClusterTemplate.uuid==cluster_template_uuid)
         try:
             return query.one()
         except NoResultFound:
@@ -368,7 +368,7 @@ class Connection(api.Connection):
         query = self._add_tenant_filters(context, query)
         public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(cluster_template_name=cluster_template_name)
+        query = query.filter(models.ClusterTemplate.name==cluster_template_name)
         try:
             return query.one()
         except MultipleResultsFound:
