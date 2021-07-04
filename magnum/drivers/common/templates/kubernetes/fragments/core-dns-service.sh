@@ -71,7 +71,6 @@ data:
         health
         kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} ${PODS_NETWORK_CIDR} {
            pods verified
-           upstream
            fallthrough in-addr.arpa ip6.arpa
         }
         prometheus :9153
