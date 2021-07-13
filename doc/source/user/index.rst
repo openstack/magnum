@@ -2414,7 +2414,7 @@ _`flannel_network_subnetlen`
 
 _`flannel_backend`
   The type of backend for Flannel.  Possible values are *udp, vxlan,
-  host-gw*.  If not specified, the default is *udp*.  Selecting the
+  host-gw*.  If not specified, the default is *vxlan*.  Selecting the
   best backend depends on your networking.  Generally, *udp* is
   the most generally supported backend since there is little
   requirement on the network, but it typically offers the lowest
