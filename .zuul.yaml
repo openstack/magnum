@@ -49,13 +49,6 @@
       - magnum_docker_login
     timeout: 2400
 
-- job:
-    name: magnum-tempest-plugin-tests-api-temporary
-    parent: magnum-tempest-plugin-tests-api
-    vars:
-      devstack_localrc:
-        GLANCE_LIMIT_IMAGE_SIZE_TOTAL: 5000
-
 - project:
     templates:
       - openstack-cover-jobs
@@ -65,12 +58,12 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - magnum-tempest-plugin-tests-api-temporary
+        - magnum-tempest-plugin-tests-api
         - magnum-container-build
     gate:
       queue: magnum
       jobs:
-        - magnum-tempest-plugin-tests-api-temporary
+        - magnum-tempest-plugin-tests-api
     post:
       jobs:
         - magnum-container-publish
