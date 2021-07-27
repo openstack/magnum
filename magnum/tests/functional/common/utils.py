@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import collections
+from collections import abc
 import functools
 import inspect
 import time
@@ -99,7 +99,7 @@ def memoized(func):
 
     @functools.wraps(func)
     def wrapper(*args):
-        if not isinstance(args, collections.Hashable):
+        if not isinstance(args, abc.Hashable):
             # args is not cacheable. just call the function.
             return func(*args)
         if args in cache:
