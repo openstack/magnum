@@ -34,10 +34,10 @@ rules = [
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'get',
         check_str=RULE_ADMIN_OR_USER_OR_CLUSTER_USER,
-        description='Retrieve CA information about the given bay/cluster.',
+        description='Retrieve CA information about the given cluster.',
         operations=[
             {
-                'path': '/v1/certificates/{bay_uuid/cluster_uuid}',
+                'path': '/v1/certificates/{cluster_uuid}',
                 'method': 'GET'
             }
         ]
@@ -45,10 +45,10 @@ rules = [
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'rotate_ca',
         check_str=base.RULE_ADMIN_OR_OWNER,
-        description='Rotate the CA certificate on the given bay/cluster.',
+        description='Rotate the CA certificate on the given cluster.',
         operations=[
             {
-                'path': '/v1/certificates/{bay_uuid/cluster_uuid}',
+                'path': '/v1/certificates/{cluster_uuid}',
                 'method': 'PATCH'
             }
         ]

@@ -24,12 +24,12 @@ cluster_template_opts = [
                        "cluster-templates. Use 'all' keyword to allow all "
                        "drivers supported for kubernetes cluster-templates. "
                        "Supported network drivers include flannel."),
-                deprecated_group='baymodel'),
+                ),
     cfg.StrOpt('kubernetes_default_network_driver',
                default='flannel',
                help=_("Default network driver for kubernetes "
                       "cluster-templates."),
-               deprecated_group='baymodel'),
+               ),
     cfg.ListOpt('swarm_allowed_network_drivers',
                 default=['all'],
                 help=_("Allowed network drivers for docker swarm "
@@ -37,7 +37,7 @@ cluster_template_opts = [
                        "drivers supported for swarm cluster-templates. "
                        "Supported network drivers include docker and flannel."
                        ),
-                deprecated_group='baymodel'),
+                ),
     cfg.StrOpt('swarm_default_network_driver',
                default='docker',
                help=_("Default network driver for docker swarm "

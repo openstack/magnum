@@ -104,3 +104,8 @@ user documentation.
 
   Allow the cluster to be created with node_count = 0 as well as to update
   existing nodegroups to have 0 nodes.
+
+1.11
+---
+
+  Drop bay and baymodels objects from magnum source code

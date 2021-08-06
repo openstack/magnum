@@ -71,10 +71,6 @@ class Certificate(base.APIBase):
         elif value == wtypes.Unset:
             self._cluster_uuid = wtypes.Unset
 
-    bay_uuid = wsme.wsproperty(wtypes.text, _get_cluster_uuid,
-                               _set_cluster_uuid)
-    """The bay UUID or id"""
-
     cluster_uuid = wsme.wsproperty(wtypes.text, _get_cluster_uuid,
                                    _set_cluster_uuid)
     """The cluster UUID or id"""
@@ -102,10 +98,6 @@ class Certificate(base.APIBase):
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # set the attribute for bay_uuid for backwards compatibility
-        self.fields.append('bay_uuid')
-        setattr(self, 'bay_uuid', kwargs.get('bay_uuid',  self._cluster_uuid))
-
     def get_cluster(self):
         if not self._cluster:
             self._cluster = api_utils.get_resource('Cluster',
@@ -115,7 +107,7 @@ class Certificate(base.APIBase):
     @staticmethod
     def _convert_with_links(certificate, url, expand=True):
         if not expand:
-            certificate.unset_fields_except(['bay_uuid', 'cluster_uuid',
+            certificate.unset_fields_except(['cluster_uuid',
                                              'csr', 'pem', 'ca_cert_type'])
 
         certificate.links = [link.Link.make_link('self', url,
@@ -135,8 +127,7 @@ class Certificate(base.APIBase):
 
     @classmethod
     def sample(cls, expand=True):
-        sample = cls(bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
-                     cluster_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
+        sample = cls(cluster_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                      created_at=timeutils.utcnow(),
                      csr='AAA....AAA',
                      ca_cert_type='kubernetes')

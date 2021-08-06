@@ -1,17 +1,17 @@
 .. -*- rst -*-
 
 =====================================
- Manage certificates for bay/cluster
+ Manage certificates for cluster
 =====================================
 
-Generates and show CA certificates for bay/cluster.
+Generates and show CA certificates for cluster.
 
-Show details about the CA certificate for a bay/cluster
+Show details about the CA certificate for a cluster
 =======================================================
 
 .. rest_method:: GET /v1/certificates/{cluster_ident}?ca_cert_type={ca_cert_type}
 
-Show CA certificate details that are associated with the created bay/cluster based on the
+Show CA certificate details that are associated with the created cluster based on the
 given CA certificate type.
 
 Response Codes
@@ -34,11 +34,6 @@ Request
   - cluster_ident: cluster_ident
   - ca_cert_type: ca_cert_type
 
-.. note::
-
-   After Newton, all terms related bay/baymodel will be renamed to cluster
-   and cluster template.
-
 Response
 --------
 
@@ -47,13 +42,7 @@ Response
   - X-Openstack-Request-Id: request_id
   - cluster_uuid: cluster_id
   - pem: pem
-  - bay_uuid: bay_id
   - links: links
-
-.. note::
-
-   After Newton, all terms related bay/baymodel will be renamed to cluster
-   and cluster template.
 
 Response Example
 ----------------
@@ -61,12 +50,12 @@ Response Example
 .. literalinclude:: samples/certificates-ca-show-resp.json
    :language: javascript
 
-Generate the CA certificate for a bay/cluster
+Generate the CA certificate for a cluster
 =============================================
 
 .. rest_method:: POST /v1/certificates/
 
-Sign client key and generate the CA certificate for a bay/cluster
+Sign client key and generate the CA certificate for a cluster
 
 Response Codes
 --------------
@@ -86,13 +75,8 @@ Request
 
 .. rest_parameters:: parameters.yaml
 
-  - bay_uuid: bay_id
+  - cluster_uuid: cluster_id
   - csr: csr
-
-.. note::
-
-   After Newton, all terms related bay/baymodel will be renamed to cluster
-   and cluster template.
 
 Request Example
 ----------------
@@ -107,14 +91,9 @@ Response
 
   - X-Openstack-Request-Id: request_id
   - pem: pem
-  - bay_uuid: bay_id
+  - cluster_uuid: cluster_id
   - links: links
   - csr: csr
-
-.. note::
-
-   After Newton, all terms related bay/baymodel will be renamed to cluster
-   and cluster template.
 
 Response Example
 ----------------
@@ -122,12 +101,12 @@ Response Example
 .. literalinclude:: samples/certificates-ca-sign-resp.json
    :language: javascript
 
-Rotate the CA certificate for a bay/cluster
+Rotate the CA certificate for a cluster
 ===========================================
 
-.. rest_method:: PATCH /v1/certificates/{bay_uuid/cluster_uuid}
+.. rest_method:: PATCH /v1/certificates/
 
-Rotate the CA certificate for a bay/cluster and invalidate all user
+Rotate the CA certificate for a cluster and invalidate all user
 certificates.
 
 Response Codes

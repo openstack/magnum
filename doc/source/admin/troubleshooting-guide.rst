@@ -100,9 +100,7 @@ When a user creates a cluster, Magnum will dynamically create a service account
 for the cluster. The service account will be used by the cluster to
 access the OpenStack services (i.e. Neutron, Swift, etc.). A trust relationship
 will be created between the user who created the cluster (the "trustor") and
-the service account created for the cluster (the "trustee"). For details,
-please refer to
-`Create a trustee user for each bay <https://opendev.org/openstack/magnum/src/branch/master/specs/create-trustee-user-for-each-bay.rst>`_.
+the service account created for the cluster (the "trustee").
 
 If Magnum fails to create the trustee, check the magnum config file (usually
 in /etc/magnum/magnum.conf). Make sure 'trustee_*' and 'www_authenticate_uri'

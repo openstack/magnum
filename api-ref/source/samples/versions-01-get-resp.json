@@ -26,16 +26,6 @@
          "rel":"bookmark"
       }
    ],
-   "bays":[
-      {
-         "href":"http://10.164.180.104:9511/v1/bays/",
-         "rel":"self"
-      },
-      {
-         "href":"http://10.164.180.104:9511/bays/",
-         "rel":"bookmark"
-      }
-   ],
    "clustertemplates":[
       {
          "href":"http://10.164.180.104:9511/v1/clustertemplates/",
@@ -63,16 +53,6 @@
       },
       {
          "href":"http://10.164.180.104:9511/clusters/",
-         "rel":"bookmark"
-      }
-   ],
-   "baymodels":[
-      {
-         "href":"http://10.164.180.104:9511/v1/baymodels/",
-         "rel":"self"
-      },
-      {
-         "href":"http://10.164.180.104:9511/baymodels/",
          "rel":"bookmark"
       }
    ],

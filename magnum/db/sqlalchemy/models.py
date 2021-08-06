@@ -107,7 +107,7 @@ class Cluster(Base):
 
     __tablename__ = 'cluster'
     __table_args__ = (
-        schema.UniqueConstraint('uuid', name='uniq_bay0uuid'),
+        schema.UniqueConstraint('uuid'),
         table_args()
     )
     id = Column(Integer, primary_key=True)
@@ -158,7 +158,7 @@ class ClusterTemplate(Base):
 
     __tablename__ = 'cluster_template'
     __table_args__ = (
-        schema.UniqueConstraint('uuid', name='uniq_baymodel0uuid'),
+        schema.UniqueConstraint('uuid'),
         table_args()
     )
     id = Column(Integer, primary_key=True)

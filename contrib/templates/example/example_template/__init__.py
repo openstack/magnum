@@ -28,9 +28,9 @@ class ExampleTemplate(template_def.BaseTemplateDefinition):
         super(ExampleTemplate, self).__init__()
 
         self.add_output('server_address',
-                        bay_attr='api_address')
+                        cluster_attr='api_address')
         self.add_output('node_addresses',
-                        bay_attr='node_addresses')
+                        cluster_attr='node_addresses')
 
     def template_path(self):
         return os.path.join(os.path.dirname(__file__), 'example.yaml')

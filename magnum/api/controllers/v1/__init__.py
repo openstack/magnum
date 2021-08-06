@@ -24,8 +24,6 @@ from wsme import types as wtypes
 
 from magnum.api.controllers import base as controllers_base
 from magnum.api.controllers import link
-from magnum.api.controllers.v1 import bay
-from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import cluster
 from magnum.api.controllers.v1 import cluster_template
@@ -76,12 +74,6 @@ class V1(controllers_base.APIBase):
     links = [link.Link]
     """Links that point to a specific URL for this version and documentation"""
 
-    baymodels = [link.Link]
-    """Links to the baymodels resource"""
-
-    bays = [link.Link]
-    """Links to the bays resource"""
-
     clustertemplates = [link.Link]
     """Links to the clustertemplates resource"""
 
@@ -119,18 +111,6 @@ class V1(controllers_base.APIBase):
                                         bookmark=True, type='text/html')]
         v1.media_types = [MediaType('application/json',
                           'application/vnd.openstack.magnum.v1+json')]
-        v1.baymodels = [link.Link.make_link('self', pecan.request.host_url,
-                                            'baymodels', ''),
-                        link.Link.make_link('bookmark',
-                                            pecan.request.host_url,
-                                            'baymodels', '',
-                                            bookmark=True)]
-        v1.bays = [link.Link.make_link('self', pecan.request.host_url,
-                                       'bays', ''),
-                   link.Link.make_link('bookmark',
-                                       pecan.request.host_url,
-                                       'bays', '',
-                                       bookmark=True)]
         v1.clustertemplates = [link.Link.make_link('self',
                                                    pecan.request.host_url,
                                                    'clustertemplates', ''),
@@ -189,8 +169,6 @@ class V1(controllers_base.APIBase):
 class Controller(controllers_base.Controller):
     """Version 1 API controller root."""
 
-    bays = bay.BaysController()
-    baymodels = baymodel.BayModelsController()
     clusters = cluster.ClustersController()
     clustertemplates = cluster_template.ClusterTemplatesController()
     quotas = quota.QuotaController()

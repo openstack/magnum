@@ -41,7 +41,7 @@ class TestRootController(api_base.FunctionalTest):
                                [{u'href': u'http://localhost/v1/',
                                  u'rel': u'self'}],
                            u'status': u'CURRENT',
-                           u'max_version': u'1.10',
+                           u'max_version': u'1.11',
                            u'min_version': u'1.1'}]}
 
         self.v1_expected = {
@@ -58,14 +58,6 @@ class TestRootController(api_base.FunctionalTest):
                        u'rel': u'self'},
                        {u'href': u'http://localhost/stats/',
                         u'rel': u'bookmark'}],
-            u'bays': [{u'href': u'http://localhost/v1/bays/',
-                       u'rel': u'self'},
-                      {u'href': u'http://localhost/bays/',
-                       u'rel': u'bookmark'}],
-            u'baymodels': [{u'href': u'http://localhost/v1/baymodels/',
-                            u'rel': u'self'},
-                           {u'href': u'http://localhost/baymodels/',
-                            u'rel': u'bookmark'}],
             u'clusters': [{u'href': u'http://localhost/v1/clusters/',
                            u'rel': u'self'},
                           {u'href': u'http://localhost/clusters/',

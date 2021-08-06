@@ -49,7 +49,7 @@ class TestClusterObject(base.TestCase):
         cluster.cluster_template_id = wtypes.Unset
         self.assertEqual(wtypes.Unset, cluster.cluster_template_id)
 
-        # test backwards compatibility of bay fields with new objects
+        # test backwards compatibility of cluster fields with new objects
         cluster_dict['create_timeout'] = 15
         cluster = api_cluster.Cluster(**cluster_dict)
         self.assertEqual(15, cluster.create_timeout)

@@ -16,8 +16,6 @@ import datetime
 
 import pytz
 
-from magnum.api.controllers.v1 import bay as bay_controller
-from magnum.api.controllers.v1 import baymodel as baymodel_controller
 from magnum.api.controllers.v1 import cluster as cluster_controller
 from magnum.api.controllers.v1 import cluster_template as cluster_tmp_ctrl
 from magnum.api.controllers.v1 import federation as federation_controller
@@ -30,27 +28,10 @@ def remove_internal(values, internal):
     return {k: v for (k, v) in values.items() if k not in int_attr}
 
 
-def baymodel_post_data(**kw):
-    baymodel = utils.get_test_cluster_template(**kw)
-    internal = baymodel_controller.BayModelPatchType.internal_attrs()
-    return remove_internal(baymodel, internal)
-
-
 def cluster_template_post_data(**kw):
     cluster_template = utils.get_test_cluster_template(**kw)
     internal = cluster_tmp_ctrl.ClusterTemplatePatchType.internal_attrs()
     return remove_internal(cluster_template, internal)
-
-
-def bay_post_data(**kw):
-    kw.update({'for_api_use': True})
-    bay = utils.get_test_cluster(**kw)
-    bay['baymodel_id'] = kw.get('baymodel_id', bay['cluster_template_id'])
-    bay['bay_create_timeout'] = kw.get('bay_create_timeout', 15)
-    del bay['cluster_template_id']
-    del bay['create_timeout']
-    internal = bay_controller.BayPatchType.internal_attrs()
-    return remove_internal(bay, internal)
 
 
 def cluster_post_data(**kw):

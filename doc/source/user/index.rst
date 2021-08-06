@@ -481,7 +481,7 @@ the table are linked to more details elsewhere in the user guide.
 Cluster
 -------
 
-A cluster (previously known as bay) is an instance of the ClusterTemplate
+A cluster is an instance of the ClusterTemplate
 of a COE.  Magnum deploys a cluster by referring to the attributes
 defined in the particular ClusterTemplate as well as a few additional
 parameters for the cluster.  Magnum deploys the orchestration templates
@@ -566,13 +566,6 @@ Heat.  For more help on Heat stack troubleshooting, refer to the
 
 Create
 ++++++
-
-**NOTE** bay-<command> are the deprecated versions of these commands and are
-still support in current release. They will be removed in a future version.
-Any references to the term bay will be replaced in the parameters when using
-the 'bay' versions of the commands. For example, in 'bay-create' --baymodel
-is used as the baymodel parameter for this command instead of
---cluster-template.
 
 The 'cluster-create' command deploys a cluster, for example::
 
@@ -2884,14 +2877,11 @@ Supported Events
 ----------------
 
 The following table displays the corresponding relationship between resource
-types and operations. The bay type is deprecated and will be removed in a
-future version. Cluster is the new equivalent term.
+types and operations.
 
 +---------------+----------------------------+-------------------------+
 | resource type |    supported operations    |       typeURI           |
 +===============+============================+=========================+
-| bay           |  create, update, delete    |  service/magnum/bay     |
-+---------------+----------------------------+-------------------------+
 | cluster       |  create, update, delete    |  service/magnum/cluster |
 +---------------+----------------------------+-------------------------+
 

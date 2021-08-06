@@ -8,18 +8,6 @@ request_id:
     with the request by default appears in the service logs.
 
 # Path params
-bay_ident:
-  type: string
-  in: path
-  required: true
-  description: |
-    The UUID or name of bays in Magnum.
-baymodel_ident:
-  description: |
-    The UUID or name of baymodels in Magnum.
-  in: path
-  required: true
-  type: string
 ca_cert_type:
   type: string
   in: path
@@ -59,40 +47,6 @@ apiserver_port:
   required: true
   description: |
     The exposed port of COE API server.
-bay_create_timeout:
-  type: integer
-  in: body
-  required: true
-  description: |
-    The timeout for bay creation in minutes. The value expected is a
-    positive integer and the default is 60 minutes. If the timeout is reached
-    during bay creation process, the operation will be aborted and the
-    bay status will be set to ``CREATE_FAILED``.
-bay_id:
-  type: UUID
-  in: body
-  required: true
-  description: |
-    The UUID of the bay.
-bay_list:
-  type: array
-  in: body
-  required: true
-  description: |
-    The list of all bays in Magnum.
-    The list of all clusters in Magnum.
-baymodel_id:
-  type: UUID
-  in: body
-  required: true
-  description: |
-    The UUID of the baymodel.
-baymodel_list:
-  type: array
-  in: body
-  required: true
-  description: |
-    The list of all baymodels in Magnum.
 binary:
   type: string
   in: body
@@ -105,7 +59,7 @@ cluster_distro:
   required: true
   description: |
     Display the attribute ``os_distro`` defined as appropriate metadata in
-    image for the bay/cluster driver.
+    image for the cluster driver.
 cluster_id:
   type: UUID
   in: body
@@ -143,14 +97,14 @@ coe:
   description: |
     Specify the Container Orchestration Engine to use. Supported COEs
     include ``kubernetes``, ``swarm``. If your environment has
-    additional bay/cluster drivers installed, refer to the bay/cluster driver
+    additional cluster drivers installed, refer to the cluster driver
     documentation for the new COE names.
 coe_version:
   type: string
   in: body
   required: true
   description: |
-    Version info of chosen COE in bay/cluster for helping client in picking
+    Version info of chosen COE in cluster for helping client in picking
     the right version of client.
 create_timeout:
   type: integer
@@ -214,7 +168,7 @@ discovery_url:
 
        https://discovery.etcd.io
 
-    In this case, Magnum will generate a unique url here for each bay and
+    In this case, Magnum will generate a unique url here for each uster and
     store the info for the servers.
   in: body
   format: uri
@@ -222,8 +176,8 @@ discovery_url:
   type: string
 dns_nameserver:
   description: |
-    The DNS nameserver for the servers and containers in the bay/cluster to
-    use. This is configured in the private Neutron network for the bay/cluster.
+    The DNS nameserver for the servers and containers in the cluster to
+    use. This is configured in the private Neutron network for the cluster.
     The default is ``8.8.8.8``.
   in: body
   required: true
@@ -248,29 +202,29 @@ docker_volume_size:
 external_network_id:
   description: |
     The name or network ID of a Neutron network to provide connectivity to the
-    external internet for the bay/cluster. This network must be an external
+    external internet for the cluster. This network must be an external
     network, i.e. its attribute ``router:external`` must be ``True``. The
-    servers in the bay/cluster will be connected to a private network and
+    servers in the cluster will be connected to a private network and
     Magnum will create a router between this private network and the external
     network. This will allow the servers to download images, access discovery
     service, etc, and the containers to install packages, etc. In the opposite
     direction, floating IPs will be allocated from the external network to
     provide access from the external internet to servers and the container
-    services hosted in the bay/cluster.
+    services hosted in the cluster.
   in: body
   required: true
   type: string
 fixed_network:
   description: |
     The name or network ID of a Neutron network to provide connectivity to
-    the internal network for the bay/cluster.
+    the internal network for the cluster.
   in: body
   required: false
   type: string
 fixed_subnet:
   description: |
     Fixed subnet that are using to allocate network address for nodes in
-    bay/cluster.
+    cluster.
   in: body
   required: false
   type: string
@@ -341,8 +295,8 @@ id_s:
 image_id:
   description: |
     The name or UUID of the base image in Glance to boot the servers for the
-    bay/cluster. The image must have the attribute ``os_distro`` defined as
-    appropriate for the bay/cluster driver.
+    cluster. The image must have the attribute ``os_distro`` defined as
+    appropriate for the cluster driver.
   in: body
   required: true
   type: string
@@ -355,9 +309,9 @@ insecure_registry:
   type: string
 keypair_id:
   description: |
-    The name of the SSH keypair to configure in the bay/cluster servers
+    The name of the SSH keypair to configure in the cluster servers
     for ssh access. Users will need the key to be able to ssh to the servers in
-    the bay/cluster. The login name is specific to the bay/cluster driver, for
+    the cluster. The login name is specific to the cluster driver, for
     example with fedora-atomic image, default login name is ``fedora``.
   in: body
   required: true
@@ -365,8 +319,8 @@ keypair_id:
 labels:
   description: |
     Arbitrary labels in the form of ``key=value`` pairs. The accepted keys and
-    valid values are defined in the bay/cluster drivers. They are used as a way
-    to pass additional parameters that are specific to a bay/cluster driver.
+    valid values are defined in the cluster drivers. They are used as a way
+    to pass additional parameters that are specific to a cluster driver.
   in: body
   required: false
   type: array
@@ -384,40 +338,40 @@ master_addresses:
   type: array
 master_count:
   description: |
-    The number of servers that will serve as master for the bay/cluster. The
+    The number of servers that will serve as master for the cluster. The
     default is 1. Set to more than 1 master to enable High Availability. If
-    the option ``master-lb-enabled`` is specified in the baymodel/cluster
+    the option ``master-lb-enabled`` is specified in the cluster
     template, the master servers will be placed in a load balancer pool.
   in: body
   required: true
   type: integer
 master_flavor_id:
   description: |
-    The flavor of the master node for this baymodel/cluster template.
+    The flavor of the master node for this cluster template.
   in: body
   required: false
   type: string
 master_lb_enabled:
   description: |
-    Since multiple masters may exist in a bay/cluster, a Neutron load balancer
-    is created to provide the API endpoint for the bay/cluster and to direct
+    Since multiple masters may exist in a cluster, a Neutron load balancer
+    is created to provide the API endpoint for the cluster and to direct
     requests to the masters. In some cases, such as when the LBaaS service is
-    not available, this option can be set to ``false`` to create a bay/cluster
+    not available, this option can be set to ``false`` to create a cluster
     without the load balancer. In this case, one of the masters will serve as
     the API endpoint. The default is ``true``, i.e. to create the load
-    balancer for the bay.
+    balancer for the cluster.
   in: body
   required: true
   type: boolean
 master_lb_enabled_cluster:
   description: |
-    Since multiple masters may exist in a bay/cluster, a Neutron load balancer
-    is created to provide the API endpoint for the bay/cluster and to direct
+    Since multiple masters may exist in a cluster, a Neutron load balancer
+    is created to provide the API endpoint for the cluster and to direct
     requests to the masters. In some cases, such as when the LBaaS service is
-    not available, this option can be set to ``false`` to create a bay/cluster
+    not available, this option can be set to ``false`` to create a cluster
     without the load balancer. In this case, one of the masters will serve as
     the API endpoint. The default is ``true``, i.e. to create the load
-    balancer for the bay.
+    balancer for the cluster.
   in: body
   required: false
   type: boolean
@@ -443,7 +397,7 @@ network_driver:
   description: |
     The name of a network driver for providing the networks for the containers.
     Note that this is different and separate from the Neutron network for the
-    bay/cluster. The operation and networking model are specific to the
+    cluster. The operation and networking model are specific to the
     particular driver.
   in: body
   required: true
@@ -464,7 +418,7 @@ node_addresses:
   type: array
 node_count:
   description: |
-    The number of servers that will serve as node in the bay/cluster. The
+    The number of servers that will serve as node in the cluster. The
     default is 1.
   in: body
   required: true
@@ -504,15 +458,15 @@ path:
   type: string
 pem:
   description: |
-    CA certificate for the bay/cluster.
+    CA certificate for the cluster.
   in: body
   required: true
   type: string
 public_type:
   description: |
-    Access to a baymodel/cluster template is normally limited to the admin,
+    Access to a cluster template is normally limited to the admin,
     owner or users within the same tenant as the owners. Setting this flag
-    makes the baymodel/cluster template public and accessible by other users.
+    makes the cluster template public and accessible by other users.
     The default is not public.
   in: body
   required: true
@@ -522,7 +476,7 @@ registry_enabled:
     Docker images by default are pulled from the public Docker registry,
     but in some cases, users may want to use a private registry. This option
     provides an alternative registry based on the Registry V2: Magnum will
-    create a local registry in the bay/cluster backed by swift to host the
+    create a local registry in the cluster backed by swift to host the
     images. The default is to use the public registry.
   in: body
   required: false
@@ -535,8 +489,8 @@ report_count:
   type: integer
 server_type:
   description: |
-    The servers in the bay/cluster can be ``vm`` or ``baremetal``. This
-    parameter selects the type of server to create for the bay/cluster.
+    The servers in the cluster can be ``vm`` or ``baremetal``. This
+    parameter selects the type of server to create for the cluster.
     The default is ``vm``.
   in: body
   required: true
@@ -555,13 +509,13 @@ state:
   type: string
 status:
   description: |
-    The current state of the bay/cluster.
+    The current state of the cluster.
   in: body
   required: true
   type: string
 status_reason:
   description: |
-    The reason of bay/cluster current status.
+    The reason of cluster current status.
   in: body
   required: true
   type: string
@@ -574,8 +528,8 @@ tags:
 tls_disabled:
   description: |
     Transport Layer Security (TLS) is normally enabled to secure the
-    bay/cluster. In some cases, users may want to disable TLS in the
-    bay/cluster, for instance during development or to troubleshoot certain
+    cluster. In some cases, users may want to disable TLS in the
+    cluster, for instance during development or to troubleshoot certain
     problems. Specifying this parameter will disable TLS so that users can
     access the COE endpoints without a certificate. The default is TLS enabled.
   in: body

@@ -13,8 +13,6 @@
 from tempest import clients
 from tempest.common import credentials_factory as common_creds
 
-from magnum.tests.functional.api.v1.clients import bay_client
-from magnum.tests.functional.api.v1.clients import baymodel_client
 from magnum.tests.functional.api.v1.clients import cert_client
 from magnum.tests.functional.api.v1.clients import cluster_client
 from magnum.tests.functional.api.v1.clients import cluster_template_client
@@ -32,11 +30,7 @@ class Manager(clients.Manager):
         self.auth_provider.orig_base_url = self.auth_provider.base_url
         self.auth_provider.base_url = self.bypassed_base_url
         auth = self.auth_provider
-        if request_type == 'baymodel':
-            self.client = baymodel_client.BayModelClient(auth)
-        elif request_type == 'bay':
-            self.client = bay_client.BayClient(auth)
-        elif request_type == 'cert':
+        if request_type == 'cert':
             self.client = cert_client.CertClient(auth)
         elif request_type == 'cluster_template':
             self.client = cluster_template_client.ClusterTemplateClient(auth)

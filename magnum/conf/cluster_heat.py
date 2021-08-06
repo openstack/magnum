@@ -25,19 +25,18 @@ cluster_heat_opts = [
                      'during cluster creation if timeout is set as the poll '
                      'will continue until cluster creation either ends '
                      'or times out.'),
-               deprecated_group='bay_heat'),
+               ),
     cfg.IntOpt('wait_interval',
                default=1,
                help=('Sleep time interval between two attempts of querying '
                      'the Heat stack.  This interval is in seconds.'),
-               deprecated_group='bay_heat'),
+               ),
     cfg.IntOpt('create_timeout',
                default=60,
                help=('The length of time to let cluster creation continue. '
                      'This interval is in minutes. The default is 60 minutes.'
                      ),
-               deprecated_group='bay_heat',
-               deprecated_name='bay_create_timeout')
+               )
 ]
 
 

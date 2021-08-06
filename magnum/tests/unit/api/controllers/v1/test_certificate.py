@@ -62,8 +62,6 @@ class TestGetCaCertificate(api_base.FunctionalTest):
                                  headers=HEADERS)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
-        # check that bay is still valid as well
-        self.assertEqual(self.cluster.uuid, response['bay_uuid'])
         self.assertEqual(fake_cert['csr'], response['csr'])
         self.assertEqual(fake_cert['pem'], response['pem'])
 
@@ -77,8 +75,6 @@ class TestGetCaCertificate(api_base.FunctionalTest):
                                  headers=HEADERS)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
-        # check that bay is still valid as well
-        self.assertEqual(self.cluster.uuid, response['bay_uuid'])
         self.assertEqual(fake_cert['csr'], response['csr'])
         self.assertEqual(fake_cert['pem'], response['pem'])
 
@@ -149,23 +145,6 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
         self.assertEqual(new_cert['cluster_uuid'],
                          response.json['cluster_uuid'])
-        # verify bay_uuid is still valid as well
-        self.assertEqual(new_cert['cluster_uuid'], response.json['bay_uuid'])
-        self.assertEqual('fake-pem', response.json['pem'])
-
-    # Test that bay_uuid is still backward compatible
-    def test_create_cert_by_bay_name(self, ):
-        new_cert = api_utils.cert_post_data(cluster_uuid=self.cluster.uuid)
-        del new_cert['pem']
-        new_cert['bay_uuid'] = new_cert['cluster_uuid']
-        del new_cert['cluster_uuid']
-
-        response = self.post_json('/certificates', new_cert, headers=HEADERS)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(201, response.status_int)
-        self.assertEqual(self.cluster.uuid, response.json['cluster_uuid'])
-        # verify bay_uuid is still valid as well
-        self.assertEqual(self.cluster.uuid, response.json['bay_uuid'])
         self.assertEqual('fake-pem', response.json['pem'])
 
     def test_create_cert_by_cluster_name(self, ):
