@@ -195,7 +195,7 @@ class TestHeathcheck(api_base.FunctionalTest):
         # Read current file and create new one
         config = ConfigParser.RawConfigParser()
         config.read(self.get_path(paste_ini))
-        config.set('filter:healthcheck',
+        config.set('app:healthcheck',
                    'disable_by_file_path',
                    self.tempdir + "/disable")
         with open(self.tempdir + "/paste.ini", 'wt') as configfile:

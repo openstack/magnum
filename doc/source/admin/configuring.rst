@@ -35,20 +35,22 @@ Healthcheck Middleware
 This piece of middleware creates an endpoint that allows a load balancer
 to probe if the API endpoint should be available at the node or not.
 
-The healthcheck middleware should be placed early in the pipeline. Which
-is located in your ``api-paste.ini`` under a section called
-``[filter:healthcheck]``. It should look like this::
+The healthcheck middleware should be deployed as a paste application
+application. Which is located in your ``api-paste.ini`` under a section called
+``[app:healthcheck]``. It should look like this::
 
-    [filter:healthcheck]
-    paste.filter_factory = oslo_middleware:Healthcheck.factory
+    [app:healthcheck]
+    paste.app_factory = oslo_middleware:Healthcheck.app_factory
     backends = disable_by_file
     disable_by_file_path = /etc/magnum/healthcheck_disable
 
-The main pipeline using this filter should look something like this also
+The main pipeline using this application should look something like this also
 defined in the ``api-paste.ini``::
 
-    [pipeline:main]
-    pipeline = cors healthcheck request_id authtoken api_v1
+    [composite:main]
+    paste.composite_factory = magnum.api:root_app_factory
+    /: api
+    /healthcheck: healthcheck
 
 If you wish to disable a middleware without taking it out of the
 pipeline, you can create a file under the file path defined by
