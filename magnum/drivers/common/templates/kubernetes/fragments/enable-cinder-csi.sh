@@ -391,6 +391,8 @@ spec:
       labels:
         app: csi-cinder-nodeplugin
     spec:
+      tolerations:
+        - operator: Exists
       serviceAccount: csi-cinder-node-sa
       hostNetwork: true
       containers:
