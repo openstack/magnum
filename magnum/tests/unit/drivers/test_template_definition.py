@@ -20,6 +20,7 @@ import six
 
 from magnum.common import exception
 import magnum.conf
+from magnum.drivers.cluster_api import driver as cluster_api_driver
 from magnum.drivers.common import driver
 from magnum.drivers.heat import template_def as cmn_tdef
 from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
@@ -56,6 +57,13 @@ class TemplateDefinitionTestCase(base.TestCase):
                                                       entry_points):
             self.assertEqual(expected_entry_point, actual_entry_point)
             expected_entry_point.load.assert_called_once_with(require=False)
+
+    def test_get_vm_cluster_api_k8s_driver(self):
+        # NOTE(johngarbutt) covered by above test, but I wanted to be explict
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'ubuntu',
+                                                  'kubernetes')
+        self.assertIsInstance(cluster_driver, cluster_api_driver.Driver)
 
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_get_vm_atomic_kubernetes_definition(self, mock_driver):
