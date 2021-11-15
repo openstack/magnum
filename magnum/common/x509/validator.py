@@ -18,6 +18,12 @@ from magnum.common import exception
 from magnum.common.x509 import extensions
 import magnum.conf
 
+try:
+    # for cryptography >= 35.0.0
+    from cryptography.hazmat._oid import _OID_NAMES as OID_NAMES
+except ImportError:
+    from cryptography.x509.oid import _OID_NAMES as OID_NAMES
+
 _CA_KEY_USAGES = [
     extensions.KeyUsages.KEY_CERT_SIGN.value[0],
     extensions.KeyUsages.CRL_SIGN.value[0]
@@ -50,7 +56,7 @@ def filter_allowed_extensions(extensions, allowed_extensions=None):
     allowed_extensions = allowed_extensions or []
 
     for ext in extensions:
-        ext_name = x509.oid._OID_NAMES.get(ext.oid, None)
+        ext_name = OID_NAMES.get(ext.oid, None)
         if ext_name in allowed_extensions:
             yield ext
         else:
