@@ -25,10 +25,9 @@ class TestX509Operations(base.BaseTestCase):
         super(TestX509Operations, self).setUp()
 
     @mock.patch.object(serialization, 'NoEncryption')
-    @mock.patch.object(operations, 'default_backend')
     @mock.patch.object(operations, '_load_pem_private_key')
     def test_decrypt_key(self, mock_load_pem_private_key,
-                         mock_default_backend, mock_no_encryption_class):
+                         mock_no_encryption_class):
         mock_private_key = mock.MagicMock()
         mock_load_pem_private_key.return_value = mock_private_key
         mock_private_key.private_bytes.return_value = mock.sentinel.decrypted
@@ -45,11 +44,7 @@ class TestX509Operations(base.BaseTestCase):
         )
         self.assertEqual(mock.sentinel.decrypted, actual_decrypted)
 
-    @mock.patch.object(operations, 'default_backend')
-    @mock.patch.object(rsa, 'generate_private_key')
-    def test_generate_csr_and_key(self, mock_generate_private_key,
-                                  mock_default_backend):
-        mock_generate_private_key.return_value = mock.MagicMock()
+    def test_generate_csr_and_key(self):
         csr_keys = operations.generate_csr_and_key(u"Test")
         self.assertIsNotNone(csr_keys)
         self.assertTrue("public_key" in csr_keys)

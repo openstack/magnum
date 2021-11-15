@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
@@ -40,11 +39,10 @@ class TestX509(base.BaseTestCase):
     def _load_pems(self, keypairs, encryption_password):
         private_key = serialization.load_pem_private_key(
             keypairs['private_key'],
-            password=encryption_password,
-            backend=default_backend(),
+            password=encryption_password
         )
         certificate = c_x509.load_pem_x509_certificate(
-            keypairs['certificate'], default_backend())
+            keypairs['certificate'])
 
         return certificate, private_key
 
@@ -85,8 +83,7 @@ class TestX509(base.BaseTestCase):
     def _generate_private_key(self):
         return rsa.generate_private_key(
             public_exponent=65537,
-            key_size=2048,
-            backend=default_backend()
+            key_size=2048
         )
 
     def _build_csr(self, private_key):
@@ -95,7 +92,7 @@ class TestX509(base.BaseTestCase):
             c_x509.NameAttribute(NameOID.COMMON_NAME, self.subject_name)
         ]))
 
-        return csr.sign(private_key, hashes.SHA256(), default_backend())
+        return csr.sign(private_key, hashes.SHA256())
 
     def assertHasPublicKey(self, keypairs):
         key = keypairs[1]
