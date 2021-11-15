@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Default value of ``[cinder_client] api_version`` has been updated from
+    ``2`` to ``3``, because volume v2 API is no longer available.
