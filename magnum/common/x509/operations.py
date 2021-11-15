@@ -16,7 +16,6 @@ import datetime
 import six
 import uuid
 
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
@@ -112,8 +111,7 @@ def _generate_certificate(issuer_name, subject_name, extensions,
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,
-        key_size=CONF.x509.rsa_key_size,
-        backend=default_backend()
+        key_size=CONF.x509.rsa_key_size
     )
 
     # subject name is set as common name
@@ -132,7 +130,7 @@ def _generate_certificate(issuer_name, subject_name, extensions,
         ca_key = private_key
         ca_key_password = encryption_password
 
-    csr = csr.sign(private_key, hashes.SHA256(), default_backend())
+    csr = csr.sign(private_key, hashes.SHA256())
 
     if six.PY3 and isinstance(encryption_password, six.text_type):
         encryption_password = encryption_password.encode()
@@ -170,8 +168,7 @@ def _load_pem_private_key(ca_key, ca_key_password=None):
 
         ca_key = serialization.load_pem_private_key(
             ca_key,
-            password=ca_key_password,
-            backend=default_backend()
+            password=ca_key_password
         )
 
     return ca_key
@@ -198,7 +195,7 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
         csr = six.b(str(csr))
     if not isinstance(csr, x509.CertificateSigningRequest):
         try:
-            csr = x509.load_pem_x509_csr(csr, backend=default_backend())
+            csr = x509.load_pem_x509_csr(csr)
         except ValueError:
             LOG.exception("Received invalid csr %s.", csr)
             raise exception.InvalidCsr(csr=csr)
@@ -229,7 +226,6 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
 
     certificate = builder.sign(
         private_key=ca_key, algorithm=hashes.SHA256(),
-        backend=default_backend()
     ).public_bytes(serialization.Encoding.PEM).strip()
 
     return certificate
@@ -239,14 +235,14 @@ def generate_csr_and_key(common_name):
     """Return a dict with a new csr, public key and private key."""
     private_key = rsa.generate_private_key(
         public_exponent=65537,
-        key_size=2048,
-        backend=default_backend())
+        key_size=2048
+    )
 
     public_key = private_key.public_key()
 
     csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
         x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, common_name),
-    ])).sign(private_key, hashes.SHA256(), default_backend())
+    ])).sign(private_key, hashes.SHA256())
 
     result = {
         'csr': csr.public_bytes(
