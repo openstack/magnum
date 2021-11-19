@@ -14,6 +14,8 @@
 
 from unittest import mock
 
+import heatclient.exc as heat_exc
+
 from magnum.common import exception
 from magnum.common import octavia
 from magnum import objects
@@ -159,6 +161,29 @@ class OctaviaTest(base.TestCase):
         mock_heat_client.resources.list.return_value = [
             TestHeatLBResource(None)
         ]
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.octavia.return_value = mock_octavia_client
+        osc.heat.return_value = mock_heat_client
+
+        octavia.delete_loadbalancers(self.context, self.cluster)
+
+        self.assertFalse(mock_octavia_client.load_balancer_show.called)
+        self.assertFalse(mock_octavia_client.load_balancer_delete.called)
+
+    @mock.patch("magnum.common.neutron.delete_floatingip")
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_delete_loadbalancers_with_stack_not_found(self, mock_clients,
+                                                       mock_delete_fip):
+        mock_octavia_client = mock.MagicMock()
+        mock_octavia_client.load_balancer_list.return_value = {
+            "loadbalancers": []
+        }
+
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.resources.list.side_effect = \
+            heat_exc.HTTPNotFound
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
