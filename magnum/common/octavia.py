@@ -14,6 +14,7 @@
 import re
 import time
 
+import heatclient.exc as heat_exc
 from osc_lib import exceptions as osc_exc
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -71,7 +72,7 @@ def _delete_loadbalancers(context, lbs, cluster, octavia_client,
     return candidates
 
 
-def delete_loadbalancers(context, cluster):
+def delete_loadbalancers(context, cluster):  # noqa: C901
     """Delete loadbalancers for the cluster.
 
     The following load balancers are deleted:
@@ -106,9 +107,14 @@ def delete_loadbalancers(context, cluster):
 
         # Get load balancers created for Kubernetes api/etcd
         lbs = []
-        lb_resources = heat_client.resources.list(
-            cluster.stack_id, nested_depth=2,
-            filters={"type": lb_resource_type})
+        try:
+            lb_resources = heat_client.resources.list(
+                cluster.stack_id, nested_depth=2,
+                filters={"type": lb_resource_type})
+        except heat_exc.HTTPNotFound:
+            # NOTE(mnaser): It's possible that the stack has been deleted
+            #               but Magnum still has a `stack_id` pointing.
+            return
         for lb_res in lb_resources:
             lb_id = lb_res.physical_resource_id
             if not lb_id:
