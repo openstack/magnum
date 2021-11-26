@@ -34,11 +34,25 @@ cluster_update_allowed_properties = set(['node_count', 'health_status',
 federation_update_allowed_properties = set(['member_ids', 'properties'])
 
 
+def ct_not_found_to_bad_request():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except exception.ClusterTemplateNotFound as e:
+            # Change error code because 404 (NotFound) is inappropriate
+            # response for a POST request to create a Cluster
+            e.code = 400  # BadRequest
+            raise
+
+    return wrapper
+
+
 def enforce_cluster_type_supported():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         cluster = args[1]
-        cluster_template = objects.ClusterTemplate.get_by_uuid(
+        cluster_template = objects.ClusterTemplate.get(
             pecan.request.context, cluster.cluster_template_id)
         cluster_type = (cluster_template.server_type,
                         cluster_template.cluster_distro,
@@ -77,7 +91,7 @@ def enforce_cluster_volume_storage_size():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         cluster = args[1]
-        cluster_template = objects.ClusterTemplate.get_by_uuid(
+        cluster_template = objects.ClusterTemplate.get(
             pecan.request.context, cluster.cluster_template_id)
         _enforce_volume_storage_size(
             cluster_template.as_dict(), cluster.as_dict())

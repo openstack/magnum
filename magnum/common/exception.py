@@ -480,3 +480,8 @@ class InvalidClusterTemplateForUpgrade(Conflict):
 
 class ClusterAPIAddressUnavailable(Conflict):
     message = _("Cluster API address is not available yet")
+
+
+class ObjectError(MagnumException):
+    message = _("Failed to perform action %{action}s on %{obj_name}s with "
+                "uuid %{obj_id}s: %{reason}s")

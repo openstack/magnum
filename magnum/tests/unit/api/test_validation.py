@@ -30,7 +30,7 @@ CONF = magnum.conf.CONF
 class TestValidation(base.BaseTestCase):
 
     def _test_enforce_cluster_type_supported(
-            self, mock_cluster_template_get_by_uuid, mock_cluster_get_by_uuid,
+            self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type, assert_raised=False):
 
         @v.enforce_cluster_type_supported()
@@ -41,7 +41,7 @@ class TestValidation(base.BaseTestCase):
         cluster_template = obj_utils.get_test_cluster_template(
             mock_pecan_request.context, uuid='cluster_template_id',
             coe=coe, cluster_distro=cluster_distro, server_type=server_type)
-        mock_cluster_template_get_by_uuid.return_value = cluster_template
+        mock_cluster_template_get.return_value = cluster_template
 
         cluster = mock.MagicMock()
         cluster.cluster_template_id = 'cluster_template_id'
@@ -56,26 +56,26 @@ class TestValidation(base.BaseTestCase):
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get')
     def test_enforce_cluster_type_supported(
-            self, mock_cluster_template_get_by_uuid, mock_cluster_get_by_uuid,
+            self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request):
 
         cluster_type = ('vm', 'fedora-atomic', 'kubernetes')
         self._test_enforce_cluster_type_supported(
-            mock_cluster_template_get_by_uuid, mock_cluster_get_by_uuid,
+            mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type)
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get')
     def test_enforce_cluster_type_not_supported(
-            self, mock_cluster_template_get_by_uuid, mock_cluster_get_by_uuid,
+            self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request):
 
         cluster_type = ('vm', 'foo', 'kubernetes')
         exc = self._test_enforce_cluster_type_supported(
-            mock_cluster_template_get_by_uuid, mock_cluster_get_by_uuid,
+            mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type, assert_raised=True)
         self.assertEqual('Cluster type (vm, foo, kubernetes) not supported.',
                          exc.message)

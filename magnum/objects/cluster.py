@@ -22,6 +22,9 @@ from magnum.objects import fields as m_fields
 from magnum.objects.nodegroup import NodeGroup
 
 
+LAZY_LOADED_ATTRS = ['cluster_template']
+
+
 @base.MagnumObjectRegistry.register
 class Cluster(base.MagnumPersistentObject, base.MagnumObject,
               base.MagnumObjectDictCompat):
@@ -100,15 +103,10 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     def _from_db_object(cluster, db_cluster):
         """Converts a database entity to a formal object."""
         for field in cluster.fields:
+            # cluster_template will be loaded lazily when it is needed
+            # by obj_load_attr.
             if field != 'cluster_template':
                 cluster[field] = db_cluster[field]
-
-        # Note(eliqiao): The following line needs to be placed outside the
-        # loop because there is a dependency from cluster_template to
-        # cluster_template_id. The cluster_template_id must be populated
-        # first in the loop before it can be used to find the cluster_template.
-        cluster['cluster_template'] = ClusterTemplate.get_by_uuid(
-            cluster._context, cluster.cluster_template_id)
 
         cluster.obj_reset_changes()
         return cluster
@@ -330,6 +328,17 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         for field in self.fields:
             if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]
+
+    def obj_load_attr(self, attrname):
+        if attrname not in LAZY_LOADED_ATTRS:
+            raise exception.ObjectError(
+                action='obj_load_attr', obj_name=self.name, obj_id=self.uuid,
+                reason='unable to lazy-load %s' % attrname)
+
+        self['cluster_template'] = ClusterTemplate.get_by_uuid(
+            self._context, self.cluster_template_id)
+
+        self.obj_reset_changes(['cluster_template'])
 
     def as_dict(self):
         dict_ = super(Cluster, self).as_dict()
