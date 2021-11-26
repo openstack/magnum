@@ -89,6 +89,9 @@ spec:
           args:
             - /bin/octavia-ingress-controller
             - --config=/etc/config/octavia-ingress-controller-config.yaml
+          resources:
+            requests:
+              cpu: 50m
           volumeMounts:
             - mountPath: /etc/kubernetes
               name: kubernetes-config

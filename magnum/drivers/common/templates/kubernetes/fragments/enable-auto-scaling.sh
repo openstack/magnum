@@ -148,6 +148,10 @@ spec:
             - --scale-down-unneeded-time=10m
             - --scale-down-delay-after-failure=3m
             - --scale-down-delay-after-add=10m
+          resources:
+            requests:
+              cpu: 100m
+              memory: 300Mi
           ports:
           - containerPort: 8085
             name: metrics

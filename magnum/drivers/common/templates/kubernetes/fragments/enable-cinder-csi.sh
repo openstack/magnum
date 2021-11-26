@@ -262,6 +262,9 @@ spec:
             - "--v=5"
             - "--csi-address=\$(ADDRESS)"
             - "--timeout=3m"
+          resources:
+            requests:
+              cpu: 20m
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
@@ -274,6 +277,9 @@ spec:
           args:
             - "--csi-address=\$(ADDRESS)"
             - "--timeout=3m"
+          resources:
+            requests:
+              cpu: 20m
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
@@ -285,6 +291,9 @@ spec:
           image: ${CONTAINER_INFRA_PREFIX:-quay.io/k8scsi/}csi-snapshotter:${CSI_SNAPSHOTTER_TAG}
           args:
             - "--csi-address=\$(ADDRESS)"
+          resources:
+            requests:
+              cpu: 20m
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
@@ -297,6 +306,9 @@ spec:
           args:
             - "--v=5"
             - "--csi-address=\$(ADDRESS)"
+          resources:
+            requests:
+              cpu: 20m
           env:
             - name: ADDRESS
               value: /var/lib/csi/sockets/pluginproxy/csi.sock
@@ -312,6 +324,9 @@ spec:
             - "--endpoint=\$(CSI_ENDPOINT)"
             - "--cloud-config=\$(CLOUD_CONFIG)"
             - "--cluster=\$(CLUSTER_NAME)"
+          resources:
+            requests:
+              cpu: 20m
           env:
             - name: NODE_ID
               valueFrom:
@@ -401,6 +416,9 @@ spec:
           args:
             - "--csi-address=\$(ADDRESS)"
             - "--kubelet-registration-path=\$(DRIVER_REG_SOCK_PATH)"
+          resources:
+            requests:
+              cpu: 25m
           lifecycle:
             preStop:
               exec:
@@ -432,6 +450,9 @@ spec:
             - "--nodeid=\$(NODE_ID)"
             - "--endpoint=\$(CSI_ENDPOINT)"
             - "--cloud-config=\$(CLOUD_CONFIG)"
+          resources:
+            requests:
+              cpu: 25m
           env:
             - name: NODE_ID
               valueFrom:

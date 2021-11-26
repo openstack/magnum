@@ -216,6 +216,10 @@ spec:
             # If not specified, Dashboard will attempt to auto discover the API server and connect
             # to it. Uncomment only if the default does not work.
             # - --apiserver-host=http://my-address:port
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
           volumeMounts:
             - name: kubernetes-dashboard-certs
               mountPath: /certs
@@ -292,6 +296,9 @@ spec:
           ports:
             - containerPort: 8000
               protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
           livenessProbe:
             httpGet:
               scheme: HTTP
@@ -354,6 +361,10 @@ spec:
       containers:
       - name: influxdb
         image: ${INFLUX_IMAGE}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
         volumeMounts:
         - mountPath: /data
           name: influxdb-storage
@@ -405,6 +416,10 @@ spec:
       containers:
       - name: grafana
         image: ${GRAFANA_IMAGE}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
         ports:
         - containerPort: 3000
           protocol: TCP
@@ -508,6 +523,10 @@ spec:
         command:
         - /heapster
         - --source=kubernetes:https://kubernetes.default?insecure=false&useServiceAccount=true&kubeletPort=10250&kubeletHttps=true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
 ${INFLUX_SINK}
 ---
 apiVersion: v1

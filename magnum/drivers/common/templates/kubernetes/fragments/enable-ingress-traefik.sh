@@ -70,6 +70,10 @@ spec:
       containers:
       - image: ${CONTAINER_INFRA_PREFIX:-docker.io/}traefik:${TRAEFIK_INGRESS_CONTROLLER_TAG}
         name: ingress-traefik-backend
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
         ports:
         - name: http
           containerPort: 80
