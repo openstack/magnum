@@ -41,8 +41,6 @@ if [[ -e /etc/ci/mirror_info.sh ]]; then
     source /etc/ci/mirror_info.sh
 fi
 
-NODEPOOL_ATOMIC_MIRROR=${NODEPOOL_FEDORA_MIRROR:-https://download.fedoraproject.org/pub/alt}
-
 if [ "$coe" = "mesos" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-ocata.qcow2"
 elif [ "$coe" = "k8s-coreos" ]; then
@@ -88,7 +86,7 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SPECS_DISK=10"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_EPHEMERAL_DISK=5"
 else
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='${NODEPOOL_ATOMIC_MIRROR}/atomic/stable/Fedora-29-updates-20190820.0/AtomicHost/x86_64/images/Fedora-AtomicHost-29-20190820.0.x86_64.qcow2'"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='https://dl.fedoraproject.org/pub/alt/atomic/stable/Fedora-29-updates-20190820.0/AtomicHost/x86_64/images/Fedora-AtomicHost-29-20190820.0.x86_64.qcow2'"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='Fedora-AtomicHost-29-20190820.0.x86_64'"
 fi
 
