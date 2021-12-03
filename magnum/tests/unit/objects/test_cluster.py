@@ -117,13 +117,12 @@ class TestClusterObject(base.DbTestCase):
             self.assertThat(clusters, HasLength(1))
             self.assertIsInstance(clusters[0], objects.Cluster)
             self.assertEqual(self.context, clusters[0]._context)
+            mock_cluster_template_get.assert_not_called()
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    def test_list_with_filters(self, mock_cluster_template_get):
+    def test_list_with_filters(self):
         with mock.patch.object(self.dbapi, 'get_cluster_list',
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_cluster]
-            mock_cluster_template_get.return_value = self.fake_cluster_template
             filters = {'name': 'cluster1'}
             clusters = objects.Cluster.list(self.context, filters=filters)
 
@@ -136,24 +135,20 @@ class TestClusterObject(base.DbTestCase):
             self.assertIsInstance(clusters[0], objects.Cluster)
             self.assertEqual(self.context, clusters[0]._context)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    def test_create(self, mock_cluster_template_get):
+    def test_create(self):
         with mock.patch.object(self.dbapi, 'create_cluster',
                                autospec=True) as mock_create_cluster:
-            mock_cluster_template_get.return_value = self.fake_cluster_template
             mock_create_cluster.return_value = self.fake_cluster
             cluster = objects.Cluster(self.context, **self.fake_cluster)
             cluster.create()
             mock_create_cluster.assert_called_once_with(self.fake_cluster)
             self.assertEqual(self.context, cluster._context)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    def test_destroy(self, mock_cluster_template_get):
+    def test_destroy(self):
         uuid = self.fake_cluster['uuid']
         with mock.patch.object(self.dbapi, 'get_cluster_by_uuid',
                                autospec=True) as mock_get_cluster:
             mock_get_cluster.return_value = self.fake_cluster
-            mock_cluster_template_get.return_value = self.fake_cluster_template
             with mock.patch.object(self.dbapi, 'destroy_cluster',
                                    autospec=True) as mock_destroy_cluster:
                 cluster = objects.Cluster.get_by_uuid(self.context, uuid)
@@ -162,12 +157,10 @@ class TestClusterObject(base.DbTestCase):
                 mock_destroy_cluster.assert_called_once_with(uuid)
                 self.assertEqual(self.context, cluster._context)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    def test_save(self, mock_cluster_template_get):
+    def test_save(self):
         uuid = self.fake_cluster['uuid']
         with mock.patch.object(self.dbapi, 'get_cluster_by_uuid',
                                autospec=True) as mock_get_cluster:
-            mock_cluster_template_get.return_value = self.fake_cluster_template
             mock_get_cluster.return_value = self.fake_cluster
             with mock.patch.object(self.dbapi, 'update_cluster',
                                    autospec=True) as mock_update_cluster:
@@ -177,12 +170,10 @@ class TestClusterObject(base.DbTestCase):
 
                 mock_get_cluster.assert_called_once_with(self.context, uuid)
                 mock_update_cluster.assert_called_once_with(
-                    uuid, {'status': 'DELETE_IN_PROGRESS',
-                           'cluster_template': self.fake_cluster_template})
+                    uuid, {'status': 'DELETE_IN_PROGRESS'})
                 self.assertEqual(self.context, cluster._context)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    def test_refresh(self, mock_cluster_template_get):
+    def test_refresh(self):
         uuid = self.fake_cluster['uuid']
         new_uuid = uuidutils.generate_uuid()
         returns = [dict(self.fake_cluster, uuid=uuid),
@@ -192,7 +183,6 @@ class TestClusterObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_cluster_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_cluster:
-            mock_cluster_template_get.return_value = self.fake_cluster_template
             cluster = objects.Cluster.get_by_uuid(self.context, uuid)
             self.assertEqual(uuid, cluster.uuid)
             cluster.refresh()

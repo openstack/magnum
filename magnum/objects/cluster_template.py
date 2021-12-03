@@ -14,7 +14,6 @@ from oslo_utils import strutils
 from oslo_utils import uuidutils
 from oslo_versionedobjects import fields
 
-from magnum.common import exception
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import fields as m_fields
@@ -112,7 +111,7 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         elif uuidutils.is_uuid_like(cluster_template_id):
             return cls.get_by_uuid(context, cluster_template_id)
         else:
-            raise exception.InvalidIdentity(identity=cluster_template_id)
+            return cls.get_by_name(context, cluster_template_id)
 
     @base.remotable_classmethod
     def get_by_id(cls, context, cluster_template_id):
