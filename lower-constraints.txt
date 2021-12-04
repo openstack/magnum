@@ -49,7 +49,6 @@ jsonschema==2.6.0
 keystoneauth1==3.14.0
 keystonemiddleware==9.0.0
 kombu==5.0.1
-kubernetes==12.0.0
 linecache2==1.0.0
 logutils==0.3.5
 Mako==1.0.7
@@ -124,6 +123,7 @@ repoze.lru==0.7
 requests-oauthlib==0.8.0
 requests-toolbelt==0.8.0
 requests==2.20.1
+requests-mock==1.2.0
 requestsexceptions==1.4.0
 restructuredtext-lint==1.1.3
 rfc3986==1.2.0

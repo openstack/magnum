@@ -42,7 +42,7 @@ class K8sMonitor(monitors.MonitorBase):
         }
 
     def pull_data(self):
-        k8s_api = k8s.create_k8s_api(self.context, self.cluster)
+        k8s_api = k8s.KubernetesAPI(self.context, self.cluster)
         nodes = k8s_api.list_node()
         self.data['nodes'] = self._parse_node_info(nodes)
         pods = k8s_api.list_namespaced_pod('default')
@@ -52,7 +52,7 @@ class K8sMonitor(monitors.MonitorBase):
         if self._is_magnum_auto_healer_running():
             return
 
-        k8s_api = k8s.create_k8s_api(self.context, self.cluster)
+        k8s_api = k8s.KubernetesAPI(self.context, self.cluster)
         if self._is_cluster_accessible():
             status, reason = self._poll_health_status(k8s_api)
         else:
@@ -132,20 +132,16 @@ class K8sMonitor(monitors.MonitorBase):
             [{'Memory': 1280000.0, cpu: 0.5},
              {'Memory': 1280000.0, cpu: 0.5}]
         """
-        pods = pods.items
+        pods = pods['items']
         parsed_containers = []
         for pod in pods:
-            containers = pod.spec.containers
+            containers = pod['spec']['containers']
             for container in containers:
                 memory = 0
                 cpu = 0
-                resources = container.resources
-                limits = resources.limits
+                resources = container['resources']
+                limits = resources['limits']
                 if limits is not None:
-                    # Output of resources.limits is string
-                    # for example:
-                    # limits = "{cpu': '500m': 'memory': '1000Ki'}"
-                    limits = ast.literal_eval(limits)
                     if limits.get('memory', ''):
                         memory = utils.get_k8s_quantity(limits['memory'])
                     if limits.get('cpu', ''):
@@ -184,13 +180,13 @@ class K8sMonitor(monitors.MonitorBase):
              {'cpu': 1, 'Memory': 1024.0}]
 
         """
-        nodes = nodes.items
+        nodes = nodes['items']
         parsed_nodes = []
         for node in nodes:
             # Output of node.status.capacity is strong
             # for example:
             # capacity = "{'cpu': '1', 'memory': '1000Ki'}"
-            capacity = node.status.capacity
+            capacity = node['status']['capacity']
             memory = utils.get_k8s_quantity(capacity['memory'])
             cpu = int(capacity['cpu'])
             parsed_nodes.append({'Memory': memory, 'Cpu': cpu})
@@ -234,15 +230,14 @@ class K8sMonitor(monitors.MonitorBase):
         api_status = None
 
         try:
-            api_status, _, _ = k8s_api.api_client.call_api(
-                '/healthz', 'GET', response_type=object)
+            api_status = k8s_api.get_healthz()
 
-            for node in k8s_api.list_node().items:
-                node_key = node.metadata.name + ".Ready"
+            for node in k8s_api.list_node()['items']:
+                node_key = node['metadata']['name'] + ".Ready"
                 ready = False
-                for condition in node.status.conditions:
-                    if condition.type == 'Ready':
-                        ready = strutils.bool_from_string(condition.status)
+                for condition in node['status']['conditions']:
+                    if condition['type'] == 'Ready':
+                        ready = strutils.bool_from_string(condition['status'])
                         break
 
                 health_status_reason[node_key] = ready
