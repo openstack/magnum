@@ -29,10 +29,7 @@ function create_test_data {
 
     coe=$1
     special=$2
-    if [ $coe == 'mesos' ]; then
-        local image_name="ubuntu.*mesos"
-        local container_format="bare"
-    elif [ $coe == 'k8s-coreos' ]; then
+    if [ $coe == 'k8s-coreos' ]; then
         local image_name="coreos"
         local container_format="bare"
     elif [ "${coe}${special}" == 'k8s-ironic' ]; then
@@ -158,8 +155,7 @@ export MAGNUM_DIR="$BASE/new/magnum"
 sudo chown -R $USER:stack $MAGNUM_DIR
 
 # Run functional tests
-# Currently we support functional-api, functional-k8s, will support swarm,
-# mesos later.
+# Currently we support functional-api, functional-k8s, will support swarm.
 
 echo "Running magnum functional test suite for $1"
 

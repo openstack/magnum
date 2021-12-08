@@ -92,7 +92,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --coe \<coe\>
   Specify the Container Orchestration Engine to use.  Supported
-  COE's include 'kubernetes', 'swarm'.  If your environment
+  COE's include 'kubernetes' and 'swarm'.  If your environment
   has additional cluster drivers installed, refer to the cluster driver
   documentation for the new COE names.  This is a mandatory parameter
   and there is no default value.

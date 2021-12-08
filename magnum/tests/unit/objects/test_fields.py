@@ -95,8 +95,7 @@ class TestClusterType(test_fields.TestField):
         super(TestClusterType, self).setUp()
         self.field = fields.ClusterTypeField()
         self.coerce_good_values = [('kubernetes', 'kubernetes'),
-                                   ('swarm', 'swarm'),
-                                   ('mesos', 'mesos'), ]
+                                   ('swarm', 'swarm'), ]
         self.coerce_bad_values = ['invalid']
 
         self.to_primitive_values = self.coerce_good_values[0:1]

@@ -341,15 +341,3 @@ class SwarmValidator(Validator):
                               swarm_default_network_driver)
 
     supported_volume_driver = ['rexray']
-
-
-class MesosValidator(Validator):
-
-    supported_network_drivers = ['docker']
-    supported_server_types = ['vm', 'bm']
-    allowed_network_drivers = (CONF.cluster_template.
-                               mesos_allowed_network_drivers)
-    default_network_driver = (CONF.cluster_template.
-                              mesos_default_network_driver)
-
-    supported_volume_driver = ['rexray']

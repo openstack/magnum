@@ -28,7 +28,7 @@ def get_scale_manager(context, osclient, cluster):
     cluster_driver = Driver.get_driver_for_cluster(context, cluster)
     manager = cluster_driver.get_scale_manager(context, osclient, cluster)
 
-    # NOTE: Currently only kubernetes and mesos cluster scale managers
+    # NOTE: Currently only kubernetes cluster scale managers
     # are available.
     return manager
 

@@ -3,7 +3,7 @@ Using Proxies in magnum if running under firewall
 =================================================
 
 If you are running magnum behind a firewall then you may need a proxy
-for using services like docker, kubernetes. Use these steps
+for using services like docker and kubernetes. Use these steps
 when your firewall will not allow you to use those services without a
 proxy.
 

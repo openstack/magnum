@@ -1138,9 +1138,9 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_cluster_with_disabled_driver(self):
         cfg.CONF.set_override('disabled_drivers',
-                              ['mesos_ubuntu_v1'],
+                              ['swarm_fedora_atomic_v1'],
                               group='drivers')
-        bdict = apiutils.cluster_template_post_data(coe="mesos")
+        bdict = apiutils.cluster_template_post_data(coe="swarm")
         self.assertRaises(AppError, self.post_json, '/clustertemplates',
                           bdict)
 

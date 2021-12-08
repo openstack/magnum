@@ -43,17 +43,6 @@ cluster_template_opts = [
                help=_("Default network driver for docker swarm "
                       "cluster-templates."),
                deprecated_group='baymodel'),
-    cfg.ListOpt('mesos_allowed_network_drivers',
-                default=['all'],
-                help=_("Allowed network drivers for mesos cluster-templates. "
-                       "Use 'all' keyword to allow all drivers supported "
-                       "for mesos cluster-templates. Supported network "
-                       "drivers include docker."),
-                deprecated_group='baymodel'),
-    cfg.StrOpt('mesos_default_network_driver',
-               default='docker',
-               help=_("Default network driver for mesos cluster-templates."),
-               deprecated_group='baymodel'),
 ]
 
 

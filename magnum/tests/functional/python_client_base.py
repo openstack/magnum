@@ -382,8 +382,6 @@ extendedKeyUsage = clientAuth
             output_keys = ["swarm_primary_master",
                            "swarm_secondary_masters",
                            "swarm_nodes"]
-        elif self.cluster_template.coe == "mesos":
-            output_keys = ["mesos_master", "mesos_slaves"]
 
         for output in stack_outputs:
             for key in output_keys:

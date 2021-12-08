@@ -125,76 +125,6 @@ class TestAttrValidator(base.BaseTestCase):
         fake_labels = {}
         attr_validator.validate_labels(fake_labels)
 
-    def test_validate_labels_main_isolation_invalid_label(self):
-        fake_labels = {'mesos_slave_isolation': 'abc'}
-        self.assertRaises(exception.InvalidParameterValue,
-                          attr_validator.validate_labels,
-                          fake_labels)
-
-    def test_validate_labels_isolation_valid(self):
-        fake_labels = {'mesos_slave_isolation':
-                       'filesystem/posix,filesystem/linux'}
-        attr_validator.validate_labels_isolation(fake_labels)
-
-    def test_validate_labels_main_with_valid_providers_none_isolation(self):
-        fake_labels = {'mesos_slave_image_providers': 'docker'}
-        self.assertRaises(exception.RequiredParameterNotProvided,
-                          attr_validator.validate_labels,
-                          fake_labels)
-
-    def test_validate_labels_with_valid_providers_invalid_isolation(self):
-        fake_labels = {'mesos_slave_image_providers': 'docker',
-                       'mesos_slave_isolation': 'abc'}
-        self.assertRaises(exception.RequiredParameterNotProvided,
-                          attr_validator.validate_labels_image_providers,
-                          fake_labels)
-
-    def test_validate_labels_with_valid_providers_invalid_providers(self):
-        fake_labels = {'mesos_slave_image_providers': 'appc'}
-        attr_validator.validate_labels_image_providers(fake_labels)
-
-    def test_validate_labels_with_invalid_providers(self):
-        fake_labels = {'mesos_slave_image_providers': 'abc'}
-        self.assertRaises(exception.InvalidParameterValue,
-                          attr_validator.validate_labels_image_providers,
-                          fake_labels)
-
-    def test_validate_labels_with_valid_providers_none_isolation(self):
-        fake_labels = {'mesos_slave_image_providers': 'docker'}
-        self.assertRaises(exception.RequiredParameterNotProvided,
-                          attr_validator.validate_labels_image_providers,
-                          fake_labels)
-
-    def test_validate_labels_with_valid_providers_valid_isolation(self):
-        fake_labels = {'mesos_slave_image_providers': 'docker',
-                       'mesos_slave_isolation': 'docker/runtime'}
-        attr_validator.validate_labels_image_providers(fake_labels)
-
-    def test_validate_labels_with_environment_variables_valid_json(self):
-        contents = '{"step": "upgrade", "interface": "deploy"}'
-        fack_labels = {'mesos_slave_executor_env_variables': contents}
-        attr_validator.validate_labels_executor_env_variables(
-            fack_labels)
-
-    def test_validate_labels_with_environment_variables_bad_json(self):
-        fack_labels = {'mesos_slave_executor_env_variables': 'step'}
-        self.assertRaisesRegex(
-            exception.InvalidParameterValue,
-            "Json format error",
-            attr_validator.validate_labels_executor_env_variables,
-            fack_labels)
-
-    def test_validate_labels_with_valid_isolation(self):
-        fake_labels = {'mesos_slave_isolation':
-                       'filesystem/posix,filesystem/linux'}
-        attr_validator.validate_labels_isolation(fake_labels)
-
-    def test_validate_labels_isolation_invalid(self):
-        fake_labels = {'mesos_slave_isolation': 'filesystem'}
-        self.assertRaises(exception.InvalidParameterValue,
-                          attr_validator.validate_labels_isolation,
-                          fake_labels)
-
     def test_validate_labels_strategy_valid(self):
         fake_labels = {'swarm_strategy': 'spread'}
         attr_validator.validate_labels_strategy(fake_labels)
@@ -306,7 +236,7 @@ class TestAttrValidator(base.BaseTestCase):
     @mock.patch('magnum.api.attr_validator.validate_labels')
     def test_validate_os_resources_with_label(self, mock_validate_labels,
                                               mock_os_cli):
-        mock_cluster_template = {'labels': {'mesos_slave_isolation': 'abc'}}
+        mock_cluster_template = {'labels': {'swarm_strategy': 'abc'}}
         mock_context = mock.MagicMock()
         self.assertRaises(exception.InvalidParameterValue,
                           attr_validator.validate_os_resources, mock_context,
