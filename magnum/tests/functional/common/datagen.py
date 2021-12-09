@@ -38,7 +38,6 @@ def gen_coe_dep_network_driver(coe):
         'kubernetes': ['flannel', None],
         'swarm': ['docker', 'flannel', None],
         'swarm-mode': ['docker', None],
-        'mesos': ['docker', None],
     }
     driver_types = allowed_driver_types[coe]
     return driver_types[random.randrange(0, len(driver_types))]
@@ -49,7 +48,6 @@ def gen_coe_dep_volume_driver(coe):
         'kubernetes': ['cinder', None],
         'swarm': ['rexray', None],
         'swarm-mode': ['rexray', None],
-        'mesos': ['rexray', None],
     }
     driver_types = allowed_driver_types[coe]
     return driver_types[random.randrange(0, len(driver_types))]

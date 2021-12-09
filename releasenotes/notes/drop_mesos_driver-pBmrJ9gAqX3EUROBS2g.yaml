@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    Removed mesos driver. Mesos is no longer supported in Magnum.

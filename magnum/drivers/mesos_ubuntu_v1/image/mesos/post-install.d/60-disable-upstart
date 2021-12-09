@@ -1,6 +1,0 @@
-#!/bin/bash
-
-for service in zookeeper mesos-slave mesos-master marathon; do
-    service $service stop
-    [ -f /etc/init/$service.conf ] && echo "manual" > /etc/init/$service.override
-done

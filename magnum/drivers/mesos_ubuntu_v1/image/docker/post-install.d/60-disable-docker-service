@@ -1,4 +1,0 @@
-#!/bin/bash
-
-service docker stop
-[ -f /etc/init/docker.conf ] && echo "manual" > /etc/init/docker.override

@@ -16,12 +16,10 @@
 import tempfile
 from unittest import mock
 
-from oslo_serialization import jsonutils
 from requests_mock.contrib import fixture
 
 from magnum.common import exception
 from magnum.drivers.common import k8s_monitor
-from magnum.drivers.mesos_ubuntu_v1 import monitor as mesos_monitor
 from magnum.drivers.swarm_fedora_atomic_v1 import monitor as swarm_monitor
 from magnum.drivers.swarm_fedora_atomic_v2 import monitor as swarm_v2_monitor
 from magnum import objects
@@ -65,8 +63,6 @@ class MonitorsTestCase(base.TestCase):
         self.v2_monitor = swarm_v2_monitor.SwarmMonitor(self.context,
                                                         self.cluster)
         self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.cluster)
-        self.mesos_monitor = mesos_monitor.MesosMonitor(self.context,
-                                                        self.cluster)
         p = mock.patch('magnum.drivers.swarm_fedora_atomic_v1.monitor.'
                        'SwarmMonitor.metrics_spec',
                        new_callable=mock.PropertyMock)
@@ -349,124 +345,6 @@ class MonitorsTestCase(base.TestCase):
         }
         self.k8s_monitor.data = test_data
         cpu_util = self.k8s_monitor.compute_cpu_util()
-        self.assertEqual(0, cpu_util)
-
-    def _test_mesos_monitor_pull_data(
-            self, mock_url_get, state_json, expected_mem_total,
-            expected_mem_used, expected_cpu_total, expected_cpu_used):
-        state_json = jsonutils.dumps(state_json)
-        mock_url_get.return_value = state_json
-        self.mesos_monitor.pull_data()
-        self.assertEqual(self.mesos_monitor.data['mem_total'],
-                         expected_mem_total)
-        self.assertEqual(self.mesos_monitor.data['mem_used'],
-                         expected_mem_used)
-        self.assertEqual(self.mesos_monitor.data['cpu_total'],
-                         expected_cpu_total)
-        self.assertEqual(self.mesos_monitor.data['cpu_used'],
-                         expected_cpu_used)
-
-    @mock.patch('magnum.objects.NodeGroup.list')
-    @mock.patch('magnum.common.urlfetch.get')
-    def test_mesos_monitor_pull_data_success(self, mock_url_get,
-                                             mock_ng_list):
-        mock_ng_list.return_value = self.nodegroups
-        state_json = {
-            'leader': 'master@10.0.0.6:5050',
-            'pid': 'master@10.0.0.6:5050',
-            'slaves': [{
-                'resources': {
-                    'mem': 100,
-                    'cpus': 1,
-                },
-                'used_resources': {
-                    'mem': 50,
-                    'cpus': 0.2,
-                }
-            }]
-        }
-        self._test_mesos_monitor_pull_data(mock_url_get, state_json,
-                                           100, 50, 1, 0.2)
-
-    @mock.patch('magnum.objects.NodeGroup.list')
-    @mock.patch('magnum.common.urlfetch.get')
-    def test_mesos_monitor_pull_data_success_not_leader(self, mock_url_get,
-                                                        mock_ng_list):
-        mock_ng_list.return_value = self.nodegroups
-        state_json = {
-            'leader': 'master@10.0.0.6:5050',
-            'pid': 'master@1.1.1.1:5050',
-            'slaves': []
-        }
-        self._test_mesos_monitor_pull_data(mock_url_get, state_json,
-                                           0, 0, 0, 0)
-
-    @mock.patch('magnum.objects.NodeGroup.list')
-    @mock.patch('magnum.common.urlfetch.get')
-    def test_mesos_monitor_pull_data_success_no_master(self, mock_url_get,
-                                                       mock_ng_list):
-        mock_ng_list.return_value = []
-        self._test_mesos_monitor_pull_data(mock_url_get, {}, 0, 0, 0, 0)
-
-    def test_mesos_monitor_get_metric_names(self):
-        mesos_metric_spec = ('magnum.drivers.mesos_ubuntu_v1.monitor.'
-                             'MesosMonitor.metrics_spec')
-        with mock.patch(mesos_metric_spec,
-                        new_callable=mock.PropertyMock) as mock_mesos_metric:
-            mock_mesos_metric.return_value = self.test_metrics_spec
-            names = self.mesos_monitor.get_metric_names()
-            self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
-
-    def test_mesos_monitor_get_metric_unit(self):
-        mesos_metric_spec = ('magnum.drivers.mesos_ubuntu_v1.monitor.'
-                             'MesosMonitor.metrics_spec')
-        with mock.patch(mesos_metric_spec,
-                        new_callable=mock.PropertyMock) as mock_mesos_metric:
-            mock_mesos_metric.return_value = self.test_metrics_spec
-            unit = self.mesos_monitor.get_metric_unit('metric1')
-            self.assertEqual('metric1_unit', unit)
-
-    def test_mesos_monitor_compute_memory_util(self):
-        test_data = {
-            'mem_total': 100,
-            'mem_used': 50
-        }
-        self.mesos_monitor.data = test_data
-        mem_util = self.mesos_monitor.compute_memory_util()
-        self.assertEqual(50, mem_util)
-
-        test_data = {
-            'mem_total': 0,
-            'pods': 0,
-        }
-        self.mesos_monitor.data = test_data
-        mem_util = self.mesos_monitor.compute_memory_util()
-        self.assertEqual(0, mem_util)
-
-        test_data = {
-            'mem_total': 100,
-            'mem_used': 0,
-            'pods': 0,
-        }
-        self.mesos_monitor.data = test_data
-        mem_util = self.mesos_monitor.compute_memory_util()
-        self.assertEqual(0, mem_util)
-
-    def test_mesos_monitor_compute_cpu_util(self):
-        test_data = {
-            'cpu_total': 1,
-            'cpu_used': 0.2,
-        }
-        self.mesos_monitor.data = test_data
-        cpu_util = self.mesos_monitor.compute_cpu_util()
-        self.assertEqual(20, cpu_util)
-
-        test_data = {
-            'cpu_total': 100,
-            'cpu_used': 0,
-        }
-        self.mesos_monitor.data = test_data
-        cpu_util = self.mesos_monitor.compute_cpu_util()
         self.assertEqual(0, cpu_util)
 
     @mock.patch('magnum.conductor.k8s_api.create_client_files')

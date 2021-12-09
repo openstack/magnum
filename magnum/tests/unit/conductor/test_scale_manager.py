@@ -20,7 +20,6 @@ from requests_mock.contrib import fixture
 from magnum.common import exception
 from magnum.conductor import scale_manager
 from magnum.drivers.common.k8s_scale_manager import K8sScaleManager
-from magnum.drivers.mesos_ubuntu_v1.scale_manager import MesosScaleManager
 from magnum.tests import base
 
 
@@ -224,25 +223,4 @@ class TestK8sScaleManager(base.TestCase):
             mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
         hosts = mgr._get_hosts_with_container(
             mock.MagicMock(), mock_cluster)
-        self.assertEqual(hosts, {'node1', 'node2'})
-
-
-class TestMesosScaleManager(base.TestCase):
-
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    @mock.patch('marathon.MarathonClient')
-    @mock.patch('marathon.MarathonClient.list_tasks')
-    def test_get_hosts_with_container(self, mock_list_tasks,
-                                      mock_client,  mock_get):
-        task_1 = mock.MagicMock()
-        task_1.host = 'node1'
-        task_2 = mock.MagicMock()
-        task_2.host = 'node2'
-        tasks = [task_1, task_2]
-        mock_list_tasks.return_value = tasks
-
-        mgr = MesosScaleManager(
-            mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
-        hosts = mgr._get_hosts_with_container(
-            mock.MagicMock(), mock.MagicMock())
         self.assertEqual(hosts, {'node1', 'node2'})
