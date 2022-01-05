@@ -1,0 +1,8 @@
+---
+upgrades:
+  - |
+    Updates flannel to version 0.15.1.
+    This will address issue where pods on multinode
+    installations don't have network connectivity
+    if they are spawned on different hosts.
+    `More details <https://github.com/flannel-io/flannel/blob/master/Documentation/troubleshooting.md>`_
