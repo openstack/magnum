@@ -53,12 +53,20 @@ Features
 * Integration with Neutron for Kubernetes multi-tenancy network security
 * Integration with Cinder to provide volume service for containers
 
+Installation Guide
+==================
+.. toctree::
+   :maxdepth: 1
+
+   install/index
+
 User Documentation
 ==================
 .. toctree::
    :maxdepth: 1
 
    user/index
+   user/monitoring.rst
    user/glossary.rst
 
 Contributor Guide
@@ -74,13 +82,6 @@ Admin Guide
    :maxdepth: 1
 
    admin/index
-
-Installation Guide
-==================
-.. toctree::
-   :maxdepth: 1
-
-   install/index
 
 CLI Guide
 =========

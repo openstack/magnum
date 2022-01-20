@@ -1,4 +1,4 @@
-As of this moment, monitoring is only supported for kubernetes clusters.
+.. _monitoring:
 
 Container Monitoring in Kubernetes
 ----------------------------------
