@@ -20,9 +20,9 @@ class K8sScaleManager(ScaleManager):
         super(K8sScaleManager, self).__init__(context, osclient, cluster)
 
     def _get_hosts_with_container(self, context, cluster):
-        k8s_api = k8s.create_k8s_api(self.context, cluster)
+        k8s_api = k8s.KubernetesAPI(context, cluster)
         hosts = set()
-        for pod in k8s_api.list_namespaced_pod(namespace='default').items:
-            hosts.add(pod.spec.node_name)
+        for pod in k8s_api.list_namespaced_pod(namespace='default')['items']:
+            hosts.add(pod['spec']['node_name'])
 
         return hosts
