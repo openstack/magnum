@@ -2719,6 +2719,8 @@ _`calico_tag`
   Stein default: v2.6.7
   Train default: v3.3.6
   Ussuri default: v3.13.1
+  Victoria default: v3.13.1
+  Wallaby default: v3.13.1
 
 
 Besides, the Calico network driver needs kube_tag with v1.9.3 or later, because

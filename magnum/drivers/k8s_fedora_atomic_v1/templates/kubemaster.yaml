@@ -212,6 +212,10 @@ parameters:
     type: string
     description: Subnet from which to allocate fixed addresses.
 
+  fixed_subnet_cidr:
+    type: string
+    description: network range for fixed ip network
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
@@ -779,6 +783,7 @@ resources:
                   "$CLUSTER_NETWORK": {get_param: fixed_network}
                   "$CLUSTER_NETWORK_NAME": {get_param: fixed_network_name}
                   "$CLUSTER_SUBNET": {get_param: fixed_subnet}
+                  "$CLUSTER_SUBNET_CIDR": {get_param: fixed_subnet_cidr}
                   "$TLS_DISABLED": {get_param: tls_disabled}
                   "$TRAEFIK_INGRESS_CONTROLLER_TAG": {get_param: traefik_ingress_controller_tag}
                   "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}

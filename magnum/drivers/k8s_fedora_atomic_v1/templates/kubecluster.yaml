@@ -1214,6 +1214,7 @@ resources:
           fixed_network: {get_attr: [network, fixed_network]}
           fixed_network_name: {get_param: fixed_network_name}
           fixed_subnet: {get_attr: [network, fixed_subnet]}
+          fixed_subnet_cidr: {get_param: fixed_subnet_cidr}
           api_pool_id: {get_attr: [api_lb, pool_id]}
           etcd_pool_id: {get_attr: [etcd_lb, pool_id]}
           username: {get_param: username}

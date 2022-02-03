@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Upgrade to calico_tag=v3.21.2. Additionally, use fixed subnet CIDR for
+    IP_AUTODETECTION_METHOD supported from v3.16.x onwards.
