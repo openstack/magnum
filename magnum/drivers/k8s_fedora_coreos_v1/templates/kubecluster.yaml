@@ -139,7 +139,7 @@ parameters:
   metrics_server_chart_tag:
     type: string
     description: tag of the stable/metrics-server chart to install
-    default: v2.8.8
+    default: v3.7.0
 
   minion_flavor:
     type: string

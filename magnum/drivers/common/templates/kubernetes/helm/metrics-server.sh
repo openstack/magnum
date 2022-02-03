@@ -13,13 +13,13 @@ if [ "$(echo ${METRICS_SERVER_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]
     cat << EOF >> ${HELM_CHART_DIR}/requirements.yaml
 - name: ${CHART_NAME}
   version: ${METRICS_SERVER_CHART_TAG}
-  repository: https://charts.helm.sh/stable
+  repository: https://kubernetes-sigs.github.io/metrics-server/
 EOF
 
     cat << EOF >> ${HELM_CHART_DIR}/values.yaml
 metrics-server:
   image:
-    repository: ${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}metrics-server-${ARCH}
+    repository: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/metrics-server/}metrics-server
   resources:
     requests:
       cpu: 100m

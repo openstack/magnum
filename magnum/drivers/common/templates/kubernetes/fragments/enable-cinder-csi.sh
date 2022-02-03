@@ -509,7 +509,7 @@ spec:
             path: /etc/kubernetes/ca-bundle.crt
             type: File
 ---
-apiVersion: storage.k8s.io/v1beta1
+apiVersion: storage.k8s.io/v1
 kind: CSIDriver
 metadata:
   name: cinder.csi.openstack.org
