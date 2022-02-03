@@ -93,8 +93,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --volume /lib/modules:/lib/modules:ro \\
     --volume /run:/run \\
     --volume /dev:/dev \\
-    --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \\
-    --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \\
+    --volume /sys/fs/cgroup:/sys/fs/cgroup \\
     --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
     --volume /var/lib/calico:/var/lib/calico \\
     --volume /var/lib/docker:/var/lib/docker \\
@@ -134,8 +133,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kube-proxy \\
     --volume /usr/lib/os-release:/etc/os-release:ro \\
     --volume /etc/ssl/certs:/etc/ssl/certs:ro \\
     --volume /run:/run \\
-    --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \\
-    --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \\
+    --volume /sys/fs/cgroup:/sys/fs/cgroup \\
     --volume /lib/modules:/lib/modules:ro \\
     --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \\
     \${CONTAINER_INFRA_PREFIX:-\${HYPERKUBE_PREFIX}}hyperkube:\${KUBE_TAG} \\
