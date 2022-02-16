@@ -12,7 +12,12 @@
 # [0] https://github.com/coreos/fcct
 # [1] https://github.com/coreos/fedora-coreos-docs/blob/master/modules/ROOT/pages/producing-ign.adoc
 variant: fcos
-version: 1.0.0
+version: 1.4.0
+kernel_arguments:
+  should_exist:
+    - mitigations=off
+  should_not_exist:
+    - mitigations=auto,nosmt
 passwd:
   users:
     - name: core
@@ -43,6 +48,7 @@ storage:
       user:
         name: root
       contents:
+        compression: null
         inline: |
           # This file controls the state of SELinux on the system.
           # SELINUX= can take one of these three values:
@@ -110,6 +116,7 @@ storage:
       group:
         name: root
       contents:
+        compression: null
         inline: |
           #!/bin/bash
           

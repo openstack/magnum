@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    Minimum version of Fedora CoreOS required now is 34.
