@@ -105,13 +105,13 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   as appropriate for the cluster driver.  For the currently supported
   images, the os_distro names are:
 
-  ========== =====================
+  ========== ==========================
   COE        os_distro
-  ========== =====================
-  Kubernetes fedora-coreos
+  ========== ==========================
+  Kubernetes fedora-coreos (minimum 34)
   Swarm      fedora-atomic
   Mesos      ubuntu
-  ========== =====================
+  ========== ==========================
 
   This is a mandatory parameter and there is no default value. Note that the
   os_distro attribute is case sensitive.
