@@ -267,7 +267,7 @@ Fedora CoreOS
 ::
 
     openstack coe cluster template create k8s-cluster-template \
-        --image fedora-coreos-31.20200323.3.2-openstack.x86_64 \
+        --image fedora-coreos-35.20220116.3.0-openstack.x86_64 \
         --keypair testkey \
         --external-network public \
         --dns-nameserver 8.8.8.8 \
