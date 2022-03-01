@@ -1288,7 +1288,7 @@ _`hyperkube_prefix`
   unofficial sources like `docker.io/rancher/`, `ghcr.io/openstackmagnum/` or
   your own container registry. If `container_infra_prefix` label is defined, it
   still takes precedence over this label.
-  Default: k8s.gcr.io/
+  Default: docker.io/rancher/
 
 _`kube_tag`
   This label allows users to select a specific Kubernetes release based on its
@@ -1301,6 +1301,7 @@ _`kube_tag`
   Train default: v1.15.7
   Ussuri default: v1.18.2
   Victoria default: v1.18.16
+  Yoga default: v1.23.3-rancher1
 
 _`heapster_enabled`
   heapster_enabled is used to enable disable the installation of heapster.
