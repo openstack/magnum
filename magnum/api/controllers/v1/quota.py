@@ -42,7 +42,7 @@ class Quota(base.APIBase):
     id = wsme.wsattr(wtypes.IntegerType(minimum=1))
     """unique id"""
 
-    hard_limit = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    hard_limit = wsme.wsattr(wtypes.IntegerType(minimum=0), default=1)
     """The hard limit for total number of clusters. Default to 1 if not set"""
 
     project_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
