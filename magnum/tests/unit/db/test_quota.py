@@ -137,15 +137,26 @@ class DbQuotaTestCase(base.DbTestCase):
         q = utils.create_test_quotas(project_id='123',
                                      resource='test-res',
                                      hard_limit=5)
+        utils.create_test_quotas(project_id='123',
+                                 resource='another-res',
+                                 hard_limit=5)
+        utils.create_test_quotas(project_id='456',
+                                 resource='test-res',
+                                 hard_limit=5)
         res = self.dbapi.get_quota_by_project_id_resource('123', 'test-res')
         self.assertEqual(q.hard_limit, res.hard_limit)
         self.assertEqual(q.project_id, res.project_id)
         self.assertEqual(q.resource, res.resource)
+        res = self.dbapi.get_quota_list(self.context)
+        self.assertEqual(3, len(res))
         self.dbapi.delete_quota(q.project_id, q.resource)
         self.assertRaises(exception.QuotaNotFound,
                           self.dbapi.get_quota_by_project_id_resource,
                           project_id='123',
                           resource='bad-res')
+        # Check that we didn't delete any other quotas
+        res = self.dbapi.get_quota_list(self.context)
+        self.assertEqual(2, len(res))
 
     def test_delete_quota_that_does_not_exist(self):
         # Make sure that quota does not exist

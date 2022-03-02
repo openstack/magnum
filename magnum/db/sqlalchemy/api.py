@@ -635,11 +635,12 @@ class Connection(api.Connection):
     def delete_quota(self, project_id, resource):
         session = get_session()
         with session.begin():
-            query = model_query(models.Quota, session=session)
+            query = model_query(models.Quota, session=session) \
+                .filter_by(project_id=project_id) \
+                .filter_by(resource=resource)
 
             try:
-                query.filter_by(project_id=project_id).filter_by(
-                    resource=resource).one()
+                query.one()
             except NoResultFound:
                 msg = (_('project_id %(project_id)s resource %(resource)s.') %
                        {'project_id': project_id, 'resource': resource})
