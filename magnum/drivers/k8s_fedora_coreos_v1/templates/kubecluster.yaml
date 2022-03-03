@@ -888,7 +888,7 @@ parameters:
   nginx_ingress_controller_chart_tag:
     type: string
     description: nginx ingress controller helm chart tag
-    default: v1.36.3
+    default: 4.0.17
 
   draino_tag:
     type: string
