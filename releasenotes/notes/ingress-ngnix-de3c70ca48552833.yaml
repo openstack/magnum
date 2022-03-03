@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Upgrade of ingress controler. Chart name nginx-ingress has been changed to 
+    ingress-nginx. Chart repository also has been changed. More details about 
+    why this change take place can be found in github repository 
+    https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx

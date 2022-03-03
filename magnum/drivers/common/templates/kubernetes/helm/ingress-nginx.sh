@@ -2,7 +2,7 @@ set +x
 . /etc/sysconfig/heat-params
 set -ex
 
-CHART_NAME="nginx-ingress"
+CHART_NAME="ingress-nginx"
 
 if [ "$(echo ${INGRESS_CONTROLLER} | tr '[:upper:]' '[:lower:]')" = "nginx" ]; then
     echo "Writing ${CHART_NAME} config"
@@ -13,7 +13,7 @@ if [ "$(echo ${INGRESS_CONTROLLER} | tr '[:upper:]' '[:lower:]')" = "nginx" ]; t
     cat << EOF >> ${HELM_CHART_DIR}/requirements.yaml
 - name: ${CHART_NAME}
   version: ${NGINX_INGRESS_CONTROLLER_CHART_TAG}
-  repository: https://charts.helm.sh/stable
+  repository: https://kubernetes.github.io/ingress-nginx
 EOF
 
     cat << EOF >> ${HELM_CHART_DIR}/values.yaml
