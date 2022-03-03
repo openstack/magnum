@@ -256,8 +256,6 @@ class Validator(object):
             return K8sValidator()
         elif coe == 'swarm' or coe == 'swarm-mode':
             return SwarmValidator()
-        elif coe == 'mesos':
-            return MesosValidator()
         else:
             raise exception.InvalidParameterValue(
                 _('Requested COE type %s is not supported.') % coe)

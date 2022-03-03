@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Remove mesos from the API. This means new clusters of coe type 'mesos'
+    cannot be created.
+    The mesos driver will be removed in the next release.
