@@ -42,7 +42,7 @@ class RequestContext(context.RequestContext):
         """
         super(RequestContext, self).__init__(auth_token=auth_token,
                                              user_id=user_name,
-                                             tenant=project_name,
+                                             project_id=project_name,
                                              is_admin=is_admin,
                                              read_only=read_only,
                                              show_deleted=show_deleted,
