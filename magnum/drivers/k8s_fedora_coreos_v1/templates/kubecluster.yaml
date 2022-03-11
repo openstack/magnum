@@ -893,6 +893,12 @@ parameters:
     description: tag of csi node driver registrar
     default: v2.4.0
 
+  csi_liveness_probe_tag:
+    type: string
+    description: tag of cinder csi liveness probe
+      tag of the k8s.gcr.io/sig-storage/liveness-probe container
+    default: v2.5.0
+
   node_problem_detector_tag:
     type: string
     description: tag of the node problem detector container
@@ -1424,6 +1430,7 @@ resources:
           csi_snapshotter_tag: {get_param: csi_snapshotter_tag}
           csi_resizer_tag: {get_param: csi_resizer_tag}
           csi_node_driver_registrar_tag: {get_param: csi_node_driver_registrar_tag}
+          csi_liveness_probe_tag: {get_param: csi_liveness_probe_tag}
           draino_tag: {get_param: draino_tag}
           autoscaler_tag: {get_param: autoscaler_tag}
           min_node_count: {get_param: min_node_count}
