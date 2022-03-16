@@ -267,6 +267,11 @@ class ClusterTemplatesController(base.Controller):
         "different storage driver, such as overlay2. overlay2 will be set "
         "as the default storage driver from Victoria cycle in Magnum.")
 
+    _fedora_atomic_deprecation_note = (
+        "The fedora_atomic driver is deprecated in favor of the fedora_coreos "
+        "driver. Please migrate to the fedora_coreos driver. fedora_atomic "
+        "driver will be remove in a future Magnum version.")
+
     def _generate_name_for_cluster_template(self, context):
         """Generate a random name like: zeta-22-model."""
 
@@ -420,6 +425,12 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._devicemapper_overlay_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._devicemapper_overlay_deprecation_note)
+
+        if (cluster_template_dict['coe'] == 'kubernetes' and
+                cluster_template_dict['cluster_distro'] == 'fedora-atomic'):
+            warnings.warn(self._fedora_atomic_deprecation_note,
+                          DeprecationWarning)
+            LOG.warning(self._fedora_atomic_deprecation_note)
 
         # NOTE(yuywz): We will generate a random human-readable name for
         # cluster_template if the name is not specified by user.

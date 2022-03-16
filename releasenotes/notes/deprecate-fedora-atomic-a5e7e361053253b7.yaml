@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    Deprecate the use of os_distro 'fedora-atomic' with COE 'kubernetes'.
+    Fedora Atomic OS has been EOL since 2019-11-26.  Users using COE
+    'kubernetes' are encouraged to migrate to Fedora CoreOS and the
+    'fedora-coreos' driver. 'fedora-atomic' driver will be removed in a future
+    Magnum verison.
