@@ -312,37 +312,37 @@ the table are linked to more details elsewhere in the user guide.
 | `heapster_enabled`_                   | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| :ref:`metrics_server_chart_tag`       | see below          | see below     |
+| `metrics_server_chart_tag`            | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`metrics_server_enabled`         | - true             | true          |
+| `metrics_server_enabled`              | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| :ref:`monitoring_enabled`             | - true             | false         |
+| `monitoring_enabled`                  | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| :ref:`monitoring_retention_days`      | see below          | see below     |
+| `monitoring_retention_days`           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`monitoring_retention_size`      | see below          | see below     |
+| `monitoring_retention_size`           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`monitoring_storage_class_name`  | see below          | see below     |
+| `monitoring_storage_class_name`       | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`monitoring_interval_seconds`    | see below          | see below     |
+| `monitoring_interval_seconds`         | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`monitoring_ingress_enabled`     | - true             | false         |
+| `monitoring_ingress_enabled`          | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| :ref:`cluster_basic_auth_secret`      | see below          | see below     |
+| `cluster_basic_auth_secret`           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`cluster_root_domain_name`       | see below          | see below     |
+| `cluster_root_domain_name`            | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`prometheus_operator_chart_tag`  | see below          | see below     |
+| `prometheus_operator_chart_tag`       | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`prometheus_adapter_enabled`     | - true             | true          |
+| `prometheus_adapter_enabled`          | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| :ref:`prometheus_adapter_chart_tag`   | see below          | see below     |
+| `prometheus_adapter_chart_tag`        | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-| :ref:`prometheus_adapter_configmap`   | (rules CM name)    | ""            |
+| `prometheus_adapter_configmap`        | (rules CM name)    | ""            |
 +---------------------------------------+--------------------+---------------+
 | `swarm_strategy`_                     | - spread           | spread        |
 |                                       | - binpack          |               |
@@ -355,7 +355,7 @@ the table are linked to more details elsewhere in the user guide.
 | `prometheus_monitoring` (deprecated)  | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| :ref:`grafana_admin_passwd`           | (any string)       | "admin"       |
+| `grafana_admin_passwd`                | (any string)       | "admin"       |
 +---------------------------------------+--------------------+---------------+
 | `hyperkube_prefix`_                   | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
