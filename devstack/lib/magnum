@@ -120,8 +120,6 @@ function create_magnum_accounts {
         "container-infra" "Container Infrastructure Management Service")
     get_or_create_endpoint $magnum_service \
         "$REGION_NAME" \
-        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST/container-infra/v1" \
-        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST/container-infra/v1" \
         "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST/container-infra/v1"
 
     # Create for Kubernetes Keystone auth
