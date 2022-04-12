@@ -31,7 +31,7 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'delete',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_OWNER,
         description='Delete a cluster template.',
         operations=[
             {
@@ -121,7 +121,7 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'update',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_OWNER,
         description='Update an existing cluster template.',
         operations=[
             {
