@@ -4,7 +4,6 @@ amqp==2.6.1
 appdirs==1.4.3
 asn1crypto==0.24.0
 automaton==1.14.0
-Babel==2.3.4
 bandit==1.1.0
 bashate==2.0.0
 beautifulsoup4==4.6.0

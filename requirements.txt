@@ -5,7 +5,6 @@
 # Despite above warning added by global sync process, please use
 # ascii betical order.
 
-Babel!=2.4.0,>=2.3.4 # BSD
 PyYAML>=3.13 # MIT
 SQLAlchemy>=1.2.0 # MIT
 WSME>=0.8.0 # MIT
