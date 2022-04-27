@@ -3,13 +3,12 @@ Using Proxies in magnum if running under firewall
 =================================================
 
 If you are running magnum behind a firewall then you may need a proxy
-for using services like docker, kubernetes and mesos. Use these steps
+for using services like docker, kubernetes. Use these steps
 when your firewall will not allow you to use those services without a
 proxy.
 
 **NOTE:** This feature has only been tested with the supported cluster type
-and associated image: Kubernetes and Swarm use the Fedora Atomic
-image, and Mesos uses the Ubuntu image.
+and associated image.
 
 Proxy Parameters to define before use
 =====================================
@@ -66,15 +65,3 @@ any coe type. All of proxy parameters are optional.
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
 
-.. code-block:: console
-
-   $ openstack coe cluster template create mesos-cluster-template \
-                       --image ubuntu-mesos \
-                       --keypair testkey \
-                       --external-network public \
-                       --dns-nameserver 8.8.8.8 \
-                       --flavor m1.small \
-                       --coe mesos \
-                       --http-proxy <http://abc-proxy.com:8080> \
-                       --https-proxy <https://abc-proxy.com:8080> \
-                       --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>

@@ -23,7 +23,6 @@ created and managed by Magnum to support the COE's.
 #. `Native Clients`_
 #. `Kubernetes`_
 #. `Swarm`_
-#. `Mesos`_
 #. `Transport Layer Security`_
 #. `Networking`_
 #. `High Availability`_
@@ -43,8 +42,8 @@ Overview
 ========
 
 Magnum is an OpenStack API service developed by the OpenStack Containers Team
-making container orchestration engines (COE) such as Docker Swarm, Kubernetes
-and Apache Mesos available as first class resources in OpenStack.
+making container orchestration engines (COE) such as Docker Swarm and
+Kubernetes available as first class resources in OpenStack.
 
 Magnum uses Heat to orchestrate an OS image which contains Docker and COE
 and runs that image in either virtual machines or bare metal in a cluster
@@ -59,7 +58,7 @@ Following are few salient features of Magnum:
 
 - Standard API based complete life-cycle management for Container Clusters
 - Multi-tenancy for container clusters
-- Choice of COE: Kubernetes, Swarm, Mesos, DC/OS
+- Choice of COE: Kubernetes, Swarm
 - Choice of container cluster deployment model: VM or Bare-metal
 - Keystone-based multi-tenant security and auth management
 - Neutron based multi-tenant network control and isolation
@@ -94,7 +93,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --coe \<coe\>
   Specify the Container Orchestration Engine to use.  Supported
-  COE's include 'kubernetes', 'swarm', 'mesos'.  If your environment
+  COE's include 'kubernetes', 'swarm'.  If your environment
   has additional cluster drivers installed, refer to the cluster driver
   documentation for the new COE names.  This is a mandatory parameter
   and there is no default value.
@@ -110,7 +109,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ========== =====================
   Kubernetes fedora-coreos
   Swarm      fedora-atomic
-  Mesos      ubuntu
   ========== =====================
 
   This is a mandatory parameter and there is no default value. Note that the
@@ -161,7 +159,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ===========  =================  ========
   Kubernetes   flannel, calico    flannel
   Swarm        docker, flannel    flannel
-  Mesos        docker             docker
   ===========  =================  ========
 
   Note that the network driver name is case sensitive.
@@ -176,7 +173,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ============= ============= ===========
   Kubernetes    cinder        No Driver
   Swarm         rexray        No Driver
-  Mesos         rexray        No Driver
   ============= ============= ===========
 
   Note that the volume driver name is case sensitive.
@@ -289,25 +285,6 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `rexray_preempt`_                     | - true             | false         |
 |                                       | - false            |               |
-+---------------------------------------+--------------------+---------------+
-| `mesos_slave_isolation`_              | - filesystem/posix | ""            |
-|                                       | - filesystem/linux |               |
-|                                       | - filesystem/shared|               |
-|                                       | - posix/cpu        |               |
-|                                       | - posix/mem        |               |
-|                                       | - posix/disk       |               |
-|                                       | - cgroups/cpu      |               |
-|                                       | - cgroups/mem      |               |
-|                                       | - docker/runtime   |               |
-|                                       | - namespaces/pid   |               |
-+---------------------------------------+--------------------+---------------+
-| `mesos_slave_image_providers`_        | - appc             | ""            |
-|                                       | - docker           |               |
-|                                       | - appc,docker      |               |
-+---------------------------------------+--------------------+---------------+
-| `mesos_slave_work_dir`_               | (directory name)   | ""            |
-+---------------------------------------+--------------------+---------------+
-| `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
 | `heapster_enabled`_                   | - true             | false         |
 |                                       | - false            |               |
@@ -883,8 +860,6 @@ COE and distro pairs:
 +------------+---------------+
 | Swarm      | Fedora Atomic |
 +------------+---------------+
-| Mesos      | Ubuntu        |
-+------------+---------------+
 
 Magnum is designed to accommodate new cluster drivers to support custom
 COE's and this section describes how a new cluster driver can be
@@ -1006,18 +981,6 @@ that allow for sophisticated software deployments, including canary deploys
 and blue/green deploys. Kubernetes is very popular, especially for web
 applications.
 
-Apache Mesos is a COE that has been around longer than Kubernetes or Swarm. It
-allows for a variety of different frameworks to be used along with it,
-including Marathon, Aurora, Chronos, Hadoop, and `a number of others.
-<http://mesos.apache.org/documentation/latest/frameworks/>`_
-
-The Apache Mesos framework design can be used to run alternate COE software
-directly on Mesos. Although this approach is not widely used yet, it may soon
-be possible to run Mesos with Kubernetes and Swarm as frameworks, allowing
-you to share the resources of a cluster between multiple different COEs. Until
-this option matures, we encourage Magnum users to create multiple clusters, and
-use the COE in each cluster that best fits the anticipated workload.
-
 Finding the right COE for your workload is up to you, but Magnum offers you a
 choice to select among the prevailing leading options. Once you decide, see
 the next sections for examples of how to create a cluster with your desired
@@ -1033,7 +996,7 @@ clusters.  In the typical case, there are two clients to consider:
 
 COE level
   This is the orchestration or management level such as Kubernetes,
-  Swarm, Mesos and its frameworks.
+  Swarm and its frameworks.
 
 Container level
   This is the low level container operation.  Currently it is
@@ -1065,9 +1028,6 @@ For Swarm, the main CLI is 'docker', along with associated tools
 such as 'docker-compose', etc.  Specific version of the binaries can
 be obtained from the `Docker Engine installation
 <https://docs.docker.com/engine/installation/binaries/>`_.
-
-Mesos cluster uses the Marathon framework and details on the Marathon
-UI can be found in the section `Using Marathon`_.
 
 Depending on the client requirement, you may need to use a version of
 the client that matches the version in the cluster.  To determine the
@@ -1894,106 +1854,6 @@ _`swarm_strategy`
   - binpack
   - random
 
-Mesos
-=====
-
-A Mesos cluster consists of a pool of servers running as Mesos slaves,
-managed by a set of servers running as Mesos masters.  Mesos manages
-the resources from the slaves but does not itself deploy containers.
-Instead, one of more Mesos frameworks running on the Mesos cluster would
-accept user requests on their own endpoint, using their particular
-API.  These frameworks would then negotiate the resources with Mesos
-and the containers are deployed on the servers where the resources are
-offered.
-
-Magnum deploys a Mesos cluster using parameters defined in the ClusterTemplate
-and specified on the 'cluster-create' command, for example::
-
-    openstack coe cluster template create mesos-cluster-template \
-                           --image ubuntu-mesos \
-                           --keypair testkey \
-                           --external-network public \
-                           --dns-nameserver 8.8.8.8 \
-                           --flavor m1.small \
-                           --coe mesos
-
-    openstack coe cluster create mesos-cluster \
-                      --cluster-template mesos-cluster-template \
-                      --master-count 3 \
-                      --node-count 8
-
-Refer to the `ClusterTemplate`_ and `Cluster`_ sections for the full list of
-parameters.  Following are further details relevant to Mesos:
-
-What runs on the servers
-  There are two types of servers in the Mesos cluster: masters and slaves.
-  The Docker daemon runs on all servers.  On the servers for master,
-  the Mesos master is run as a process on port 5050 and this is
-  initiated by the upstart service 'mesos-master'.  Zookeeper is also
-  run on the master servers, initiated by the upstart service
-  'zookeeper'.  Zookeeper is used by the master servers for electing
-  the leader among the masters, and by the slave servers and
-  frameworks to determine the current leader.  The framework Marathon
-  is run as a process on port 8080 on the master servers, initiated by
-  the upstart service 'marathon'.  On the servers for slave, the Mesos
-  slave is run as a process initiated by the upstart service
-  'mesos-slave'.
-
-Number of master (master-count)
-  Specified in the cluster-create command to indicate how many servers
-  will run as masters in the cluster.  Having more than one will provide
-  high availability.  If the load balancer option is specified, the
-  masters will be in a load balancer pool and the load balancer
-  virtual IP address (VIP) will serve as the Mesos API endpoint.  A
-  floating IP associated with the load balancer VIP will serve as the
-  external Mesos API endpoint.
-
-Number of agents (node-count)
-  Specified in the cluster-create command to indicate how many servers
-  will run as Mesos slave in the cluster.  Docker daemon is run locally to
-  host containers from users.  The slaves report their available
-  resources to the master and accept request from the master to deploy
-  tasks from the frameworks.  In this case, the tasks will be to
-  run Docker containers.
-
-Network driver (network-driver)
-  Specified in the ClusterTemplate to select the network driver.  Currently
-  'docker' is the only supported driver: containers are connected to
-  the 'docker0' bridge on each node and are assigned local IP address.
-  Refer to the `Networking`_ section for more details.
-
-Volume driver (volume-driver)
-  Specified in the ClusterTemplate to select the volume driver to provide
-  persistent storage for containers.  The supported volume driver is
-  'rexray'.  The default is no volume driver.  When 'rexray' or other
-  volume driver is deployed, you can use the Docker 'volume' command to
-  create, mount, unmount, delete volumes in containers.  Cinder block
-  storage is used as the backend to support this feature.
-  Refer to the `Storage`_ section for more details.
-
-Storage driver (docker-storage-driver)
-  This is currently not supported for Mesos.
-
-Image (image)
-  Specified in the ClusterTemplate to indicate the image to boot the servers
-  for the Mesos master and slave.  The image binary is loaded in
-  Glance with the attribute 'os_distro = ubuntu'.  You can download
-  the `ready-built image
-  <https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2>`_,
-  or you can create the image as described below in the `Building
-  Mesos image`_ section.
-
-TLS (tls-disabled)
-  Transport Layer Security is currently not implemented yet for Mesos.
-
-Log into the servers
-  You can log into the manager and node servers with the account
-  'ubuntu' and the keypair specified in the ClusterTemplate.
-
-In addition to the common attributes in the baymodel, you can specify
-the following attributes that are specific to Mesos by using the
-labels attribute.
-
 _`rexray_preempt`
   When the volume driver 'rexray' is used, you can mount a data volume
   backed by Cinder to a host to be accessed by a container.  In this
@@ -2004,165 +1864,6 @@ _`rexray_preempt`
   host.  If this label is set to false, then rexray will ensure data
   safety for locking the volume before remounting.  The default value
   is False.
-
-_`mesos_slave_isolation`
-  This label corresponds to the Mesos parameter for slave
-  '--isolation'.  The isolators are needed to provide proper isolation
-  according to the runtime configurations specified in the container
-  image.  For more details, refer to the `Mesos configuration
-  <http://mesos.apache.org/documentation/latest/configuration/>`_
-  and the `Mesos container image support
-  <http://mesos.apache.org/documentation/latest/container-image/>`_.
-  Valid values for this label are:
-
-  - filesystem/posix
-  - filesystem/linux
-  - filesystem/shared
-  - posix/cpu
-  - posix/mem
-  - posix/disk
-  - cgroups/cpu
-  - cgroups/mem
-  - docker/runtime
-  - namespaces/pid
-
-_`mesos_slave_image_providers`
-  This label corresponds to the Mesos parameter for agent
-  '--image_providers', which tells Mesos containerizer what
-  types of container images are allowed.
-  For more details, refer to the `Mesos configuration
-  <http://mesos.apache.org/documentation/latest/configuration/>`_ and
-  the `Mesos container image support
-  <http://mesos.apache.org/documentation/latest/container-image/>`_.
-  Valid values are:
-
-  - appc
-  - docker
-  - appc,docker
-
-_`mesos_slave_work_dir`
-  This label corresponds to the Mesos parameter '--work_dir' for slave.
-  For more details, refer to the `Mesos configuration
-  <http://mesos.apache.org/documentation/latest/configuration/>`_.
-  Valid value is a directory path to use as the work directory for
-  the framework, for example::
-
-    mesos_slave_work_dir=/tmp/mesos
-
-_`mesos_slave_executor_env_variables`
-  This label corresponds to the Mesos parameter for slave
-  '--executor_environment_variables', which passes additional
-  environment variables to the executor and subsequent tasks.
-  For more details, refer to the `Mesos configuration
-  <http://mesos.apache.org/documentation/latest/configuration/>`_.
-  Valid value is the name of a JSON file, for example::
-
-     mesos_slave_executor_env_variables=/home/ubuntu/test.json
-
-  The JSON file should contain environment variables, for example::
-
-    {
-       "PATH": "/bin:/usr/bin",
-       "LD_LIBRARY_PATH": "/usr/local/lib"
-    }
-
-  By default the executor will inherit the slave's environment
-  variables.
-
-
-.. _building_mesos_image:
-
-Building Mesos image
---------------------
-
-The boot image for Mesos cluster is an Ubuntu 14.04 base image with the
-following middleware pre-installed:
-
--  ``docker``
--  ``zookeeper``
--  ``mesos``
--  ``marathon``
-
-The cluster driver provides two ways to create this image, as follows.
-
-Diskimage-builder
-+++++++++++++++++
-
-To run the `diskimage-builder
-<https://docs.openstack.org/diskimage-builder/latest>`__ tool
-manually, use the provided `elements
-<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/mesos_ubuntu_v1/image/mesos/>`__.
-Following are the typical steps to use the diskimage-builder tool on
-an Ubuntu server::
-
-    $ sudo apt-get update
-    $ sudo apt-get install git qemu-utils python-pip
-    $ sudo pip install diskimage-builder
-
-    $ git clone https://opendev.org/openstack/magnum
-    $ git clone https://opendev.org/openstack/dib-utils.git
-    $ git clone https://opendev.org/openstack/tripleo-image-elements.git
-    $ git clone https://opendev.org/openstack/heat-templates.git
-    $ export PATH="${PWD}/dib-utils/bin:$PATH"
-    $ export ELEMENTS_PATH=tripleo-image-elements/elements:heat-templates/hot/software-config/elements:magnum/magnum/drivers/mesos_ubuntu_v1/image/mesos
-    $ export DIB_RELEASE=trusty
-
-    $ disk-image-create ubuntu vm docker mesos \
-        os-collect-config os-refresh-config os-apply-config \
-        heat-config heat-config-script \
-        -o ubuntu-mesos.qcow2
-
-Dockerfile
-++++++++++
-
-To build the image as above but within a Docker container, use the
-provided `Dockerfile
-<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/mesos_ubuntu_v1/image/Dockerfile>`__.
-The output image will be saved as '/tmp/ubuntu-mesos.qcow2'.
-Following are the typical steps to run a Docker container to build the image::
-
-    $ git clone https://opendev.org/openstack/magnum
-    $ cd magnum/magnum/drivers/mesos_ubuntu_v1/image
-    $ sudo docker build -t magnum/mesos-builder .
-    $ sudo docker run -v /tmp:/output --rm -ti --privileged magnum/mesos-builder
-    ...
-    Image file /output/ubuntu-mesos.qcow2 created...
-
-
-Using Marathon
---------------
-
-Marathon is a Mesos framework for long running applications.  Docker
-containers can be deployed via Marathon's REST API.  To get the
-endpoint for Marathon, run the cluster-show command and look for the
-property 'api_address'.  Marathon's endpoint is port 8080 on this IP
-address, so the web console can be accessed at::
-
-    http://<api_address>:8080/
-
-Refer to Marathon documentation for details on running applications.
-For example, you can 'post' a JSON app description to
-``http://<api_address>:8080/apps`` to deploy a Docker container::
-
-    $ cat > app.json << END
-    {
-      "container": {
-        "type": "DOCKER",
-        "docker": {
-          "image": "libmesos/ubuntu"
-        }
-      },
-      "id": "ubuntu",
-      "instances": 1,
-      "cpus": 0.5,
-      "mem": 512,
-      "uris": [],
-      "cmd": "while sleep 10; do date -u +%T; done"
-    }
-    END
-    $ API_ADDRESS=$(openstack coe cluster show mesos-cluster | awk '/ api_address /{print $4}')
-    $ curl -X POST -H "Content-Type: application/json" \
-        http://${API_ADDRESS}:8080/v2/apps -d@app.json
 
 .. _transport_layer_security:
 
@@ -2204,8 +1905,6 @@ Current TLS support is summarized below:
 | Kubernetes | yes         |
 +------------+-------------+
 | Swarm      | yes         |
-+------------+-------------+
-| Mesos      | no          |
 +------------+-------------+
 
 For cluster type with TLS support, e.g. Kubernetes and Swarm, TLS is
@@ -2657,18 +2356,18 @@ network-driver
   The network driver name for instantiating container networks.
   Currently, the following network drivers are supported:
 
-  +--------+-------------+-------------+-------------+
-  | Driver | Kubernetes  |   Swarm     |    Mesos    |
-  +========+=============+=============+=============+
-  | Flannel| supported   | supported   | unsupported |
-  +--------+-------------+-------------+-------------+
-  | Docker | unsupported | supported   | supported   |
-  +--------+-------------+-------------+-------------+
-  | Calico | supported   | unsupported | unsupported |
-  +--------+-------------+-------------+-------------+
+  +--------+-------------+-------------+
+  | Driver | Kubernetes  |   Swarm     |
+  +========+=============+=============+
+  | Flannel| supported   | supported   |
+  +--------+-------------+-------------+
+  | Docker | unsupported | supported   |
+  +--------+-------------+-------------+
+  | Calico | supported   | unsupported |
+  +--------+-------------+-------------+
 
   If not specified, the default driver is Flannel for Kubernetes, and
-  Docker for Swarm and Mesos.
+  Docker for Swarm.
 
 Particular network driver may require its own set of parameters for
 configuration, and these parameters are specified through the labels
@@ -2848,14 +2547,7 @@ manually set the number of instances of a container.  For Swarm
 version 1.12 and later, services can also be scaled manually through
 the command `docker service scale
 <https://docs.docker.com/engine/swarm/swarm-tutorial/scale-service/>`_.
-Automatic scaling for Swarm is not yet available.  Mesos manages the
-resources and does not support scaling directly; instead, this is
-provided by frameworks running within Mesos.  With the Marathon
-framework currently supported in the Mesos cluster, you can use the
-`scale operation
-<https://mesosphere.github.io/marathon/docs/application-basics.html>`_
-on the Marathon UI or through a REST API call to manually set the
-attribute 'instance' for a container.
+Automatic scaling for Swarm is not yet available.
 
 Scaling the cluster nodes involves managing the number of nodes in the
 cluster by adding more nodes or removing nodes.  There is no direct
@@ -2906,21 +2598,6 @@ Swarm
   No node selection heuristic is currently supported.  If you decrease
   the node_count, a node will be chosen by magnum without
   consideration of what containers are running on the selected node.
-
-Mesos
-  Magnum scans the running tasks on Marathon server to determine the
-  nodes on which there is *no* task running (empty nodes). If the
-  number of nodes to be removed is equal or less than the number of
-  these empty nodes, these nodes will be removed from the cluster.
-  If the number of nodes to be removed is larger than the number of
-  empty nodes, a warning message will be sent to the Magnum log and
-  the empty nodes along with additional nodes will be removed from the
-  cluster. The additional nodes are selected randomly and the containers
-  running on them will be deleted without warning. Note that even when
-  only the empty nodes are removed, there is no guarantee that no
-  container will be deleted because there is no locking to ensure that
-  Mesos will not launch new containers on these nodes after Magnum
-  has scanned the tasks.
 
 
 Currently, scaling containers and scaling cluster nodes are handled
@@ -3011,7 +2688,7 @@ driver to perform the actual work.  Then this volume can be mounted
 when a container is created.  A number of third-party volume drivers
 support OpenStack Cinder as the backend, for example Rexray and
 Flocker.  Magnum currently supports Rexray as the volume driver for
-Swarm and Mesos.  Other drivers are being considered.
+Swarm.  Other drivers are being considered.
 
 Kubernetes allows a previously created Cinder block to be mounted to
 a pod and this is done by specifying the block ID in the pod YAML file.
@@ -3027,13 +2704,13 @@ Magnum supports these features to use Cinder as persistent storage
 using the ClusterTemplate attribute 'volume-driver' and the support matrix
 for the COE types is summarized as follows:
 
-+--------+-------------+-------------+-------------+
-| Driver | Kubernetes  |    Swarm    |    Mesos    |
-+========+=============+=============+=============+
-| cinder | supported   | unsupported | unsupported |
-+--------+-------------+-------------+-------------+
-| rexray | unsupported | supported   | supported   |
-+--------+-------------+-------------+-------------+
++--------+-------------+-------------+
+| Driver | Kubernetes  |    Swarm    |
++========+=============+=============+
+| cinder | supported   | unsupported |
++--------+-------------+-------------+
+| rexray | unsupported | supported   |
++--------+-------------+-------------+
 
 Following are some examples for using Cinder as persistent storage.
 
@@ -3128,85 +2805,6 @@ Using Cinder in Swarm
 *To be filled in*
 
 
-Using Cinder in Mesos
-+++++++++++++++++++++
-
-1. Create the ClusterTemplate.
-
-   Specify 'rexray' as the volume-driver for Mesos.  As an option, you
-   can specify in a label the attributes 'rexray_preempt' to enable
-   any host to take control of a volume regardless if other
-   hosts are using the volume. If this is set to false, the driver
-   will ensure data safety by locking the volume::
-
-    openstack coe cluster template create mesos-cluster-template \
-                               --image ubuntu-mesos \
-                               --keypair testkey \
-                               --external-network public \
-                               --dns-nameserver 8.8.8.8 \
-                               --master-flavor m1.magnum \
-                               --docker-volume-size 4 \
-                               --tls-disabled \
-                               --flavor m1.magnum \
-                               --coe mesos \
-                               --volume-driver rexray \
-                               --labels rexray-preempt=true
-
-2. Create the Mesos cluster::
-
-    openstack coe cluster create mesos-cluster \
-                          --cluster-template mesos-cluster-template \
-                          --node-count 1
-
-3. Create the cinder volume and configure this cluster::
-
-    cinder create --display-name=redisdata 1
-
-   Create the following file ::
-
-    cat > mesos.json << END
-    {
-      "id": "redis",
-      "container": {
-        "docker": {
-        "image": "redis",
-        "network": "BRIDGE",
-        "portMappings": [
-          { "containerPort": 80, "hostPort": 0, "protocol": "tcp"}
-        ],
-        "parameters": [
-           { "key": "volume-driver", "value": "rexray" },
-           { "key": "volume", "value": "redisdata:/data" }
-        ]
-        }
-     },
-     "cpus": 0.2,
-     "mem": 32.0,
-     "instances": 1
-    }
-    END
-
-**NOTE:** When the Mesos cluster is created using this ClusterTemplate, the
-Mesos cluster will be configured so that a filesystem on an existing cinder
-volume can be mounted in a container by configuring the parameters to mount
-the cinder volume in the JSON file ::
-
-    "parameters": [
-       { "key": "volume-driver", "value": "rexray" },
-       { "key": "volume", "value": "redisdata:/data" }
-    ]
-
-4. Create the container using Marathon REST API ::
-
-    MASTER_IP=$(openstack coe cluster show mesos-cluster | awk '/ api_address /{print $4}')
-    curl -X POST -H "Content-Type: application/json" \
-    http://${MASTER_IP}:8080/v2/apps -d@mesos.json
-
-You can log into the container to check that the mountPath exists, and
-you can run the command 'cinder list' to verify that your cinder
-volume status is 'in-use'.
-
-
 Image Management
 ================
 
@@ -3214,7 +2812,7 @@ When a COE is deployed, an image from Glance is used to boot the nodes
 in the cluster and then the software will be configured and started on
 the nodes to bring up the full cluster.  An image is based on a
 particular distro such as Fedora, Ubuntu, etc, and is prebuilt with
-the software specific to the COE such as Kubernetes, Swarm, Mesos.
+the software specific to the COE such as Kubernetes and Swarm.
 The image is tightly coupled with the following in Magnum:
 
 1. Heat templates to orchestrate the configuration.
@@ -3280,25 +2878,6 @@ This image can be downloaded from the `public Atomic site
 or can be built locally using diskimagebuilder.
 The login for this image is *fedora*.
 
-Mesos on Ubuntu
----------------
-
-This image is built manually using diskimagebuilder.  The instructions are
-provided in the section `Diskimage-builder`_.
-The Fedora site hosts the current image `ubuntu-mesos-latest.qcow2
-<https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2>`_.
-
-+-------------+-----------+
-| OS/software | version   |
-+=============+===========+
-| Ubuntu      | 14.04     |
-+-------------+-----------+
-| Docker      | 1.8.1     |
-+-------------+-----------+
-| Mesos       | 0.25.0    |
-+-------------+-----------+
-| Marathon    | 0.11.1    |
-+-------------+-----------+
 
 Notification
 ============
