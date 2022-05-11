@@ -36,10 +36,6 @@ Swarm cluster-create fails
   Check the `heat stacks`_, log into the master nodes and check the `Swarm
   services`_ and `etcd service`_.
 
-Mesos cluster-create fails
-  Check the `heat stacks`_, log into the master nodes and check the `Mesos
-  services`_.
-
 I get the error "Timed out waiting for a reply" when deploying a pod
   Verify the `Kubernetes services`_ and `etcd service`_ are running on the
   master nodes.
@@ -56,9 +52,6 @@ I deploy pods and services on Kubernetes cluster but the app is not working
 
 Swarm cluster is created successfully but I cannot deploy containers
   Check the `Swarm services`_ and `etcd service`_ on the master nodes.
-
-Mesos cluster is created successfully but I cannot deploy containers on Marathon
-  Check the `Mesos services`_ on the master node.
 
 I get a "Protocol violation" error when deploying a container
   For Kubernetes, check the `Kubernetes services`_ to verify that
@@ -104,7 +97,7 @@ in some cases it may only say "Unknown".
 If the failed resource is OS::Heat::WaitConditionHandle, this indicates that
 one of the services that are being started on the node is hung.  Log into the
 node where the failure occurred and check the respective `Kubernetes
-services`_, `Swarm services`_ or `Mesos services`_.  If the failure is in
+services`_ or `Swarm services`_.  If the failure is in
 other scripts, look for them as `Heat software resource scripts`_.
 
 
@@ -212,7 +205,7 @@ Barbican service
 
 Cluster internet access
 -----------------------
-The nodes for Kubernetes, Swarm and Mesos are connected to a private
+The nodes for Kubernetes and Swarm are connected to a private
 Neutron network, so to provide access to the external internet, a router
 connects the private network to a public network.  With devstack, the
 default public network is "public", but this can be replaced by the
@@ -680,10 +673,6 @@ Swarm services
 
 (How to check on a swarm cluster: see membership information, view master,
 agent containers)
-
-Mesos services
---------------
-*To be filled in*
 
 
 Barbican issues

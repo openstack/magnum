@@ -16,5 +16,5 @@ following components:
 
 ``magnum-conductor`` service
   Runs on a controller machine and connects to heat to orchestrate a
-  cluster. Additionally, it connects to a Docker Swarm, Kubernetes
-  or Mesos REST API endpoint.
+  cluster. Additionally, it connects to a Docker Swarm or Kubernetes
+  API endpoint.
