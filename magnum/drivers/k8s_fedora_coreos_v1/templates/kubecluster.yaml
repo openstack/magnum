@@ -660,6 +660,24 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    default: amphora
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+
+  octavia_lb_algorithm:
+    type: string
+    default: ROUND_ROBIN
+    description: >
+      Octavia lb algorithm to use for LoadBalancer type service
+
+  octavia_lb_healthcheck:
+    type: boolean
+    description: >
+      if true, enable Octavia load balancer healthcheck
+    default: true
+
   kube_service_account_key:
     type: string
     hidden: true
@@ -1021,6 +1039,9 @@ resources:
       protocol: {get_param: loadbalancing_protocol}
       port: {get_param: kubernetes_port}
       allowed_cidrs: {get_param: master_lb_allowed_cidrs}
+      octavia_provider: {get_param: octavia_provider}
+      octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+      octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
 
   etcd_lb:
     condition: create_cluster_resources
@@ -1030,6 +1051,9 @@ resources:
       protocol: {get_param: loadbalancing_protocol}
       port: 2379
       allowed_cidrs: {get_param: master_lb_allowed_cidrs}
+      octavia_provider: {get_param: octavia_provider}
+      octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+      octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
 
   ######################################################################
   #
@@ -1317,6 +1341,9 @@ resources:
           kubecontroller_options: {get_param: kubecontroller_options}
           kubescheduler_options: {get_param: kubescheduler_options}
           octavia_enabled: {get_param: octavia_enabled}
+          octavia_provider: {get_param: octavia_provider}
+          octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+          octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
           kube_service_account_key: {get_param: kube_service_account_key}
           kube_service_account_private_key: {get_param: kube_service_account_private_key}
           prometheus_tag: {get_param: prometheus_tag}
@@ -1538,6 +1565,9 @@ resources:
           kubelet_options: {get_param: kubelet_options}
           kubeproxy_options: {get_param: kubeproxy_options}
           octavia_enabled: {get_param: octavia_enabled}
+          octavia_provider: {get_param: octavia_provider}
+          octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+          octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
           auto_healing_enabled: {get_param: auto_healing_enabled}
           npd_enabled: {get_param: npd_enabled}
