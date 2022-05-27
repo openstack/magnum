@@ -18,8 +18,7 @@ from magnum.conductor.handlers.common.cert_manager import create_client_files
 
 
 class KubernetesAPI:
-    """
-    Simple Kubernetes API client using requests.
+    """Simple Kubernetes API client using requests.
 
     This API wrapper allows for a set of very simple operations to be
     performed on a Kubernetes cluster using the `requests` library. The
@@ -55,9 +54,7 @@ class KubernetesAPI:
             return response.text
 
     def get_healthz(self):
-        """
-        Get the health of the cluster from API
-        """
+        """Get the health of the cluster from API"""
         return self._request(
             'GET',
             f"{self.cluster.api_address}/healthz",
@@ -65,8 +62,7 @@ class KubernetesAPI:
         )
 
     def list_node(self):
-        """
-        List all nodes in the cluster.
+        """List all nodes in the cluster.
 
         :return: List of nodes.
         """
@@ -76,8 +72,7 @@ class KubernetesAPI:
         )
 
     def list_namespaced_pod(self, namespace):
-        """
-        List all pods in the given namespace.
+        """List all pods in the given namespace.
 
         :param namespace: Namespace to list pods from.
         :return: List of pods.
@@ -88,9 +83,9 @@ class KubernetesAPI:
         )
 
     def __del__(self):
-        """
-        Close all of the file descriptions for the certificates, since they
-        are left open by `create_client_files`.
+        """Close all of the file descriptions for the certificates
+
+        They are left open by `create_client_files`.
 
         TODO(mnaser): Use a context manager and avoid having these here.
         """

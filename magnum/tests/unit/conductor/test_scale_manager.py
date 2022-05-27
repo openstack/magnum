@@ -190,7 +190,8 @@ class TestK8sScaleManager(base.TestCase):
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.k8s_api.create_client_files')
-    def test_get_hosts_with_container(self, mock_create_client_files, mock_get):
+    def test_get_hosts_with_container(
+            self, mock_create_client_files, mock_get):
         mock_cluster = mock.MagicMock()
         mock_cluster.api_address = "https://foobar.com:6443"
 

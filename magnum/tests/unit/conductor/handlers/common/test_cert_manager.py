@@ -247,8 +247,8 @@ class CertManagerTestCase(base.BaseTestCase):
             mock_cluster, ca_cert_type="front-proxy")
 
         self.CertManager.get_cert.assert_called_once_with(
-            mock_cluster.front_proxy_ca_cert_ref, resource_ref=mock_cluster.uuid,
-            context=None)
+            mock_cluster.front_proxy_ca_cert_ref,
+            resource_ref=mock_cluster.uuid, context=None)
         self.assertEqual(mock_ca_cert, cluster_ca_cert)
 
     def test_get_cluster_magnum_cert(self):

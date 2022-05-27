@@ -610,7 +610,8 @@ class MonitorsTestCase(base.TestCase):
                           'api': 'ok', 'k8s-cluster-node-1.Ready': True})
 
     @mock.patch('magnum.conductor.k8s_api.create_client_files')
-    def test_k8s_monitor_health_unreachable_cluster(self, mock_create_client_files):
+    def test_k8s_monitor_health_unreachable_cluster(
+            self, mock_create_client_files):
         mock_create_client_files.return_value = (
             tempfile.NamedTemporaryFile(),
             tempfile.NamedTemporaryFile(),
@@ -634,7 +635,8 @@ class MonitorsTestCase(base.TestCase):
                          m_fields.ClusterHealthStatus.UNKNOWN)
 
     @mock.patch('magnum.conductor.k8s_api.create_client_files')
-    def test_k8s_monitor_health_unreachable_with_master_lb(self, mock_create_client_files):
+    def test_k8s_monitor_health_unreachable_with_master_lb(
+            self, mock_create_client_files):
         mock_create_client_files.return_value = (
             tempfile.NamedTemporaryFile(),
             tempfile.NamedTemporaryFile(),

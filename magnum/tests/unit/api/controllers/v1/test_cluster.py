@@ -189,7 +189,8 @@ class TestListCluster(api_base.FunctionalTest):
     @mock.patch("magnum.common.context.make_context")
     @mock.patch("magnum.objects.Cluster.obj_load_attr")
     @mock.patch("magnum.objects.Cluster.cluster_template")
-    def test_get_all_with_all_projects(self, mock_context, mock_policy, mock_load, mock_template):
+    def test_get_all_with_all_projects(self, mock_context, mock_policy,
+                                       mock_load, mock_template):
         for id_ in range(4):
             temp_uuid = uuidutils.generate_uuid()
             obj_utils.create_test_cluster(self.context, id=id_,

@@ -44,4 +44,3 @@ class Certificate(base.MagnumPersistentObject, base.MagnumObject):
         return cls(project_id=cluster['project_id'],
                    user_id=cluster['user_id'],
                    cluster_uuid=cluster['uuid'])
-

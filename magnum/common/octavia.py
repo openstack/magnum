@@ -72,7 +72,7 @@ def _delete_loadbalancers(context, lbs, cluster, octavia_client,
     return candidates
 
 
-def delete_loadbalancers(context, cluster):
+def delete_loadbalancers(context, cluster):  # noqa: C901
     """Delete loadbalancers for the cluster.
 
     The following load balancers are deleted:

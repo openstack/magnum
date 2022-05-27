@@ -45,7 +45,7 @@ class Handler(object):
         LOG.debug("Creating self signed x509 certificate")
         try:
             ca_cert_type = certificate.ca_cert_type
-        except Exception as e:
+        except Exception:
             LOG.debug("There is no CA cert type specified for the CSR")
             ca_cert_type = "kubernetes"
 

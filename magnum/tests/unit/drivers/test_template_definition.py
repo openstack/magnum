@@ -624,7 +624,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'master_lb_allowed_cidrs')
         octavia_provider = mock_cluster.labels.get('octavia_provider')
         octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
-        octavia_lb_healthcheck = mock_cluster.labels.get('octavia_lb_healthcheck')
+        octavia_lb_healthcheck = mock_cluster.labels.get(
+                'octavia_lb_healthcheck')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1186,7 +1187,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         octavia_provider = mock_cluster.labels.get('octavia_provider')
         octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
-        octavia_lb_healthcheck = mock_cluster.labels.get('octavia_lb_healthcheck')
+        octavia_lb_healthcheck = mock_cluster.labels.get(
+                'octavia_lb_healthcheck')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
