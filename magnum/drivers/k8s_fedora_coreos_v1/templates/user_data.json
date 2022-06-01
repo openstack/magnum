@@ -1,14 +1,6 @@
 {
   "ignition": {
-    "version": "3.3.0"
-  },
-  "kernelArguments": {
-    "shouldExist": [
-      "mitigations=off"
-    ],
-    "shouldNotExist": [
-      "mitigations=auto,nosmt"
-    ]
+    "version": "3.0.0"
   },
   "passwd": {
     "users": [
