@@ -1667,7 +1667,7 @@ _`ingress_controller`
   'nginx' and 'octavia' are supported. The default is '', meaning no Ingress
   Controller is configured. For more details about octavia-ingress-controller
   please refer to `cloud-provider-openstack document
-  <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-octavia-ingress-controller.md>`_
+  <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/octavia-ingress-controller/using-octavia-ingress-controller.md>`_
   To use 'nginx' ingress controller, tiller_enabled must be true when using
   helm_client_tag<v3.0.0.
 
