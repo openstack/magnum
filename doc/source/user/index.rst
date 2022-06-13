@@ -1486,8 +1486,8 @@ _`csi_node_driver_registrar_tag`
   Yoga-default: v2.4.0
 
 -`liveness_probe_tag`
-  This label allows users to override the default container tag for CSI liveness
-  probe.
+  This label allows users to override the default container tag for CSI
+  liveness probe.
   Yoga-default: v2.5.0
 
 _`keystone_auth_enabled`
