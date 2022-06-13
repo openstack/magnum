@@ -627,7 +627,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         extra_security_group = mock_cluster.labels.get('extra_security_group')
         octavia_provider = mock_cluster.labels.get('octavia_provider')
         octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
-        octavia_lb_healthcheck = mock_cluster.labels.get('octavia_lb_healthcheck')
+        octavia_lb_healthcheck = mock_cluster.labels.get(
+            'octavia_lb_healthcheck')
         liveness_probe_tag = mock_cluster.labels.get(
             'liveness_probe_tag')
 
@@ -1197,7 +1198,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         extra_security_group = mock_cluster.labels.get('extra_security_group')
         octavia_provider = mock_cluster.labels.get('octavia_provider')
         octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
-        octavia_lb_healthcheck = mock_cluster.labels.get('octavia_lb_healthcheck')
+        octavia_lb_healthcheck = mock_cluster.labels.get(
+            'octavia_lb_healthcheck')
         liveness_probe_tag = mock_cluster.labels.get(
             'liveness_probe_tag')
 
