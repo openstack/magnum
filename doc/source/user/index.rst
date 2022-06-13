@@ -1488,7 +1488,7 @@ _`csi_node_driver_registrar_tag`
 -`liveness_probe_tag`
   This label allows users to override the default container tag for CSI liveness
   probe.
-  Yoga-default: v2.5.0 
+  Yoga-default: v2.5.0
 
 _`keystone_auth_enabled`
   If this label is set to True, Kubernetes will support use Keystone for
@@ -1672,9 +1672,9 @@ _`extra_subnet`
 
 _`extra_security_group`
   Optional additional group name or UUID to add to network port.
-  Only used when 'extra_network' is defined. 
+  Only used when 'extra_network' is defined.
   Default: cluster node default security group.
-  
+
 _`octavia_provider`
   Octavia provider driver to be used for creating load balancers.
 
