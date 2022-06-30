@@ -228,12 +228,36 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             'boot_volume_size', CONF.cinder.default_boot_volume_size)
         extra_params['boot_volume_size'] = boot_volume_size
 
+        # set master_volume_size
+        master_volume_size = cluster.labels.get(
+            'master_volume_size', boot_volume_size)
+        extra_params['master_volume_size'] = master_volume_size
+
+        # set worker_volume_size
+        worker_volume_size = cluster.labels.get(
+            'worker_volume_size', boot_volume_size)
+        extra_params['worker_volume_size'] = worker_volume_size
+
         # set boot_volume_type
         boot_volume_type = (cluster.labels.get(
             'boot_volume_type',
             cinder.get_default_boot_volume_type(context))
-            if int(boot_volume_size) > 0 else '')
+            if (int(boot_volume_size) or
+                int(master_volume_size) or
+                int(worker_volume_size)) > 0 else '')
         extra_params['boot_volume_type'] = boot_volume_type
+
+        # set master_volume_type
+        if int(master_volume_size) > 0:
+            master_volume_type = cluster.labels.get(
+                'master_volume_type', boot_volume_type)
+            extra_params['master_volume_type'] = master_volume_type
+
+        # set worker_volume_type
+        if int(worker_volume_size) > 0:
+            worker_volume_type = cluster.labels.get(
+                'worker_volume_type', boot_volume_type)
+            extra_params['worker_volume_type'] = worker_volume_type
 
     def get_env_files(self, cluster_template, cluster, nodegroup=None):
         env_files = []
