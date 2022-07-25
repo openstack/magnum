@@ -12,6 +12,8 @@
 import collections
 from unittest import mock
 
+import keystoneauth1
+
 from magnum.common import clients
 from magnum.common import utils
 from magnum.drivers.cluster_api import app_creds
@@ -97,3 +99,29 @@ clouds:
       application_credential_id: id
 """
         self.assertEqual(expected, app_cred)
+
+    @mock.patch.object(clients, "OpenStackClients")
+    def test_delete_app_cred(self, mock_client):
+        mock_app_cred = mock_client().keystone().client.application_credentials
+        mock_find = mock.MagicMock()
+        mock_app_cred.find.return_value = mock_find
+
+        app_creds.delete_app_cred("context", self.cluster_obj)
+
+        mock_find.delete.assert_called_once_with()
+        mock_app_cred.find.assert_called_once_with(
+            name=f"magnum-{self.cluster_obj.uuid}",
+            user="fake_user",
+        )
+
+    @mock.patch.object(clients, "OpenStackClients")
+    def test_delete_app_cred_not_found(self, mock_client):
+        mock_app_cred = mock_client().keystone().client.application_credentials
+        mock_app_cred.find.side_effect = keystoneauth1.exceptions.http.NotFound
+
+        app_creds.delete_app_cred("context", self.cluster_obj)
+
+        mock_app_cred.find.assert_called_once_with(
+            name=f"magnum-{self.cluster_obj.uuid}",
+            user="fake_user",
+        )

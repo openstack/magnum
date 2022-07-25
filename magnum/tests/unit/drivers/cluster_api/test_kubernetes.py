@@ -158,3 +158,292 @@ class TestKubernetesClient(base.TestCase):
             headers={"Content-Type": "application/apply-patch+yaml"},
             params={"fieldManager": "magnum", "force": "true"},
         )
+
+    @mock.patch.object(requests.Session, "request")
+    def test_delete_all_secrets_by_label(self, mock_request):
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        mock_response = mock.MagicMock()
+        mock_request.return_value = mock_response
+
+        client.delete_all_secrets_by_label("label", "cluster1", "ns1")
+
+        mock_request.assert_called_once_with(
+            "DELETE",
+            "https://test:6443/api/v1/namespaces/ns1/secrets",
+            params={"labelSelector": "label=cluster1"},
+        )
+        mock_response.raise_for_status.assert_called_once_with()
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_capi_cluster_found(self, mock_request):
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = "mock_json"
+        mock_request.return_value = mock_response
+
+        cluster = client.get_capi_cluster("name", "ns1")
+
+        mock_request.assert_called_once_with(
+            "GET",
+            (
+                "https://test:6443/apis/cluster.x-k8s.io/"
+                "v1beta1/namespaces/ns1/clusters/name"
+            ),
+            allow_redirects=True,
+        )
+        self.assertEqual("mock_json", cluster)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_capi_cluster_not_found(self, mock_request):
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 404
+        mock_request.return_value = mock_response
+
+        cluster = client.get_capi_cluster("name", "ns1")
+
+        self.assertIsNone(cluster)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_capi_cluster_error(self, mock_request):
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 500
+        mock_response.raise_for_status.side_effect = requests.HTTPError
+        mock_request.return_value = mock_response
+
+        self.assertRaises(
+            requests.HTTPError, client.get_capi_cluster, "name", "ns1"
+        )
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_kubeadm_control_plane_found(self, mock_request):
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = "mock_json"
+        mock_request.return_value = mock_response
+
+        cluster = client.get_kubeadm_control_plane("name", "ns1")
+
+        mock_request.assert_called_once_with(
+            "GET",
+            (
+                "https://test:6443/apis/controlplane.cluster.x-k8s.io/"
+                "v1beta1/namespaces/ns1/kubeadmcontrolplanes/name"
+            ),
+            allow_redirects=True,
+        )
+        self.assertEqual("mock_json", cluster)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_machine_deployment_found(self, mock_request):
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = "mock_json"
+        mock_request.return_value = mock_response
+
+        cluster = client.get_machine_deployment("name", "ns1")
+
+        mock_request.assert_called_once_with(
+            "GET",
+            (
+                "https://test:6443/apis/cluster.x-k8s.io/"
+                "v1beta1/namespaces/ns1/machinedeployments/name"
+            ),
+            allow_redirects=True,
+        )
+        self.assertEqual("mock_json", cluster)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_manifests_by_label_found(self, mock_request):
+        items = [
+            {
+                "kind": "Manifests",
+                "metadata": {
+                    "name": f"manifests{idx}",
+                    "namespace": "ns1"
+                },
+            }
+            for idx in range(5)
+        ]
+
+        mock_response = mock.Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "metadata": {
+                "continue": "",
+            },
+            "items": items,
+        }
+        mock_request.return_value = mock_response
+
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        manifests = client.get_manifests_by_label("label", "cluster1", "ns1")
+
+        mock_request.assert_called_once_with(
+            "GET",
+            (
+                "https://test:6443/apis/addons.stackhpc.com/"
+                "v1alpha1/namespaces/ns1/manifests"
+            ),
+            params={"labelSelector": "label=cluster1"},
+            allow_redirects=True
+        )
+        self.assertEqual(items, manifests)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_helm_releases_by_label_found(self, mock_request):
+        items = [
+            {
+                "kind": "HelmRelease",
+                "metadata": {
+                    "name": f"helmrelease{idx}",
+                    "namespace": "ns1"
+                },
+            }
+            for idx in range(5)
+        ]
+
+        mock_response = mock.Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "metadata": {
+                "continue": "",
+            },
+            "items": items,
+        }
+        mock_request.return_value = mock_response
+
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        helm_releases = client.get_helm_releases_by_label(
+            "label",
+            "cluster1",
+            "ns1"
+        )
+
+        mock_request.assert_called_once_with(
+            "GET",
+            (
+                "https://test:6443/apis/addons.stackhpc.com/"
+                "v1alpha1/namespaces/ns1/helmreleases"
+            ),
+            params={"labelSelector": "label=cluster1"},
+            allow_redirects=True
+        )
+        self.assertEqual(items, helm_releases)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_helm_releases_by_label_multipage(self, mock_request):
+        items = [
+            {
+                "kind": "HelmRelease",
+                "metadata": {
+                    "name": f"helmrelease{idx}",
+                    "namespace": "ns1"
+                },
+            }
+            for idx in range(10)
+        ]
+
+        mock_response_page1 = mock.Mock()
+        mock_response_page1.raise_for_status.return_value = None
+        mock_response_page1.json.return_value = {
+            "metadata": {
+                "continue": "continuetoken",
+            },
+            "items": items[:5],
+        }
+        mock_response_page2 = mock.Mock()
+        mock_response_page2.raise_for_status.return_value = None
+        mock_response_page2.json.return_value = {
+            "metadata": {
+                "continue": "",
+            },
+            "items": items[5:],
+        }
+        mock_request.side_effect = [
+            mock_response_page1,
+            mock_response_page2,
+        ]
+
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        helm_releases = client.get_helm_releases_by_label(
+            "label",
+            "cluster1",
+            "ns1"
+        )
+
+        self.assertEqual(mock_request.call_count, 2)
+        mock_request.assert_has_calls([
+            mock.call(
+                "GET",
+                (
+                    "https://test:6443/apis/addons.stackhpc.com/"
+                    "v1alpha1/namespaces/ns1/helmreleases"
+                ),
+                params={"labelSelector": "label=cluster1"},
+                allow_redirects=True
+            ),
+            mock.call(
+                "GET",
+                (
+                    "https://test:6443/apis/addons.stackhpc.com/"
+                    "v1alpha1/namespaces/ns1/helmreleases"
+                ),
+                params={
+                    "labelSelector": "label=cluster1",
+                    "continue": "continuetoken",
+                },
+                allow_redirects=True
+            ),
+        ])
+        self.assertEqual(items, helm_releases)
+
+    @mock.patch.object(kubernetes.Client, "get_helm_releases_by_label")
+    @mock.patch.object(kubernetes.Client, "get_manifests_by_label")
+    def test_get_addons_by_label_found(
+        self,
+        mock_get_manifests,
+        mock_get_helm_releases
+    ):
+        manifests = [
+            {
+                "kind": "Manifests",
+                "metadata": {
+                    "name": f"manifests{idx}",
+                    "namespace": "ns1"
+                },
+            }
+            for idx in range(5)
+        ]
+        helm_releases = [
+            {
+                "kind": "HelmRelease",
+                "metadata": {
+                    "name": f"helmrelease{idx}",
+                    "namespace": "ns1"
+                },
+            }
+            for idx in range(5)
+        ]
+
+        mock_get_manifests.return_value = manifests
+        mock_get_helm_releases.return_value = helm_releases
+
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        addons = client.get_addons_by_label("label", "cluster1", "ns1")
+
+        mock_get_manifests.assert_called_once_with(
+            "label",
+            "cluster1",
+            "ns1"
+        )
+        mock_get_helm_releases.assert_called_once_with(
+            "label",
+            "cluster1",
+            "ns1"
+        )
+        self.assertEqual(manifests + helm_releases, addons)

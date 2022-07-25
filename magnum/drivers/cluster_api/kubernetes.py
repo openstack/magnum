@@ -129,6 +129,41 @@ class Client(requests.Session):
     def apply_secret(self, secret_name, data, namespace):
         Secret(self).apply(secret_name, data, namespace)
 
+    def delete_all_secrets_by_label(self, label, value, namespace):
+        Secret(self).delete_all_by_label(label, value, namespace)
+
+    def get_capi_cluster(self, name, namespace):
+        return Cluster(self).fetch(name, namespace)
+
+    def get_kubeadm_control_plane(self, name, namespace):
+        return KubeadmControlPlane(self).fetch(name, namespace)
+
+    def get_machine_deployment(self, name, namespace):
+        return MachineDeployment(self).fetch(name, namespace)
+
+    def get_manifests_by_label(self, label, value, namespace):
+        return list(
+            Manifests(self).fetch_all_by_label(
+                label,
+                value,
+                namespace
+            )
+        )
+
+    def get_helm_releases_by_label(self, label, value, namespace):
+        return list(
+            HelmRelease(self).fetch_all_by_label(
+                label,
+                value,
+                namespace
+            )
+        )
+
+    def get_addons_by_label(self, label, value, namespace):
+        addons = list(self.get_manifests_by_label(label, value, namespace))
+        addons.extend(self.get_helm_releases_by_label(label, value, namespace))
+        return addons
+
 
 class Resource:
     def __init__(self, client):
@@ -153,6 +188,39 @@ class Resource:
             f"{self.plural_name}{path_name}"
         )
 
+    def fetch(self, name, namespace=None):
+        """Fetches specified object from the target Kubernetes cluster.
+
+        If the object is not found, None is returned.
+        """
+        assert self.namespaced == bool(namespace)
+        response = self.client.get(self.prepare_path(name, namespace))
+        if 200 <= response.status_code < 300:
+            return response.json()
+        elif response.status_code == 404:
+            return None
+        else:
+            response.raise_for_status()
+
+    def fetch_all_by_label(self, label, value, namespace=None):
+        """Fetches all objects with the specified label from cluster."""
+        assert self.namespaced == bool(namespace)
+        continue_token = ""
+        while True:
+            params = {"labelSelector": f"{label}={value}"}
+            if continue_token:
+                params["continue"] = continue_token
+            response = self.client.get(
+                self.prepare_path(namespace=namespace),
+                params=params
+            )
+            response.raise_for_status()
+            response_data = response.json()
+            yield from response_data["items"]
+            continue_token = response_data["metadata"]["continue"]
+            if not continue_token:
+                break
+
     def apply(self, name, data=None, namespace=None):
         """Applies the given object to the target Kubernetes cluster."""
         assert self.namespaced == bool(namespace)
@@ -171,6 +239,15 @@ class Resource:
         response.raise_for_status()
         return response.json()
 
+    def delete_all_by_label(self, label, value, namespace=None):
+        """Deletes all objects with the specified label from cluster."""
+        assert self.namespaced == bool(namespace)
+        response = self.client.delete(
+            self.prepare_path(namespace=namespace),
+            params={"labelSelector": f"{label}={value}"},
+        )
+        response.raise_for_status()
+
 
 class Namespace(Resource):
     api_version = "v1"
@@ -179,3 +256,24 @@ class Namespace(Resource):
 
 class Secret(Resource):
     api_version = "v1"
+
+
+class Cluster(Resource):
+    api_version = "cluster.x-k8s.io/v1beta1"
+
+
+class MachineDeployment(Resource):
+    api_version = "cluster.x-k8s.io/v1beta1"
+
+
+class KubeadmControlPlane(Resource):
+    api_version = "controlplane.cluster.x-k8s.io/v1beta1"
+
+
+class Manifests(Resource):
+    api_version = "addons.stackhpc.com/v1alpha1"
+    plural_name = "manifests"
+
+
+class HelmRelease(Resource):
+    api_version = "addons.stackhpc.com/v1alpha1"

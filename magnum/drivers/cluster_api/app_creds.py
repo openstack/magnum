@@ -13,12 +13,15 @@
 import yaml
 
 import certifi
+import keystoneauth1
+from oslo_log import log as logging
 
 from magnum.common import clients
 from magnum.common import utils
 import magnum.conf
 
 CONF = magnum.conf.CONF
+LOG = logging.getLogger(__name__)
 
 
 def get_openstack_ca_certificate():
@@ -69,3 +72,19 @@ def _create_app_cred(context, cluster):
 def get_app_cred_yaml(context, cluster):
     app_cred_dict = _create_app_cred(context, cluster)
     return yaml.safe_dump(app_cred_dict)
+
+
+def delete_app_cred(context, cluster):
+    osc = clients.OpenStackClients(context)
+    try:
+        appcred = osc.keystone().client.application_credentials.find(
+            name=f"magnum-{cluster.uuid}", user=cluster.user_id
+        )
+    except keystoneauth1.exceptions.http.NotFound:
+        # We don't want this to be a failure condition as it may prevent
+        # cleanup of broken clusters, e.g. if cluster creation fails
+        # before the appcred is created or cluster deletion fails after
+        # the appcred is deleted
+        LOG.warning("Appcred does not exist for %s", cluster.uuid)
+    else:
+        appcred.delete()
