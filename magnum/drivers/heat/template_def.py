@@ -320,11 +320,13 @@ class TemplateDefinition(object, metaclass=abc.ABCMeta):
         for output in self.nodegroup_output_mappings:
             output.set_output(stack, cluster_template, cluster)
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def driver_module_path(self):
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def template_path(self):
         pass
 
@@ -357,7 +359,8 @@ class BaseTemplateDefinition(TemplateDefinition):
     def driver_module_path(self):
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def template_path(self):
         pass
 
