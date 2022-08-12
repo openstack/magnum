@@ -120,13 +120,16 @@ class HeatDriver(driver.Driver):
             osc = clients.OpenStackClients(context)
             self._delete_stack(context, osc, nodegroup.stack_id)
 
-    def update_cluster_status(self, context, cluster):
+    def update_cluster_status(self, context, cluster, use_admin_ctx=False):
         if cluster.stack_id is None:
             # NOTE(mgoddard): During cluster creation it is possible to poll
             # the cluster before its heat stack has been created. See bug
             # 1682058.
             return
-        stack_ctx = mag_ctx.make_cluster_context(cluster)
+        if use_admin_ctx:
+            stack_ctx = context
+        else:
+            stack_ctx = mag_ctx.make_cluster_context(cluster)
         poller = HeatPoller(clients.OpenStackClients(stack_ctx), context,
                             cluster, self)
         poller.poll_and_check()

@@ -141,7 +141,7 @@ class Driver(object):
             context, cluster.cluster_template_id)
         return cls.get_driver(ct.server_type, ct.cluster_distro, ct.coe)
 
-    def update_cluster_status(self, context, cluster):
+    def update_cluster_status(self, context, cluster, use_admin_ctx=False):
         """Update the cluster status based on underlying orchestration
 
            This is an optional method if your implementation does not need

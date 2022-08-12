@@ -23,6 +23,7 @@ from oslo_service import periodic_task
 from pycadf import cadftaxonomy as taxonomy
 
 from magnum.common import context
+from magnum.common import exception
 from magnum.common import profiler
 from magnum.common import rpc
 from magnum.conductor import monitors
@@ -68,7 +69,19 @@ class ClusterUpdateJob(object):
         # get the driver for the cluster
         cdriver = driver.Driver.get_driver_for_cluster(self.ctx, self.cluster)
         # ask the driver to sync status
-        cdriver.update_cluster_status(self.ctx, self.cluster)
+        try:
+            cdriver.update_cluster_status(self.ctx, self.cluster)
+        except exception.AuthorizationFailure as e:
+            trust_ex = ("Could not find trust: %s" % self.cluster.trust_id)
+            # Try to use admin context if trust not found.
+            # This will make sure even with trust got deleted out side of
+            # Magnum, we still be able to check cluster status
+            if trust_ex in str(e):
+                cdriver.update_cluster_status(
+                    self.ctx, self.cluster, use_admin_ctx=True)
+            else:
+                raise
+
         LOG.debug("Status for cluster %s updated to %s (%s)",
                   self.cluster.id, self.cluster.status,
                   self.cluster.status_reason)
