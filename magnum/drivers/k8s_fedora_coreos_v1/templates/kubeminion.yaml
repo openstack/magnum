@@ -294,6 +294,24 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+    default: False
+
+  octavia_lb_algorithm:
+    type: string
+    default: ROUND_ROBIN
+    description: >
+      Octavia lb algorithm to use for LoadBalancer type service.
+
+  octavia_lb_healthcheck:
+    type: boolean
+    default: True
+    description: >
+      Octavia lb healthcheck.
+
   cloud_provider_enabled:
     type: boolean
     description: Enable or disable the openstack kubernetes cloud provider
@@ -369,6 +387,21 @@ parameters:
       The private key will be used to sign generated k8s service account
       tokens.
 
+  extra_network:
+    type: string
+    description: >
+      Additional network name to bind ports to instances
+
+  extra_subnet:
+    type: string
+    description: >
+      Additional subnet name
+
+  extra_security_group:
+    type: string
+    description: >
+      Additional seurity group name
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -377,6 +410,25 @@ conditions:
       equals:
       - get_param: boot_volume_size
       - 0
+
+  extra_network_defined:
+    not:
+      equals:
+      - get_param: extra_network
+      - ''
+
+  extra_subnet_defined:
+    not:
+      equals:
+      - get_param: extra_subnet
+      - ''
+
+  extra_security_group_defined:
+    not:
+      equals:
+      - get_param: extra_security_group
+      - ''
+
 
 resources:
 
@@ -482,6 +534,9 @@ resources:
                   $KUBELET_OPTIONS: {get_param: kubelet_options}
                   $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
                   $OCTAVIA_ENABLED: {get_param: octavia_enabled}
+                  $OCTAVIA_PROVIDER: {get_param: octavia_provider}
+                  $OCTAVIA_LB_ALGORITHM: {get_param: octavia_lb_algorithm}
+                  $OCTAVIA_LB_HEALTHCHECK: {get_param: octavia_lb_healthcheck}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
                   $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
                   $AUTO_HEALING_CONTROLLER: {get_param: auto_healing_controller}
@@ -542,7 +597,12 @@ resources:
       user_data_format: SOFTWARE_CONFIG
       software_config_transport: POLL_SERVER_HEAT
       networks:
-        - port: {get_resource: kube_minion_eth0}
+        list_concat:
+          - - port: {get_resource: kube_minion_eth0}
+          - if:
+              - "extra_network_defined"
+              - - port: {get_resource: kube_minion_eth1}
+              - []
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
 
@@ -556,7 +616,12 @@ resources:
       user_data_format: SOFTWARE_CONFIG
       software_config_transport: POLL_SERVER_HEAT
       networks:
-        - port: {get_resource: kube_minion_eth0}
+        list_concat:
+          - - port: {get_resource: kube_minion_eth0}
+          - if:
+              - "extra_network_defined"
+              - - port: {get_resource: kube_minion_eth1}
+              - []
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
       block_device_mapping_v2:
@@ -573,6 +638,23 @@ resources:
         - subnet: {get_param: fixed_subnet}
       allowed_address_pairs:
         - ip_address: {get_param: pods_network_cidr}
+      replacement_policy: AUTO
+
+  kube_minion_eth1:
+    type: OS::Neutron::Port
+    condition: extra_network_defined
+    properties:
+      network: {get_param: extra_network}
+      security_groups:
+        - if:
+            - "extra_security_group_defined"
+            - get_param: extra_security_group
+            - get_param: secgroup_kube_minion_id
+      fixed_ips:
+        if:
+          - "extra_subnet_defined"
+          - - subnet: {get_param: extra_subnet}
+          - []
       replacement_policy: AUTO
 
   kube_minion_floating:

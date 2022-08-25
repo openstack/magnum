@@ -622,6 +622,15 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         metrics_scraper_tag = mock_cluster.labels.get('metrics_scraper_tag')
         master_lb_allowed_cidrs = mock_cluster.labels.get(
             'master_lb_allowed_cidrs')
+        extra_network = mock_cluster.labels.get('extra_network')
+        extra_subnet = mock_cluster.labels.get('extra_subnet')
+        extra_security_group = mock_cluster.labels.get('extra_security_group')
+        octavia_provider = mock_cluster.labels.get('octavia_provider')
+        octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
+        octavia_lb_healthcheck = mock_cluster.labels.get(
+            'octavia_lb_healthcheck')
+        liveness_probe_tag = mock_cluster.labels.get(
+            'liveness_probe_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -746,6 +755,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'metrics_scraper_tag': metrics_scraper_tag,
             'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
             'fixed_subnet_cidr': '20.200.0.0/16',
+            'extra_network': extra_network,
+            'extra_subnet': extra_subnet,
+            'extra_security_group': extra_security_group,
+            'octavia_provider': octavia_provider,
+            'octavia_lb_algorithm': octavia_lb_algorithm,
+            'octavia_lb_healthcheck': octavia_lb_healthcheck,
+            'liveness_probe_tag': liveness_probe_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1177,6 +1193,15 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         master_lb_allowed_cidrs = mock_cluster.labels.get(
             'master_lb_allowed_cidrs')
+        extra_network = mock_cluster.labels.get('extra_network')
+        extra_subnet = mock_cluster.labels.get('extra_subnet')
+        extra_security_group = mock_cluster.labels.get('extra_security_group')
+        octavia_provider = mock_cluster.labels.get('octavia_provider')
+        octavia_lb_algorithm = mock_cluster.labels.get('octavia_lb_algorithm')
+        octavia_lb_healthcheck = mock_cluster.labels.get(
+            'octavia_lb_healthcheck')
+        liveness_probe_tag = mock_cluster.labels.get(
+            'liveness_probe_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1303,6 +1328,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'metrics_scraper_tag': metrics_scraper_tag,
             'master_lb_allowed_cidrs': master_lb_allowed_cidrs,
             'fixed_subnet_cidr': '20.200.0.0/16',
+            'extra_network': extra_network,
+            'extra_subnet': extra_subnet,
+            'extra_security_group': extra_security_group,
+            'octavia_provider': octavia_provider,
+            'octavia_lb_algorithm': octavia_lb_algorithm,
+            'octavia_lb_healthcheck': octavia_lb_healthcheck,
+            'liveness_probe_tag': liveness_probe_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,

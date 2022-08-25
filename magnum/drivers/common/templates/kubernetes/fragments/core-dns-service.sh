@@ -75,7 +75,10 @@ data:
     .:53 {
         errors
         log stdout
-        health
+        health {
+            lameduck 5s
+        }
+        ready
         kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} ${PODS_NETWORK_CIDR} {
            pods verified
            fallthrough in-addr.arpa ip6.arpa

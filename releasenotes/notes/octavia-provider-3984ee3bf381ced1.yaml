@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Added support for choosing Octavia provider driver by using
+    ``octavia_provider`` tag.

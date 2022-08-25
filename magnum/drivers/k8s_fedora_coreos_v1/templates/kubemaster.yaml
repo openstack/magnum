@@ -434,6 +434,23 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+
+  octavia_lb_algorithm:
+    type: string
+    default: ROUND_ROBIN
+    description: >
+      Octavia lb algorithm to use for LoadBalancer type service.
+
+  octavia_lb_healthcheck:
+    type: boolean
+    default: True
+    description: >
+      Octavia lb healthcheck.
+
   kube_service_account_key:
     type: string
     hidden: true
@@ -692,6 +709,26 @@ parameters:
     description: >
       Tag of metrics-scraper for kubernetes dashboard.
 
+  extra_network:
+    type: string
+    description: >
+      Additional network name to bind ports to instances
+
+  extra_subnet:
+    type: string
+    description: >
+      Additional subnet name
+
+  extra_security_group:
+    type: string
+    description: >
+      Additional security group name
+
+  liveness_probe_tag:
+    type: string
+    description: >
+      Tag of liveness-probe for cinder csi.
+
 conditions:
 
   image_based: {equals: [{get_param: boot_volume_size}, 0]}
@@ -700,6 +737,24 @@ conditions:
       equals:
       - get_param: boot_volume_size
       - 0
+
+  extra_network_defined:
+    not:
+      equals:
+      - get_param: extra_network
+      - ''
+
+  extra_subnet_defined:
+    not:
+      equals:
+      - get_param: extra_subnet
+      - ''
+
+  extra_security_group_defined:
+    not:
+      equals:
+      - get_param: extra_security_group
+      - ''
 
 resources:
   ######################################################################
@@ -849,6 +904,9 @@ resources:
                   "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
                   "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
                   "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
+                  "$OCTAVIA_PROVIDER": {get_param: octavia_provider}
+                  "$OCTAVIA_LB_ALGORITHM": {get_param: octavia_lb_algorithm}
+                  "$OCTAVIA_LB_HEALTHCHECK": {get_param: octavia_lb_healthcheck}
                   "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
                   "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
                   "$PROMETHEUS_TAG": {get_param: prometheus_tag}
@@ -905,6 +963,7 @@ resources:
                   "$CONTAINERD_TARBALL_SHA256": {get_param: containerd_tarball_sha256}
                   "$POST_INSTALL_MANIFEST_URL": {get_param: post_install_manifest_url}
                   "$METRICS_SCRAPER_TAG":  {get_param: metrics_scraper_tag}
+                  "$LIVENESS_PROBE_TAG":  {get_param: liveness_probe_tag}
             - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
@@ -959,7 +1018,12 @@ resources:
       software_config_transport: POLL_SERVER_HEAT
       user_data: {get_resource: agent_config}
       networks:
-        - port: {get_resource: kube_master_eth0}
+        list_concat:
+          - - port: {get_resource: kube_master_eth0}
+          - if:
+              - "extra_network_defined"
+              - - port: {get_resource: kube_master_eth1}
+              - []
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
 
@@ -973,7 +1037,12 @@ resources:
       software_config_transport: POLL_SERVER_HEAT
       user_data: {get_resource: agent_config}
       networks:
-        - port: {get_resource: kube_master_eth0}
+        list_concat:
+          - - port: {get_resource: kube_master_eth0}
+          - if:
+              - "extra_network_defined"
+              - - port: {get_resource: kube_master_eth1}
+              - []
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
       block_device_mapping_v2:
@@ -990,6 +1059,23 @@ resources:
         - subnet: {get_param: fixed_subnet}
       allowed_address_pairs:
         - ip_address: {get_param: pods_network_cidr}
+      replacement_policy: AUTO
+
+  kube_master_eth1:
+    type: OS::Neutron::Port
+    condition: extra_network_defined
+    properties:
+      network: {get_param: extra_network}
+      security_groups:
+        - if:
+            - "extra_security_group_defined"
+            - {get_param: extra_security_group}
+            - {get_param: secgroup_kube_master_id}
+      fixed_ips:
+        if:
+          - "extra_subnet_defined"
+          - - subnet: {get_param: extra_subnet}
+          - []
       replacement_policy: AUTO
 
   kube_master_floating:
