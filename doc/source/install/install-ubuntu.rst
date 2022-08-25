@@ -15,7 +15,7 @@ Install and configure components
 
    .. code-block:: console
 
-      # DEBIAN_FRONTEND=noninteractive apt-get install magnum-api magnum-conductor python-magnumclient
+      # DEBIAN_FRONTEND=noninteractive apt-get install magnum-api magnum-conductor python3-magnumclient
 
 .. include:: common/configure_2_edit_magnum_conf.rst
 
