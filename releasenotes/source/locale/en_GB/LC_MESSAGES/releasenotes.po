@@ -1,15 +1,16 @@
 # Andi Chandler <andi@gowling.com>, 2018. #zanata
 # Andi Chandler <andi@gowling.com>, 2019. #zanata
 # Andi Chandler <andi@gowling.com>, 2020. #zanata
+# Andi Chandler <andi@gowling.com>, 2022. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: magnum\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-06 21:22+0000\n"
+"POT-Creation-Date: 2022-09-05 09:21+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2020-12-13 12:43+0000\n"
+"PO-Revision-Date: 2022-09-05 10:35+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en_GB\n"
@@ -25,6 +26,39 @@ msgstr ""
 
 msgid "10.0.0"
 msgstr "10.0.0"
+
+msgid "10.1.0"
+msgstr "10.1.0"
+
+msgid "10.1.0-3"
+msgstr "10.1.0-3"
+
+msgid "11.0.0"
+msgstr "11.0.0"
+
+msgid "11.1.0"
+msgstr "11.1.0"
+
+msgid "11.2.0"
+msgstr "11.2.0"
+
+msgid "12.0.0"
+msgstr "12.0.0"
+
+msgid "12.1.0"
+msgstr "12.1.0"
+
+msgid "13.0.0"
+msgstr "13.0.0"
+
+msgid "13.0.0-9"
+msgstr "13.0.0-9"
+
+msgid "14.0.0"
+msgstr "14.0.0"
+
+msgid "14.0.0.0rc1-16"
+msgstr "14.0.0.0rc1-16"
 
 msgid "3.0.0"
 msgstr "3.0.0"
@@ -116,11 +150,23 @@ msgstr "9.3.0"
 msgid "9.4.0"
 msgstr "9.4.0"
 
+msgid "9.4.1"
+msgstr "9.4.1"
+
 msgid ":ref:`genindex`"
 msgstr ":ref:`genindex`"
 
 msgid ":ref:`search`"
 msgstr ":ref:`search`"
+
+msgid ""
+"A new API endpoint <ClusterID>/actions/upgrade is added to support rolling "
+"upgrade the base OS of nodes and the version of Kubernetes. More details "
+"please refer the API Refreence document."
+msgstr ""
+"A new API endpoint <ClusterID>/actions/upgrade is added to support the "
+"rolling upgrade of the base OS of nodes and the version of Kubernetes. For "
+"more details please refer to the API Reference document."
 
 msgid ""
 "A new section is created in magnum.conf named cinder. In this cinder "
@@ -881,6 +927,9 @@ msgstr ""
 "Requires a db upgrade to change the docker_storage_driver field to be a "
 "string instead of an enum."
 
+msgid "Rocky Series Release Notes"
+msgstr "Rocky Series Release Notes"
+
 msgid ""
 "Secure etcd cluster for swarm and k8s. Etcd cluster is secured using TLS by "
 "default. TLS can be disabled by passing --tls-disabled during cluster "
@@ -892,6 +941,9 @@ msgstr ""
 
 msgid "Security Issues"
 msgstr "Security Issues"
+
+msgid "Stein Series Release Notes"
+msgstr "Stein Series Release Notes"
 
 msgid ""
 "Strip signed certificate. Certificate (ca.crt) has to be striped for some "
@@ -1008,6 +1060,9 @@ msgstr ""
 "Magnum, in the `trust` section of magnum.conf, set `cluster_user_trust` to "
 "True. The default value is False."
 
+msgid "Train Series Release Notes"
+msgstr "Train Series Release Notes"
+
 msgid ""
 "Update Swarm default version to 1.2.5. It should be the last version since "
 "Docker people are now working on the new Swarm mode integrated in Docker."
@@ -1069,6 +1124,15 @@ msgstr ""
 "cluster config command is affected. [0] https://docs.openstack.org/magnum/"
 "latest/user/index.html#interfacing-with-a-secure-cluster"
 
+msgid "Ussuri Series Release Notes"
+msgstr "Ussuri Series Release Notes"
+
+msgid "Victoria Series Release Notes"
+msgstr "Victoria Series Release Notes"
+
+msgid "Wallaby Series Release Notes"
+msgstr "Wallaby Series Release Notes"
+
 msgid "Welcome to Magnum Release Notes's documentation!"
 msgstr "Welcome to Magnum Release Notes documentation!"
 
@@ -1092,6 +1156,12 @@ msgstr ""
 "Heat SoftwareDeployments. This patch passes the ResourceGroup index of every "
 "master so that resource creation will be attempted only from the first "
 "master node. [1] https://github.com/kubernetes/kubernetes/issues/44165"
+
+msgid "Xena Series Release Notes"
+msgstr "Xena Series Release Notes"
+
+msgid "Yoga Series Release Notes"
+msgstr "Yoga Series Release Notes"
 
 msgid ""
 "[1] https://github.com/projectatomic/atomic-system-containers [2] https://"
@@ -1131,6 +1201,43 @@ msgstr ""
 "installed the Certificate Authority to all nodes."
 
 msgid ""
+"containerd_tarball_sha256 sha256 of the tarball fetched with "
+"containerd_tarball_url or from https://storage.googleapis.com/cri-containerd-"
+"release/."
+msgstr ""
+"containerd_tarball_sha256 sha256 of the tarball fetched with "
+"containerd_tarball_url or from https://storage.googleapis.com/cri-containerd-"
+"release/."
+
+msgid "containerd_tarball_url Url with the tarball of containerd's binaries."
+msgstr "containerd_tarball_url URL with the tarball of containerd's binaries."
+
+msgid ""
+"containerd_version The containerd version to use as released in https://"
+"github.com/containerd/containerd/releases and https://storage.googleapis.com/"
+"cri-containerd-release/"
+msgstr ""
+"containerd_version The containerd version to use as released in https://"
+"github.com/containerd/containerd/releases and https://storage.googleapis.com/"
+"cri-containerd-release/"
+
+msgid ""
+"core-podman Mount os-release properly To display the node OS-IMAGE in k8s "
+"properly we need to mount /usr/lib/os-release, /ets/os-release is just a "
+"symlink."
+msgstr ""
+"core-podman Mount os-release properly To display the node OS-IMAGE in k8s "
+"properly we need to mount /usr/lib/os-release, /ets/os-release is just a "
+"symlink."
+
+msgid ""
+"k8s-keystone-auth now uses the upstream k8scloudprovider docker repo instead "
+"of the openstackmagnum repo."
+msgstr ""
+"k8s-keystone-auth now uses the upstream k8scloudprovider docker repo instead "
+"of the openstackmagnum repo."
+
+msgid ""
 "k8s_fedora Remove cluster role from the kubernetes-dashboard account. When "
 "accessing the dashboard and skip authentication, users login with the "
 "kunernetes-dashboard service account, if that service account has the "
@@ -1149,3 +1256,31 @@ msgid ""
 msgstr ""
 "k8s_fedora_atomic clusters are deployed with RBAC support. Along with RBAC "
 "Node authorization is added so the appropriate certificates are generated."
+
+msgid ""
+"k8s_fedora_atomic_v1 defaults to use_podman=false, meaning atomic will be "
+"used pulling containers from docker.io/openstackmagnum. use_podman=true is "
+"accepted as well, which will pull containers by k8s.gcr.io."
+msgstr ""
+"k8s_fedora_atomic_v1 defaults to use_podman=false, meaning atomic will be "
+"used pulling containers from docker.io/openstackmagnum. use_podman=true is "
+"accepted as well, which will pull containers by k8s.gcr.io."
+
+msgid "k8s_fedora_coreos_v1 defaults and accepts only use_podman=true."
+msgstr "k8s_fedora_coreos_v1 defaults and accepts only use_podman=true."
+
+msgid ""
+"nginx-ingress-controller QoS changed from Guaranteed to Burstable. Priority "
+"class 'system-cluster-critical' or higher for nginx-ingress-controller."
+msgstr ""
+"nginx-ingress-controller QoS changed from Guaranteed to Burstable. Priority "
+"class 'system-cluster-critical' or higher for nginx-ingress-controller."
+
+msgid ""
+"nginx-ingress-controller requests.memory increased to 256MiB. This is a "
+"result of tests that showed the pod getting oom killed by the node on a "
+"relatively generic use case."
+msgstr ""
+"nginx-ingress-controller requests.memory increased to 256MiB. This is a "
+"result of tests that showed the pod getting oom killed by the node on a "
+"relatively generic use case."
