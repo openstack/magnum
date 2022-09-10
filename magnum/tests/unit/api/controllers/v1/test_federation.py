@@ -54,13 +54,13 @@ class TestListFederation(api_base.FunctionalTest):
         federation = obj_utils.create_test_federation(
             self.context, uuid=uuidutils.generate_uuid())
         response = self.get_json('/federations/%s' % federation['uuid'])
-        self.assertTrue(response['uuid'], federation.uuid)
+        self.assertEqual(federation.uuid, response['uuid'])
 
     def test_get_one_by_name(self):
         federation = obj_utils.create_test_federation(
             self.context, uuid=uuidutils.generate_uuid())
         response = self.get_json('/federations/%s' % federation['name'])
-        self.assertTrue(response['uuid'], federation.uuid)
+        self.assertEqual(federation.uuid, response['uuid'])
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/federations/not_found', expect_errors=True)
@@ -73,7 +73,7 @@ class TestListFederation(api_base.FunctionalTest):
         federation = obj_utils.create_test_federation(self.context,
                                                       uuid=temp_uuid)
         response = self.get_json('/federations/%s' % temp_uuid)
-        self.assertTrue(response['uuid'], federation.uuid)
+        self.assertEqual(federation.uuid, response['uuid'])
 
     def test_get_one_by_uuid_not_found(self):
         temp_uuid = uuidutils.generate_uuid()
