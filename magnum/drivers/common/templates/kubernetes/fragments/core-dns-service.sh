@@ -67,7 +67,7 @@ data:
   Corefile: |
     .:53 {
         errors
-        log stdout
+        log
         health
         kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} ${PODS_NETWORK_CIDR} {
            pods verified
