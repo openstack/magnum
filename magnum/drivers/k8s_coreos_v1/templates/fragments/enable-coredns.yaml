@@ -48,7 +48,7 @@ write_files:
         Corefile: |
           .:53 {
               errors
-              log stdout
+              log
               health
               kubernetes ${DNS_CLUSTER_DOMAIN} {
                 cidrs ${PORTAL_NETWORK_CIDR}
