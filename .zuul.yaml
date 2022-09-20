@@ -24,6 +24,7 @@
     timeout: 2400
 
 - project:
+    queue: magnum
     templates:
       - openstack-cover-jobs
       - openstack-python3-victoria-jobs
@@ -35,7 +36,6 @@
         - magnum-tempest-plugin-tests-api
         - magnum-container-build
     gate:
-      queue: magnum
       jobs:
         - magnum-tempest-plugin-tests-api
     post:
