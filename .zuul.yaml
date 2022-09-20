@@ -57,6 +57,7 @@
         GLANCE_LIMIT_IMAGE_SIZE_TOTAL: 5000
 
 - project:
+    queue: magnum
     templates:
       - openstack-cover-jobs
       - openstack-python3-victoria-jobs
@@ -68,7 +69,6 @@
         - magnum-tempest-plugin-tests-api-temporary
         - magnum-container-build
     gate:
-      queue: magnum
       jobs:
         - magnum-tempest-plugin-tests-api-temporary
     post:
