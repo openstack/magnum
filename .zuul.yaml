@@ -53,7 +53,7 @@
     queue: magnum
     templates:
       - openstack-cover-jobs
-      - openstack-python3-zed-jobs
+      - openstack-python3-jobs
       - check-requirements
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
