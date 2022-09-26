@@ -1400,30 +1400,35 @@ _`cinder_csi_plugin_tag`
   <https://hub.docker.com/r/k8scloudprovider/cinder-csi-plugin/tags>`_.
   Train default: v1.16.0
   Ussuri default: v1.18.0
+  Yoga default: v1.23.0
 
 _`csi_attacher_tag`
   This label allows users to override the default container tag for CSI attacher.
   For additional tags, `refer to CSI attacher page
   <https://quay.io/repository/k8scsi/csi-attacher?tab=tags>`_.
   Ussuri-default: v2.0.0
+  Yoga-default: v3.3.0
 
 _`csi_provisioner_tag`
   This label allows users to override the default container tag for CSI provisioner.
   For additional tags, `refer to CSI provisioner page
   <https://quay.io/repository/k8scsi/csi-provisioner?tab=tags>`_.
   Ussuri-default: v1.4.0
+  Yoga-default: v3.0.0
 
 _`csi_snapshotter_tag`
   This label allows users to override the default container tag for CSI snapshotter.
   For additional tags, `refer to CSI snapshotter page
   <https://quay.io/repository/k8scsi/csi-snapshotter?tab=tags>`_.
   Ussuri-default: v1.2.2
+  Yoga-default: v4.2.1
 
 _`csi_resizer_tag`
   This label allows users to override the default container tag for CSI resizer.
   For additional tags, `refer to CSI resizer page
   <https://quay.io/repository/k8scsi/csi-resizer?tab=tags>`_.
   Ussuri-default: v0.3.0
+  Yoga-default: v1.3.0
 
 _`csi_node_driver_registrar_tag`
   This label allows users to override the default container tag for CSI node
@@ -1431,6 +1436,12 @@ _`csi_node_driver_registrar_tag`
   page
   <https://quay.io/repository/k8scsi/csi-node-driver-registrar?tab=tags>`_.
   Ussuri-default: v1.1.0
+  Yoga-default: v2.4.0
+
+-`csi_liveness_probe_tag`
+  This label allows users to override the default container tag for CSI
+  liveness probe.
+  Yoga-default: v2.5.0
 
 _`keystone_auth_enabled`
   If this label is set to True, Kubernetes will support use Keystone for
