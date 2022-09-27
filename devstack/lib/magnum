@@ -135,8 +135,9 @@ function create_magnum_conf {
     rm -f $MAGNUM_CONF
     HOSTNAME=`hostname`
     iniset $MAGNUM_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
-    iniset $MAGNUM_CONF DEFAULT transport_url $(get_transport_url)
     iniset $MAGNUM_CONF DEFAULT host "$HOSTNAME"
+
+    iniset_rpc_backend magnum $MAGNUM_CONF
 
     iniset $MAGNUM_CONF database connection `database_connection_url magnum`
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
