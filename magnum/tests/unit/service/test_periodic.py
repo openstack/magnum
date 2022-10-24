@@ -17,6 +17,7 @@ from unittest import mock
 from oslo_utils import uuidutils
 
 from magnum.common import context
+from magnum.common import exception
 from magnum.common.rpc_service import CONF
 from magnum.db.sqlalchemy import api as dbapi
 from magnum.drivers.common import driver
@@ -188,6 +189,32 @@ class PeriodicTestCase(base.TestCase):
 
         self.mock_driver.update_cluster_status.side_effect = (
             _mock_update_status)
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
+    def test_update_status_non_trusts_error(self, mock_get_driver):
+        mock_get_driver.return_value = self.mock_driver
+        trust_ex = ("Unknown Keystone error")
+        self.mock_driver.update_cluster_status.side_effect = \
+            exception.AuthorizationFailure(client='keystone', message=trust_ex)
+        self.assertRaises(
+            exception.AuthorizationFailure,
+            periodic.ClusterUpdateJob(
+                self.context, self.cluster1).update_status
+        )
+        self.assertEqual(1, self.mock_driver.update_cluster_status.call_count)
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
+    def test_update_status_trusts_not_found(self, mock_get_driver):
+        mock_get_driver.return_value = self.mock_driver
+        trust_ex = ("Could not find trust: %s" % self.cluster1.trust_id)
+        self.mock_driver.update_cluster_status.side_effect = \
+            exception.AuthorizationFailure(client='keystone', message=trust_ex)
+        self.assertRaises(
+            exception.AuthorizationFailure,
+            periodic.ClusterUpdateJob(
+                self.context, self.cluster1).update_status
+        )
+        self.assertEqual(2, self.mock_driver.update_cluster_status.call_count)
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
