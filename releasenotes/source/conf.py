@@ -60,7 +60,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2016, Magnum developers'
+copyright = '2016, Magnum developers'
 
 # Remove setting of version/release
 # The short X.Y version.
@@ -195,8 +195,8 @@ htmlhelp_basename = 'MagnumReleaseNotesdoc'
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'MagnumReleaseNotes.tex', u'Magnum Release Notes Documentation',
-     u'2016, Magnum developers', 'manual'),
+    ('index', 'MagnumReleaseNotes.tex', 'Magnum Release Notes Documentation',
+     '2016, Magnum developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -225,8 +225,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'magnumreleasenotes', u'Magnum Release Notes Documentation',
-     [u'2016, Magnum developers'], 1)
+    ('index', 'magnumreleasenotes', 'Magnum Release Notes Documentation',
+     ['2016, Magnum developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -239,8 +239,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'MagnumReleaseNotes', u'Magnum Release Notes Documentation',
-     u'2016, Magnum developers', 'MagnumReleaseNotes',
+    ('index', 'MagnumReleaseNotes', 'Magnum Release Notes Documentation',
+     '2016, Magnum developers', 'MagnumReleaseNotes',
      'One line description of project.', 'Miscellaneous'),
 ]
 
