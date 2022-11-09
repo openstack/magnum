@@ -85,7 +85,7 @@ ExecStart=/bin/bash -c '/usr/bin/podman run --name kubelet \\
     --pid host \\
     --network host \\
     --entrypoint /hyperkube \\
-    --volume /:/rootfs:ro \\
+    --volume /:/rootfs:rslave,ro \\
     --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \\
     --volume /etc/kubernetes:/etc/kubernetes:ro,z \\
     --volume /usr/lib/os-release:/usr/lib/os-release:ro \\
