@@ -124,7 +124,7 @@ storage:
           done
 
           /usr/bin/update-ca-trust
-          mkdir /etc/kubernetes/
+          mkdir -p /etc/kubernetes/
           cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
           HTTP_PROXY="__HTTP_PROXY__"
