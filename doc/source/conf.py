@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2013, OpenStack Foundation'
+copyright = '2013, OpenStack Foundation'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
@@ -80,8 +80,8 @@ htmlhelp_basename = 'magnumdoc'
 latex_documents = [
     ('index',
      'doc-magnum.tex',
-     u'magnum Documentation',
-     u'OpenStack Foundation', 'manual'),
+     'magnum Documentation',
+     'OpenStack Foundation', 'manual'),
 ]
 
 # If false, no module index is generated.
