@@ -30,13 +30,6 @@ drivers_opts = [
                default="",
                help='Path to the OpenStack CA-bundle file to pass and '
                     'install in all cluster nodes.'),
-    cfg.BoolOpt('send_cluster_metrics',
-                default=False,
-                deprecated_for_removal=True,
-                deprecated_reason='It does not make sense only collecting '
-                                  'metrics from the "default" namespcae.',
-                help='Allow periodic tasks to pull COE data and send to '
-                     'ceilometer.'),
     cfg.ListOpt('disabled_drivers',
                 default=[],
                 help='Disabled driver entry points. The default value is []. '

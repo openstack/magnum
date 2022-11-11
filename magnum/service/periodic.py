@@ -16,7 +16,6 @@
 import functools
 
 from oslo_log import log
-from oslo_log.versionutils import deprecated
 from oslo_service import loopingcall
 from oslo_service import periodic_task
 
@@ -226,56 +225,6 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             LOG.warning(
                 "Ignore error [%s] when syncing up cluster status.",
                 e, exc_info=True)
-
-    @periodic_task.periodic_task(run_immediately=True)
-    @set_context
-    @deprecated(as_of=deprecated.ROCKY)
-    def _send_cluster_metrics(self, ctx):
-        if not CONF.drivers.send_cluster_metrics:
-            LOG.debug('Skip sending cluster metrics')
-            return
-
-        LOG.debug('Starting to send cluster metrics')
-        for cluster in objects.Cluster.list(ctx):
-            if cluster.status not in (
-                    objects.fields.ClusterStatus.CREATE_COMPLETE,
-                    objects.fields.ClusterStatus.UPDATE_COMPLETE):
-                continue
-
-            monitor = monitors.create_monitor(ctx, cluster)
-            if monitor is None:
-                continue
-
-            try:
-                monitor.pull_data()
-            except Exception as e:
-                LOG.warning(
-                    "Skip pulling data from cluster %(cluster)s due to "
-                    "error: %(e)s",
-                    {'e': e, 'cluster': cluster.uuid}, exc_info=True)
-                continue
-
-            metrics = list()
-            for name in monitor.get_metric_names():
-                try:
-                    metric = {
-                        'name': name,
-                        'value': monitor.compute_metric_value(name),
-                        'unit': monitor.get_metric_unit(name),
-                    }
-                    metrics.append(metric)
-                except Exception as e:
-                    LOG.warning("Skip adding metric %(name)s due to "
-                                "error: %(e)s",
-                                {'e': e, 'name': name}, exc_info=True)
-
-            message = dict(metrics=metrics,
-                           user_id=cluster.user_id,
-                           project_id=cluster.project_id,
-                           resource_id=cluster.uuid)
-            LOG.debug("About to send notification: '%s'", message)
-            self.notifier.info(ctx, "magnum.cluster.metrics.update",
-                               message)
 
 
 def setup(conf, tg):
