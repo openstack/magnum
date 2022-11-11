@@ -17,7 +17,6 @@ created and managed by Magnum to support the COE's.
 #. `Python Client`_
 #. `Horizon Interface`_
 #. `Cluster Drivers`_
-#. `Cluster Type Definition`_
 #. `Heat Stack Templates`_
 #. `Choosing a COE`_
 #. `Native Clients`_
@@ -947,11 +946,6 @@ Installing a cluster driver
 ---------------------------
 *To be filled in*
 
-
-Cluster Type Definition
-=======================
-
-.. include:: cluster-type-definition.rst
 
 Heat Stack Templates
 ====================

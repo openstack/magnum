@@ -83,9 +83,6 @@ To run unit test coverage and check percentage of code covered::
 
     tox -e cover
 
-To discover and interact with templates, please refer to
-:doc:`/user/cluster-type-definition`.
-
 Exercising the Services Using DevStack
 ======================================
 
