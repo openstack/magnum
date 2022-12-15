@@ -12,15 +12,15 @@ if [ "${volume_driver}" = "cinder" ] && [ "${cinder_csi_enabled}" = "true" ]; th
     echo "Writing File: $CINDER_CSI_DEPLOY"
     mkdir -p $(dirname ${CINDER_CSI_DEPLOY})
     cat << EOF > ${CINDER_CSI_DEPLOY}
----
 # This YAML file contains RBAC API objects,
 # which are necessary to run csi controller plugin
----
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: csi-cinder-controller-sa
   namespace: kube-system
+
 ---
 # external attacher
 kind: ClusterRole
@@ -131,10 +131,10 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents"]
-    verbs: ["create", "get", "list", "watch", "update", "delete"]
+    verbs: ["create", "get", "list", "watch", "update", "delete", "patch"]
   - apiGroups: ["snapshot.storage.k8s.io"]
     resources: ["volumesnapshotcontents/status"]
-    verbs: ["update"]
+    verbs: ["update", "patch"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
     verbs: ["get", "watch", "list", "delete", "update", "create"]
@@ -195,11 +195,12 @@ roleRef:
   kind: ClusterRole
   name: csi-resizer-role
   apiGroup: rbac.authorization.k8s.io
+
 ---
 # This YAML file contains CSI Controller Plugin Sidecars
 # external-attacher, external-provisioner, external-snapshotter
 # external-resize, liveness-probe
----
+
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -250,7 +251,6 @@ spec:
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-provisioner
           image: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}csi-provisioner:${CSI_PROVISIONER_TAG}
-          image: k8s.gcr.io/sig-storage/csi-provisioner:v3.0.0
           args:
             - "--csi-address=\$(ADDRESS)"
             - "--timeout=3m"
@@ -303,7 +303,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: liveness-probe
-          image: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}livenessprobe:${LIVENESS_PROBE_TAG}
+          image: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}livenessprobe:${CSI_LIVENESS_PROBE_TAG}
           args:
             - "--csi-address=\$(ADDRESS)"
           resources:
@@ -364,7 +364,7 @@ spec:
             type: File
 ---
 # This YAML defines all API objects to create RBAC roles for csi node plugin.
----
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -379,6 +379,7 @@ rules:
   - apiGroups: [""]
     resources: ["events"]
     verbs: ["get", "list", "watch", "create", "update", "patch"]
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -395,7 +396,7 @@ roleRef:
 ---
 # This YAML file contains driver-registrar & csi driver nodeplugin API objects,
 # which are necessary to run csi nodeplugin for cinder.
----
+
 kind: DaemonSet
 apiVersion: apps/v1
 metadata:
@@ -420,10 +421,6 @@ spec:
           args:
             - "--csi-address=\$(ADDRESS)"
             - "--kubelet-registration-path=\$(DRIVER_REG_SOCK_PATH)"
-          lifecycle:
-            preStop:
-              exec:
-                command: ["/bin/sh", "-c", "rm -rf /registration/cinder.csi.openstack.org /registration/cinder.csi.openstack.org-reg.sock"]
           env:
             - name: ADDRESS
               value: /csi/csi.sock
@@ -440,7 +437,7 @@ spec:
             - name: registration-dir
               mountPath: /registration
         - name: liveness-probe
-          image: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}livenessprobe:${LIVENESS_PROBE_TAG}
+          image: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}livenessprobe:${CSI_LIVENESS_PROBE_TAG}
           args:
             - --csi-address=/csi/csi.sock
           resources:
@@ -470,6 +467,7 @@ spec:
             - containerPort: 9808
               name: healthz
               protocol: TCP
+          # The probe
           livenessProbe:
             failureThreshold: 5
             httpGet:

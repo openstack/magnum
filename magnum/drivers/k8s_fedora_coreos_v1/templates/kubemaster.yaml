@@ -621,6 +621,11 @@ parameters:
     type: string
     description: tag of csi node driver registrar
 
+  csi_liveness_probe_tag:
+    type: string
+    description: >
+      Tag of liveness-probe for cinder csi.
+
   node_problem_detector_tag:
     type: string
     description: tag of the node problem detector container
@@ -948,6 +953,7 @@ resources:
                   "$CSI_SNAPSHOTTER_TAG": {get_param: csi_snapshotter_tag}
                   "$CSI_RESIZER_TAG": {get_param: csi_resizer_tag}
                   "$CSI_NODE_DRIVER_REGISTRAR_TAG": {get_param: csi_node_driver_registrar_tag}
+                  "$CSI_LIVENESS_PROBE_TAG":  {get_param: csi_liveness_probe_tag}
                   "$DRAINO_TAG": {get_param: draino_tag}
                   "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
                   "$MIN_NODE_COUNT": {get_param: min_node_count}

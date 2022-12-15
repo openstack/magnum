@@ -90,6 +90,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'csi_attacher_tag', 'csi_provisioner_tag',
                       'csi_snapshotter_tag', 'csi_resizer_tag',
                       'csi_node_driver_registrar_tag',
+                      'csi_liveness_probe_tag',
                       'etcd_tag', 'flannel_tag', 'flannel_cni_tag',
                       'cloud_provider_tag',
                       'prometheus_tag', 'grafana_tag',
