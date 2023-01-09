@@ -222,7 +222,6 @@ spec:
         app: csi-cinder-controllerplugin
     spec:
       serviceAccount: csi-cinder-controller-sa
-      hostNetwork: true
       tolerations:
         # Make sure the pod can be scheduled on master kubelet.
         - effect: NoSchedule
