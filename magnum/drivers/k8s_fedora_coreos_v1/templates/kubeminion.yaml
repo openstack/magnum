@@ -46,15 +46,16 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
-  boot_volume_size:
+  worker_volume_size:
     type: number
     description: >
-      size of the cinder boot volume
+      size of the minion cinder boot volume
 
-  boot_volume_type:
+  worker_volume_type:
     type: string
     description: >
-      type of the cinder boot volume
+      type of the minion cinder boot volume
+    default: ""
 
   docker_volume_size:
     type: number
@@ -404,11 +405,12 @@ parameters:
 
 conditions:
 
-  image_based: {equals: [{get_param: boot_volume_size}, 0]}
+  image_based: {equals: [{get_param: worker_volume_size}, 0]}
+  
   volume_based:
     not:
       equals:
-      - get_param: boot_volume_size
+      - get_param: worker_volume_size
       - 0
 
   extra_network_defined:
@@ -579,8 +581,8 @@ resources:
     condition: volume_based
     properties:
       image: {get_param: server_image}
-      size: {get_param: boot_volume_size}
-      volume_type: {get_param: boot_volume_type}
+      size: {get_param: worker_volume_size}
+      volume_type: {get_param: worker_volume_type}
       availability_zone: {get_param: availability_zone}
 
   # do NOT use "_" (underscore) in the Nova server name

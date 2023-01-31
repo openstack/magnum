@@ -389,6 +389,14 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `boot_volume_type`_                   | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `master_volume_size`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `master_volume_type`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `worker_volume_size`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `worker_volume_type`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `etcd_volume_size`_                   | etcd storage       | 0             |
 |                                       | volume size        |               |
 +---------------------------------------+--------------------+---------------+
@@ -1212,13 +1220,42 @@ _`admission_control_list`
 _`boot_volume_size`
   This label overrides the default_boot_volume_size of instances which is
   useful if your flavors are boot from volume only. The default value is 0,
-  meaning that cluster instances will not boot from volume.
+  meaning that cluster instances will not boot from volume unless
+  master_volume_size or worker_volume_size is defined. This label has
+  lower priority than abovementioned and can be overridden by them.
+  Current precedence is master/worker_volume_size, boot_volume_size,
+  default_boot_volume_size.
+
 
 _`boot_volume_type`
   This label overrides the default_boot_volume_type of instances which is
   useful if your flavors are boot from volume only. The default value is '',
   meaning that Magnum will randomly select a Cinder volume type from all
-  available options.
+  available options unless master_volume_type or worker_volume_type are set.
+  Current precedence is master/worker_volume_type, boot_volume_type,
+  default_boot_volume_type.
+
+_`master_volume_size`
+  This labed can be used to define different volume size for master nodes than
+  set in boot_volume_size. Master_volume_size will be set to boot_volume_size
+  if not defined, fallback to default_boot_volume_size if the latter is
+  missing. If neither is defined master nodes will not boot
+  from volume.
+
+_`master_volume_type`
+  This label can be used to override volume type of master nodes if defined.
+  Otherwise boot_volume_type value will be used.
+
+_`worker_volume_size`
+  This labed can be used to define different volume size for worker nodes than
+  set in boot_volume_size. worker_volume_size will be set to boot_volume_size
+  if not defined, fallback to default_boot_volume_size if the latter is
+  missing. If neither is defined worker nodes will not boot
+  from volume.
+
+_`worker_volume_type`
+  This label can be used to override volume type of worker nodes if defined.
+  Otherwise boot_volume_type value will be used.
 
 _`etcd_volume_size`
   This label sets the size of a volume holding the etcd storage data.
@@ -3084,6 +3121,39 @@ for the COE types is summarized as follows:
 +--------+-------------+-------------+-------------+
 | rexray | unsupported | supported   | supported   |
 +--------+-------------+-------------+-------------+
+
+Labels can be used to customize nodes boot volume at creation time:
+
+- boot_volume_type
+- boot_volume_size
+
+These define volume type and size used for boot media of node vm, and they can
+be further overriden by:
+
+- master_volume_type
+- master_volume_size
+- worker_volume_type
+- worker_volume_size
+
+Current precedence is:
+- master_volume_size / worker_volume_size
+- boot_volume_size
+- default_boot_volume_size
+
+Labels shown above allow user to use different storage types and sizes for
+master and worker nodes. They can be used independently of each other
+for ex. boot_volume_type to define type of storage to use for both master
+and worker vms, along with master_volume_size and worker_volume_size
+setting size of their boot volumes. Another example would be usage of
+boot_volume_size to define size of both master and worker, with different
+storage types for them set by master_volume_type and worker_volume_type.
+It's possible to use any combination of the above.
+
+If either master_volume_type or worker_volume_type is missing,
+boot_volume_type will be used instead. A random volume type from Cinder will
+be used if none of those options is set. In case of master_volume_size or
+worker_volume_size missing value for boot_volume_size is used. If neither
+is defined instances will not be volume based.
 
 Following are some examples for using Cinder as persistent storage.
 

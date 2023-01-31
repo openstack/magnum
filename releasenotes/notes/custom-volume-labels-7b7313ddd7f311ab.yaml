@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Support for overriding boot volume type and size for volume based master
+    and worker nodes. Allows user to use different storage types and sizes for
+    master and minion nodes with new labels:
+
+    - master_volume_size
+    - master_volume_type
+    - worker_volume_size
+    - worker_volume_type
+
+    If either master_volume_type or worker_volume_type is missing,
+    boot_volume_type will be used instead. A random volume type from Cinder will
+    be used if none of those options is set. In case of master_volume_size or
+    worker_volume_size missing value for boot_volume_size is used. If neither
+    is defined instances will not be volume based.

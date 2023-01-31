@@ -63,16 +63,15 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
-  boot_volume_size:
+  master_volume_size:
     type: number
     description: >
-      size of the cinder boot volume for nodes root volume
-    default: 0
+      size of the master cinder boot volume
 
-  boot_volume_type:
+  master_volume_type:
     type: string
     description: >
-      type of the cinder boot volume for nodes root volume
+      type of the master cinder boot volume
 
   etcd_volume_size:
     type: number
@@ -736,11 +735,12 @@ parameters:
 
 conditions:
 
-  image_based: {equals: [{get_param: boot_volume_size}, 0]}
-  volume_based:
+  image_based: {equals: [{get_param: master_volume_size}, 0]}
+
+  volume_based:                       
     not:
       equals:
-      - get_param: boot_volume_size
+      - get_param: master_volume_size
       - 0
 
   extra_network_defined:
@@ -1006,8 +1006,8 @@ resources:
     condition: volume_based
     properties:
       image: {get_param: server_image}
-      size: {get_param: boot_volume_size}
-      volume_type: {get_param: boot_volume_type}
+      size: {get_param: master_volume_size}
+      volume_type: {get_param: master_volume_type}
       availability_zone: {get_param: availability_zone}
 
   # do NOT use "_" (underscore) in the Nova server name

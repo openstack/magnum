@@ -246,6 +246,28 @@ parameters:
     description: >
       type of the cinder boot volume for nodes root volume
 
+  master_volume_size:
+    type: number
+    description: >
+      size of the master cinder boot volume
+
+  master_volume_type:
+    type: string
+    description: >
+      type of the master cinder boot volume
+    default: ""
+
+  worker_volume_size:
+    type: number
+    description: >
+      size of the minion cinder boot volume
+
+  worker_volume_type:
+    type: string
+    description: >
+      type of the minion cinder boot volume
+    default: ""
+
   etcd_volume_size:
     type: number
     description: >
@@ -1310,8 +1332,8 @@ resources:
           master_flavor: {get_param: master_flavor}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
-          boot_volume_size: {get_param: boot_volume_size}
-          boot_volume_type: {get_param: boot_volume_type}
+          master_volume_size: {get_param: master_volume_size}
+          master_volume_type: {get_param: master_volume_type}
           etcd_volume_size: {get_param: etcd_volume_size}
           etcd_volume_type: {get_param: etcd_volume_type}
           docker_volume_size: {get_param: docker_volume_size}
@@ -1565,8 +1587,8 @@ resources:
               - get_param: existing_master_private_ip
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
-          boot_volume_size: {get_param: boot_volume_size}
-          boot_volume_type: {get_param: boot_volume_type}
+          worker_volume_size: {get_param: worker_volume_size}
+          worker_volume_type: {get_param: worker_volume_type}
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
