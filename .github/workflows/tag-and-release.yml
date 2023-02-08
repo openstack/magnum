@@ -5,6 +5,7 @@ name: Tag & Release
     branches:
       - stackhpc/yoga
 permissions:
+  actions: read
   contents: write
 jobs:
   tag-and-release:
