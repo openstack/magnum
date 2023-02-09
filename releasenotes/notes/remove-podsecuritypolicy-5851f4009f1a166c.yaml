@@ -1,0 +1,13 @@
+---
+deprecations:
+  - |
+    PodSecurityPolicy has been removed in Kubernetes v1.25 [1]. To allow Magnum
+    to support Kubernetes v1.25 and above, PodSecurityPolicy Admission
+    Controller has has been removed.
+
+    This means that there is a behaviour change in Cluster Templates created
+    after this change, where new Clusters with such Cluster Templates will not
+    have PodSecurityPolicy. Please be aware of the subsequent impact on Helm
+    Charts, etc.
+
+    [1] https://kubernetes.io/docs/concepts/security/pod-security-policy/
