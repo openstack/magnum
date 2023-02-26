@@ -132,7 +132,9 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/')
         self.assertEqual(self.v1_expected, response.json)
 
-        response = app.get('/v1/clustertemplates')
+        response = app.get('/v1/clustertemplates',
+                           headers={"X-Roles": "reader"}
+                           )
         self.assertEqual(200, response.status_int)
 
     def test_auth_with_no_public_routes(self):

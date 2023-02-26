@@ -20,7 +20,8 @@ STATS = 'stats:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=STATS % 'get_all',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER,
+        scope_types=["project"],
         description='Retrieve magnum stats.',
         operations=[
             {

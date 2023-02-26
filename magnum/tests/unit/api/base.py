@@ -128,6 +128,9 @@ class FunctionalTest(base.DbTestCase):
                               with the request
         :param status: expected status code of response
         """
+        # Provide member role for put request
+        if not headers:
+            headers = {"X-Roles": "member"}
         return self._request_json(path=path, params=params,
                                   expect_errors=expect_errors,
                                   headers=headers, extra_environ=extra_environ,
@@ -146,6 +149,9 @@ class FunctionalTest(base.DbTestCase):
                               with the request
         :param status: expected status code of response
         """
+        # Provide member role for post request
+        if not headers:
+            headers = {"X-Roles": "member"}
         return self._request_json(path=path, params=params,
                                   expect_errors=expect_errors,
                                   headers=headers, extra_environ=extra_environ,
@@ -164,6 +170,9 @@ class FunctionalTest(base.DbTestCase):
                               with the request
         :param status: expected status code of response
         """
+        # Provide member role for patch request
+        if not headers:
+            headers = {"X-Roles": "member"}
         return self._request_json(path=path, params=params,
                                   expect_errors=expect_errors,
                                   headers=headers, extra_environ=extra_environ,
@@ -184,6 +193,9 @@ class FunctionalTest(base.DbTestCase):
         """
         full_path = path_prefix + path
         print('DELETE: %s' % (full_path))
+        # Provide member role for delete request
+        if not headers:
+            headers = {"X-Roles": "member"}
         response = self.app.delete(str(full_path),
                                    headers=headers,
                                    status=status,
@@ -215,6 +227,10 @@ class FunctionalTest(base.DbTestCase):
                         'q.value': [],
                         'q.op': [],
                         }
+
+        # Provide reader role for get request
+        if not headers:
+            headers = {"X-Roles": "reader"}
         for query in q:
             for name in ['field', 'op', 'value']:
                 query_params['q.%s' % name].append(query.get(name, ''))

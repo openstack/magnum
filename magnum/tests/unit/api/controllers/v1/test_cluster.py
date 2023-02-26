@@ -494,7 +494,9 @@ class TestPatch(api_base.FunctionalTest):
             '/clusters/%s/?rollback=True' % self.cluster_obj.uuid,
             [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
-            headers={'OpenStack-API-Version': 'container-infra 1.3'})
+            headers={'OpenStack-API-Version': 'container-infra 1.3',
+                     "X-Roles": "member"
+                     })
 
         self.mock_cluster_update.assert_called_once_with(
             mock.ANY, node_count, self.cluster_obj.health_status,
@@ -507,7 +509,9 @@ class TestPatch(api_base.FunctionalTest):
             '/clusters/%s/?rollback=False' % self.cluster_obj.uuid,
             [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
-            headers={'OpenStack-API-Version': 'container-infra 1.3'})
+            headers={'OpenStack-API-Version': 'container-infra 1.3',
+                     "X-Roles": "member"
+                     })
 
         self.mock_cluster_update.assert_called_once_with(
             mock.ANY, node_count, self.cluster_obj.health_status,
@@ -520,7 +524,9 @@ class TestPatch(api_base.FunctionalTest):
             '/clusters/%s' % self.cluster_obj.uuid,
             [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
-            headers={'OpenStack-API-Version': 'container-infra 1.9'},
+            headers={'OpenStack-API-Version': 'container-infra 1.9',
+                     "X-Roles": "member"
+                     },
             expect_errors=True)
 
         self.assertEqual(400, response.status_code)
@@ -531,7 +537,9 @@ class TestPatch(api_base.FunctionalTest):
             '/clusters/%s' % self.cluster_obj.uuid,
             [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
-            headers={'OpenStack-API-Version': 'container-infra 1.10'})
+            headers={'OpenStack-API-Version': 'container-infra 1.10',
+                     "X-Roles": "member"
+                     })
 
         self.mock_cluster_update.assert_called_once_with(
             mock.ANY, node_count, self.cluster_obj.health_status,
@@ -708,18 +716,24 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_with_zero_node_count_fail(self):
         bdict = apiutils.cluster_post_data()
         bdict['node_count'] = 0
-        response = self.post_json('/clusters', bdict, expect_errors=True,
-                                  headers={"Openstack-Api-Version":
-                                           "container-infra 1.9"})
+        response = self.post_json(
+            '/clusters', bdict, expect_errors=True,
+            headers={
+                "Openstack-Api-Version": "container-infra 1.9",
+                "X-Roles": "member"
+            })
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
 
     def test_create_cluster_with_zero_node_count(self):
         bdict = apiutils.cluster_post_data()
         bdict['node_count'] = 0
-        response = self.post_json('/clusters', bdict,
-                                  headers={"Openstack-Api-Version":
-                                           "container-infra 1.10"})
+        response = self.post_json(
+            '/clusters', bdict,
+            headers={
+                "Openstack-Api-Version": "container-infra 1.10",
+                "X-Roles": "member"
+            })
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
 

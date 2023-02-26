@@ -34,7 +34,8 @@ class TestContextHook(base.BaseTestCase):
         super(TestContextHook, self).setUp()
         self.app = fakes.FakeApp()
 
-    def test_context_hook_before_method(self):
+    @mock.patch("magnum.common.policy.check_is_admin")
+    def test_context_hook_before_method(self, m_c):
         state = mock.Mock(request=fakes.FakePecanRequest())
         hook = hooks.ContextHook()
         hook.before(state)
@@ -51,12 +52,13 @@ class TestContextHook(base.BaseTestCase):
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-Roles'],
                          ','.join(ctx.roles))
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Domain-Name'],
-                         ctx.domain_name)
+                         ctx.user_domain_name)
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Domain-Id'],
-                         ctx.domain_id)
+                         ctx.user_domain_id)
         self.assertIsNone(ctx.auth_token_info)
 
-    def test_context_hook_before_method_auth_info(self):
+    @mock.patch("magnum.common.policy.check_is_admin")
+    def test_context_hook_before_method_auth_info(self, c_m):
         state = mock.Mock(request=fakes.FakePecanRequest())
         state.request.environ['keystone.token_info'] = 'assert_this'
         hook = hooks.ContextHook()

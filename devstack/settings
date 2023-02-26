@@ -14,6 +14,10 @@
 # PHYSICAL_NETWORK=public
 # OVS_PHYSICAL_BRIDGE=br-ex
 
+# This option controls whether or not to enforce scope when evaluating policies. Learn more:
+# https://docs.openstack.org/oslo.policy/latest/configuration/index.html#oslo_policy.enforce_scope
+MAGNUM_ENFORCE_SCOPE=$(trueorfalse False MAGNUM_ENFORCE_SCOPE)
+
 # Enable Magnum services
 enable_service magnum-api
 enable_service magnum-cond

@@ -153,6 +153,14 @@ function create_magnum_conf {
 
     iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY
 
+    if [[ "$MAGNUM_ENFORCE_SCOPE" == True ]] ; then
+        iniset $MAGNUM_CONF oslo_policy enforce_scope true
+        iniset $MAGNUM_CONF oslo_policy enforce_new_defaults true
+    else
+        iniset $MAGNUM_CONF oslo_policy enforce_scope false
+        iniset $MAGNUM_CONF oslo_policy enforce_new_defaults false
+    fi
+
     iniset $MAGNUM_CONF keystone_auth auth_type password
     iniset $MAGNUM_CONF keystone_auth username magnum
     iniset $MAGNUM_CONF keystone_auth password $SERVICE_PASSWORD

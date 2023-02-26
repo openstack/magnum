@@ -42,7 +42,7 @@ class RequestContext(context.RequestContext):
         """
         super(RequestContext, self).__init__(auth_token=auth_token,
                                              user_id=user_name,
-                                             project_id=project_name,
+                                             project_id=project_id,
                                              is_admin=is_admin,
                                              read_only=read_only,
                                              show_deleted=show_deleted,
@@ -53,8 +53,6 @@ class RequestContext(context.RequestContext):
         self.user_id = user_id
         self.project_name = project_name
         self.project_id = project_id
-        self.domain_id = domain_id
-        self.domain_name = domain_name
         self.user_domain_id = user_domain_id
         self.user_domain_name = user_domain_name
         self.auth_url = auth_url
@@ -71,8 +69,6 @@ class RequestContext(context.RequestContext):
         value = super(RequestContext, self).to_dict()
         value.update({'auth_token': self.auth_token,
                       'auth_url': self.auth_url,
-                      'domain_id': self.domain_id,
-                      'domain_name': self.domain_name,
                       'user_domain_id': self.user_domain_id,
                       'user_domain_name': self.user_domain_name,
                       'user_name': self.user_name,
