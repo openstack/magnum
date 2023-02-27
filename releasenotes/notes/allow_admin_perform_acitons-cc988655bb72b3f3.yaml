@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    To make sure better have backward compatibility,
+    we set specific rule to allow admin perform all actions.
+    This will apply on part of APIs in
+    * Cluster
+    * Cluster Template
+    * federation

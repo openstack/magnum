@@ -175,7 +175,8 @@ rules = [
         name='admin_or_project_member_deny_cluster_user',
         check_str=(
             f"({RULE_ADMIN_API}) or ({RULE_PROJECT_MEMBER_DENY_CLUSTER_USER})"
-        )
+        ),
+        deprecated_rule=DEPRECATED_DENY_CLUSTER_USER
     ),
     policy.RuleDefault(
         name='project_reader_deny_cluster_user',
@@ -188,7 +189,8 @@ rules = [
         name='admin_or_project_reader_deny_cluster_user',
         check_str=(
             f"({RULE_ADMIN_API}) or ({RULE_PROJECT_READER_DENY_CLUSTER_USER})"
-        )
+        ),
+        deprecated_rule=DEPRECATED_DENY_CLUSTER_USER
     ),
     policy.RuleDefault(
         name='admin_or_project_reader_user_or_cluster_user',

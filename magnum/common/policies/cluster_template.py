@@ -20,7 +20,7 @@ CLUSTER_TEMPLATE = 'clustertemplate:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'create',
-        check_str=base.RULE_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
         scope_types=["project"],
         description='Create a new cluster template.',
         operations=[
@@ -67,7 +67,7 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'detail',
-        check_str=base.RULE_PROJECT_READER_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
         scope_types=["project"],
         description='Retrieve a list of cluster templates with detail.',
         operations=[
@@ -79,7 +79,7 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'get',
-        check_str=base.RULE_PROJECT_READER_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
         scope_types=["project"],
         description='Retrieve information about the given cluster template.',
         operations=[
@@ -103,7 +103,7 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'get_all',
-        check_str=base.RULE_PROJECT_READER_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
         scope_types=["project"],
         description='Retrieve a list of cluster templates.',
         operations=[
