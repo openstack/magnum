@@ -112,6 +112,8 @@ class OctaviaTest(base.TestCase):
     @mock.patch("magnum.common.neutron.delete_floatingip")
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_delete_loadbalancers_timeout(self, mock_clients, mock_delete_fip):
+        # don't wait the full 60 seconds for a unit test
+        self.config(pre_delete_lb_timeout=1, group="cluster")
         osc = mock.MagicMock()
         mock_clients.return_value = osc
         mock_octavia_client = mock.MagicMock()
