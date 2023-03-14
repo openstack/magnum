@@ -481,7 +481,7 @@ class BaseTemplateDefinition(TemplateDefinition):
             url += '/_config/size'
 
         try:
-            result = requests.get(url).text
+            result = requests.get(url, timeout=60).text
         except req_exceptions.RequestException as err:
             LOG.error(err)
             raise exception.GetClusterSizeFailed(
@@ -521,7 +521,8 @@ class BaseTemplateDefinition(TemplateDefinition):
                 CONF.cluster.etcd_discovery_service_endpoint_format %
                 {'size': cluster.master_count})
             try:
-                discovery_request = requests.get(discovery_endpoint)
+                discovery_request = requests.get(discovery_endpoint,
+                                                 timeout=60)
                 if discovery_request.status_code != requests.codes.ok:
                     raise exception.GetDiscoveryUrlFailed(
                         discovery_endpoint=discovery_endpoint)
