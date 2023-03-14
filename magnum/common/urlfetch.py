@@ -34,8 +34,6 @@ def get(url, allowed_schemes=('http', 'https')):
     """Get the data at the specified URL.
 
     The URL must use the http: or https: schemes.
-    The file: scheme is also supported if you override
-    the allowed_schemes argument.
     Raise an IOError if getting the data fails.
     """
     LOG.info('Fetching data from %s', url)
@@ -45,14 +43,8 @@ def get(url, allowed_schemes=('http', 'https')):
     if components.scheme not in allowed_schemes:
         raise URLFetchError(_('Invalid URL scheme %s') % components.scheme)
 
-    if components.scheme == 'file':  # nosec
-        try:
-            return urllib.request.urlopen(url).read()
-        except urllib.error.URLError as uex:
-            raise URLFetchError(_('Failed to retrieve manifest: %s') % uex)
-
     try:
-        resp = requests.get(url, stream=True)
+        resp = requests.get(url, stream=True, timeout=60)
         resp.raise_for_status()
 
         # We cannot use resp.text here because it would download the
