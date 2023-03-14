@@ -1385,7 +1385,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         discovery_url = k8s_def.get_discovery_url(mock_cluster)
 
-        mock_get.assert_called_once_with('http://etcd/test?size=10')
+        mock_get.assert_called_once_with('http://etcd/test?size=10',
+                                         timeout=60)
         self.assertEqual(expected_discovery_url, mock_cluster.discovery_url)
         self.assertEqual(expected_discovery_url, discovery_url)
 
@@ -2052,7 +2053,8 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
         discovery_url = swarm_def.get_discovery_url(mock_cluster)
 
-        mock_get.assert_called_once_with('http://etcd/test?size=1')
+        mock_get.assert_called_once_with('http://etcd/test?size=1',
+                                         timeout=60)
         self.assertEqual(mock_cluster.discovery_url, expected_discovery_url)
         self.assertEqual(discovery_url, expected_discovery_url)
 
