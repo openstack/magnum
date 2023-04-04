@@ -389,6 +389,14 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `boot_volume_type`_                   | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `master_volume_size`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `master_volume_type`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `worker_volume_size`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `worker_volume_type`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `etcd_volume_size`_                   | etcd storage       | 0             |
 |                                       | volume size        |               |
 +---------------------------------------+--------------------+---------------+
@@ -501,6 +509,18 @@ the table are linked to more details elsewhere in the user guide.
 | `calico_ipv4pool_ipip`_               | see below          | Off           |
 +---------------------------------------+--------------------+---------------+
 | `fixed_subnet_cidr`_                  | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `extra_network`_                      | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `extra_subnet`_                       | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `extra_security_group`_               | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `octavia_provider`_                   | see below          | amphora       |
++---------------------------------------+--------------------+---------------+
+| `octavia_lb_algorithm`_               | see bellow         | ROUND_ROBIN   |
++---------------------------------------+--------------------+---------------+
+| `octavia_lb_healthcheck`_             | see bellow         | true          |
 +---------------------------------------+--------------------+---------------+
 
 .. _cluster:
@@ -1200,13 +1220,42 @@ _`admission_control_list`
 _`boot_volume_size`
   This label overrides the default_boot_volume_size of instances which is
   useful if your flavors are boot from volume only. The default value is 0,
-  meaning that cluster instances will not boot from volume.
+  meaning that cluster instances will not boot from volume unless
+  master_volume_size or worker_volume_size is defined. This label has
+  lower priority than abovementioned and can be overridden by them.
+  Current precedence is master/worker_volume_size, boot_volume_size,
+  default_boot_volume_size.
+
 
 _`boot_volume_type`
   This label overrides the default_boot_volume_type of instances which is
   useful if your flavors are boot from volume only. The default value is '',
   meaning that Magnum will randomly select a Cinder volume type from all
-  available options.
+  available options unless master_volume_type or worker_volume_type are set.
+  Current precedence is master/worker_volume_type, boot_volume_type,
+  default_boot_volume_type.
+
+_`master_volume_size`
+  This labed can be used to define different volume size for master nodes than
+  set in boot_volume_size. Master_volume_size will be set to boot_volume_size
+  if not defined, fallback to default_boot_volume_size if the latter is
+  missing. If neither is defined master nodes will not boot
+  from volume.
+
+_`master_volume_type`
+  This label can be used to override volume type of master nodes if defined.
+  Otherwise boot_volume_type value will be used.
+
+_`worker_volume_size`
+  This labed can be used to define different volume size for worker nodes than
+  set in boot_volume_size. worker_volume_size will be set to boot_volume_size
+  if not defined, fallback to default_boot_volume_size if the latter is
+  missing. If neither is defined worker nodes will not boot
+  from volume.
+
+_`worker_volume_type`
+  This label can be used to override volume type of worker nodes if defined.
+  Otherwise boot_volume_type value will be used.
 
 _`etcd_volume_size`
   This label sets the size of a volume holding the etcd storage data.
@@ -1264,13 +1313,14 @@ _`container_infra_prefix`
 
   Images that might be needed if 'monitoring_enabled' is 'true':
 
-  * quay.io/prometheus/alertmanager:v0.20.0
-  * docker.io/squareup/ghostunnel:v1.5.2
-  * docker.io/jettech/kube-webhook-certgen:v1.0.0
-  * quay.io/coreos/prometheus-operator:v0.37.0
-  * quay.io/coreos/configmap-reload:v0.0.1
-  * quay.io/coreos/prometheus-config-reloader:v0.37.0
-  * quay.io/prometheus/prometheus:v2.15.2
+  * quay.io/prometheus/alertmanager:v0.21.0
+  * docker.io/jettech/kube-webhook-certgen:v1.5.0
+  * quay.io/prometheus-operator/prometheus-operator:v0.44.0
+  * docker.io/jimmidyson/configmap-reload:v0.4.0
+  * quay.io/prometheus-operator/prometheus-config-reloader:v0.44.0
+  * quay.io/prometheus/prometheus:v2.22.1
+  * quay.io/prometheus/node-exporter:v1.0.1
+  * docker.io/directxman12/k8s-prometheus-adapter:v0.8.2
 
   Images that might be needed if 'cinder_csi_enabled' is 'true':
 
@@ -1434,30 +1484,35 @@ _`cinder_csi_plugin_tag`
   <https://hub.docker.com/r/k8scloudprovider/cinder-csi-plugin/tags>`_.
   Train default: v1.16.0
   Ussuri default: v1.18.0
+  Yoga default: v1.23.0
 
 _`csi_attacher_tag`
   This label allows users to override the default container tag for CSI attacher.
   For additional tags, `refer to CSI attacher page
   <https://quay.io/repository/k8scsi/csi-attacher?tab=tags>`_.
   Ussuri-default: v2.0.0
+  Yoga-default: v3.3.0
 
 _`csi_provisioner_tag`
   This label allows users to override the default container tag for CSI provisioner.
   For additional tags, `refer to CSI provisioner page
   <https://quay.io/repository/k8scsi/csi-provisioner?tab=tags>`_.
   Ussuri-default: v1.4.0
+  Yoga-default: v3.0.0
 
 _`csi_snapshotter_tag`
   This label allows users to override the default container tag for CSI snapshotter.
   For additional tags, `refer to CSI snapshotter page
   <https://quay.io/repository/k8scsi/csi-snapshotter?tab=tags>`_.
   Ussuri-default: v1.2.2
+  Yoga-default: v4.2.1
 
 _`csi_resizer_tag`
   This label allows users to override the default container tag for CSI resizer.
   For additional tags, `refer to CSI resizer page
   <https://quay.io/repository/k8scsi/csi-resizer?tab=tags>`_.
   Ussuri-default: v0.3.0
+  Yoga-default: v1.3.0
 
 _`csi_node_driver_registrar_tag`
   This label allows users to override the default container tag for CSI node
@@ -1465,6 +1520,12 @@ _`csi_node_driver_registrar_tag`
   page
   <https://quay.io/repository/k8scsi/csi-node-driver-registrar?tab=tags>`_.
   Ussuri-default: v1.1.0
+  Yoga-default: v2.4.0
+
+-`csi_liveness_probe_tag`
+  This label allows users to override the default container tag for CSI
+  liveness probe.
+  Yoga-default: v2.5.0
 
 _`keystone_auth_enabled`
   If this label is set to True, Kubernetes will support use Keystone for
@@ -1634,6 +1695,33 @@ _`fixed_subnet_cidr`
   CIDR of the fixed subnet created by Magnum when a user has not
   specified an existing fixed_subnet during cluster creation.
   Ussuri default: 10.0.0.0/24
+
+_`extra_network`
+  Optional additional network name or UUID to add to cluster nodes.
+  When not specified, additional networks are not added. Optionally specify
+  'extra_subnet' if you wish to use a specific subnet on the network.
+  Default: ""
+
+_`extra_subnet`
+  Optional additional subnet name or UUID to add to cluster nodes.
+  Only used when 'extra_network' is defined.
+  Default: ""
+
+_`extra_security_group`
+  Optional additional group name or UUID to add to network port.
+  Only used when 'extra_network' is defined.
+  Default: cluster node default security group.
+
+_`octavia_provider`
+  Octavia provider driver to be used for creating load balancers.
+
+_`octavia_lb_algorithm`
+  Octavia Octavia lb algorithm to use for LoadBalancer type service
+  Default: ROUND_ROBIN
+
+_`octavia_lb_healthcheck`
+  If true, enable Octavia load balancer healthcheck
+  Default: true
 
 External load balancer for services
 -----------------------------------
@@ -2723,7 +2811,6 @@ _`calico_tag`
   Victoria default: v3.13.1
   Wallaby default: v3.13.1
 
-
 Besides, the Calico network driver needs kube_tag with v1.9.3 or later, because
 Calico needs extra mounts for the kubelet container. See `commit
 <https://github.com/projectatomic/atomic-system-containers/commit/54ab8abc7fa1bfb6fa674f55cd0c2fa0c812fd36>`_
@@ -3034,6 +3121,39 @@ for the COE types is summarized as follows:
 +--------+-------------+-------------+-------------+
 | rexray | unsupported | supported   | supported   |
 +--------+-------------+-------------+-------------+
+
+Labels can be used to customize nodes boot volume at creation time:
+
+- boot_volume_type
+- boot_volume_size
+
+These define volume type and size used for boot media of node vm, and they can
+be further overriden by:
+
+- master_volume_type
+- master_volume_size
+- worker_volume_type
+- worker_volume_size
+
+Current precedence is:
+- master_volume_size / worker_volume_size
+- boot_volume_size
+- default_boot_volume_size
+
+Labels shown above allow user to use different storage types and sizes for
+master and worker nodes. They can be used independently of each other
+for ex. boot_volume_type to define type of storage to use for both master
+and worker vms, along with master_volume_size and worker_volume_size
+setting size of their boot volumes. Another example would be usage of
+boot_volume_size to define size of both master and worker, with different
+storage types for them set by master_volume_type and worker_volume_type.
+It's possible to use any combination of the above.
+
+If either master_volume_type or worker_volume_type is missing,
+boot_volume_type will be used instead. A random volume type from Cinder will
+be used if none of those options is set. In case of master_volume_size or
+worker_volume_size missing value for boot_volume_size is used. If neither
+is defined instances will not be volume based.
 
 Following are some examples for using Cinder as persistent storage.
 

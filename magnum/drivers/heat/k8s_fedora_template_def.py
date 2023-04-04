@@ -90,6 +90,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'csi_attacher_tag', 'csi_provisioner_tag',
                       'csi_snapshotter_tag', 'csi_resizer_tag',
                       'csi_node_driver_registrar_tag',
+                      'csi_liveness_probe_tag',
                       'etcd_tag', 'flannel_tag', 'flannel_cni_tag',
                       'cloud_provider_tag',
                       'prometheus_tag', 'grafana_tag',
@@ -126,7 +127,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'min_node_count', 'max_node_count', 'npd_enabled',
                       'ostree_remote', 'ostree_commit',
                       'use_podman', 'kube_image_digest',
-                      'metrics_scraper_tag']
+                      'extra_network', 'extra_subnet', 'extra_security_group',
+                      'metrics_scraper_tag', 'liveness_probe_tag']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 
@@ -226,12 +228,36 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             'boot_volume_size', CONF.cinder.default_boot_volume_size)
         extra_params['boot_volume_size'] = boot_volume_size
 
+        # set master_volume_size
+        master_volume_size = cluster.labels.get(
+            'master_volume_size', boot_volume_size)
+        extra_params['master_volume_size'] = master_volume_size
+
+        # set worker_volume_size
+        worker_volume_size = cluster.labels.get(
+            'worker_volume_size', boot_volume_size)
+        extra_params['worker_volume_size'] = worker_volume_size
+
         # set boot_volume_type
         boot_volume_type = (cluster.labels.get(
             'boot_volume_type',
             cinder.get_default_boot_volume_type(context))
-            if int(boot_volume_size) > 0 else '')
+            if (int(boot_volume_size) or
+                int(master_volume_size) or
+                int(worker_volume_size)) > 0 else '')
         extra_params['boot_volume_type'] = boot_volume_type
+
+        # set master_volume_type
+        if int(master_volume_size) > 0:
+            master_volume_type = cluster.labels.get(
+                'master_volume_type', boot_volume_type)
+            extra_params['master_volume_type'] = master_volume_type
+
+        # set worker_volume_type
+        if int(worker_volume_size) > 0:
+            worker_volume_type = cluster.labels.get(
+                'worker_volume_type', boot_volume_type)
+            extra_params['worker_volume_type'] = worker_volume_type
 
     def get_env_files(self, cluster_template, cluster, nodegroup=None):
         env_files = []

@@ -1,0 +1,162 @@
+#!/usr/bin/env python3.9
+
+import requests
+
+manifest_data = []
+
+files = requests.get("https://api.github.com/repos/kubernetes/cloud-provider-openstack/contents/manifests/cinder-csi-plugin").json()
+for file in files:
+    if file['name'] == 'csi-secret-cinderplugin.yaml':
+        continue
+
+    r = requests.get(file['download_url'])
+    manifest_data.append(r.text)
+
+manifests = "---\n".join(manifest_data)
+
+# Clean-ups
+manifests = manifests.replace(
+"""
+            # - name: cacert
+            #   mountPath: /etc/cacert
+            #   readOnly: true
+""",
+"""
+            - name: cacert
+              mountPath: /etc/kubernetes/ca-bundle.crt
+              readOnly: true
+""").replace(
+"""
+            secretName: cloud-config
+        # - name: cacert
+        #   hostPath:
+        #     path: /etc/cacert
+""",
+"""
+            secretName: cinder-csi-cloud-config
+        - name: cacert
+          hostPath:
+            path: /etc/kubernetes/ca-bundle.crt
+            type: File
+""").replace(
+"""
+      serviceAccount: csi-cinder-controller-sa
+""",
+"""
+      serviceAccount: csi-cinder-controller-sa
+      hostNetwork: true
+      tolerations:
+        # Make sure the pod can be scheduled on master kubelet.
+        - effect: NoSchedule
+          operator: Exists
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+""").replace(
+"""
+            - --csi-address=/csi/csi.sock
+""",
+"""
+            - --csi-address=/csi/csi.sock
+          resources:
+            requests:
+              cpu: 20m
+""").replace(
+"""
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+""",
+"""
+          resources:
+            requests:
+              cpu: 20m
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+""").replace(
+    "$(",
+    "\$("
+).replace(
+    "k8s.gcr.io/sig-storage/",
+    "${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}"
+).replace(
+    "docker.io/k8scloudprovider/",
+    "${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}",
+).replace(
+    "csi-attacher:v3.4.0",
+    "csi-attacher:${CSI_ATTACHER_TAG}",
+).replace(
+    "csi-provisioner:v3.1.0",
+    "csi-provisioner:${CSI_PROVISIONER_TAG}",
+).replace(
+    "csi-snapshotter:v6.0.1",
+    "csi-snapshotter:${CSI_SNAPSHOTTER_TAG}",
+).replace(
+    "csi-resizer:v1.4.0",
+    "csi-resizer:${CSI_RESIZER_TAG}",
+).replace(
+    "livenessprobe:v2.7.0",
+    "livenessprobe:${CSI_LIVENESS_PROBE_TAG}",
+).replace(
+    "cinder-csi-plugin:latest",
+    "cinder-csi-plugin:${CINDER_CSI_PLUGIN_TAG}",
+).replace(
+    "csi-node-driver-registrar:v2.5.1",
+    "csi-node-driver-registrar:${CSI_NODE_DRIVER_REGISTRAR_TAG}",
+).replace(
+    "/etc/config/cloud.conf",
+    "/etc/config/cloud-config"
+)
+
+template = f"""step="enable-cinder-csi"
+printf "Starting to run ${{step}}\\n"
+
+. /etc/sysconfig/heat-params
+
+volume_driver=$(echo "${{VOLUME_DRIVER}}" | tr '[:upper:]' '[:lower:]')
+cinder_csi_enabled=$(echo $CINDER_CSI_ENABLED | tr '[:upper:]' '[:lower:]')
+
+if [ "${{volume_driver}}" = "cinder" ] && [ "${{cinder_csi_enabled}}" = "true" ]; then
+    # Generate Cinder CSI manifest file
+    CINDER_CSI_DEPLOY=/srv/magnum/kubernetes/manifests/cinder-csi.yaml
+    echo "Writing File: $CINDER_CSI_DEPLOY"
+    mkdir -p $(dirname ${{CINDER_CSI_DEPLOY}})
+    cat << EOF > ${{CINDER_CSI_DEPLOY}}
+{manifests.strip()}
+EOF
+
+    echo "Waiting for Kubernetes API..."
+    until  [ "ok" = "$(kubectl get --raw='/healthz')" ]
+    do
+        sleep 5
+    done
+
+    cat <<EOF | kubectl apply -f -
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cinder-csi-cloud-config
+  namespace: kube-system
+type: Opaque
+stringData:
+  cloud-config: |-
+    [Global]
+    auth-url=$AUTH_URL
+    user-id=$TRUSTEE_USER_ID
+    password=$TRUSTEE_PASSWORD
+    trust-id=$TRUST_ID
+    region=$REGION_NAME
+    ca-file=/etc/kubernetes/ca-bundle.crt
+EOF
+
+    kubectl apply -f ${{CINDER_CSI_DEPLOY}}
+fi
+printf "Finished running ${{step}}\\n"
+"""
+
+with open("magnum/drivers/common/templates/kubernetes/fragments/enable-cinder-csi.sh", "w") as fd:
+    fd.write(template)

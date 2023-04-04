@@ -246,6 +246,28 @@ parameters:
     description: >
       type of the cinder boot volume for nodes root volume
 
+  master_volume_size:
+    type: number
+    description: >
+      size of the master cinder boot volume
+
+  master_volume_type:
+    type: string
+    description: >
+      type of the master cinder boot volume
+    default: ""
+
+  worker_volume_size:
+    type: number
+    description: >
+      size of the minion cinder boot volume
+
+  worker_volume_type:
+    type: string
+    description: >
+      type of the minion cinder boot volume
+    default: ""
+
   etcd_volume_size:
     type: number
     description: >
@@ -495,7 +517,7 @@ parameters:
   coredns_tag:
     type: string
     description: tag for coredns
-    default: 1.6.6
+    default: 1.8.7
 
   flannel_tag:
     type: string
@@ -660,6 +682,24 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    default: amphora
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+
+  octavia_lb_algorithm:
+    type: string
+    default: ROUND_ROBIN
+    description: >
+      Octavia lb algorithm to use for LoadBalancer type service
+
+  octavia_lb_healthcheck:
+    type: boolean
+    description: >
+      if true, enable Octavia load balancer healthcheck
+    default: true
+
   kube_service_account_key:
     type: string
     hidden: true
@@ -754,8 +794,8 @@ parameters:
 
   prometheus_operator_chart_tag:
     type: string
-    description: The stable/prometheus-operator chart version to use.
-    default: v8.12.13
+    description: The prometheus-community/kube-prometheus-stack chart version to use.
+    default: 33.0.0
 
   prometheus_adapter_enabled:
     type: boolean
@@ -764,8 +804,8 @@ parameters:
 
   prometheus_adapter_chart_tag:
     type: string
-    description: The stable/prometheus-adapter chart version to use.
-    default: 1.4.0
+    description: The prometheus-community/prometheus-adapter chart version to use.
+    default: 3.0.2
 
   prometheus_adapter_configmap:
     type: string
@@ -848,32 +888,38 @@ parameters:
     description: tag of cinder csi plugin
       tag of the k8scloudprovider/cinder-csi-plugin container
       https://hub.docker.com/r/k8scloudprovider/cinder-csi-plugin/tags/
-    default: v1.18.0
+    default: v1.23.0
 
   csi_attacher_tag:
     type: string
     description: tag of csi attacher
-    default: v2.0.0
+    default: v3.3.0
 
   csi_provisioner_tag:
     type: string
     description: tag of csi provisioner
-    default: v1.4.0
+    default: v3.0.0
 
   csi_snapshotter_tag:
     type: string
     description: tag of csi snapshotter
-    default: v1.2.2
+    default: v4.2.1
 
   csi_resizer_tag:
     type: string
     description: tag of csi resizer
-    default: v0.3.0
+    default: v1.3.0
 
   csi_node_driver_registrar_tag:
     type: string
     description: tag of csi node driver registrar
-    default: v1.1.0
+    default: v2.4.0
+
+  csi_liveness_probe_tag:
+    type: string
+    description: tag of cinder csi liveness probe
+      tag of the k8s.gcr.io/sig-storage/liveness-probe container
+    default: v2.5.0
 
   node_problem_detector_tag:
     type: string
@@ -984,12 +1030,36 @@ parameters:
     description: >
       Post install manifest URL used to setup some cloud provider/vendor
       specific configs
-    default: ""
+    default: ''
 
   master_lb_allowed_cidrs:
     type: comma_delimited_list
     description: The allowed CIDR list for master load balancer
     default: []
+
+  extra_network:
+    type: string
+    description: >
+      Additional network to bind nodes to
+    default: ''
+
+  extra_subnet:
+    type: string
+    description: >
+      Subnet for additional network
+    default: ''
+
+  extra_security_group:
+    type: string
+    description: >
+      Additional security group name
+    default: ''
+
+  liveness_probe_tag:
+    type: string
+    description: tag of cinder csi liveness probe
+      tag of the k8s.gcr.io/sig-storage/liveness-probe container
+    default: v2.5.0
 
 resources:
 
@@ -1021,6 +1091,9 @@ resources:
       protocol: {get_param: loadbalancing_protocol}
       port: {get_param: kubernetes_port}
       allowed_cidrs: {get_param: master_lb_allowed_cidrs}
+      octavia_provider: {get_param: octavia_provider}
+      octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+      octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
 
   etcd_lb:
     condition: create_cluster_resources
@@ -1030,6 +1103,9 @@ resources:
       protocol: {get_param: loadbalancing_protocol}
       port: 2379
       allowed_cidrs: {get_param: master_lb_allowed_cidrs}
+      octavia_provider: {get_param: octavia_provider}
+      octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+      octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
 
   ######################################################################
   #
@@ -1082,6 +1158,22 @@ resources:
         - protocol: udp
           port_range_min: 8472
           port_range_max: 8472
+          # Prometheus Server
+        - protocol: tcp
+          port_range_min: 9090
+          port_range_max: 9090
+        - protocol: tcp
+          port_range_min: 10259
+          port_range_max: 10259
+        - protocol: tcp
+          port_range_min: 10257
+          port_range_max: 10257
+        - protocol: tcp
+          port_range_min: 10249
+          port_range_max: 10249
+        - protocol: tcp
+          port_range_min: 9153
+          port_range_max: 9153
 
   secgroup_kube_minion:
     condition: create_cluster_resources
@@ -1240,8 +1332,8 @@ resources:
           master_flavor: {get_param: master_flavor}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
-          boot_volume_size: {get_param: boot_volume_size}
-          boot_volume_type: {get_param: boot_volume_type}
+          master_volume_size: {get_param: master_volume_size}
+          master_volume_type: {get_param: master_volume_type}
           etcd_volume_size: {get_param: etcd_volume_size}
           etcd_volume_type: {get_param: etcd_volume_type}
           docker_volume_size: {get_param: docker_volume_size}
@@ -1317,6 +1409,9 @@ resources:
           kubecontroller_options: {get_param: kubecontroller_options}
           kubescheduler_options: {get_param: kubescheduler_options}
           octavia_enabled: {get_param: octavia_enabled}
+          octavia_provider: {get_param: octavia_provider}
+          octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+          octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
           kube_service_account_key: {get_param: kube_service_account_key}
           kube_service_account_private_key: {get_param: kube_service_account_private_key}
           prometheus_tag: {get_param: prometheus_tag}
@@ -1357,6 +1452,7 @@ resources:
           csi_snapshotter_tag: {get_param: csi_snapshotter_tag}
           csi_resizer_tag: {get_param: csi_resizer_tag}
           csi_node_driver_registrar_tag: {get_param: csi_node_driver_registrar_tag}
+          csi_liveness_probe_tag: {get_param: csi_liveness_probe_tag}
           draino_tag: {get_param: draino_tag}
           autoscaler_tag: {get_param: autoscaler_tag}
           min_node_count: {get_param: min_node_count}
@@ -1373,6 +1469,10 @@ resources:
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
           post_install_manifest_url: {get_param: post_install_manifest_url}
           metrics_scraper_tag: {get_param: metrics_scraper_tag}
+          extra_network: {get_param: extra_network}
+          extra_subnet: {get_param: extra_subnet}
+          extra_security_group: {get_param: extra_security_group}
+          liveness_probe_tag: {get_param: liveness_probe_tag}
 
   kube_cluster_config:
     condition: create_cluster_resources
@@ -1487,8 +1587,8 @@ resources:
               - get_param: existing_master_private_ip
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
-          boot_volume_size: {get_param: boot_volume_size}
-          boot_volume_type: {get_param: boot_volume_type}
+          worker_volume_size: {get_param: worker_volume_size}
+          worker_volume_type: {get_param: worker_volume_type}
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
@@ -1538,6 +1638,9 @@ resources:
           kubelet_options: {get_param: kubelet_options}
           kubeproxy_options: {get_param: kubeproxy_options}
           octavia_enabled: {get_param: octavia_enabled}
+          octavia_provider: {get_param: octavia_provider}
+          octavia_lb_algorithm: {get_param: octavia_lb_algorithm}
+          octavia_lb_healthcheck: {get_param: octavia_lb_healthcheck}
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
           auto_healing_enabled: {get_param: auto_healing_enabled}
           npd_enabled: {get_param: npd_enabled}
@@ -1552,6 +1655,10 @@ resources:
           containerd_tarball_sha256: {get_param: containerd_tarball_sha256}
           kube_service_account_key: {get_param: kube_service_account_key}
           kube_service_account_private_key: {get_param: kube_service_account_private_key}
+          extra_network: {get_param: extra_network}
+          extra_subnet: {get_param: extra_subnet}
+          extra_security_group: {get_param: extra_security_group}
+
 outputs:
 
   api_address:

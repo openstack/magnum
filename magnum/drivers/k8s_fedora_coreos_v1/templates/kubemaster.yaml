@@ -63,16 +63,15 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
-  boot_volume_size:
+  master_volume_size:
     type: number
     description: >
-      size of the cinder boot volume for nodes root volume
-    default: 0
+      size of the master cinder boot volume
 
-  boot_volume_type:
+  master_volume_type:
     type: string
     description: >
-      type of the cinder boot volume for nodes root volume
+      type of the master cinder boot volume
 
   etcd_volume_size:
     type: number
@@ -434,6 +433,23 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  octavia_provider:
+    type: string
+    description: >
+      Octavia provider driver to use for LoadBalancer type service.
+
+  octavia_lb_algorithm:
+    type: string
+    default: ROUND_ROBIN
+    description: >
+      Octavia lb algorithm to use for LoadBalancer type service.
+
+  octavia_lb_healthcheck:
+    type: boolean
+    default: True
+    description: >
+      Octavia lb healthcheck.
+
   kube_service_account_key:
     type: string
     hidden: true
@@ -604,6 +620,11 @@ parameters:
     type: string
     description: tag of csi node driver registrar
 
+  csi_liveness_probe_tag:
+    type: string
+    description: >
+      Tag of liveness-probe for cinder csi.
+
   node_problem_detector_tag:
     type: string
     description: tag of the node problem detector container
@@ -692,14 +713,53 @@ parameters:
     description: >
       Tag of metrics-scraper for kubernetes dashboard.
 
+  extra_network:
+    type: string
+    description: >
+      Additional network name to bind ports to instances
+
+  extra_subnet:
+    type: string
+    description: >
+      Additional subnet name
+
+  extra_security_group:
+    type: string
+    description: >
+      Additional security group name
+
+  liveness_probe_tag:
+    type: string
+    description: >
+      Tag of liveness-probe for cinder csi.
+
 conditions:
 
-  image_based: {equals: [{get_param: boot_volume_size}, 0]}
-  volume_based:
+  image_based: {equals: [{get_param: master_volume_size}, 0]}
+
+  volume_based:                       
     not:
       equals:
-      - get_param: boot_volume_size
+      - get_param: master_volume_size
       - 0
+
+  extra_network_defined:
+    not:
+      equals:
+      - get_param: extra_network
+      - ''
+
+  extra_subnet_defined:
+    not:
+      equals:
+      - get_param: extra_subnet
+      - ''
+
+  extra_security_group_defined:
+    not:
+      equals:
+      - get_param: extra_security_group
+      - ''
 
 resources:
   ######################################################################
@@ -849,6 +909,9 @@ resources:
                   "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
                   "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
                   "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
+                  "$OCTAVIA_PROVIDER": {get_param: octavia_provider}
+                  "$OCTAVIA_LB_ALGORITHM": {get_param: octavia_lb_algorithm}
+                  "$OCTAVIA_LB_HEALTHCHECK": {get_param: octavia_lb_healthcheck}
                   "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
                   "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
                   "$PROMETHEUS_TAG": {get_param: prometheus_tag}
@@ -890,6 +953,7 @@ resources:
                   "$CSI_SNAPSHOTTER_TAG": {get_param: csi_snapshotter_tag}
                   "$CSI_RESIZER_TAG": {get_param: csi_resizer_tag}
                   "$CSI_NODE_DRIVER_REGISTRAR_TAG": {get_param: csi_node_driver_registrar_tag}
+                  "$CSI_LIVENESS_PROBE_TAG":  {get_param: csi_liveness_probe_tag}
                   "$DRAINO_TAG": {get_param: draino_tag}
                   "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
                   "$MIN_NODE_COUNT": {get_param: min_node_count}
@@ -905,6 +969,7 @@ resources:
                   "$CONTAINERD_TARBALL_SHA256": {get_param: containerd_tarball_sha256}
                   "$POST_INSTALL_MANIFEST_URL": {get_param: post_install_manifest_url}
                   "$METRICS_SCRAPER_TAG":  {get_param: metrics_scraper_tag}
+                  "$LIVENESS_PROBE_TAG":  {get_param: liveness_probe_tag}
             - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
@@ -941,8 +1006,8 @@ resources:
     condition: volume_based
     properties:
       image: {get_param: server_image}
-      size: {get_param: boot_volume_size}
-      volume_type: {get_param: boot_volume_type}
+      size: {get_param: master_volume_size}
+      volume_type: {get_param: master_volume_type}
       availability_zone: {get_param: availability_zone}
 
   # do NOT use "_" (underscore) in the Nova server name
@@ -959,7 +1024,12 @@ resources:
       software_config_transport: POLL_SERVER_HEAT
       user_data: {get_resource: agent_config}
       networks:
-        - port: {get_resource: kube_master_eth0}
+        list_concat:
+          - - port: {get_resource: kube_master_eth0}
+          - if:
+              - "extra_network_defined"
+              - - port: {get_resource: kube_master_eth1}
+              - []
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
 
@@ -973,7 +1043,12 @@ resources:
       software_config_transport: POLL_SERVER_HEAT
       user_data: {get_resource: agent_config}
       networks:
-        - port: {get_resource: kube_master_eth0}
+        list_concat:
+          - - port: {get_resource: kube_master_eth0}
+          - if:
+              - "extra_network_defined"
+              - - port: {get_resource: kube_master_eth1}
+              - []
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
       block_device_mapping_v2:
@@ -990,6 +1065,23 @@ resources:
         - subnet: {get_param: fixed_subnet}
       allowed_address_pairs:
         - ip_address: {get_param: pods_network_cidr}
+      replacement_policy: AUTO
+
+  kube_master_eth1:
+    type: OS::Neutron::Port
+    condition: extra_network_defined
+    properties:
+      network: {get_param: extra_network}
+      security_groups:
+        - if:
+            - "extra_security_group_defined"
+            - {get_param: extra_security_group}
+            - {get_param: secgroup_kube_master_id}
+      fixed_ips:
+        if:
+          - "extra_subnet_defined"
+          - - subnet: {get_param: extra_subnet}
+          - []
       replacement_policy: AUTO
 
   kube_master_floating:

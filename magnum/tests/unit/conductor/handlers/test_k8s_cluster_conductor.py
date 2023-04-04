@@ -114,6 +114,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'kubeproxy_options': '--kubeproxy',
                        'influx_grafana_dashboard_enabled': 'True',
                        'service_cluster_ip_range': '10.254.0.0/16',
+                       'worker_volume_size': '40',
+                       'worker_volume_type': 'lvmdriver-2',
                        'boot_volume_size': '60'},
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
@@ -279,6 +281,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'influx_grafana_dashboard_enabled': 'True',
                        'docker_volume_type': 'lvmdriver-1',
                        'boot_volume_type': 'lvmdriver-1',
+                       'worker_volume_type': 'lvmdriver-2',
                        'etcd_volume_size': None,
                        'etcd_volume_type': '',
                        'availability_zone': 'az_1',
@@ -375,6 +378,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
+            'master_volume_size': '60',
+            'master_volume_type': 'lvmdriver-1',
+            'worker_volume_size': '40',
+            'worker_volume_type': 'lvmdriver-2',
             'master_role': 'master',
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
@@ -382,6 +389,9 @@ class TestClusterConductorWithK8s(base.TestCase):
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
+            'octavia_provider': None,
+            'octavia_lb_algorithm': None,
+            'octavia_lb_healthcheck': None,
         }
 
         if missing_attr is not None:
@@ -532,13 +542,20 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
+            'master_volume_size': '60',
+            'master_volume_type': 'lvmdriver-1',
+            'worker_volume_size': '40',
+            'worker_volume_type': 'lvmdriver-2',
             'master_role': 'master',
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
-            'fixed_subnet_cidr': self.fixed_subnet_cidr
+            'fixed_subnet_cidr': self.fixed_subnet_cidr,
+            'octavia_provider': None,
+            'octavia_lb_algorithm': None,
+            'octavia_lb_healthcheck': None,
         }
 
         self.assertEqual(expected, definition)
@@ -669,6 +686,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             'max_node_count': 2,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
+            'master_volume_size': '60',
+            'master_volume_type': 'lvmdriver-1',
+            'worker_volume_size': '40',
+            'worker_volume_type': 'lvmdriver-2',
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'master_role': 'master',
             'worker_role': 'worker',
@@ -676,7 +697,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
-            'fixed_subnet_cidr': self.fixed_subnet_cidr
+            'fixed_subnet_cidr': self.fixed_subnet_cidr,
+            'octavia_provider': None,
+            'octavia_lb_algorithm': None,
+            'octavia_lb_healthcheck': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -794,6 +818,9 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
+            'octavia_provider': None,
+            'octavia_lb_algorithm': None,
+            'octavia_lb_healthcheck': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -909,6 +936,9 @@ class TestClusterConductorWithK8s(base.TestCase):
             'worker_nodegroup_name': 'worker_ng',
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
+            'octavia_provider': None,
+            'octavia_lb_algorithm': None,
+            'octavia_lb_healthcheck': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1153,6 +1183,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
+            'master_volume_size': '60',
+            'master_volume_type': 'lvmdriver-1',
+            'worker_volume_size': '40',
+            'worker_volume_type': 'lvmdriver-2',
             'master_role': 'master',
             'worker_role': 'worker',
             'master_nodegroup_name': 'master_ng',
@@ -1160,6 +1194,9 @@ class TestClusterConductorWithK8s(base.TestCase):
             'post_install_manifest_url': '',
             'master_lb_allowed_cidrs': None,
             'fixed_subnet_cidr': self.fixed_subnet_cidr,
+            'octavia_provider': None,
+            'octavia_lb_algorithm': None,
+            'octavia_lb_healthcheck': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
