@@ -74,11 +74,8 @@ data:
   Corefile: |
     .:53 {
         errors
-        log stdout
-        health {
-            lameduck 5s
-        }
-        ready
+        log
+        health
         kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} ${PODS_NETWORK_CIDR} {
            pods verified
            fallthrough in-addr.arpa ip6.arpa
