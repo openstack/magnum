@@ -13,7 +13,7 @@ conditions:
   octavia_lb_healthcheck_enabled:
       equals:
       - get_param: octavia_lb_healthcheck
-      - []
+      - True
 
 parameters:
 
