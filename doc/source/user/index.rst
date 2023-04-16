@@ -1622,19 +1622,34 @@ Supported versions
 
 The supported (tested) versions of Kubernetes and Operating Systems are:
 
-+-------------------+----------+---------------+------------+
-| Release           | kube_tag | os_distro     | os version |
-+===================+==========+===============+============+
-| 15.0.0 (Zed)      | v1.23.3  | fedora-coreos | fcos 35    |
-+-------------------+----------+---------------+------------+
-| 14.0.0 (Yoga)     | v1.23.3  | fedora-coreos | fcos 35    |
-+-------------------+----------+---------------+------------+
-| 13.0.0 (Xena)     | v1.21.x  | fedora-coreos | fcos 31    |
-+-------------------+----------+---------------+------------+
-| 12.0.0 (Wallaby)  | v1.21.x  | fedora-coreos | fcos 31    |
-+-------------------+----------+---------------+------------+
-| 11.1.1 (Victoria) | v1.21.x  | fedora-coreos | fcos 31    |
-+-------------------+----------+---------------+------------+
++-------------------+----------+-------------------------------+
+| Release           | kube_tag | os distro and version         |
++===================+==========+===============================+
+| 15.0.0 (Zed)      | v1.23.3  | fedora-coreos-35.20220116.3.0 |
++-------------------+----------+-------------------------------+
+| 14.0.0 (Yoga)     | v1.23.3  | fedora-coreos-35.20220116.3.0 |
++-------------------+----------+-------------------------------+
+| 13.0.0 (Xena)     | v1.21.x  | fedora-coreos-31.20200323.3.2 |
++-------------------+----------+-------------------------------+
+| 12.0.0 (Wallaby)  | v1.21.x  | fedora-coreos-31.20200323.3.2 |
++-------------------+----------+-------------------------------+
+| 11.1.1 (Victoria) | v1.21.x  | fedora-coreos-31.20200323.3.2 |
++-------------------+----------+-------------------------------+
+
+Note: It is important to try to use the exact image version tested. Sometimes
+Fedora updates packages within the same major version, so Magnum may not work
+if it is expecting different software versions. e.g.
+
+- fedora-coreos-35.20220116.3.0 - containerd 1.5
+- fedora-coreos-35.20220424.3.0 - containerd 1.6
+
+Due to config file differences between containerd 1.5 and 1.6, a newer version
+of fcos 35 will not work without patches.
+
+Download
+
+- fedora-coreos-35.20220116.3.0 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/35.20220116.3.0/x86_64/fedora-coreos-35.20220116.3.0-openstack.x86_64.qcow2.xz
+- fedora-coreos-31.20200323.3.2 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/31.20200323.3.2/x86_64/fedora-coreos-31.20200323.3.2-openstack.x86_64.qcow2.xz
 
 External load balancer for services
 -----------------------------------
