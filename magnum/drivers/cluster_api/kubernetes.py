@@ -141,28 +141,29 @@ class Client(requests.Session):
     def get_machine_deployment(self, name, namespace):
         return MachineDeployment(self).fetch(name, namespace)
 
-    def get_manifests_by_label(self, label, value, namespace):
+    def get_manifests_by_label(self, labels, namespace):
         return list(
             Manifests(self).fetch_all_by_label(
-                label,
-                value,
+                labels,
                 namespace
             )
         )
 
-    def get_helm_releases_by_label(self, label, value, namespace):
+    def get_helm_releases_by_label(self, labels, namespace):
         return list(
             HelmRelease(self).fetch_all_by_label(
-                label,
-                value,
+                labels,
                 namespace
             )
         )
 
-    def get_addons_by_label(self, label, value, namespace):
-        addons = list(self.get_manifests_by_label(label, value, namespace))
-        addons.extend(self.get_helm_releases_by_label(label, value, namespace))
+    def get_addons_by_label(self, labels, namespace):
+        addons = list(self.get_manifests_by_label(labels, namespace))
+        addons.extend(self.get_helm_releases_by_label(labels, namespace))
         return addons
+
+    def get_all_machines_by_label(self, labels, namespace):
+        return list(Machine(self).fetch_all_by_label(labels, namespace))
 
 
 class Resource:
@@ -202,12 +203,13 @@ class Resource:
         else:
             response.raise_for_status()
 
-    def fetch_all_by_label(self, label, value, namespace=None):
-        """Fetches all objects with the specified label from cluster."""
+    def fetch_all_by_label(self, labels, namespace=None):
+        """Fetches objects matching the labels from the target cluster."""
         assert self.namespaced == bool(namespace)
+        label_selector = ",".join(f"{k}={v}" for k, v in labels.items())
         continue_token = ""
         while True:
-            params = {"labelSelector": f"{label}={value}"}
+            params = {"labelSelector": label_selector}
             if continue_token:
                 params["continue"] = continue_token
             response = self.client.get(
@@ -268,6 +270,10 @@ class MachineDeployment(Resource):
 
 class KubeadmControlPlane(Resource):
     api_version = "controlplane.cluster.x-k8s.io/v1beta1"
+
+
+class Machine(Resource):
+    api_version = "cluster.x-k8s.io/v1beta1"
 
 
 class Manifests(Resource):

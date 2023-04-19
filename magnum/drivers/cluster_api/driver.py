@@ -123,6 +123,23 @@ class Driver(driver.Driver):
         if md:
             ng_state = NodeGroupState.PENDING
 
+        # When a machine deployment is deleted, it disappears straight
+        # away even when there are still machines belonging to it that
+        # are deleting
+        # In that case, we want to keep the nodegroup as DELETE_IN_PROGRESS
+        # until all the machines for the node group are gone
+        if (
+            not md
+            and nodegroup.status.startswith("DELETE_")
+            and self._nodegroup_machines_exist(cluster, nodegroup)
+        ):
+            LOG.debug(
+                f"Node group {nodegroup.name} "
+                f"for cluster {cluster.uuid} "
+                "machine deployment gone, but machines still found."
+            )
+            ng_state = NodeGroupState.PENDING
+
         md_status = md.get("status", {}) if md else {}
         md_phase = md_status.get("phase")
         if md_phase:
@@ -137,11 +154,15 @@ class Driver(driver.Driver):
         # For delete we are waiting for not present
         if nodegroup.status.startswith("DELETE_"):
             if ng_state == NodeGroupState.NOT_PRESENT:
-                # Conductor will delete default nodegroups
-                # when cluster is deleted
+                if not nodegroup.is_default:
+                    # Conductor will delete default nodegroups
+                    # when cluster is deleted, but non default
+                    # node groups should be deleted here.
+                    nodegroup.destroy()
                 LOG.debug(
                     f"Node group deleted: {nodegroup.name} "
-                    f"for cluster {cluster.uuid}"
+                    f"for cluster {cluster.uuid} "
+                    f"which is_default: {nodegroup.is_default}"
                 )
                 # signal the node group has been deleted
                 return None
@@ -195,6 +216,19 @@ class Driver(driver.Driver):
 
         return nodegroup
 
+    def _nodegroup_machines_exist(self, cluster, nodegroup):
+        cluster_name = self._get_chart_release_name(cluster)
+        nodegroup_name = self._sanitised_name(nodegroup.name)
+        machines = self._k8s_client.get_all_machines_by_label(
+            {
+                "capi.stackhpc.com/cluster": cluster_name,
+                "capi.stackhpc.com/component": "worker",
+                "capi.stackhpc.com/node-group": nodegroup_name,
+            },
+            self._namespace(cluster),
+        )
+        return bool(machines)
+
     def _update_cluster_api_address(self, cluster, capi_cluster):
         # As soon as we know the API address, we should set it
         # This means users can access the API even if the create is
@@ -237,8 +271,11 @@ class Driver(driver.Driver):
 
         # Check the status of the addons
         addons = self._k8s_client.get_addons_by_label(
-            "addons.stackhpc.com/cluster",
-            self._sanitised_name(self._get_chart_release_name(cluster)),
+            {
+                "addons.stackhpc.com/cluster": self._sanitised_name(
+                    self._get_chart_release_name(cluster)
+                ),
+            },
             self._namespace(cluster)
         )
         for addon in addons:
@@ -422,7 +459,9 @@ class Driver(driver.Driver):
         # NOTE(mkjpryor) default on, like the heat driver
         return kube_dash_label != "false"
 
-    def _update_helm_release(self, context, cluster):
+    def _update_helm_release(self, context, cluster, nodegroups=None):
+        if nodegroups is None:
+            nodegroups = cluster.nodegroups
         cluster_template = cluster.cluster_template
         image_id, kube_version = self._get_image_details(
             context, cluster_template.image_id
@@ -466,7 +505,7 @@ class Driver(driver.Driver):
                     "machineFlavor": ng.flavor_id,
                     "machineCount": ng.node_count,
                 }
-                for ng in cluster.nodegroups
+                for ng in nodegroups
                 if ng.role != NODE_GROUP_ROLE_CONTROLLER
             ],
         }
@@ -594,9 +633,15 @@ class Driver(driver.Driver):
 
         self._update_helm_release(context, cluster)
 
-    def update_cluster(self, context, cluster, scale_manager=None,
-                       rollback=False):
-        raise Exception("not implemented update yet!")
+    def update_cluster(
+        self, context, cluster, scale_manager=None, rollback=False
+    ):
+        # Cluster API refuses to update things like cluster networking,
+        # so it is safest not to implement this for now
+        # TODO(mkjpryor) Check what bits of update we can support
+        raise NotImplementedError(
+            "Updating a cluster in this way is not currently supported"
+        )
 
     def delete_cluster(self, context, cluster):
         LOG.info("Starting to delete cluster %s", cluster.uuid)
@@ -618,9 +663,18 @@ class Driver(driver.Driver):
             namespace=self._namespace(cluster),
         )
 
-    def resize_cluster(self, context, cluster, resize_manager, node_count,
-                       nodes_to_remove, nodegroup=None):
-        raise Exception("don't support removing nodes this way yet")
+    def resize_cluster(
+        self,
+        context,
+        cluster,
+        resize_manager,
+        node_count,
+        nodes_to_remove,
+        nodegroup=None,
+    ):
+        if nodes_to_remove:
+            LOG.warning("Removing specific nodes is not currently supported")
+        self._update_helm_release(context, cluster)
 
     def upgrade_cluster(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, scale_manager=None,
@@ -628,13 +682,30 @@ class Driver(driver.Driver):
         raise Exception("don't support upgrade yet")
 
     def create_nodegroup(self, context, cluster, nodegroup):
-        raise Exception("we don't support node groups yet")
+        nodegroup.status = fields.ClusterStatus.CREATE_IN_PROGRESS
+        nodegroup.save()
+
+        self._update_helm_release(context, cluster)
 
     def update_nodegroup(self, context, cluster, nodegroup):
-        raise Exception("we don't support node groups yet")
+        nodegroup.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
+        nodegroup.save()
+
+        self._update_helm_release(context, cluster)
 
     def delete_nodegroup(self, context, cluster, nodegroup):
-        raise Exception("we don't support node groups yet")
+        nodegroup.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+        nodegroup.save()
+
+        # Remove the nodegroup being deleted from the nodegroups
+        # for the Helm release
+        self._update_helm_release(
+            context,
+            cluster,
+            list(
+                [ng for ng in cluster.nodegroups if ng.name != nodegroup.name]
+            ),
+        )
 
     def create_federation(self, context, federation):
         return NotImplementedError("Will not implement 'create_federation'")

@@ -20,7 +20,6 @@ from magnum.drivers.cluster_api import driver
 from magnum.drivers.cluster_api import helm
 from magnum.drivers.cluster_api import kubernetes
 from magnum.drivers.common import k8s_monitor
-from magnum import objects
 from magnum.objects import fields
 from magnum.tests.unit.db import base
 from magnum.tests.unit.objects import utils as obj_utils
@@ -210,7 +209,9 @@ class ClusterAPIDriverTest(base.DbTestCase):
         mock_load.return_value = mock_client
         nodegroup = mock.MagicMock()
         nodegroup.name = "workers"
-        mock_client.get_machine_deployment.return_value = None
+        nodegroup.status = fields.ClusterStatus.CREATE_IN_PROGRESS
+        md = {"status": {}}
+        mock_client.get_machine_deployment.return_value = md
 
         self.driver._update_worker_nodegroup_status(
             self.cluster_obj, nodegroup
@@ -220,7 +221,7 @@ class ClusterAPIDriverTest(base.DbTestCase):
             "cluster-example-a-111111111111-workers", "magnum-fakeproject"
         )
         mock_update.assert_called_once_with(
-            self.cluster_obj, mock.ANY, driver.NodeGroupState.NOT_PRESENT
+            self.cluster_obj, nodegroup, driver.NodeGroupState.PENDING
         )
 
     @mock.patch.object(driver.Driver, "_update_nodegroup_status")
@@ -255,6 +256,7 @@ class ClusterAPIDriverTest(base.DbTestCase):
         mock_load.return_value = mock_client
         nodegroup = mock.MagicMock()
         nodegroup.name = "workers"
+        nodegroup.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         md = {"status": {"phase": "Failed"}}
         mock_client.get_machine_deployment.return_value = md
 
@@ -266,8 +268,99 @@ class ClusterAPIDriverTest(base.DbTestCase):
             "cluster-example-a-111111111111-workers", "magnum-fakeproject"
         )
         mock_update.assert_called_once_with(
-            self.cluster_obj, mock.ANY, driver.NodeGroupState.FAILED
+            self.cluster_obj, nodegroup, driver.NodeGroupState.FAILED
         )
+
+    @mock.patch.object(driver.Driver, "_update_nodegroup_status")
+    @mock.patch.object(kubernetes.Client, "load")
+    def test_update_worker_nodegroup_status_not_present_creating(
+        self, mock_load, mock_update
+    ):
+        mock_client = mock.MagicMock(spec=kubernetes.Client)
+        mock_load.return_value = mock_client
+        nodegroup = mock.MagicMock()
+        nodegroup.name = "workers"
+        nodegroup.status = fields.ClusterStatus.CREATE_IN_PROGRESS
+        mock_client.get_machine_deployment.return_value = None
+        mock_client.get_all_machines_by_label.return_value = None
+
+        self.driver._update_worker_nodegroup_status(
+            self.cluster_obj, nodegroup
+        )
+
+        mock_client.get_machine_deployment.assert_called_once_with(
+            "cluster-example-a-111111111111-workers", "magnum-fakeproject"
+        )
+        mock_update.assert_called_once_with(
+            self.cluster_obj, nodegroup, driver.NodeGroupState.NOT_PRESENT
+        )
+        mock_client.get_all_machines_by_label.assert_not_called()
+        nodegroup.destroy.assert_not_called()
+        nodegroup.save.assert_not_called()
+
+    @mock.patch.object(driver.Driver, "_update_nodegroup_status")
+    @mock.patch.object(kubernetes.Client, "load")
+    def test_update_worker_nodegroup_status_not_present_deleting(
+        self, mock_load, mock_update
+    ):
+        mock_client = mock.MagicMock(spec=kubernetes.Client)
+        mock_load.return_value = mock_client
+        nodegroup = mock.MagicMock()
+        nodegroup.name = "workers"
+        nodegroup.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+        machine = {"status": {}}
+        mock_client.get_machine_deployment.return_value = None
+        mock_client.get_all_machines_by_label.return_value = machine
+
+        self.driver._update_worker_nodegroup_status(
+            self.cluster_obj, nodegroup
+        )
+
+        mock_client.get_machine_deployment.assert_called_once_with(
+            "cluster-example-a-111111111111-workers", "magnum-fakeproject"
+        )
+        mock_client.get_all_machines_by_label.assert_called_once_with(
+            {
+                "capi.stackhpc.com/cluster": "cluster-example-a-111111111111",
+                "capi.stackhpc.com/component": "worker",
+                "capi.stackhpc.com/node-group": "workers",
+            },
+            "magnum-fakeproject",
+        )
+        mock_update.assert_called_once_with(
+            self.cluster_obj, nodegroup, driver.NodeGroupState.PENDING
+        )
+
+    @mock.patch.object(kubernetes.Client, "load")
+    def test_update_worker_nodegroup_status_machines_missing_non_default(
+        self, mock_load
+    ):
+        mock_client = mock.MagicMock(spec=kubernetes.Client)
+        mock_load.return_value = mock_client
+        nodegroup = mock.MagicMock()
+        nodegroup.name = "workers"
+        nodegroup.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+        nodegroup.is_default = False
+        mock_client.get_machine_deployment.return_value = None
+        mock_client.get_all_machines_by_label.return_value = None
+
+        self.driver._update_worker_nodegroup_status(
+            self.cluster_obj, nodegroup
+        )
+
+        mock_client.get_machine_deployment.assert_called_once_with(
+            "cluster-example-a-111111111111-workers", "magnum-fakeproject"
+        )
+        mock_client.get_all_machines_by_label.assert_called_once_with(
+            {
+                "capi.stackhpc.com/cluster": "cluster-example-a-111111111111",
+                "capi.stackhpc.com/component": "worker",
+                "capi.stackhpc.com/node-group": "workers",
+            },
+            "magnum-fakeproject",
+        )
+        nodegroup.destroy.assert_called_once_with()
+        nodegroup.save.assert_not_called()
 
     @mock.patch.object(driver.Driver, "_update_nodegroup_status")
     @mock.patch.object(kubernetes.Client, "load")
@@ -439,6 +532,27 @@ class ClusterAPIDriverTest(base.DbTestCase):
         )
         mock_update.assert_called_once_with(
             self.cluster_obj, mock.ANY, driver.NodeGroupState.READY
+        )
+
+    @mock.patch.object(kubernetes.Client, "load")
+    def test_nodegroup_machines_exist(self, mock_load):
+        mock_client = mock.MagicMock(spec=kubernetes.Client)
+        mock_load.return_value = mock_client
+        mock_client.get_all_machines_by_label.return_value = ["item1"]
+        nodegroup = obj_utils.create_test_nodegroup(self.context)
+
+        result = self.driver._nodegroup_machines_exist(
+            self.cluster_obj, nodegroup
+        )
+
+        self.assertTrue(result)
+        mock_client.get_all_machines_by_label.assert_called_once_with(
+            {
+                "capi.stackhpc.com/cluster": "cluster-example-a-111111111111",
+                "capi.stackhpc.com/component": "worker",
+                "capi.stackhpc.com/node-group": "nodegroup1",
+            },
+            "magnum-fakeproject",
         )
 
     @mock.patch.object(k8s_monitor, "K8sMonitor")
@@ -794,6 +908,18 @@ class ClusterAPIDriverTest(base.DbTestCase):
         )
 
         self.assertIsNone(result)
+
+    def test_update_nodegroup_status_delete_non_default_destroy(self):
+        nodegroup = mock.MagicMock()
+        nodegroup.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+        nodegroup.is_default = False
+
+        result = self.driver._update_nodegroup_status(
+            self.cluster_obj, nodegroup, driver.NodeGroupState.NOT_PRESENT
+        )
+
+        self.assertIsNone(result)
+        nodegroup.destroy.assert_called_once_with()
 
     def test_update_nodegroup_status_delete_unexpected_state(self):
         nodegroup = obj_utils.create_test_nodegroup(self.context)
@@ -1271,16 +1397,27 @@ class ClusterAPIDriverTest(base.DbTestCase):
             self.cluster_obj,
         )
 
-    def test_resize_cluster(self):
-        self.assertRaises(
-            NotImplementedError,
-            self.driver.resize_cluster,
+    @mock.patch.object(driver.Driver, "_update_helm_release")
+    def test_resize_cluster(self, mock_update):
+        self.driver.resize_cluster(
             self.context,
             self.cluster_obj,
             None,
-            4,
+            None,
             None,
         )
+        mock_update.assert_called_once_with(self.context, self.cluster_obj)
+
+    @mock.patch.object(driver.Driver, "_update_helm_release")
+    def test_resize_cluster_ignore_nodes_to_remove(self, mock_update):
+        self.driver.resize_cluster(
+            self.context,
+            self.cluster_obj,
+            None,
+            ["node1"],
+            None,
+        )
+        mock_update.assert_called_once_with(self.context, self.cluster_obj)
 
     def test_upgrade_cluster(self):
         self.assertRaises(
@@ -1293,31 +1430,49 @@ class ClusterAPIDriverTest(base.DbTestCase):
             None,
         )
 
-    def test_create_nodegroup(self):
-        self.assertRaises(
-            NotImplementedError,
-            self.driver.create_nodegroup,
-            self.context,
-            self.cluster_obj,
-            objects.NodeGroup(),
+    @mock.patch.object(driver.Driver, "_update_helm_release")
+    def test_create_nodegroup(self, mock_update):
+        node_group = mock.MagicMock()
+
+        self.driver.create_nodegroup(
+            self.context, self.cluster_obj, node_group
         )
 
-    def test_update_nodegroup(self):
-        self.assertRaises(
-            NotImplementedError,
-            self.driver.update_nodegroup,
+        mock_update.assert_called_once_with(self.context, self.cluster_obj)
+        node_group.save.assert_called_once_with()
+        self.assertEqual("CREATE_IN_PROGRESS", node_group.status)
+
+    @mock.patch.object(driver.Driver, "_update_helm_release")
+    def test_update_nodegroup(self, mock_update):
+        node_group = mock.MagicMock()
+
+        self.driver.update_nodegroup(
             self.context,
             self.cluster_obj,
-            objects.NodeGroup(),
+            node_group,
         )
 
-    def test_delete_nodegroup(self):
-        self.assertRaises(
-            NotImplementedError,
-            self.driver.delete_nodegroup,
+        mock_update.assert_called_once_with(self.context, self.cluster_obj)
+        node_group.save.assert_called_once_with()
+        self.assertEqual("UPDATE_IN_PROGRESS", node_group.status)
+
+    @mock.patch.object(driver.Driver, "_update_helm_release")
+    def test_delete_nodegroup(self, mock_update):
+        self.driver.delete_nodegroup(
             self.context,
             self.cluster_obj,
-            objects.NodeGroup(),
+            self.cluster_obj.nodegroups[1],
+        )
+
+        mock_update.assert_called_once_with(
+            self.context,
+            self.cluster_obj,
+            mock.ANY,
+        )
+        # because nodegroups equality is broken
+        self.assertEqual(
+            self.cluster_obj.nodegroups[0].as_dict(),
+            mock_update.call_args.args[2][0].as_dict(),
         )
 
     def test_create_federation(self):

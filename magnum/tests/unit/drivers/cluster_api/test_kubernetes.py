@@ -258,7 +258,7 @@ class TestKubernetesClient(base.TestCase):
         self.assertEqual("mock_json", cluster)
 
     @mock.patch.object(requests.Session, "request")
-    def test_get_manifests_by_label_found(self, mock_request):
+    def test_get_manifests_by_label(self, mock_request):
         items = [
             {
                 "kind": "Manifests",
@@ -281,7 +281,7 @@ class TestKubernetesClient(base.TestCase):
         mock_request.return_value = mock_response
 
         client = kubernetes.Client(TEST_KUBECONFIG)
-        manifests = client.get_manifests_by_label("label", "cluster1", "ns1")
+        manifests = client.get_manifests_by_label({"label": "cluster1"}, "ns1")
 
         mock_request.assert_called_once_with(
             "GET",
@@ -295,7 +295,7 @@ class TestKubernetesClient(base.TestCase):
         self.assertEqual(items, manifests)
 
     @mock.patch.object(requests.Session, "request")
-    def test_get_helm_releases_by_label_found(self, mock_request):
+    def test_get_helm_releases_by_label(self, mock_request):
         items = [
             {
                 "kind": "HelmRelease",
@@ -319,8 +319,7 @@ class TestKubernetesClient(base.TestCase):
 
         client = kubernetes.Client(TEST_KUBECONFIG)
         helm_releases = client.get_helm_releases_by_label(
-            "label",
-            "cluster1",
+            {"label": "cluster1"},
             "ns1"
         )
 
@@ -371,8 +370,7 @@ class TestKubernetesClient(base.TestCase):
 
         client = kubernetes.Client(TEST_KUBECONFIG)
         helm_releases = client.get_helm_releases_by_label(
-            "label",
-            "cluster1",
+            {"label": "cluster1"},
             "ns1"
         )
 
@@ -404,7 +402,7 @@ class TestKubernetesClient(base.TestCase):
 
     @mock.patch.object(kubernetes.Client, "get_helm_releases_by_label")
     @mock.patch.object(kubernetes.Client, "get_manifests_by_label")
-    def test_get_addons_by_label_found(
+    def test_get_addons_by_label(
         self,
         mock_get_manifests,
         mock_get_helm_releases
@@ -434,16 +432,58 @@ class TestKubernetesClient(base.TestCase):
         mock_get_helm_releases.return_value = helm_releases
 
         client = kubernetes.Client(TEST_KUBECONFIG)
-        addons = client.get_addons_by_label("label", "cluster1", "ns1")
+        addons = client.get_addons_by_label({"label": "cluster1"}, "ns1")
 
         mock_get_manifests.assert_called_once_with(
-            "label",
-            "cluster1",
+            {"label": "cluster1"},
             "ns1"
         )
         mock_get_helm_releases.assert_called_once_with(
-            "label",
-            "cluster1",
+            {"label": "cluster1"},
             "ns1"
         )
         self.assertEqual(manifests + helm_releases, addons)
+
+    @mock.patch.object(requests.Session, "request")
+    def test_get_all_machines_by_label(self, mock_request):
+        items = [
+            {
+                "kind": "Machine",
+                "metadata": {
+                    "name": f"machine{idx}",
+                    "namespace": "ns1"
+                },
+            }
+            for idx in range(5)
+        ]
+
+        mock_response = mock.Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "metadata": {
+                "continue": "",
+            },
+            "items": items,
+        }
+        mock_request.return_value = mock_response
+
+        client = kubernetes.Client(TEST_KUBECONFIG)
+        machines = client.get_all_machines_by_label(
+            {"capi.stackhpc.com/cluster": "cluster_name", "foo": "bar"},
+            "ns1"
+        )
+
+        mock_request.assert_called_once_with(
+            "GET",
+            (
+                "https://test:6443/apis/cluster.x-k8s.io/"
+                "v1beta1/namespaces/ns1/machines"
+            ),
+            params={
+                "labelSelector": (
+                    "capi.stackhpc.com/cluster=cluster_name,foo=bar"
+                )
+            },
+            allow_redirects=True,
+        )
+        self.assertEqual(items, machines)
