@@ -12,6 +12,7 @@
 
 from oslo_log import log as logging
 
+from magnum.drivers.cluster_api import helm
 from magnum.drivers.common import driver
 from magnum.objects import fields
 
@@ -19,6 +20,8 @@ LOG = logging.getLogger(__name__)
 
 
 class Driver(driver.Driver):
+    def __init__(self):
+        self._helm_client = helm.Client()
 
     @property
     def provides(self):
