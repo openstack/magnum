@@ -1,0 +1,5 @@
+deprecations:
+  - |
+    Deprecate the Docker Swarm COE ('swarm' and 'swarm-mode'). Docker Swarm
+    relies on Fedora Atomic OS which has been EOL. Users are encourged to use
+    the 'kubernetes' COE as it is better supported.
