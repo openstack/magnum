@@ -21,7 +21,6 @@ created and managed by Magnum to support the COE's.
 #. `Choosing a COE`_
 #. `Native Clients`_
 #. `Kubernetes`_
-#. `Swarm`_
 #. `Transport Layer Security`_
 #. `Networking`_
 #. `High Availability`_
@@ -92,7 +91,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --coe \<coe\>
   Specify the Container Orchestration Engine to use.  Supported
-  COE's include 'kubernetes' and 'swarm'.  If your environment
+  COE is 'kubernetes'.  If your environment
   has additional cluster drivers installed, refer to the cluster driver
   documentation for the new COE names.  This is a mandatory parameter
   and there is no default value.
@@ -107,7 +106,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   COE        os_distro
   ========== =====================
   Kubernetes fedora-coreos
-  Swarm      fedora-atomic
   ========== =====================
 
   This is a mandatory parameter and there is no default value. Note that the
@@ -282,9 +280,6 @@ the table are linked to more details elsewhere in the user guide.
 | `flannel_network_subnetlen`_          | size of subnet to  | 24            |
 |                                       | assign to node     |               |
 +---------------------------------------+--------------------+---------------+
-| `rexray_preempt`_                     | - true             | false         |
-|                                       | - false            |               |
-+---------------------------------------+--------------------+---------------+
 | `heapster_enabled`_                   | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -319,10 +314,6 @@ the table are linked to more details elsewhere in the user guide.
 | `prometheus_adapter_chart_tag`        | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `prometheus_adapter_configmap`        | (rules CM name)    | ""            |
-+---------------------------------------+--------------------+---------------+
-| `swarm_strategy`_                     | - spread           | spread        |
-|                                       | - binpack          |               |
-|                                       | - random           |               |
 +---------------------------------------+--------------------+---------------+
 | `traefik_ingress_controller_tag`_     | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
@@ -1795,132 +1786,6 @@ Please refer the doc of `k8s-keystone-auth in cloud-provider-openstack
 <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-keystone-webhook-authenticator-and-authorizer.md>`_
 for more information.
 
-Swarm
-=====
-
-A Swarm cluster is a pool of servers running Docker daemon that is
-managed as a single Docker host.  One or more Swarm managers accepts
-the standard Docker API and manage this pool of servers.
-Magnum deploys a Swarm cluster using parameters defined in
-the ClusterTemplate and specified on the 'cluster-create' command, for
-example::
-
-    openstack coe cluster template create swarm-cluster-template \
-                               --image fedora-atomic-latest \
-                               --keypair testkey \
-                               --external-network public \
-                               --dns-nameserver 8.8.8.8 \
-                               --flavor m1.small \
-                               --docker-volume-size 5 \
-                               --coe swarm
-
-    openstack coe cluster create swarm-cluster \
-                      --cluster-template swarm-cluster-template \
-                      --master-count 3 \
-                      --node-count 8
-
-Refer to the `ClusterTemplate`_ and `Cluster`_ sections for the full list of
-parameters. Following are further details relevant to Swarm:
-
-What runs on the servers
-  There are two types of servers in the Swarm cluster: managers and nodes.
-  The Docker daemon runs on all servers.  On the servers for manager,
-  the Swarm manager is run as a Docker container on port 2376 and this
-  is initiated by the systemd service swarm-manager.  Etcd is also run
-  on the manager servers for discovery of the node servers in the cluster.
-  On the servers for node, the Swarm agent is run as a Docker
-  container on port 2375 and this is initiated by the systemd service
-  swarm-agent.  On start up, the agents will register themselves in
-  etcd and the managers will discover the new node to manage.
-
-Number of managers (master-count)
-  Specified in the cluster-create command to indicate how many servers will
-  run as managers in the cluster.  Having more than one will provide high
-  availability.  The managers will be in a load balancer pool and the
-  load balancer virtual IP address (VIP) will serve as the Swarm API
-  endpoint.  A floating IP associated with the load balancer VIP will
-  serve as the external Swarm API endpoint.  The managers accept
-  the standard Docker API and perform the corresponding operation on the
-  servers in the pool.  For instance, when a new container is created,
-  the managers will select one of the servers based on some strategy
-  and schedule the containers there.
-
-Number of nodes (node-count)
-  Specified in the cluster-create command to indicate how many servers will
-  run as nodes in the cluster to host your Docker containers.  These servers
-  will register themselves in etcd for discovery by the managers, and
-  interact with the managers.  Docker daemon is run locally to host
-  containers from users.
-
-Network driver (network-driver)
-  Specified in the ClusterTemplate to select the network driver.  The supported
-  drivers are 'docker' and 'flannel', with 'docker' as the default.
-  With the 'docker' driver, containers are connected to the 'docker0'
-  bridge on each node and are assigned local IP address.  With the
-  'flannel' driver, containers are connected to a flat overlay network
-  and are assigned IP address by Flannel.  Refer to the `Networking`_
-  section for more details.
-
-Volume driver (volume-driver)
-  Specified in the ClusterTemplate to select the volume driver to provide
-  persistent storage for containers.  The supported volume driver is
-  'rexray'.  The default is no volume driver.  When 'rexray' or other
-  volume driver is deployed, you can use the Docker 'volume' command to
-  create, mount, unmount, delete volumes in containers.  Cinder block
-  storage is used as the backend to support this feature.
-  Refer to the `Storage`_ section for more details.
-
-Storage driver (docker-storage-driver)
-  Specified in the ClusterTemplate to select the Docker storage driver.  The
-  default is 'devicemapper'. Refer to the `Storage`_ section for more
-  details.
-
-Image (image)
-  Specified in the ClusterTemplate to indicate the image to boot the servers
-  for the Swarm manager and node.
-  The image binary is loaded in Glance with the attribute
-  'os_distro = fedora-atomic'.
-  Current supported image is Fedora Atomic (download from `Fedora
-  <https://dl.fedoraproject.org/pub/alt/atomic/stable/>`_ )
-
-TLS (tls-disabled)
-  Transport Layer Security is enabled by default to secure the Swarm API for
-  access by both the users and Magnum.  You will need a key and a
-  signed certificate to access the Swarm API and CLI.  Magnum
-  handles its own key and certificate when interfacing with the
-  Swarm cluster.  In development mode, TLS can be disabled.  Refer to
-  the 'Transport Layer Security'_ section for details on how to create your
-  key and have Magnum sign your certificate.
-
-Log into the servers
-  You can log into the manager and node servers with the account 'fedora' and
-  the keypair specified in the ClusterTemplate.
-
-In addition to the common attributes in the ClusterTemplate, you can specify
-the following attributes that are specific to Swarm by using the
-labels attribute.
-
-_`swarm_strategy`
-  This label corresponds to Swarm parameter for master '--strategy'.
-  For more details, refer to the `Swarm Strategy
-  <https://docs.docker.com/swarm/scheduler/strategy/>`_.
-  Valid values for this label are:
-
-  - spread
-  - binpack
-  - random
-
-_`rexray_preempt`
-  When the volume driver 'rexray' is used, you can mount a data volume
-  backed by Cinder to a host to be accessed by a container.  In this
-  case, the label 'rexray_preempt' can optionally be set to True or
-  False to enable any host to take control of the volume regardless of
-  whether other hosts are using the volume.  This will in effect
-  unmount the volume from the current host and remount it on the new
-  host.  If this label is set to false, then rexray will ensure data
-  safety for locking the volume before remounting.  The default value
-  is False.
-
 .. _transport_layer_security:
 
 Transport Layer Security
@@ -2596,14 +2461,6 @@ For Kubernetes, pods are scaled manually by setting the count in the
 replication controller.  Kubernetes version 1.3 and later also
 supports `autoscaling
 <http://blog.kubernetes.io/2016/07/autoscaling-in-kubernetes.html>`_.
-For Docker, the tool 'Docker Compose' provides the command
-`docker-compose scale
-<https://docs.docker.com/compose/reference/scale/>`_ which lets you
-manually set the number of instances of a container.  For Swarm
-version 1.12 and later, services can also be scaled manually through
-the command `docker service scale
-<https://docs.docker.com/engine/swarm/swarm-tutorial/scale-service/>`_.
-Automatic scaling for Swarm is not yet available.
 
 Scaling the cluster nodes involves managing the number of nodes in the
 cluster by adding more nodes or removing nodes.  There is no direct
@@ -2925,14 +2782,6 @@ instructions are included in `Magnum code repo
 Currently Ironic is not fully supported yet, therefore more details will be
 provided when this driver has been fully tested.
 
-
-Swarm on Fedora Atomic
-----------------------
-
-This image can be downloaded from the `public Atomic site
-<https://dl.fedoraproject.org/pub/alt/atomic/stable/>`_
-or can be built locally using diskimagebuilder.
-The login for this image is *fedora*.
 
 
 Notification

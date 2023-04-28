@@ -32,10 +32,6 @@ Kubernetes cluster-create fails
   Check the `heat stacks`_, log into the master nodes and check the
   `Kubernetes services`_ and `etcd service`_.
 
-Swarm cluster-create fails
-  Check the `heat stacks`_, log into the master nodes and check the `Swarm
-  services`_ and `etcd service`_.
-
 I get the error "Timed out waiting for a reply" when deploying a pod
   Verify the `Kubernetes services`_ and `etcd service`_ are running on the
   master nodes.
@@ -49,9 +45,6 @@ I deploy pods and services on Kubernetes cluster but the app is not working
   The pods and services are running and the status looks correct, but
   if the app is performing communication between pods through services,
   verify `Kubernetes networking`_.
-
-Swarm cluster is created successfully but I cannot deploy containers
-  Check the `Swarm services`_ and `etcd service`_ on the master nodes.
 
 I get a "Protocol violation" error when deploying a container
   For Kubernetes, check the `Kubernetes services`_ to verify that
@@ -97,8 +90,8 @@ in some cases it may only say "Unknown".
 If the failed resource is OS::Heat::WaitConditionHandle, this indicates that
 one of the services that are being started on the node is hung.  Log into the
 node where the failure occurred and check the respective `Kubernetes
-services`_ or `Swarm services`_.  If the failure is in
-other scripts, look for them as `Heat software resource scripts`_.
+services`_.  If the failure is in other scripts, look for them as `Heat
+software resource scripts`_.
 
 
 Trustee for cluster
@@ -666,13 +659,6 @@ Kubernetes services
 Additional `Kubernetes troubleshooting section
 <https://kubernetes.io/docs/tasks/debug-application-cluster/troubleshooting/>`_
 is available in the Monitoring, Logging, and Debugging section.
-
-Swarm services
---------------
-*To be filled in*
-
-(How to check on a swarm cluster: see membership information, view master,
-agent containers)
 
 
 Barbican issues
