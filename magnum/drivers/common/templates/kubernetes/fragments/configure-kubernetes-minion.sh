@@ -47,8 +47,12 @@ EOF
         $ssh_cmd systemctl restart NetworkManager
     fi
 elif [ "$NETWORK_DRIVER" = "flannel" ]; then
-    $ssh_cmd modprobe vxlan
-    echo "vxlan" > /etc/modules-load.d/vxlan.conf
+    $ssh_cmd modprobe -a vxlan br_netfilter
+    cat <<EOF > /etc/modules-load.d/flannel.conf
+vxlan
+br_netfilter
+EOF
+
 fi
 
 mkdir -p /srv/magnum/kubernetes/
