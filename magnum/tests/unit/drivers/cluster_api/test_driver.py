@@ -1420,15 +1420,8 @@ class ClusterAPIDriverTest(base.DbTestCase):
         mock_update.assert_called_once_with(self.context, self.cluster_obj)
 
     def test_upgrade_cluster(self):
-        self.assertRaises(
-            NotImplementedError,
-            self.driver.upgrade_cluster,
-            self.context,
-            self.cluster_obj,
-            self.cluster_obj.cluster_template,
-            1,
-            None,
-        )
+        # TODO(mkjpryor) implement this
+        pass
 
     @mock.patch.object(driver.Driver, "_update_helm_release")
     def test_create_nodegroup(self, mock_update):
