@@ -1085,16 +1085,19 @@ class ClusterAPIDriverTest(base.DbTestCase):
     @mock.patch.object(driver.Driver, "_create_appcred_secret")
     @mock.patch.object(kubernetes.Client, "load")
     @mock.patch.object(driver.Driver, "_get_image_details")
+    @mock.patch.object(driver.Driver, "_get_external_network_id")
     @mock.patch.object(helm.Client, "install_or_upgrade")
     def test_create_cluster(
         self,
         mock_install,
+        mock_external_net,
         mock_image,
         mock_load,
         mock_appcred,
         mock_certs,
     ):
         mock_image.return_value = ("imageid1", "1.27.4")
+        mock_external_net.return_value = "11111111-1111-1111-1111-111111111111"
         mock_client = mock.MagicMock(spec=kubernetes.Client)
         mock_load.return_value = mock_client
         self.cluster_obj.keypair = "kp1"
@@ -1110,7 +1113,14 @@ class ClusterAPIDriverTest(base.DbTestCase):
                 "machineImageId": "imageid1",
                 "cloudCredentialsSecretName": app_cred_name,
                 "clusterNetworking": {
-                    "internalNetwork": {"nodeCidr": "10.0.0.0/24"},
+                    "externalNetworkId": (
+                        "11111111-1111-1111-1111-111111111111"
+                    ),
+                    "internalNetwork": {
+                        "networkFilter": None,
+                        "subnetFilter": None,
+                        "nodeCidr": "10.0.0.0/24"
+                    },
                     "dnsNameservers": ["8.8.1.1"],
                 },
                 "apiServer": {
@@ -1149,16 +1159,19 @@ class ClusterAPIDriverTest(base.DbTestCase):
     @mock.patch.object(driver.Driver, "_create_appcred_secret")
     @mock.patch.object(kubernetes.Client, "load")
     @mock.patch.object(driver.Driver, "_get_image_details")
+    @mock.patch.object(driver.Driver, "_get_external_network_id")
     @mock.patch.object(helm.Client, "install_or_upgrade")
     def test_create_cluster_no_dns(
         self,
         mock_install,
+        mock_external_net,
         mock_image,
         mock_load,
         mock_appcred,
         mock_certs,
     ):
         mock_image.return_value = ("imageid1", "1.27.4")
+        mock_external_net.return_value = "11111111-1111-1111-1111-111111111111"
         mock_client = mock.MagicMock(spec=kubernetes.Client)
         mock_load.return_value = mock_client
         self.cluster_obj.cluster_template.dns_nameserver = ""
@@ -1175,7 +1188,15 @@ class ClusterAPIDriverTest(base.DbTestCase):
                 "machineImageId": "imageid1",
                 "cloudCredentialsSecretName": app_cred_name,
                 "clusterNetworking": {
-                    "internalNetwork": {"nodeCidr": "10.0.0.0/24"},
+                    "externalNetworkId": (
+                        "11111111-1111-1111-1111-111111111111"
+                    ),
+                    "internalNetwork": {
+                        "networkFilter": None,
+                        "subnetFilter": None,
+                        "nodeCidr": "10.0.0.0/24"
+                    },
+                    "dnsNameservers": None,
                 },
                 "apiServer": {
                     "enableLoadBalancer": True,
@@ -1213,16 +1234,19 @@ class ClusterAPIDriverTest(base.DbTestCase):
     @mock.patch.object(driver.Driver, "_create_appcred_secret")
     @mock.patch.object(kubernetes.Client, "load")
     @mock.patch.object(driver.Driver, "_get_image_details")
+    @mock.patch.object(driver.Driver, "_get_external_network_id")
     @mock.patch.object(helm.Client, "install_or_upgrade")
     def test_create_cluster_no_keypair(
         self,
         mock_install,
+        mock_external_net,
         mock_image,
         mock_load,
         mock_appcred,
         mock_certs,
     ):
         mock_image.return_value = ("imageid1", "1.27.4")
+        mock_external_net.return_value = "11111111-1111-1111-1111-111111111111"
         mock_client = mock.MagicMock(spec=kubernetes.Client)
         mock_load.return_value = mock_client
         self.cluster_obj.keypair = ""
@@ -1236,9 +1260,17 @@ class ClusterAPIDriverTest(base.DbTestCase):
             {
                 "kubernetesVersion": "1.27.4",
                 "machineImageId": "imageid1",
+                "machineSSHKeyName": None,
                 "cloudCredentialsSecretName": app_cred_name,
                 "clusterNetworking": {
-                    "internalNetwork": {"nodeCidr": "10.0.0.0/24"},
+                    "externalNetworkId": (
+                        "11111111-1111-1111-1111-111111111111"
+                    ),
+                    "internalNetwork": {
+                        "networkFilter": None,
+                        "subnetFilter": None,
+                        "nodeCidr": "10.0.0.0/24"
+                    },
                     "dnsNameservers": ["8.8.1.1"],
                 },
                 "apiServer": {

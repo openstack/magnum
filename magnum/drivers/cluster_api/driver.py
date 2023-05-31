@@ -15,6 +15,7 @@ import re
 
 from oslo_log import log as logging
 from oslo_utils import encodeutils
+from oslo_utils import uuidutils
 
 from magnum.api import utils as api_utils
 from magnum.common import clients
@@ -456,6 +457,145 @@ class Driver(driver.Driver):
             self._get_chart_release_name(cluster), "cloud-credentials"
         )
 
+    def _get_network(self, context, network, external):
+        # NOTE(mkjpryor) inspired by magnum.common.neutron
+
+        n_client = clients.OpenStackClients(context).neutron()
+        filters = {"router:external": external}
+        if network:
+            if uuidutils.is_uuid_like(network):
+                filters["id"] = network
+            else:
+                filters["name"] = network
+        networks = n_client.list_networks(**filters).get("networks", [])
+
+        if len(networks) > 1:
+            if network:
+                raise exception.Conflict(
+                    f"Multiple networks exist with name '{network}'. "
+                    "Please use the network ID instead."
+                )
+            elif external:
+                raise exception.Conflict(
+                    "Multiple external networks found. "
+                    "Please specify one using the network ID."
+                )
+            else:
+                raise exception.Conflict(
+                    "Multiple networks found. "
+                    "Please specify one using the network ID."
+                )
+
+        return next(iter(networks), None)
+
+    def _get_subnet(self, context, subnet):
+        # NOTE(mkjpryor) inspired by magnum.common.neutron
+
+        n_client = clients.OpenStackClients(context).neutron()
+        filters = {}
+        if uuidutils.is_uuid_like(subnet):
+            filters["id"] = subnet
+        else:
+            filters["name"] = subnet
+        subnets = n_client.list_subnets(**filters).get("subnets", [])
+
+        if len(subnets) > 1:
+            raise exception.Conflict(
+                f"Multiple subnets exist with name '{subnet}'. "
+                "Please use the subnet ID instead."
+            )
+
+        return next(iter(subnets), None)
+
+    def _get_external_network_id(self, context, cluster):
+        # NOTE(mkjpryor)
+        # Even if no external network is specified, we still run the search
+        # without an ID or name filter
+        # This will make sure that we correctly identify _an_ external network
+        # and will also fail if there is more than one
+        # This is the same as CAPO but will explicitly report failures
+        external_network = self._get_network(
+            context,
+            cluster.cluster_template.external_network_id,
+            True
+        )
+        if external_network:
+            return external_network["id"]
+        else:
+            raise exception.ExternalNetworkNotFound(
+                network=cluster.cluster_template.external_network_id
+            )
+
+    def _get_cluster_fixed_network(self, context, cluster):
+        network = self._get_network(
+            context,
+            cluster.fixed_network,
+            False
+        )
+        if network:
+            return network
+        else:
+            raise exception.FixedNetworkNotFound(
+                network=cluster.fixed_network
+            )
+
+    def _get_cluster_fixed_subnet(self, context, cluster, network):
+        subnet = self._get_subnet(context, cluster.fixed_subnet)
+        if subnet and subnet["network_id"] == network["id"]:
+            return subnet
+        elif subnet:
+            raise exception.Conflict(
+                f"Subnet {subnet['id']} does not "
+                f"belong to network {network['id']}."
+            )
+        else:
+            raise exception.FixedSubnetNotFound(
+                subnet=cluster.fixed_subnet
+            )
+
+    def _get_cluster_network(self, context, cluster):
+        network = None
+        subnet = None
+
+        if cluster.fixed_network:
+            network = self._get_cluster_fixed_network(
+                context,
+                cluster
+            )
+
+        if cluster.fixed_subnet:
+            subnet = self._get_cluster_fixed_subnet(
+                context,
+                cluster,
+                network
+            )
+
+        if network and subnet:
+            return (network["id"], subnet["id"])
+        elif network:
+            subnets = network.get("subnets", [])
+            if len(subnets) > 1:
+                raise exception.Conflict(
+                    f"Network {network['id']} has multiple subnets. "
+                    "Please specify one using the subnet ID."
+                )
+            if len(subnets) < 1:
+                raise exception.Conflict(
+                    f"Network {network['id']} has no subnets."
+                )
+            return (network["id"], subnets[0])
+        elif subnet:
+            return (subnet["network_id"], subnet["id"])
+        else:
+            return (None, None)
+
+    def _get_dns_nameservers(self, cluster):
+        dns_nameserver = cluster.cluster_template.dns_nameserver
+        if dns_nameserver:
+            return dns_nameserver.split(",")
+        else:
+            return None
+
     def _get_monitoring_enabled(self, cluster):
         mon_label = self._label(cluster, "monitoring_enabled", "")
         # NOTE(mkjpryor) default of, like heat driver,
@@ -470,32 +610,65 @@ class Driver(driver.Driver):
     def _update_helm_release(self, context, cluster, nodegroups=None):
         if nodegroups is None:
             nodegroups = cluster.nodegroups
-        cluster_template = cluster.cluster_template
+
         image_id, kube_version = self._get_image_details(
-            context, cluster_template.image_id
+            context,
+            cluster.cluster_template.image_id
         )
+
+        network_id, subnet_id = self._get_cluster_network(context, cluster)
+
         values = {
             "kubernetesVersion": kube_version,
             "machineImageId": image_id,
+            "machineSSHKeyName": cluster.keypair or None,
             "cloudCredentialsSecretName": self._get_app_cred_name(cluster),
-            # TODO(johngarbutt): need to respect requested networks
-            "clusterNetworking": {
-                "internalNetwork": {
-                    "nodeCidr": self._label(
-                        cluster, "fixed_subnet_cidr", "10.0.0.0/24"
-                    ),
-                }
-            },
             "apiServer": {
                 "enableLoadBalancer": True,
                 "loadBalancerProvider": self._label(
-                    cluster, "octavia_provider", "amphora"
+                    cluster,
+                    "octavia_provider",
+                    "amphora"
                 ),
+            },
+            "clusterNetworking": {
+                "dnsNameservers": self._get_dns_nameservers(cluster),
+                "externalNetworkId": self._get_external_network_id(
+                    context,
+                    cluster
+                ),
+                "internalNetwork": {
+                    "networkFilter": (
+                        {"id": network_id}
+                        if network_id
+                        else None
+                    ),
+                    "subnetFilter": (
+                        {"id": subnet_id}
+                        if subnet_id
+                        else None
+                    ),
+                    # This is only used if a fixed network is not specified
+                    "nodeCidr": self._label(
+                        cluster,
+                        "fixed_subnet_cidr",
+                        "10.0.0.0/24"
+                    ),
+                },
             },
             "controlPlane": {
                 "machineFlavor": cluster.master_flavor_id,
                 "machineCount": cluster.master_count,
             },
+            "nodeGroups": [
+                {
+                    "name": self._sanitised_name(ng.name),
+                    "machineFlavor": ng.flavor_id,
+                    "machineCount": ng.node_count,
+                }
+                for ng in nodegroups
+                if ng.role != NODE_GROUP_ROLE_CONTROLLER
+            ],
             "addons": {
                 "monitoring": {
                     "enabled": self._get_monitoring_enabled(cluster)
@@ -507,32 +680,14 @@ class Driver(driver.Driver):
                 #                 remove the load balancer
                 "ingress": {"enabled": False},
             },
-            "nodeGroups": [
-                {
-                    "name": self._sanitised_name(ng.name),
-                    "machineFlavor": ng.flavor_id,
-                    "machineCount": ng.node_count,
-                }
-                for ng in nodegroups
-                if ng.role != NODE_GROUP_ROLE_CONTROLLER
-            ],
         }
-
-        if cluster_template.dns_nameserver:
-            dns_nameservers = cluster_template.dns_nameserver.split(",")
-            values["clusterNetworking"]["dnsNameservers"] = dns_nameservers
-
-        if cluster.keypair:
-            values["machineSSHKeyName"] = cluster.keypair
-
-        chart_version = self._get_chart_version(cluster)
 
         self._helm_client.install_or_upgrade(
             self._get_chart_release_name(cluster),
             CONF.capi_driver.helm_chart_name,
             values,
             repo=CONF.capi_driver.helm_chart_repo,
-            version=chart_version,
+            version=self._get_chart_version(cluster),
             namespace=self._namespace(cluster),
         )
 
