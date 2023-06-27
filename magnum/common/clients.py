@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from barbicanclient.v1 import client as barbicanclient
+from barbicanclient import client as barbicanclient
 from cinderclient.v3 import client as cinder_client
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient

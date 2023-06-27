@@ -1208,7 +1208,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/disable_lb_floating_ip.yaml',
              ],
             env_files)
-        reqget.assert_called_once_with('http://etcd/test?size=1')
+        reqget.assert_called_once_with('http://etcd/test?size=1', timeout=60)
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')

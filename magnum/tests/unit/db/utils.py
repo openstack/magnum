@@ -338,6 +338,7 @@ def get_nodegroups_for_cluster(**kw):
         node_count=kw.get('node_count', 3),
         status=kw.get('worker_status', 'CREATE_COMPLETE'),
         status_reason=kw.get('worker_reason', 'Completed successfully'),
+        flavor_id=kw.get('flavor_id', None),
         image_id=kw.get('image_id', 'test_image')
     )
 

@@ -301,6 +301,10 @@ class OSDistroFieldNotFound(ResourceNotFound):
     code = 400
 
 
+class KubeVersionPropertyNotFound(Invalid):
+    message = _("Image %(image_id)s does not have a kube_version property.")
+
+
 class X509KeyPairNotFound(ResourceNotFound):
     message = _("A key pair %(x509keypair)s could not be found.")
 
