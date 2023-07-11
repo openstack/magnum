@@ -20,18 +20,20 @@ CLUSTER_TEMPLATE = 'clustertemplate:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'create',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Create a new cluster template.',
         operations=[
             {
                 'path': '/v1/clustertemplates',
                 'method': 'POST'
             }
-        ]
+        ],
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'delete',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=["project"],
         description='Delete a cluster template.',
         operations=[
             {
@@ -65,7 +67,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'detail',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve a list of cluster templates with detail.',
         operations=[
             {
@@ -76,7 +79,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'get',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve information about the given cluster template.',
         operations=[
             {
@@ -99,7 +103,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'get_all',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve a list of cluster templates.',
         operations=[
             {
@@ -121,7 +126,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'update',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=["project"],
         description='Update an existing cluster template.',
         operations=[
             {

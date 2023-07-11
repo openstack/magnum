@@ -24,7 +24,8 @@ NODEGROUP = 'nodegroup:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=NODEGROUP % 'get',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER,
+        scope_types=["project"],
         description='Retrieve information about the given nodegroup.',
         operations=[
             {
@@ -35,7 +36,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=NODEGROUP % 'get_all',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER,
+        scope_types=["project"],
         description='Retrieve a list of nodegroups that belong to a cluster.',
         operations=[
             {
@@ -68,7 +70,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=NODEGROUP % 'create',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=["project"],
         description='Create a new nodegroup.',
         operations=[
             {
@@ -79,7 +82,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=NODEGROUP % 'delete',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=["project"],
         description='Delete a nodegroup.',
         operations=[
             {
@@ -90,7 +94,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=NODEGROUP % 'update',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=["project"],
         description='Update an existing nodegroup.',
         operations=[
             {

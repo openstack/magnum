@@ -16,13 +16,12 @@ from oslo_policy import policy
 from magnum.common.policies import base
 
 CERTIFICATE = 'certificate:%s'
-RULE_ADMIN_OR_USER_OR_CLUSTER_USER = base.RULE_ADMIN_OR_USER + " or " + \
-    base.RULE_CLUSTER_USER
 
 rules = [
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'create',
-        check_str=RULE_ADMIN_OR_USER_OR_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_USER_OR_CLUSTER_USER,
+        scope_types=["project"],
         description='Sign a new certificate by the CA.',
         operations=[
             {
@@ -33,7 +32,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'get',
-        check_str=RULE_ADMIN_OR_USER_OR_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_USER_OR_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve CA information about the given bay/cluster.',
         operations=[
             {
@@ -44,7 +44,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'rotate_ca',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=["project"],
         description='Rotate the CA certificate on the given bay/cluster.',
         operations=[
             {

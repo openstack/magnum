@@ -52,8 +52,8 @@ class ContextHook(hooks.PecanHook):
         user_id = headers.get('X-User-Id')
         project = headers.get('X-Project-Name')
         project_id = headers.get('X-Project-Id')
-        domain_id = headers.get('X-User-Domain-Id')
-        domain_name = headers.get('X-User-Domain-Name')
+        user_domain_id = headers.get('X-User-Domain-Id')
+        user_domain_name = headers.get('X-User-Domain-Name')
         auth_token = headers.get('X-Auth-Token')
         roles = headers.get('X-Roles', '').split(',')
         auth_token_info = state.request.environ.get('keystone.token_info')
@@ -72,8 +72,8 @@ class ContextHook(hooks.PecanHook):
             user_id=user_id,
             project_name=project,
             project_id=project_id,
-            domain_id=domain_id,
-            domain_name=domain_name,
+            user_domain_id=user_domain_id,
+            user_domain_name=user_domain_name,
             roles=roles)
 
 

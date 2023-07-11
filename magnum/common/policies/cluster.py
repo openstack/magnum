@@ -20,7 +20,8 @@ CLUSTER = 'cluster:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'create',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Create a new cluster.',
         operations=[
             {
@@ -31,7 +32,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'delete',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Delete a cluster.',
         operations=[
             {
@@ -53,7 +55,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'detail',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve a list of clusters with detail.',
         operations=[
             {
@@ -75,7 +78,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'get',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve information about the given cluster.',
         operations=[
             {
@@ -98,7 +102,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'get_all',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve a list of clusters.',
         operations=[
             {
@@ -120,7 +125,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'update',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Update an existing cluster.',
         operations=[
             {
@@ -131,7 +137,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'update_health_status',
-        check_str=base.RULE_ADMIN_OR_USER + " or " + base.RULE_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_USER_OR_CLUSTER_USER,
+        scope_types=["project"],
         description='Update the health status of an existing cluster.',
         operations=[
             {
@@ -153,7 +160,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'resize',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Resize an existing cluster.',
         operations=[
             {
@@ -164,7 +172,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CLUSTER % 'upgrade',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Upgrade an existing cluster.',
         operations=[
             {

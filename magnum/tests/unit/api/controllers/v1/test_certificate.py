@@ -21,7 +21,14 @@ from magnum.tests.unit.api import utils as api_utils
 from magnum.tests.unit.objects import utils as obj_utils
 
 
-HEADERS = {'OpenStack-API-Version': 'container-infra latest'}
+READER_HEADERS = {
+    'OpenStack-API-Version': 'container-infra latest',
+    "X-Roles": "reader"
+}
+HEADERS = {
+    'OpenStack-API-Version': 'container-infra latest',
+    "X-Roles": "member"
+}
 
 
 class TestCertObject(base.TestCase):
@@ -59,7 +66,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
         response = self.get_json('/certificates/%s' % self.cluster.uuid,
-                                 headers=HEADERS)
+                                 headers=READER_HEADERS)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
         # check that bay is still valid as well
@@ -74,7 +81,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
         response = self.get_json('/certificates/%s' % self.cluster.name,
-                                 headers=HEADERS)
+                                 headers=READER_HEADERS)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
         # check that bay is still valid as well
@@ -84,7 +91,8 @@ class TestGetCaCertificate(api_base.FunctionalTest):
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/certificates/not_found',
-                                 expect_errors=True, headers=HEADERS)
+                                 expect_errors=True,
+                                 headers=READER_HEADERS)
 
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -97,7 +105,8 @@ class TestGetCaCertificate(api_base.FunctionalTest):
                                       uuid=uuidutils.generate_uuid())
 
         response = self.get_json('/certificates/test_cluster',
-                                 expect_errors=True, headers=HEADERS)
+                                 expect_errors=True,
+                                 headers=READER_HEADERS)
 
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -110,7 +119,7 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
         response = self.get_json('/certificates/%s' % self.cluster.uuid,
-                                 headers=HEADERS)
+                                 headers=READER_HEADERS)
 
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
@@ -265,7 +274,7 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "certificate:get", self.get_json,
             '/certificates/%s' % cluster.uuid,
-            expect_errors=True, headers=HEADERS)
+            expect_errors=True, headers=READER_HEADERS)
 
     def test_policy_disallow_create(self):
         cluster = obj_utils.create_test_cluster(self.context)

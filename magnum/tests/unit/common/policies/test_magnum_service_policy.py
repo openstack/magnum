@@ -1,5 +1,3 @@
-# All Rights Reserved.
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -11,27 +9,18 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from oslo_policy import policy
 
-from magnum.common.policies import base
+from webtest.app import AppError
 
-STATS = 'stats:%s'
-
-rules = [
-    policy.DocumentedRuleDefault(
-        name=STATS % 'get_all',
-        check_str=base.RULE_ADMIN_OR_PROJECT_READER,
-        scope_types=["project"],
-        description='Retrieve magnum stats.',
-        operations=[
-            {
-                'path': '/v1/stats',
-                'method': 'GET'
-            }
-        ]
-    )
-]
+from magnum.tests.unit.common.policies import base
 
 
-def list_rules():
-    return rules
+class TestMagnumServicePolicy(base.PolicyFunctionalTest):
+    def setUp(self):
+        super(TestMagnumServicePolicy, self).setUp()
+
+    def test_get_all_no_permission(self):
+        exc = self.assertRaises(AppError,
+                                self.get_json, "/mservices",
+                                headers=self.member_headers)
+        self.assertIn("403 Forbidden", str(exc))

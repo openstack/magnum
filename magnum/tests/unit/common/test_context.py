@@ -19,29 +19,30 @@ from magnum.tests import base
 class ContextTestCase(base.TestCase):
 
     def _create_context(self, roles=None):
-        return magnum_context.RequestContext(auth_token='auth_token1',
-                                             auth_url='auth_url1',
-                                             domain_id='domain_id1',
-                                             domain_name='domain_name1',
-                                             user_name='user1',
-                                             user_id='user-id1',
-                                             project_name='tenant1',
-                                             project_id='tenant-id1',
-                                             roles=roles,
-                                             is_admin=True,
-                                             read_only=True,
-                                             show_deleted=True,
-                                             request_id='request_id1',
-                                             trust_id='trust_id1',
-                                             auth_token_info='token_info1')
+        return magnum_context.RequestContext(
+            auth_token='auth_token1',
+            auth_url='auth_url1',
+            user_domain_id='user_domain_id1',
+            user_domain_name='user_domain_name1',
+            user_name='user1',
+            user_id='user-id1',
+            project_name='tenant1',
+            project_id='tenant-id1',
+            roles=roles,
+            is_admin=True,
+            read_only=True,
+            show_deleted=True,
+            request_id='request_id1',
+            trust_id='trust_id1',
+            auth_token_info='token_info1')
 
     def test_context(self):
         ctx = self._create_context()
 
         self.assertEqual("auth_token1", ctx.auth_token)
         self.assertEqual("auth_url1", ctx.auth_url)
-        self.assertEqual("domain_id1", ctx.domain_id)
-        self.assertEqual("domain_name1", ctx.domain_name)
+        self.assertEqual("user_domain_id1", ctx.user_domain_id)
+        self.assertEqual("user_domain_name1", ctx.user_domain_name)
         self.assertEqual("user1", ctx.user_name)
         self.assertEqual("user-id1", ctx.user_id)
         self.assertEqual("tenant1", ctx.project_name)
@@ -59,8 +60,8 @@ class ContextTestCase(base.TestCase):
 
         self.assertEqual("auth_token1", ctx.auth_token)
         self.assertEqual("auth_url1", ctx.auth_url)
-        self.assertEqual("domain_id1", ctx.domain_id)
-        self.assertEqual("domain_name1", ctx.domain_name)
+        self.assertEqual("user_domain_id1", ctx.user_domain_id)
+        self.assertEqual("user_domain_name1", ctx.user_domain_name)
         self.assertEqual("user1", ctx.user_name)
         self.assertEqual("user-id1", ctx.user_id)
         self.assertEqual("tenant1", ctx.project_name)
@@ -80,8 +81,8 @@ class ContextTestCase(base.TestCase):
 
         self.assertEqual(ctx.auth_token, ctx2.auth_token)
         self.assertEqual(ctx.auth_url, ctx2.auth_url)
-        self.assertEqual(ctx.domain_id, ctx2.domain_id)
-        self.assertEqual(ctx.domain_name, ctx2.domain_name)
+        self.assertEqual(ctx.user_domain_id, ctx2.user_domain_id)
+        self.assertEqual(ctx.user_domain_name, ctx2.user_domain_name)
         self.assertEqual(ctx.user_name, ctx2.user_name)
         self.assertEqual(ctx.user_id, ctx2.user_id)
         self.assertEqual(ctx.project_id, ctx2.project_id)

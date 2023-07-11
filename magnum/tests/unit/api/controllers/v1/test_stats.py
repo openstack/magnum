@@ -21,7 +21,14 @@ from magnum.tests.unit.objects import utils as obj_utils
 class TestStatsController(api_base.FunctionalTest):
 
     def setUp(self):
-        self.base_headers = {'OpenStack-API-Version': 'container-infra 1.4'}
+        self.base_headers = {
+            "X-Roles": "reader",
+            "OpenStack-API-Version": "container-infra 1.4"
+        }
+        self.base_admin_headers = {
+            "X-Roles": "admin",
+            "OpenStack-API-Version": "container-infra 1.4"
+        }
         super(TestStatsController, self).setUp()
         obj_utils.create_test_cluster_template(self.context)
 
@@ -39,7 +46,7 @@ class TestStatsController(api_base.FunctionalTest):
         obj_utils.create_test_cluster(self.context,
                                       project_id=234,
                                       uuid='uuid2')
-        response = self.get_json('/stats', headers=self.base_headers)
+        response = self.get_json('/stats', headers=self.base_admin_headers)
         expected = {u'clusters': 2, u'nodes': 12}
         self.assertEqual(expected, response)
 
@@ -54,7 +61,7 @@ class TestStatsController(api_base.FunctionalTest):
                                       uuid='uuid2')
         self.context.is_admin = True
         response = self.get_json('/stats?project_id=234',
-                                 headers=self.base_headers)
+                                 headers=self.base_admin_headers)
         expected = {u'clusters': 1, u'nodes': 6}
         self.assertEqual(expected, response)
 
@@ -69,7 +76,7 @@ class TestStatsController(api_base.FunctionalTest):
                                       uuid='uuid2')
         self.context.is_admin = True
         response = self.get_json('/stats?project_id=34',
-                                 headers=self.base_headers)
+                                 headers=self.base_admin_headers)
         expected = {u'clusters': 0, u'nodes': 0}
         self.assertEqual(expected, response)
 

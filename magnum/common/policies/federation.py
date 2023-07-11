@@ -20,7 +20,8 @@ FEDERATION = 'federation:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=FEDERATION % 'create',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Create a new federation.',
         operations=[
             {
@@ -31,7 +32,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=FEDERATION % 'delete',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Delete a federation.',
         operations=[
             {
@@ -42,7 +44,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=FEDERATION % 'detail',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve a list of federations with detail.',
         operations=[
             {
@@ -53,7 +56,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=FEDERATION % 'get',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve information about the given federation.',
         operations=[
             {
@@ -64,7 +68,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=FEDERATION % 'get_all',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Retrieve a list of federations.',
         operations=[
             {
@@ -75,7 +80,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=FEDERATION % 'update',
-        check_str=base.RULE_DENY_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_DENY_CLUSTER_USER,
+        scope_types=["project"],
         description='Update an existing federation.',
         operations=[
             {
