@@ -161,6 +161,11 @@ def get_user_token(config, verify_ca):
                     "password": "%(trustee_password)s"
                 }
             }
+        },
+        "scope": {
+            "OS-TRUST:trust": {
+                "id": "$(trust_id)s"
+            }
         }
     }
 }
@@ -168,6 +173,7 @@ def get_user_token(config, verify_ca):
     params = {
         'trustee_user_id': config['TRUSTEE_USER_ID'],
         'trustee_password': config['TRUSTEE_PASSWORD'],
+        'trust_id': config['TRUST_ID'],
     }
     creds = creds_str % params
     headers = {'Content-Type': 'application/json'}
