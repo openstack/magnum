@@ -146,11 +146,9 @@ def get_client(target, version_cap=None, serializer=None, timeout=None):
         serializer = ProfilerRequestContextSerializer(serializer)
     else:
         serializer = RequestContextSerializer(serializer)
-    return messaging.RPCClient(TRANSPORT,
-                               target,
-                               version_cap=version_cap,
-                               serializer=serializer,
-                               timeout=timeout)
+    return messaging.get_rpc_client(
+        TRANSPORT, target, version_cap=version_cap,
+        serializer=serializer, timeout=timeout)
 
 
 def get_server(target, endpoints, serializer=None):
