@@ -36,6 +36,11 @@ drivers_opts = [
                      ' Means if not specified, then all available drivers '
                      'are enabled.'
                 ),
+    cfg.ListOpt('enabled_beta_drivers',
+                default=[],
+                help='List of beta drivers to enable. Beta drivers are not '
+                     ' intended for production. Defaults to []. '
+                ),
 ]
 
 

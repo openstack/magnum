@@ -16,6 +16,7 @@ import abc
 
 import importlib_metadata as metadata
 from oslo_config import cfg
+from oslo_log import log as logging
 from stevedore import driver
 from stevedore import exception as stevedore_exception
 
@@ -24,11 +25,13 @@ from magnum.objects import cluster_template
 
 
 CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
 class Driver(object, metaclass=abc.ABCMeta):
 
     definitions = None
+    beta = False
 
     @classmethod
     def load_entry_points(cls):
@@ -138,6 +141,17 @@ class Driver(object, metaclass=abc.ABCMeta):
                 os=os,
                 coe=coe)
         driver_info = definition_map[cluster_type]
+        driver_name = driver_info['entry_point_name']
+        beta = driver_info['class'].beta
+        if (beta and
+                driver_name not in CONF.drivers.enabled_beta_drivers):
+            LOG.info(f"Driver {driver_name} is beta "
+                     "and needs to be explicitly enabled with "
+                     "[drivers]/enabled_beta_drivers.")
+            raise exception.ClusterTypeNotSupported(
+                server_type=server_type,
+                os=os,
+                coe=coe)
         # TODO(muralia): once --drivername is supported as an input during
         # cluster create, change the following line to use driver name for
         # loading.
