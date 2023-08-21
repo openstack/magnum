@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Due to the lack of maintainers for the Fedora Kubernetes Ironic driver, it
+    has been deprecated.  Users are encouraged to use the Fedora CoreOS
+    Kubernetes VM driver to create their Kubernetes clusters.

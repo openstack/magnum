@@ -272,6 +272,10 @@ class ClusterTemplatesController(base.Controller):
         "driver. Please migrate to the fedora_coreos driver. fedora_atomic "
         "driver will be removed in a future Magnum version.")
 
+    _fedora_ironic_deprecation_note = (
+        "The fedora ironic driver is deprecated. "
+        "The driver will be removed in a future Magnum version.")
+
     _docker_swarm_deprecation_note = (
         "The swarm coe is deprecated as the fedora_atomic distro is EOL. "
         "Please migrate to using the kubernetes coe. "
@@ -436,6 +440,13 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._fedora_atomic_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._fedora_atomic_deprecation_note)
+
+        if (cluster_template_dict['coe'] == 'kubernetes' and
+                cluster_template_dict['cluster_distro'] == 'fedora' and
+                cluster_template_dict['server_type'] == 'bm'):
+            warnings.warn(self._fedora_ironic_deprecation_note,
+                          DeprecationWarning)
+            LOG.warning(self._fedora_ironic_deprecation_note)
 
         if (cluster_template_dict['coe'] == 'swarm' or
                 cluster_template_dict['coe'] == 'swarm-mode'):
