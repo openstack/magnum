@@ -1,0 +1,10 @@
+---
+fixes:
+  - |
+    We have corrected the authentication scope in Magnum drivers when
+    authenticating to create certs, so that trusts can work properly. This will
+    change the authenticated user from trustee to trustor (as trusts designed
+    for). This change affects all drivers that inherit from common Magnum
+    drivers (Heat drivers).
+    If you have custom policies that checks for trustee user, you will need to
+    update them to trustor.
