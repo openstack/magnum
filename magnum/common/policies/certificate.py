@@ -20,7 +20,7 @@ CERTIFICATE = 'certificate:%s'
 rules = [
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'create',
-        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_USER_OR_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_MEMBER_USER,
         scope_types=["project"],
         description='Sign a new certificate by the CA.',
         operations=[
@@ -32,7 +32,7 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=CERTIFICATE % 'get',
-        check_str=base.RULE_ADMIN_OR_PROJECT_READER_USER_OR_CLUSTER_USER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER_USER,
         scope_types=["project"],
         description='Retrieve CA information about the given cluster.',
         operations=[
