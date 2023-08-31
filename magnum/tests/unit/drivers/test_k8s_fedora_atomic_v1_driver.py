@@ -42,74 +42,11 @@ class K8sFedoraAtomicV1DriverTest(base.DbTestCase):
 
     @patch('magnum.common.keystone.KeystoneClientV3')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_upgrade_default_worker_ng(self, mock_osc, mock_keystone):
-        mock_keystone.is_octavia_enabled.return_value = False
-        def_ng = self.cluster_obj.default_ng_worker
-        self.driver.upgrade_cluster(self.context, self.cluster_obj,
-                                    self.cluster_template, 1, def_ng)
-        # make sure that the kube_tag is reflected correctly to the cluster
-        # and the default nodegroups.
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         self.cluster_obj.labels['kube_tag'])
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         self.cluster_obj.default_ng_master.labels['kube_tag'])
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         def_ng.labels['kube_tag'])
-        # make sure that the image from the cluster
-        # template is NOT set to the default nodegroups.
-        self.assertEqual('test-image1',
-                         self.cluster_obj.default_ng_master.image_id)
-        self.assertEqual('test-image1', def_ng.image_id)
-        # check that the non-default nodegroup was not changed
-        self.assertNotIn('kube_tag', self.nodegroup_obj.labels)
-        self.assertEqual('test-image1', self.nodegroup_obj.image_id)
-
-    @patch('magnum.common.keystone.KeystoneClientV3')
-    @patch('magnum.common.clients.OpenStackClients')
-    def test_upgrade_default_master_ng(self, mock_osc, mock_keystone):
-        mock_keystone.is_octavia_enabled.return_value = False
-        def_ng = self.cluster_obj.default_ng_master
-        self.driver.upgrade_cluster(self.context, self.cluster_obj,
-                                    self.cluster_template, 1, def_ng)
-        # make sure that the kube_tag is reflected correctly to the cluster
-        # and the default nodegroups.
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         self.cluster_obj.labels['kube_tag'])
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         self.cluster_obj.default_ng_worker.labels['kube_tag'])
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         def_ng.labels['kube_tag'])
-        # make sure that the image from the cluster
-        # template is NOT set to the default nodegroups.
-        self.assertEqual('test-image1',
-                         self.cluster_obj.default_ng_worker.image_id)
-        self.assertEqual('test-image1', def_ng.image_id)
-        # check that the non-default nodegroup was not changed
-        self.assertNotIn('kube_tag', self.nodegroup_obj.labels)
-        self.assertEqual('test-image1', self.nodegroup_obj.image_id)
-
-    @patch('magnum.common.keystone.KeystoneClientV3')
-    @patch('magnum.common.clients.OpenStackClients')
-    def test_upgrade_non_default_ng(self, mock_osc, mock_keystone):
-        mock_keystone.is_octavia_enabled.return_value = False
-        self.driver.upgrade_cluster(self.context, self.cluster_obj,
-                                    self.cluster_template, 1,
-                                    self.nodegroup_obj)
-        # check that the cluster and default nodegroups were not changed
-        self.assertNotIn('kube_tag', self.cluster_obj.labels)
-        self.assertNotIn('kube_tag', self.cluster_obj.default_ng_master.labels)
-        self.assertNotIn('kube_tag', self.cluster_obj.default_ng_worker.labels)
-        # make sure that the image from the cluster template
-        # is not reflected to the default nodegroups.
-        self.assertEqual('test-image1',
-                         self.cluster_obj.default_ng_master.image_id)
-        self.assertEqual('test-image1',
-                         self.cluster_obj.default_ng_worker.image_id)
-        # check that the non-default nodegroup reflects the cluster template.
-        self.assertEqual(self.cluster_template.labels['kube_tag'],
-                         self.nodegroup_obj.labels['kube_tag'])
-        self.assertEqual('test-image1',
-                         self.nodegroup_obj.image_id)
+    def test_upgrade_not_supported(self, mock_osc, mock_keystone):
+        self.assertRaises(exception.NotSupported,
+                          self.driver.upgrade_cluster, self.context,
+                          self.cluster_obj, self.cluster_template, 1,
+                          self.nodegroup_obj)
 
     @patch('magnum.common.keystone.KeystoneClientV3')
     @patch('magnum.common.clients.OpenStackClients')
@@ -121,22 +58,20 @@ class K8sFedoraAtomicV1DriverTest(base.DbTestCase):
         self.nodegroup_obj.save()
         self.cluster_template.labels = {'kube_tag': 'v1.14.3'}
         self.cluster_template.save()
-        mock_keystone.is_octavia_enabled.return_value = False
-        self.assertRaises(exception.InvalidVersion,
+        self.assertRaises(exception.NotSupported,
                           self.driver.upgrade_cluster, self.context,
                           self.cluster_obj, self.cluster_template, 1,
                           self.nodegroup_obj)
 
     @patch('magnum.common.keystone.KeystoneClientV3')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_invalid_ct(self, mock_osc, mock_keystone):
+    def test_upgrade_invalid_ct(self, mock_osc, mock_keystone):
         # Scenario, a user creates a nodegroup with kube_tag
         # greater that the one set in cluster's template. Check
         # that downgrading is not supported.
         self.cluster_template.labels = {}
         self.cluster_template.save()
-        mock_keystone.is_octavia_enabled.return_value = False
-        self.assertRaises(exception.InvalidClusterTemplateForUpgrade,
+        self.assertRaises(exception.NotSupported,
                           self.driver.upgrade_cluster, self.context,
                           self.cluster_obj, self.cluster_template, 1,
                           self.nodegroup_obj)
