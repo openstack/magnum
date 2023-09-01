@@ -42,7 +42,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name=QUOTA % 'get',
-        check_str=base.RULE_ADMIN_OR_OWNER,
+        check_str=base.RULE_ADMIN_OR_PROJECT_READER,
+        scope_types=["project"],
         description='Retrieve Quota information for the given project_id.',
         operations=[
             {

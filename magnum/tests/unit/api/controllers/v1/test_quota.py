@@ -207,7 +207,7 @@ class TestQuota(api_base.FunctionalTest):
                                                 project_id="proj-id-"+str(i))
             quota_list.append(quota)
 
-        headers = {'X-Project-Id': 'proj-id-2'}
+        headers = {'X-Project-Id': 'proj-id-2', "X-Roles": "member"}
         response = self.get_json('/quotas', headers=headers)
         self.assertEqual(1, len(response['quotas']))
         self.assertEqual('proj-id-2', response['quotas'][0]['project_id'])

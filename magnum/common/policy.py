@@ -17,6 +17,7 @@
 
 import decorator
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_policy import opts
 from oslo_policy import policy
 from oslo_utils import importutils
@@ -27,6 +28,7 @@ from magnum.common import exception
 from magnum.common import policies
 
 
+LOG = logging.getLogger(__name__)
 _ENFORCER = None
 CONF = cfg.CONF
 
@@ -105,8 +107,14 @@ def enforce(context, rule=None, target=None,
         target = {'project_id': context.project_id,
                   'user_id': context.user_id}
     add_policy_attributes(target)
-    return enforcer.enforce(rule, target, credentials,
-                            do_raise=do_raise, exc=exc, *args, **kwargs)
+
+    try:
+        result = enforcer.enforce(rule, target, credentials,
+                                  do_raise=do_raise, exc=exc, *args, **kwargs)
+    except policy.InvalidScope as ex:
+        LOG.debug(f"Invalid scope while enforce policy :{str(ex)}")
+        raise exc(action=rule)
+    return result
 
 
 def add_policy_attributes(target):

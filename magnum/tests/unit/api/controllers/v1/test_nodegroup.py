@@ -47,24 +47,26 @@ class TestNodegroupObject(base.TestCase):
 class NodeGroupControllerTest(api_base.FunctionalTest):
     headers = {"Openstack-Api-Version": "container-infra latest"}
 
-    def _add_headers(self, kwargs):
+    def _add_headers(self, kwargs, roles=None):
         if 'headers' not in kwargs:
             kwargs['headers'] = self.headers
+            if roles:
+                kwargs['headers']['X-Roles'] = ",".join(roles)
 
     def get_json(self, *args, **kwargs):
-        self._add_headers(kwargs)
+        self._add_headers(kwargs, roles=['reader'])
         return super(NodeGroupControllerTest, self).get_json(*args, **kwargs)
 
     def post_json(self, *args, **kwargs):
-        self._add_headers(kwargs)
+        self._add_headers(kwargs, roles=['member'])
         return super(NodeGroupControllerTest, self).post_json(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self._add_headers(kwargs)
+        self._add_headers(kwargs, roles=['member'])
         return super(NodeGroupControllerTest, self).delete(*args, **kwargs)
 
     def patch_json(self, *args, **kwargs):
-        self._add_headers(kwargs)
+        self._add_headers(kwargs, roles=['member'])
         return super(NodeGroupControllerTest, self).patch_json(*args, **kwargs)
 
 
