@@ -1609,6 +1609,8 @@ The supported (tested) versions of Kubernetes and Operating Systems are:
 +-------------------+----------+-------------------------------+
 | Release           | kube_tag | os distro and version         |
 +===================+==========+===============================+
+| 16.0.0 (Antelope) | v1.23.3  | fedora-coreos-35.20220116.3.0 |
++-------------------+----------+-------------------------------+
 | 15.0.0 (Zed)      | v1.23.3  | fedora-coreos-35.20220116.3.0 |
 +-------------------+----------+-------------------------------+
 | 14.0.0 (Yoga)     | v1.23.3  | fedora-coreos-35.20220116.3.0 |
@@ -1630,7 +1632,18 @@ if it is expecting different software versions. e.g.
 Due to config file differences between containerd 1.5 and 1.6, a newer version
 of fcos 35 will not work without patches.
 
-Download
+Supported labels
+----------------
+
+The tested labels for each release is as follow
+
+- Antelope
+  kube_tag=v1.23.8,flannel_tag=v0.18.1,master_lb_floating_ip_enabled=true,cinder_csi_enabled=true,ingress_controller=octavia,container_runtime=containerd,containerd_version=1.6.6,containerd_tarball_sha256=a64568c8ce792dd73859ce5f336d5485fcbceab15dc3e06d5d1bc1c3353fa20f,cloud_provider_tag=v1.23.4,cinder_csi_plugin_tag=v1.23.4,k8s_keystone_auth_tag=v1.23.4,magnum_auto_healer_tag=v1.23.4,octavia_ingress_controller_tag=v1.23.4,autoscaler_tag=v1.23.0,coredns_tag=1.9.3,csi_snapshotter_tag=v4.2.1,csi_attacher_tag=v3.3.0,csi_resizer_tag=v1.3.0,csi_provisioner_tag=v3.0.0,csi_node_driver_registrar_tag=v2.4.0
+
+Images
+------
+
+The supported images can be downloaded from the following locations
 
 - fedora-coreos-35.20220116.3.0 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/35.20220116.3.0/x86_64/fedora-coreos-35.20220116.3.0-openstack.x86_64.qcow2.xz
 - fedora-coreos-31.20200323.3.2 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/31.20200323.3.2/x86_64/fedora-coreos-31.20200323.3.2-openstack.x86_64.qcow2.xz
