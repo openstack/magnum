@@ -47,8 +47,8 @@ RULE_PROJECT_READER_DENY_CLUSTER_USER = (
     'rule:project_reader_deny_cluster_user')
 RULE_ADMIN_OR_PROJECT_READER_DENY_CLUSTER_USER = (
     'rule:admin_or_project_reader_deny_cluster_user')
-RULE_ADMIN_OR_PROJECT_READER_USER_OR_CLUSTER_USER = (
-    'rule:admin_or_project_reader_user_or_cluster_user')
+RULE_ADMIN_OR_PROJECT_READER_USER = (
+    'rule:admin_or_project_reader_user')
 
 # ==========================================================
 # Deprecated Since OpenStack 2023.2(Magnum 17.0.0) and should be removed in
@@ -82,6 +82,13 @@ RULE_ADMIN_OR_USER_OR_CLUSTER_USER = (
 DEPRECATED_RULE_ADMIN_OR_USER_OR_CLUSTER_USER = policy.DeprecatedRule(
     name=RULE_ADMIN_OR_USER_OR_CLUSTER_USER,
     check_str=f"(({RULE_ADMIN_API}) or ({RULE_USER_OR_CLUSTER_USER}))",
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=DEPRECATED_SINCE
+)
+
+DEPRECATED_RULE_ADMIN_OR_USER = policy.DeprecatedRule(
+    name=RULE_ADMIN_OR_USER,
+    check_str=f"(({RULE_ADMIN_API}) or ({RULE_USER}))",
     deprecated_reason=DEPRECATED_REASON,
     deprecated_since=DEPRECATED_SINCE
 )
@@ -135,7 +142,8 @@ rules = [
         check_str=(
             f"({RULE_ADMIN_API}) or (({RULE_PROJECT_MEMBER}) and "
             f"({RULE_USER}))"
-        )
+        ),
+        deprecated_rule=DEPRECATED_RULE_ADMIN_OR_USER
     ),
     policy.RuleDefault(
         name='user_or_cluster_user',
@@ -193,12 +201,12 @@ rules = [
         deprecated_rule=DEPRECATED_DENY_CLUSTER_USER
     ),
     policy.RuleDefault(
-        name='admin_or_project_reader_user_or_cluster_user',
+        name='admin_or_project_reader_user',
         check_str=(
             f"({RULE_ADMIN_API}) or (({RULE_PROJECT_READER}) and "
-            f"({RULE_USER_OR_CLUSTER_USER}))"
+            f"({RULE_USER}))"
         ),
-        deprecated_rule=DEPRECATED_RULE_ADMIN_OR_USER_OR_CLUSTER_USER
+        deprecated_rule=DEPRECATED_RULE_ADMIN_OR_USER
     ),
 ]
 
