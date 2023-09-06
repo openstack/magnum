@@ -31,6 +31,10 @@ if is_service_enabled magnum-api magnum-cond; then
             create_magnum_accounts
         fi
 
+        # Install kubectl and sonobuoy
+        install_kubectl
+        install_sonobuoy
+
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         # Initialize magnum
         init_magnum
