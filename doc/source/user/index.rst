@@ -1280,14 +1280,13 @@ _`coredns_tag`
   Ussuri default: 1.6.6
 
 _`flannel_tag`
-  This label allows users to select `a specific flannel version,
+  This label allows users to select a specific flannel version,
   based on its container tag:
-  Queens <https://hub.docker.com/r/openstackmagnum/flannel/tags/>`_
-  Rocky <https://quay.io/repository/coreos/flannel?tab=tags>`_
+
+  * `<=v0.15.1 <https://quay.io/repository/coreos/flannel?tab=tags>`_
+  * `>=v0.20.2 <https://hub.docker.com/r/flannel/flannel/tags>`_
+
   If unset, the default version will be used.
-  Stein default: v0.10.0-amd64
-  Train default: v0.11.0-amd64
-  Ussuri default: v0.12.0-amd64
 
 _`flannel_cni_tag`
   This label allows users to select `a specific flannel_cni version,
@@ -1606,23 +1605,23 @@ Supported versions
 
 The supported (tested) versions of Kubernetes and Operating Systems are:
 
-+-------------------+----------+-------------------------------+
-| Release           | kube_tag | os distro and version         |
-+===================+==========+===============================+
-| 17.0.0 (Bobcat)   | v1.25.9  | fedora-coreos-37.20230322.3.0 |
-+-------------------+----------+-------------------------------+
-| 16.0.0 (Antelope) | v1.23.3  | fedora-coreos-35.20220116.3.0 |
-+-------------------+----------+-------------------------------+
-| 15.0.0 (Zed)      | v1.23.3  | fedora-coreos-35.20220116.3.0 |
-+-------------------+----------+-------------------------------+
-| 14.0.0 (Yoga)     | v1.23.3  | fedora-coreos-35.20220116.3.0 |
-+-------------------+----------+-------------------------------+
-| 13.0.0 (Xena)     | v1.21.x  | fedora-coreos-31.20200323.3.2 |
-+-------------------+----------+-------------------------------+
-| 12.0.0 (Wallaby)  | v1.21.x  | fedora-coreos-31.20200323.3.2 |
-+-------------------+----------+-------------------------------+
-| 11.1.1 (Victoria) | v1.21.x  | fedora-coreos-31.20200323.3.2 |
-+-------------------+----------+-------------------------------+
++-------------------+-------------------+-------------------------------+
+| Release           | kube_tag          | os distro and version         |
++===================+===================+===============================+
+| 17.0.0 (Bobcat)   | v1.26.8-rancher1  | fedora-coreos-38.20230806.3.0 |
++-------------------+-------------------+-------------------------------+
+| 16.0.0 (Antelope) | v1.23.3-rancher1  | fedora-coreos-35.20220116.3.0 |
++-------------------+-------------------+-------------------------------+
+| 15.0.0 (Zed)      | v1.23.3-rancher1  | fedora-coreos-35.20220116.3.0 |
++-------------------+-------------------+-------------------------------+
+| 14.0.0 (Yoga)     | v1.23.3-rancher1  | fedora-coreos-35.20220116.3.0 |
++-------------------+-------------------+-------------------------------+
+| 13.0.0 (Xena)     | v1.21.x           | fedora-coreos-31.20200323.3.2 |
++-------------------+-------------------+-------------------------------+
+| 12.0.0 (Wallaby)  | v1.21.x           | fedora-coreos-31.20200323.3.2 |
++-------------------+-------------------+-------------------------------+
+| 11.1.1 (Victoria) | v1.21.x           | fedora-coreos-31.20200323.3.2 |
++-------------------+-------------------+-------------------------------+
 
 Note: It is important to try to use the exact image version tested. Sometimes
 Fedora updates packages within the same major version, so Magnum may not work
@@ -1639,17 +1638,20 @@ Supported labels
 
 The tested labels for each release is as follow
 
-- Antelope
-  kube_tag=v1.23.8,flannel_tag=v0.18.1,master_lb_floating_ip_enabled=true,cinder_csi_enabled=true,ingress_controller=octavia,container_runtime=containerd,containerd_version=1.6.6,containerd_tarball_sha256=a64568c8ce792dd73859ce5f336d5485fcbceab15dc3e06d5d1bc1c3353fa20f,cloud_provider_tag=v1.23.4,cinder_csi_plugin_tag=v1.23.4,k8s_keystone_auth_tag=v1.23.4,magnum_auto_healer_tag=v1.23.4,octavia_ingress_controller_tag=v1.23.4,autoscaler_tag=v1.23.0,coredns_tag=1.9.3,csi_snapshotter_tag=v4.2.1,csi_attacher_tag=v3.3.0,csi_resizer_tag=v1.3.0,csi_provisioner_tag=v3.0.0,csi_node_driver_registrar_tag=v2.4.0
-
 - Bobcat
-  kube_tag=v1.25.9,flannel_tag=v0.21.5,master_lb_floating_ip_enabled=true,cinder_csi_enabled=true,ingress_controller=octavia,container_runtime=containerd,containerd_version=1.6.20,containerd_tarball_sha256=1d86b534c7bba51b78a7eeb1b67dd2ac6c0edeb01c034cc5f590d5ccd824b416,cloud_provider_tag=v1.25.5,cinder_csi_plugin_tag=v1.25.5,k8s_keystone_auth_tag=v1.25.5,octavia_ingress_controller_tag=v1.25.5,coredns_tag=1.10.1,csi_snapshotter_tag=v6.2.1,csi_attacher_tag=v4.2.0,csi_resizer_tag=v1.7.0,csi_provisioner_tag=v3.4.1,csi_node_driver_registrar_tag=v2.8.0
+  kube_tag=v1.25.9-rancher1,flannel_tag=v0.21.5,master_lb_floating_ip_enabled=true,cinder_csi_enabled=true,ingress_controller=octavia,container_runtime=containerd,containerd_version=1.6.20,containerd_tarball_sha256=1d86b534c7bba51b78a7eeb1b67dd2ac6c0edeb01c034cc5f590d5ccd824b416,cloud_provider_tag=v1.25.5,cinder_csi_plugin_tag=v1.25.5,k8s_keystone_auth_tag=v1.25.5,octavia_ingress_controller_tag=v1.25.5,coredns_tag=1.10.1,csi_snapshotter_tag=v6.2.1,csi_attacher_tag=v4.2.0,csi_resizer_tag=v1.7.0,csi_provisioner_tag=v3.4.1,csi_node_driver_registrar_tag=v2.8.0
+  kube_tag=v1.26.8-rancher1,flannel_tag=v0.21.5,master_lb_floating_ip_enabled=true,cinder_csi_enabled=true,ingress_controller=octavia,container_runtime=containerd,containerd_version=1.6.20,containerd_tarball_sha256=1d86b534c7bba51b78a7eeb1b67dd2ac6c0edeb01c034cc5f590d5ccd824b416,cloud_provider_tag=v1.26.3,cinder_csi_plugin_tag=v1.26.3,k8s_keystone_auth_tag=v1.26.3,octavia_ingress_controller_tag=v1.26.3,coredns_tag=1.10.1,csi_snapshotter_tag=v6.2.1,csi_attacher_tag=v4.2.0,csi_resizer_tag=v1.7.0,csi_provisioner_tag=v3.4.1,csi_node_driver_registrar_tag=v2.8.0
+
+- Antelope
+  kube_tag=v1.23.8-rancher1,flannel_tag=v0.18.1,master_lb_floating_ip_enabled=true,cinder_csi_enabled=true,ingress_controller=octavia,container_runtime=containerd,containerd_version=1.6.6,containerd_tarball_sha256=a64568c8ce792dd73859ce5f336d5485fcbceab15dc3e06d5d1bc1c3353fa20f,cloud_provider_tag=v1.23.4,cinder_csi_plugin_tag=v1.23.4,k8s_keystone_auth_tag=v1.23.4,magnum_auto_healer_tag=v1.23.4,octavia_ingress_controller_tag=v1.23.4,autoscaler_tag=v1.23.0,coredns_tag=1.9.3,csi_snapshotter_tag=v4.2.1,csi_attacher_tag=v3.3.0,csi_resizer_tag=v1.3.0,csi_provisioner_tag=v3.0.0,csi_node_driver_registrar_tag=v2.4.0
 
 Images
 ------
 
 The supported images can be downloaded from the following locations
 
+- fedora-coreos-38.20230806.3.0 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/38.20230806.3.0/x86_64/fedora-coreos-38.20230806.3.0-openstack.x86_64.qcow2.xz
+- fedora-coreos-37.20230322.3.0 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/37.20230322.3.0/x86_64/fedora-coreos-37.20230322.3.0-openstack.x86_64.qcow2.xz
 - fedora-coreos-35.20220116.3.0 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/35.20220116.3.0/x86_64/fedora-coreos-35.20220116.3.0-openstack.x86_64.qcow2.xz
 - fedora-coreos-31.20200323.3.2 - https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/31.20200323.3.2/x86_64/fedora-coreos-31.20200323.3.2-openstack.x86_64.qcow2.xz
 
