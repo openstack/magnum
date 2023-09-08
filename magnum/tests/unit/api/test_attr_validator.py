@@ -203,20 +203,6 @@ class TestAttrValidator(base.BaseTestCase):
         fake_labels = {}
         attr_validator.validate_labels(fake_labels)
 
-    def test_validate_labels_strategy_valid(self):
-        fake_labels = {'swarm_strategy': 'spread'}
-        attr_validator.validate_labels_strategy(fake_labels)
-
-    def test_validate_labels_strategy_missing(self):
-        fake_labels = {'strategy': 'spread'}
-        attr_validator.validate_labels_strategy(fake_labels)
-
-    def test_validate_labels_strategy_invalid(self):
-        fake_labels = {'swarm_strategy': 'invalid'}
-        self.assertRaises(exception.InvalidParameterValue,
-                          attr_validator.validate_labels_strategy,
-                          fake_labels)
-
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_name(self, mock_os_res):
         mock_image = {'name': 'fedora-21-atomic-5',
@@ -309,16 +295,6 @@ class TestAttrValidator(base.BaseTestCase):
         self.assertRaises(exception.FlavorNotFound,
                           attr_validator.validate_os_resources,
                           mock_context, mock_cluster_template)
-
-    @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.api.attr_validator.validate_labels')
-    def test_validate_os_resources_with_label(self, mock_validate_labels,
-                                              mock_os_cli):
-        mock_cluster_template = {'labels': {'swarm_strategy': 'abc'}}
-        mock_context = mock.MagicMock()
-        self.assertRaises(exception.InvalidParameterValue,
-                          attr_validator.validate_os_resources, mock_context,
-                          mock_cluster_template)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.api.attr_validator.validators')

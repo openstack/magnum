@@ -39,7 +39,7 @@ Overview
 ========
 
 Magnum is an OpenStack API service developed by the OpenStack Containers Team
-making container orchestration engines (COE) such as Docker Swarm and
+making container orchestration engines (COE) such as
 Kubernetes available as first class resources in OpenStack.
 
 Magnum uses Heat to orchestrate an OS image which contains Docker and COE
@@ -55,7 +55,7 @@ Following are few salient features of Magnum:
 
 - Standard API based complete life-cycle management for Container Clusters
 - Multi-tenancy for container clusters
-- Choice of COE: Kubernetes, Swarm
+- Choice of COE: Kubernetes
 - Choice of container cluster deployment model: VM or Bare-metal
 - Keystone-based multi-tenant security and auth management
 - Neutron based multi-tenant network control and isolation
@@ -152,7 +152,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   COE           Network-Driver    Default
   ===========  =================  ========
   Kubernetes   flannel, calico    flannel
-  Swarm        docker, flannel    flannel
   ===========  =================  ========
 
   Note that the network driver name is case sensitive.
@@ -166,7 +165,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   COE           Volume-Driver Default
   ============= ============= ===========
   Kubernetes    cinder        No Driver
-  Swarm         rexray        No Driver
   ============= ============= ===========
 
   Note that the volume driver name is case sensitive.
@@ -501,7 +499,7 @@ along with the health monitor and floating IP to be created.  It is
 important to distinguish resources in the IaaS level from resources in
 the PaaS level.  For instance, the infrastructure networking in
 OpenStack IaaS is different and separate from the container networking
-in Kubernetes or Swarm PaaS.
+in Kubernetes PaaS.
 
 Typical infrastructure includes the following.
 
@@ -844,8 +842,6 @@ COE and distro pairs:
 +============+===============+
 | Kubernetes | Fedora CoreOS |
 +------------+---------------+
-| Swarm      | Fedora Atomic |
-+------------+---------------+
 
 Magnum is designed to accommodate new cluster drivers to support custom
 COE's and this section describes how a new cluster driver can be
@@ -891,7 +887,7 @@ version.py
   Tracks the latest version of the driver in this directory.
   This is defined by a ``version`` attribute and is represented in the
   form of ``1.0.0``. It should also include a ``Driver`` attribute with
-  descriptive name such as ``fedora_swarm_atomic``.
+  descriptive name such as ``k8s_fedora_coreos``.
 
 
 The remaining components are optional:
@@ -936,24 +932,10 @@ Heat Stack Templates
 Choosing a COE
 ==============
 
-Magnum supports a variety of COE options, and allows more to be added over time
-as they gain popularity. As an operator, you may choose to support the full
-variety of options, or you may want to offer a subset of the available choices.
-Given multiple choices, your users can run one or more clusters, and each may
-use a different COE. For example, I might have multiple clusters that use
-Kubernetes, and just one cluster that uses Swarm. All of these clusters can
-run concurrently, even though they use different COE software.
-
 Choosing which COE to use depends on what tools you want to use to manage your
-containers once you start your app. If you want to use the Docker tools, you
-may want to use the Swarm cluster type. Swarm will spread your containers
-across the various nodes in your cluster automatically. It does not monitor
-the health of your containers, so it can't restart them for you if they stop.
-It will not automatically scale your app for you (as of Swarm version 1.2.2).
-You may view this as a plus. If you prefer to manage your application yourself,
-you might prefer swarm over the other COE options.
+containers once you start your app.
 
-Kubernetes (as of v1.2) is more sophisticated than Swarm (as of v1.2.2). It
+Kubernetes
 offers an attractive YAML file description of a pod, which is a grouping of
 containers that run together as part of a distributed application. This file
 format allows you to model your application deployment using a declarative
@@ -976,8 +958,8 @@ native client for the particular cluster type to interface with the
 clusters.  In the typical case, there are two clients to consider:
 
 COE level
-  This is the orchestration or management level such as Kubernetes,
-  Swarm and its frameworks.
+  This is the orchestration or management level such as Kubernetes
+  its frameworks.
 
 Container level
   This is the low level container operation.  Currently it is
@@ -1004,11 +986,6 @@ Kubernetes Dashboard running; it can be accessed using::
     kubectl proxy
 
     The browser can be accessed at http://localhost:8001/ui
-
-For Swarm, the main CLI is 'docker', along with associated tools
-such as 'docker-compose', etc.  Specific version of the binaries can
-be obtained from the `Docker Engine installation
-<https://docs.docker.com/engine/installation/binaries/>`_.
 
 Depending on the client requirement, you may need to use a version of
 the client that matches the version in the cluster.  To determine the
@@ -1833,10 +1810,8 @@ Current TLS support is summarized below:
 +============+=============+
 | Kubernetes | yes         |
 +------------+-------------+
-| Swarm      | yes         |
-+------------+-------------+
 
-For cluster type with TLS support, e.g. Kubernetes and Swarm, TLS is
+For cluster type with TLS support, e.g. Kubernetes, TLS is
 enabled by default.  To disable TLS in Magnum, you can specify the
 parameter '--tls-disabled' in the ClusterTemplate.  Please note it is not
 recommended to disable TLS due to security reasons.
@@ -1971,7 +1946,7 @@ Automated
 Magnum provides the command 'cluster-config' to help the user in setting
 up the environment and artifacts for TLS, for example::
 
-    openstack coe cluster config swarm-cluster --dir myclusterconfig
+    openstack coe cluster config kubernetes-cluster --dir myclusterconfig
 
 This will display the necessary environment variables, which you
 can add to your environment::
@@ -2084,8 +2059,8 @@ Rotate Certificate
 User Examples
 -------------
 
-Here are some examples for using the CLI on a secure Kubernetes and
-Swarm cluster.  You can perform all the TLS set up automatically by::
+Here are some examples for using the CLI on a secure Kubernetes cluster.
+You can perform all the TLS set up automatically by::
 
     eval $(openstack coe cluster config <cluster-name>)
 
@@ -2285,18 +2260,17 @@ network-driver
   The network driver name for instantiating container networks.
   Currently, the following network drivers are supported:
 
-  +--------+-------------+-------------+
-  | Driver | Kubernetes  |   Swarm     |
-  +========+=============+=============+
-  | Flannel| supported   | supported   |
-  +--------+-------------+-------------+
-  | Docker | unsupported | supported   |
-  +--------+-------------+-------------+
-  | Calico | supported   | unsupported |
-  +--------+-------------+-------------+
+  +--------+-------------+
+  | Driver | Kubernetes  |
+  +========+=============+
+  | Flannel| supported   |
+  +--------+-------------+
+  | Docker | unsupported |
+  +--------+-------------+
+  | Calico | supported   |
+  +--------+-------------+
 
-  If not specified, the default driver is Flannel for Kubernetes, and
-  Docker for Swarm.
+  If not specified, the default driver is Flannel for Kubernetes.
 
 Particular network driver may require its own set of parameters for
 configuration, and these parameters are specified through the labels
@@ -2515,11 +2489,6 @@ Kubernetes
   ensure that Kubernetes will not launch new pods on these nodes after
   Magnum has scanned the pods.
 
-Swarm
-  No node selection heuristic is currently supported.  If you decrease
-  the node_count, a node will be chosen by magnum without
-  consideration of what containers are running on the selected node.
-
 
 Currently, scaling containers and scaling cluster nodes are handled
 separately, but in many use cases, there are interactions between the
@@ -2603,14 +2572,6 @@ so that it can be accessed later.  To persist the data, a Cinder
 volume with a filesystem on it can be mounted on a host and be made
 available to the container, then be unmounted when the container exits.
 
-Docker provides the 'volume' feature for this purpose: the user
-invokes the 'volume create' command, specifying a particular volume
-driver to perform the actual work.  Then this volume can be mounted
-when a container is created.  A number of third-party volume drivers
-support OpenStack Cinder as the backend, for example Rexray and
-Flocker.  Magnum currently supports Rexray as the volume driver for
-Swarm.  Other drivers are being considered.
-
 Kubernetes allows a previously created Cinder block to be mounted to
 a pod and this is done by specifying the block ID in the pod YAML file.
 When the pod is scheduled on a node, Kubernetes will interface with
@@ -2625,13 +2586,11 @@ Magnum supports these features to use Cinder as persistent storage
 using the ClusterTemplate attribute 'volume-driver' and the support matrix
 for the COE types is summarized as follows:
 
-+--------+-------------+-------------+
-| Driver | Kubernetes  |    Swarm    |
-+========+=============+=============+
-| cinder | supported   | unsupported |
-+--------+-------------+-------------+
-| rexray | unsupported | supported   |
-+--------+-------------+-------------+
++--------+-------------+
+| Driver | Kubernetes  |
++========+=============+
+| cinder | supported   |
++--------+-------------+
 
 Following are some examples for using Cinder as persistent storage.
 
@@ -2721,11 +2680,6 @@ and on an OpenStack client you can run the command 'cinder list' to verify
 that the cinder volume status is 'in-use'.
 
 
-Using Cinder in Swarm
-+++++++++++++++++++++
-*To be filled in*
-
-
 Image Management
 ================
 
@@ -2733,7 +2687,7 @@ When a COE is deployed, an image from Glance is used to boot the nodes
 in the cluster and then the software will be configured and started on
 the nodes to bring up the full cluster.  An image is based on a
 particular distro such as Fedora, Ubuntu, etc, and is prebuilt with
-the software specific to the COE such as Kubernetes and Swarm.
+the software specific to the COE such as Kubernetes.
 The image is tightly coupled with the following in Magnum:
 
 1. Heat templates to orchestrate the configuration.

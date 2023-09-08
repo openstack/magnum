@@ -262,10 +262,10 @@ class TestPatch(api_base.FunctionalTest):
             master_flavor_id='m1.magnum',
             external_network_id='public',
             keypair_id='test',
-            volume_driver='rexray',
+            volume_driver='cinder',
             public=False,
             docker_volume_size=20,
-            coe='swarm',
+            coe='kubernetes',
             labels={'key1': 'val1', 'key2': 'val2'},
             hidden=False
         )
@@ -800,6 +800,7 @@ class TestPost(api_base.FunctionalTest):
             cluster_template_dict,
             cluster_template_config_dict,
             expect_errors,
+            expect_default_driver,
             mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
@@ -816,10 +817,10 @@ class TestPost(api_base.FunctionalTest):
             if expect_errors:
                 self.assertEqual(400, response.status_int)
             else:
-                expected_driver = bdict.get('network_driver')
-                if not expected_driver:
-                    expected_driver = (
-                        cfg.CONF.cluster_template.swarm_default_network_driver)
+                if expect_default_driver:
+                    expected_driver = 'flannel'
+                else:
+                    expected_driver = bdict.get('network_driver')
                 self.assertEqual(expected_driver,
                                  response.json['network_driver'])
                 self.assertEqual(bdict['image_id'],
@@ -833,19 +834,23 @@ class TestPost(api_base.FunctionalTest):
                                  'network_driver': 'flannel'}
         config_dict = {}    # Default config
         expect_errors_flag = False
+        expect_default_driver_flag = False
         self._test_create_cluster_template_network_driver_attr(
             cluster_template_dict,
             config_dict,
-            expect_errors_flag)
+            expect_errors_flag,
+            expect_default_driver_flag)
 
     def test_create_cluster_template_with_no_network_driver(self):
         cluster_template_dict = {}
         config_dict = {}
         expect_errors_flag = False
+        expect_default_driver_flag = True
         self._test_create_cluster_template_network_driver_attr(
             cluster_template_dict,
             config_dict,
-            expect_errors_flag)
+            expect_errors_flag,
+            expect_default_driver_flag)
 
     def test_create_cluster_template_with_network_driver_non_def_config(self):
         cluster_template_dict = {'coe': 'kubernetes',
@@ -853,10 +858,12 @@ class TestPost(api_base.FunctionalTest):
         config_dict = {
             'kubernetes_allowed_network_drivers': ['flannel', 'foo']}
         expect_errors_flag = False
+        expect_default_driver_flag = False
         self._test_create_cluster_template_network_driver_attr(
             cluster_template_dict,
             config_dict,
-            expect_errors_flag)
+            expect_errors_flag,
+            expect_default_driver_flag)
 
     def test_create_cluster_template_with_invalid_network_driver(self):
         cluster_template_dict = {'coe': 'kubernetes',
@@ -864,10 +871,12 @@ class TestPost(api_base.FunctionalTest):
         config_dict = {
             'kubernetes_allowed_network_drivers': ['flannel', 'good_driver']}
         expect_errors_flag = True
+        expect_default_driver_flag = False
         self._test_create_cluster_template_network_driver_attr(
             cluster_template_dict,
             config_dict,
-            expect_errors_flag)
+            expect_errors_flag,
+            expect_default_driver_flag)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_cluster_template_with_volume_driver(self,
@@ -876,8 +885,8 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
-            bdict = apiutils.cluster_template_post_data(volume_driver='rexray')
+                                            'os_distro': 'fedora-coreos'}
+            bdict = apiutils.cluster_template_post_data(volume_driver='cinder')
             response = self.post_json('/clustertemplates', bdict)
             self.assertEqual(bdict['volume_driver'],
                              response.json['volume_driver'])
@@ -1138,9 +1147,9 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_cluster_with_disabled_driver(self):
         cfg.CONF.set_override('disabled_drivers',
-                              ['swarm_fedora_atomic_v1'],
+                              ['kubernetes'],
                               group='drivers')
-        bdict = apiutils.cluster_template_post_data(coe="swarm")
+        bdict = apiutils.cluster_template_post_data(coe="kubernetes")
         self.assertRaises(AppError, self.post_json, '/clustertemplates',
                           bdict)
 

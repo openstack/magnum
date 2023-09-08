@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    Dropped swarm drivers, Docker Swarm is not supported in Magnum anymore.

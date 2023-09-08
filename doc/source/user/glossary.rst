@@ -26,7 +26,7 @@ Magnum Terminology
      A container orchestration engine manages the lifecycle of one or more
      containers, logically represented in Magnum as a cluster. Magnum supports a
      number of container orchestration engines, each with their own pros and cons,
-     including Docker Swarm and Kubernetes.
+     including Kubernetes.
 
    Labels
      Labels is a general method to specify supplemental parameters that are

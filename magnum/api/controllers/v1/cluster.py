@@ -133,7 +133,7 @@ class Cluster(base.APIBase):
 
     coe_version = wsme.wsattr(wtypes.text, readonly=True)
     """Version of the COE software currently running in this cluster.
-    Example: swarm version or kubernetes version."""
+    Example: kubernetes version."""
 
     container_version = wsme.wsattr(wtypes.text, readonly=True)
     """Version of the container software. Example: docker version."""

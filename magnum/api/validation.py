@@ -254,8 +254,6 @@ class Validator(object):
     def get_coe_validator(cls, coe):
         if coe == 'kubernetes':
             return K8sValidator()
-        elif coe == 'swarm' or coe == 'swarm-mode':
-            return SwarmValidator()
         else:
             raise exception.InvalidParameterValue(
                 _('Requested COE type %s is not supported.') % coe)
@@ -329,15 +327,3 @@ class K8sValidator(Validator):
         CONF.cluster_template.kubernetes_default_network_driver)
 
     supported_volume_driver = ['cinder']
-
-
-class SwarmValidator(Validator):
-
-    supported_network_drivers = ['docker', 'flannel']
-    supported_server_types = ['vm', 'bm']
-    allowed_network_drivers = (CONF.cluster_template.
-                               swarm_allowed_network_drivers)
-    default_network_driver = (CONF.cluster_template.
-                              swarm_default_network_driver)
-
-    supported_volume_driver = ['rexray']

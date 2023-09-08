@@ -196,7 +196,7 @@ Barbican service
 
 Cluster internet access
 -----------------------
-The nodes for Kubernetes and Swarm are connected to a private
+The nodes for Kubernetes are connected to a private
 Neutron network, so to provide access to the external internet, a router
 connects the private network to a public network.  With devstack, the
 default public network is "public", but this can be replaced by the
@@ -523,8 +523,7 @@ Running Flannel
 ---------------
 
 When deploying a COE, Flannel is available as a network driver for
-certain COE type.  Magnum currently supports Flannel for a Kubernetes
-or Swarm cluster.
+certain COE type.  Magnum currently supports Flannel for a Kubernetes cluster.
 
 Flannel provides a flat network space for the containers in the cluster:
 they are allocated IP in this network space and they will have connectivity
@@ -757,13 +756,13 @@ Simulating gate tests
       export KEEP_LOCALRC=1
       function gate_hook {
            cd /opt/stack/new/magnum/
-          ./magnum/tests/contrib/gate_hook.sh api # change this to swarm to run swarm functional tests or k8s to run kubernetes functional tests
+          ./magnum/tests/contrib/gate_hook.sh api # change this to k8s to run kubernetes functional tests
       }
       export -f gate_hook
       function post_test_hook {
           . $BASE/new/devstack/accrc/admin/admin
           cd /opt/stack/new/magnum/
-          ./magnum/tests/contrib/post_test_hook.sh api # change this to swarm to run swarm functional tests or k8s to run kubernetes functional tests
+          ./magnum/tests/contrib/post_test_hook.sh api # change this to k8s to run kubernetes functional tests
       }
       export -f post_test_hook
       cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh

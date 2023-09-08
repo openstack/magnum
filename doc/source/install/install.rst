@@ -12,11 +12,11 @@ Compute service, Networking service, Block Storage service and Orchestration
 service. See `OpenStack Install Guides <https://docs.openstack.org/
 #install-guides>`__.
 
-To provide access to Docker Swarm or Kubernetes using the native clients
-(docker or kubectl, respectively) magnum uses TLS certificates. To store the
-certificates, it is recommended to use the `Key Manager service, code-named
-barbican <https://docs.openstack.org/project-install-guide/key-manager/
-draft/>`__, or you can save them in magnum's database.
+To provide access to Kubernetes using the native client (kubectl) magnum uses
+TLS certificates. To store the certificates, it is recommended to use the
+`Key Manager service, code-named barbican
+<https://docs.openstack.org/project-install-guide/key-manager/draft/>`__,
+or you can save them in magnum's database.
 
 Optionally, you can install the following components:
 

@@ -8,9 +8,3 @@ resource_registry:
 
   # kubeminion.yaml
   "Magnum::Optional::KubeMinion::Neutron::FloatingIP": "OS::Heat::None"
-
-  # swarmmaster.yaml
-  "Magnum::Optional::SwarmMaster::Neutron::FloatingIP": "OS::Heat::None"
-
-  # swarmnode.yaml
-  "Magnum::Optional::SwarmNode::Neutron::FloatingIP": "OS::Heat::None"

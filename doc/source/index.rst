@@ -48,7 +48,7 @@ Features
 ========
 
 * Abstractions for Clusters
-* Integration with Kubernetes, Swarm for backend container technology
+* Integration with Kubernetes for backend container technology
 * Integration with Keystone for multi-tenant security
 * Integration with Neutron for Kubernetes multi-tenancy network security
 * Integration with Cinder to provide volume service for containers

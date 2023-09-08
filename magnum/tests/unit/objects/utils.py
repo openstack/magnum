@@ -84,7 +84,7 @@ def create_test_cluster(context, **kw):
     """
     cluster = get_test_cluster(context, **kw)
     create_test_cluster_template(context, uuid=cluster['cluster_template_id'],
-                                 coe=kw.get('coe', 'swarm'),
+                                 coe=kw.get('coe', 'kubernetes'),
                                  tls_disabled=kw.get('tls_disabled'))
     kw.update({'cluster_id': cluster['uuid']})
     db_utils.create_nodegroups_for_cluster(**kw)
