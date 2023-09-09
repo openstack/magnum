@@ -267,6 +267,11 @@ class ClusterTemplatesController(base.Controller):
         "different storage driver, such as overlay2. overlay2 will be set "
         "as the default storage driver from Victoria cycle in Magnum.")
 
+    _coreos_deprecation_note = (
+        "The coreos driver is deprecated in favor of the fedora_coreos "
+        "driver. Please migrate to the fedora_coreos driver. coreos "
+        "driver will be removed in a future Magnum version.")
+
     _fedora_atomic_deprecation_note = (
         "The fedora_atomic driver is deprecated in favor of the fedora_coreos "
         "driver. Please migrate to the fedora_coreos driver. fedora_atomic "
@@ -440,6 +445,12 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._fedora_atomic_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._fedora_atomic_deprecation_note)
+
+        if (cluster_template_dict['coe'] == 'kubernetes' and
+                cluster_template_dict['cluster_distro'] == 'coreos'):
+            warnings.warn(self._coreos_deprecation_note,
+                          DeprecationWarning)
+            LOG.warning(self._coreos_deprecation_note)
 
         if (cluster_template_dict['coe'] == 'kubernetes' and
                 cluster_template_dict['cluster_distro'] == 'fedora' and

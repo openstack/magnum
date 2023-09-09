@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    Deprecate the use of os_distro 'coreos' with COE 'kubernetes'.
+    CoreOS (not Fedora CoreOS) has been EOL since 2020-05-26.  Users using COE
+    'kubernetes' are encouraged to migrate to Fedora CoreOS and the
+    'fedora-coreos' driver. 'coreos' driver will be removed in a future
+    Magnum verison.
