@@ -1,0 +1,64 @@
+# Gérald LONLAS <g.lonlas@gmail.com>, 2016. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: magnum\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-18 12:38+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2016-10-22 04:59+0000\n"
+"Last-Translator: Gérald LONLAS <g.lonlas@gmail.com>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"X-Generator: Zanata 4.3.3\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+
+msgid ""
+"--keypair-id parameter in magnum CLI cluster-template-create has been "
+"renamed to --keypair."
+msgstr ""
+"Le paramètre --keypair-id dans cluster-template-create du CLI magnum a été "
+"renommé pour  --keypair."
+
+msgid "3.0.0"
+msgstr "3.0.0"
+
+msgid "3.1.0"
+msgstr "3.1.0"
+
+msgid ":ref:`genindex`"
+msgstr ":ref:`genindex`"
+
+msgid ":ref:`search`"
+msgstr ":ref:`search`"
+
+msgid "Contents:"
+msgstr "Contenu :"
+
+msgid "Current Series Release Notes"
+msgstr "Note de la release actuelle"
+
+msgid "Deprecation Notes"
+msgstr "Notes dépréciées "
+
+msgid "Indices and tables"
+msgstr "Index et table des matières"
+
+msgid "New Features"
+msgstr "Nouvelles fonctionnalités"
+
+msgid "Newton Series Release Notes"
+msgstr "Note de release pour Newton"
+
+msgid "Security Issues"
+msgstr "Problèmes de sécurités"
+
+msgid "Upgrade Notes"
+msgstr "Notes de mises à jours"
+
+msgid "Welcome to Magnum Release Notes's documentation!"
+msgstr "Bienvenue dans la documentation de la note de Release de Magnum"
+
+msgid "[1] https://review.openstack.org/#/c/311476/"
+msgstr "[1] https://review.openstack.org/#/c/311476/"
