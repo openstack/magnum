@@ -49,6 +49,42 @@
       - magnum_docker_login
     timeout: 7200
 
+- job:
+    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
+    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1
+    vars:
+      devstack_localrc:
+        MAGNUM_KUBECTL_TAG: v1.27.8
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            magnum:
+              labels:
+                kube_tag: v1.27.8-rancher2
+                container_runtime: containerd
+                containerd_version: 1.7.5
+                containerd_tarball_sha256: 21ff8709d9a0b09701f2f276d93b8aa298431c3c21a130fc123e8d74bb9556d5
+
+- job:
+    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
+    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
+    vars:
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            magnum:
+              network_driver: calico
+
+- job:
+    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
+    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
+    vars:
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            magnum:
+              network_driver: flannel
+
 - project:
     queue: magnum
     templates:
@@ -60,6 +96,8 @@
     check:
       jobs:
         - magnum-tempest-plugin-tests-api-rbac
+        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
+        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
         - magnum-container-build
     gate:
       jobs:
