@@ -26,17 +26,15 @@ down_revision = 'f1d8b0ab8b8d'
 
 from alembic import op  # noqa: E402  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String  # noqa: E402
+from sqlalchemy.types import String  # noqa: E402
 
 import sqlalchemy as sa  # noqa: E402
-
-from sqlalchemy.dialects.mysql import TEXT  # noqa: E402
 
 
 def upgrade():
     op.add_column('cluster', sa.Column('etcd_ca_cert_ref',
-                  String(512, mysql_ndb_type=TEXT),
+                  String(512),
                   nullable=True))
     op.add_column('cluster', sa.Column('front_proxy_ca_cert_ref',
-                  String(512, mysql_ndb_type=TEXT),
+                  String(512),
                   nullable=True))

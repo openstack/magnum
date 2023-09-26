@@ -23,18 +23,15 @@ revision = '47380964133d'
 down_revision = '461d798132c7'
 
 from alembic import op  # noqa: E402
-from oslo_db.sqlalchemy.types import String  # noqa: E402
 import sqlalchemy as sa  # noqa: E402
-from sqlalchemy.dialects.mysql import TINYTEXT  # noqa: E402
+from sqlalchemy.types import String  # noqa: E402
 
 
 def upgrade():
     op.add_column('cluster', sa.Column('fixed_network',
-                  String(255, mysql_ndb_type=TINYTEXT),
-                  nullable=True))
+                  String(255), nullable=True))
     op.add_column('cluster', sa.Column('fixed_subnet',
-                  String(255, mysql_ndb_type=TINYTEXT),
-                  nullable=True))
+                  String(255), nullable=True))
     op.add_column('cluster', sa.Column('floating_ip_enabled',
                   sa.Boolean(create_constraint=False),
                   default=False))

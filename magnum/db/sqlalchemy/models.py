@@ -17,7 +17,6 @@ SQLAlchemy models for container service
 """
 
 from oslo_db.sqlalchemy import models
-from oslo_db.sqlalchemy.types import String
 from oslo_serialization import jsonutils
 import six.moves.urllib.parse as urlparse
 from sqlalchemy import Boolean
@@ -27,9 +26,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer
 from sqlalchemy import schema
 from sqlalchemy import Text
-from sqlalchemy.types import TypeDecorator, TEXT
-from sqlalchemy.dialects.mysql import TEXT as mysql_TEXT
-from sqlalchemy.dialects.mysql import TINYTEXT
+from sqlalchemy.types import TypeDecorator, TEXT, String
 
 import magnum.conf
 
@@ -128,27 +125,27 @@ class Cluster(Base):
     health_status = Column(String(20))
     health_status_reason = Column(JSONEncodedDict)
     create_timeout = Column(Integer())
-    discovery_url = Column(String(255, mysql_ndb_type=TINYTEXT))
+    discovery_url = Column(String(255))
     # TODO(wanghua): encrypt trust_id in db
     trust_id = Column(String(255))
-    trustee_username = Column(String(255, mysql_ndb_type=TINYTEXT))
+    trustee_username = Column(String(255))
     trustee_user_id = Column(String(255))
     # TODO(wanghua): encrypt trustee_password in db
-    trustee_password = Column(String(255, mysql_ndb_type=TINYTEXT))
-    coe_version = Column(String(255, mysql_ndb_type=TINYTEXT))
-    container_version = Column(String(255, mysql_ndb_type=TINYTEXT))
+    trustee_password = Column(String(255))
+    coe_version = Column(String(255))
+    container_version = Column(String(255))
     # (yuanying) if we use barbican,
     # cert_ref size is determined by below format
     # * http(s)://${DOMAIN_NAME}/v1/containers/${UUID}
     # as a result, cert_ref length is estimated to 312 chars.
     # but we can use another backend to store certs.
     # so, we use 512 chars to get some buffer.
-    ca_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
-    magnum_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
-    etcd_ca_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
-    front_proxy_ca_cert_ref = Column(String(512, mysql_ndb_type=mysql_TEXT))
-    fixed_network = Column(String(255, mysql_ndb_type=TINYTEXT))
-    fixed_subnet = Column(String(255, mysql_ndb_type=TINYTEXT))
+    ca_cert_ref = Column(String(512))
+    magnum_cert_ref = Column(String(512))
+    etcd_ca_cert_ref = Column(String(512))
+    front_proxy_ca_cert_ref = Column(String(512))
+    fixed_network = Column(String(255))
+    fixed_subnet = Column(String(255))
     floating_ip_enabled = Column(Boolean, default=True)
     master_lb_enabled = Column(Boolean, default=False)
 
@@ -171,25 +168,25 @@ class ClusterTemplate(Base):
     master_flavor_id = Column(String(255))
     keypair_id = Column(String(255))
     external_network_id = Column(String(255))
-    fixed_network = Column(String(255, mysql_ndb_type=TINYTEXT))
-    fixed_subnet = Column(String(255, mysql_ndb_type=TINYTEXT))
-    network_driver = Column(String(255, mysql_ndb_type=TINYTEXT))
-    volume_driver = Column(String(255, mysql_ndb_type=TINYTEXT))
-    dns_nameserver = Column(String(255, mysql_ndb_type=TINYTEXT))
+    fixed_network = Column(String(255))
+    fixed_subnet = Column(String(255))
+    network_driver = Column(String(255))
+    volume_driver = Column(String(255))
+    dns_nameserver = Column(String(255))
     apiserver_port = Column(Integer())
     docker_volume_size = Column(Integer())
     docker_storage_driver = Column(String(255))
-    cluster_distro = Column(String(255, mysql_ndb_type=TINYTEXT))
-    coe = Column(String(255, mysql_ndb_type=TINYTEXT))
-    http_proxy = Column(String(255, mysql_ndb_type=TINYTEXT))
-    https_proxy = Column(String(255, mysql_ndb_type=TINYTEXT))
-    no_proxy = Column(String(255, mysql_ndb_type=TINYTEXT))
+    cluster_distro = Column(String(255))
+    coe = Column(String(255))
+    http_proxy = Column(String(255))
+    https_proxy = Column(String(255))
+    no_proxy = Column(String(255))
     registry_enabled = Column(Boolean, default=False)
     labels = Column(JSONEncodedDict)
     tls_disabled = Column(Boolean, default=False)
     public = Column(Boolean, default=False)
     server_type = Column(String(255))
-    insecure_registry = Column(String(255, mysql_ndb_type=TINYTEXT))
+    insecure_registry = Column(String(255))
     master_lb_enabled = Column(Boolean, default=False)
     floating_ip_enabled = Column(Boolean, default=True)
     hidden = Column(Boolean, default=False)

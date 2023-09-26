@@ -29,9 +29,9 @@ from alembic import op  # noqa: E402
 
 import sqlalchemy as sa  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String  # noqa: E402
 from oslo_serialization import jsonutils  # noqa: E402
 from oslo_utils import uuidutils  # noqa: E402
+from sqlalchemy.types import String  # noqa: E402
 
 from magnum.db.sqlalchemy import models  # noqa: E402
 

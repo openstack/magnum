@@ -25,11 +25,9 @@ down_revision = None
 
 from alembic import op  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String  # noqa: E402
+from sqlalchemy.types import String  # noqa: E402
 
 import sqlalchemy as sa  # noqa: E402
-
-from sqlalchemy.dialects.mysql import TINYTEXT  # noqa: E402
 
 
 def upgrade():
@@ -61,8 +59,7 @@ def upgrade():
         sa.Column('keypair_id', sa.String(length=255), nullable=True),
         sa.Column('image_id', sa.String(length=255), nullable=True),
         sa.Column('external_network_id', sa.String(length=255), nullable=True),
-        sa.Column('dns_nameserver', String(255, mysql_ndb_type=TINYTEXT),
-                  nullable=True),
+        sa.Column('dns_nameserver', String(255), nullable=True),
         sa.Column('apiserver_port', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
