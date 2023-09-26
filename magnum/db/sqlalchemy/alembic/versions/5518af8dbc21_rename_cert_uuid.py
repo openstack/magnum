@@ -23,21 +23,17 @@ down_revision = '6f21dc920bb'
 
 from alembic import op  # noqa: E402  # noqa: E402
 
-from oslo_db.sqlalchemy.types import String  # noqa: E402
+from sqlalchemy.types import String  # noqa: E402
 
 import sqlalchemy as sa  # noqa: E402
-
-from sqlalchemy.dialects.mysql import TEXT  # noqa: E402
 
 
 def upgrade():
     op.alter_column('bay', 'ca_cert_uuid',
                     new_column_name='ca_cert_ref',
                     existing_type=sa.String(length=36),
-                    type_=String(512, mysql_ndb_type=TEXT),
-                    nullable=True)
+                    type_=String(512), nullable=True)
     op.alter_column('bay', 'magnum_cert_uuid',
                     new_column_name='magnum_cert_ref',
                     existing_type=sa.String(length=36),
-                    type_=String(512, mysql_ndb_type=TEXT),
-                    nullable=True)
+                    type_=String(512), nullable=True)
