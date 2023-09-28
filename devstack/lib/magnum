@@ -311,22 +311,11 @@ function magnum_register_image {
         echo "Unknown image extension in $image_filename, supported extensions: tgz, img, qcow2, iso, vhd, vhdx, tar.gz, img.gz, img.bz2, vhd.gz, vhdx.gz, qcow2.xz"; false
     fi
 
-    # Cluster API driver sets kube_version on the image
-    # as the image includes the k8s binaries
-    if [ ! -z "$MAGNUM_IMAGE_KUBE_VERSION" ]; then
-        magnum_image_property=$magnum_image_property" --property kube_version=$MAGNUM_IMAGE_KUBE_VERSION"
-    fi
-
     openstack image set $image_name $magnum_image_property
-    openstack image set --public $image_name
-    openstack image show -f yaml $image_name
 }
 
 #magnum_configure_flavor - set hw_rng property for flavor to address the potential entropy issue
 function magnum_configure_flavor {
-    # add a new flavor with two vcpus and just enough RAM
-    openstack flavor create ds2G20 --ram 2048 --disk 20 --id d5 --vcpus 2 --public
-
     local magnum_flavor_property="--property hw_rng:allowed=True --property hw_rng:rate_bytes=1024 --property hw_rng:rate_period=1"
 
     local FLAVOR_LIST=$(openstack flavor list -c Name -f value)
@@ -344,122 +333,12 @@ function install_magnumclient {
     fi
 }
 
-function setup_capi_management_cluster {
-
-    # # Install `kubectl` CLI
-    curl -fsLo /tmp/kubectl "https://dl.k8s.io/release/$(curl -fsL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    sudo install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
-
-    # K3s has issues without apparmor, so we add it here
-    sudo apt install -y apparmor apparmor-utils
-
-    # Install k3s
-    curl -fsL https://get.k3s.io | sudo bash -s - --disable traefik
-
-    # copy kubeconfig file into standard location
-    mkdir -p $HOME/.kube
-    sudo cp /etc/rancher/k3s/k3s.yaml $HOME/.kube/config
-    sudo chown $USER $HOME/.kube/config
-
-    # Install helm
-    curl -fsL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-    {
-        # Install cert manager
-        helm upgrade cert-manager cert-manager \
-        --install \
-        --namespace cert-manager \
-        --create-namespace \
-        --repo https://charts.jetstack.io \
-        --version v1.10.1 \
-        --set installCRDs=true \
-        --wait \
-        --timeout 10m
-    } || {
-        kubectl -n cert-manager get pods |  awk '$1 && $1!="NAME" { print $1 }' | xargs -n1 kubectl -n cert-manager logs
-        exit
-    }
-
-    # Install Cluster API resources
-    mkdir -p capi
-    cat <<EOF > capi/kustomization.yaml
----
-resources:
-  - >-
-    https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.2/cluster-api-components.yaml
-  - >-
-    https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/v0.7.2/infrastructure-components.yaml
-patches:
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/args
-        value:
-          - --leader-elect
-          - --metrics-bind-addr=localhost:8080
-    target:
-      kind: Deployment
-      namespace: capi-system
-      name: capi-controller-manager
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/args
-        value:
-          - --leader-elect
-          - --metrics-bind-addr=localhost:8080
-    target:
-      kind: Deployment
-      namespace: capi-kubeadm-bootstrap-system
-      name: capi-kubeadm-bootstrap-controller-manager
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/args
-        value:
-          - --leader-elect
-          - --metrics-bind-addr=localhost:8080
-    target:
-      kind: Deployment
-      namespace: capi-kubeadm-control-plane-system
-      name: capi-kubeadm-control-plane-controller-manager
-EOF
-
-    kubectl apply -k capi
-
-    kubectl rollout status deployment/capi-controller-manager \
-        --namespace capi-system \
-        --timeout 5m \
-    && \
-    kubectl rollout status deployment/capi-kubeadm-bootstrap-controller-manager \
-        --namespace capi-kubeadm-bootstrap-system \
-        --timeout 5m \
-    && \
-    kubectl rollout status deployment/capi-kubeadm-control-plane-controller-manager \
-        --namespace capi-kubeadm-control-plane-system \
-        --timeout 5m \
-    && \
-    kubectl rollout status deployment/capo-controller-manager \
-        --namespace capo-system \
-        --timeout 10m
-
-    # Install addon manager
-    helm upgrade cluster-api-addon-provider cluster-api-addon-provider \
-    --install \
-    --repo https://stackhpc.github.io/cluster-api-addon-provider \
-    --version 0.1.0-dev.0.main.26 \
-    --namespace capi-addon-system \
-    --create-namespace \
-    --wait \
-    --timeout 10m
-}
-
 # install_magnum() - Collect source and prepare
 function install_magnum {
     install_apache_uwsgi
 
     git_clone $MAGNUM_REPO $MAGNUM_DIR $MAGNUM_BRANCH
     setup_develop $MAGNUM_DIR
-
-    # get ready for capi driver
-    setup_capi_management_cluster
 }
 
 # start_magnum_api() - Start the API process ahead of other things
