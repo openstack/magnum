@@ -17,7 +17,6 @@ from oslo_config import cfg
 
 from magnum.conf import api
 from magnum.conf import barbican
-from magnum.conf import capi_driver
 from magnum.conf import certificates
 from magnum.conf import cinder
 from magnum.conf import cluster
@@ -49,7 +48,6 @@ CONF = cfg.CONF
 
 api.register_opts(CONF)
 barbican.register_opts(CONF)
-capi_driver.register_opts(CONF)
 cluster.register_opts(CONF)
 cluster_templates.register_opts(CONF)
 cluster_heat.register_opts(CONF)

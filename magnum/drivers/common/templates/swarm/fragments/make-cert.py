@@ -68,7 +68,7 @@ def create_dirs():
 
 
 def _get_public_ip():
-    return requests.get(PUBLIC_IP_URL, timeout=60).text
+    return requests.get(PUBLIC_IP_URL).text
 
 
 def _build_subject_alt_names(config):
@@ -95,7 +95,7 @@ def write_ca_cert(config, verify_ca):
                'OpenStack-API-Version': 'container-infra latest'}
     ca_cert_resp = requests.get(cluster_cert_url,
                                 headers=headers,
-                                verify=verify_ca, timeout=60)
+                                verify=verify_ca)
 
     with open(CA_CERT_PATH, 'w') as fp:
         fp.write(ca_cert_resp.json()['pem'])
@@ -141,7 +141,7 @@ def write_server_cert(config, csr_req, verify_ca):
     csr_resp = requests.post(cert_url,
                              data=json.dumps(csr_req),
                              headers=headers,
-                             verify=verify_ca, timeout=60)
+                             verify=verify_ca)
 
     with open(SERVER_CERT_PATH, 'w') as fp:
         fp.write(csr_resp.json()['pem'])
@@ -172,8 +172,7 @@ def get_user_token(config, verify_ca):
     creds = creds_str % params
     headers = {'Content-Type': 'application/json'}
     url = config['AUTH_URL'] + '/auth/tokens'
-    r = requests.post(url, headers=headers, data=creds, verify=verify_ca,
-                      timeout=60)
+    r = requests.post(url, headers=headers, data=creds, verify=verify_ca)
     config['USER_TOKEN'] = r.headers['X-Subject-Token']
     return config
 
