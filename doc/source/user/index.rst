@@ -64,8 +64,6 @@ Following are few salient features of Magnum:
 - Integrated with OpenStack: SSO experience for cloud users
 - Secure container cluster access (TLS enabled)
 
-More details: `Magnum Project Wiki <https://wiki.openstack.org/wiki/Magnum>`_
-
 ClusterTemplate
 ---------------
 
@@ -1238,9 +1236,7 @@ _`kube_tag`
   This label allows users to select a specific Kubernetes release based on its
   container tag for `Fedora CoreOS image
   <https://github.com/kubernetes/kubernetes/releases>`_. If unset, the current
-  Magnum version's default Kubernetes release is installed. `Take a look at
-  the Wiki for a compatibility matrix between Kubernetes and Magnum Releases
-  <https://wiki.openstack.org/wiki/Magnum#Compatibility_Matrix>`_.
+  Magnum version's default Kubernetes release is installed.
   Stein default: v1.11.6
   Train default: v1.15.7
   Ussuri default: v1.18.2
