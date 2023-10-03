@@ -47,8 +47,7 @@ Task Tracking
    there more  than one launchpad project? what's the name of the project
    group in storyboard?
 
-We track our tasks in `Storyboard
-<https://storyboard.openstack.org/#!/project/openstack/magnum>`_
+We track our tasks in `Launchpad <https://bugs.launchpad.net/magnum>`_
 
 Reporting a Bug
 ~~~~~~~~~~~~~~~
@@ -56,7 +55,7 @@ Reporting a Bug
    report bugs for your project.
 
 You found an issue and want to make sure we are aware of it? You can do so
-on `Storyboard <https://storyboard.openstack.org/#!/project/openstack/magnum>`_.
+on `Launchpad <https://bugs.launchpad.net/magnum>`_.
 
 Getting Your Patch Merged
 ~~~~~~~~~~~~~~~~~~~~~~~~~
