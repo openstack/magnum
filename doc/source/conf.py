@@ -32,7 +32,7 @@ extensions = [
 # openstackdocstheme options
 openstackdocs_repo_name = 'openstack/magnum'
 openstackdocs_pdf_link = True
-openstackdocs_use_storyboard = True
+openstackdocs_use_storyboard = False
 
 config_generator_config_file = '../../etc/magnum/magnum-config-generator.conf'
 sample_config_basename = '_static/magnum'
