@@ -99,9 +99,23 @@ def validate_external_network(cli, external_network):
 def validate_fixed_network(cli, fixed_network):
     """Validate fixed network"""
 
-    # TODO(houming):this method implement will be added after this
-    # first pathch for Cluster's OpenStack resources validation is merged.
-    pass
+    count = 0
+    network_id = None
+    networks = cli.neutron().list_networks()
+    for net in networks.get('networks'):
+        if fixed_network in [net.get('name'), net.get('id')]:
+            count += 1
+            network_id = net.get('id')
+
+    if count == 0:
+        # Unable to find the configured fixed_network.
+        raise exception.FixedNetworkNotFound(network=fixed_network)
+    elif count > 1:
+        msg = _("Multiple networks exist with same name '%s'. "
+                "Please use the network ID instead.")
+        raise exception.Conflict(msg % fixed_network)
+
+    return network_id
 
 
 def validate_labels(labels):
