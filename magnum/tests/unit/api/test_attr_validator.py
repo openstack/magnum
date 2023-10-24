@@ -94,6 +94,44 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_external_network,
                           mock_os_cli, 'test_ext_net')
 
+    def test_validate_fixed_network_with_valid_network(self):
+        mock_networks = {'networks': [{'name': 'test_net',
+                         'id': 'test_net_id'}]}
+        mock_neutron = mock.MagicMock()
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertEqual('test_net_id',
+                         attr_validator.validate_fixed_network(mock_os_cli,
+                                                               'test_net'))
+        self.assertTrue(mock_neutron.list_networks.called)
+
+    def test_validate_fixed_network_with_multiple_valid_network(self):
+        mock_networks = {
+            'networks': [{'name': 'test_net',
+                          'id': 'test_net_id1'},
+                         {'name': 'test_net',
+                          'id': 'test_net_id2'}],
+        }
+        mock_neutron = mock.MagicMock()
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.Conflict,
+                          attr_validator.validate_fixed_network,
+                          mock_os_cli, 'test_net')
+
+    def test_validate_fixed_network_with_invalid_network(self):
+        mock_networks = {'networks': [{'name': 'test_net_not_equal',
+                         'id': 'test_net_id_not_equal'}]}
+        mock_neutron = mock.MagicMock()
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.FixedNetworkNotFound,
+                          attr_validator.validate_fixed_network,
+                          mock_os_cli, 'test_net')
+
     def test_validate_keypair_with_no_keypair(self):
         mock_keypair = mock.MagicMock()
         mock_keypair.id = None
