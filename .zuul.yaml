@@ -31,7 +31,7 @@
     post-run: playbooks/container-builder-copy-logs.yaml
     roles:
       - zuul: openstack/openstack-zuul-jobs
-    timeout: 1800
+    timeout: 3600
     irrelevant-files:
       - ^.*\.rst$
       - ^api-ref/.*$

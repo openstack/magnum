@@ -24,9 +24,16 @@ helm_versions:
   - version: v3.2.0
 
 cluster_autoscaler_versions:
-  - version: 1.18.3
-  - version: 1.19.1
-  - version: 1.20.0
-  - version: 1.21.0
-  - version: 1.22.0
-  - version: 1.23.0
+  - version: 1.25.0
+  - version: 1.25.1
+  - version: 1.25.2
+  - version: 1.25.3
+  - version: 1.26.0
+  - version: 1.26.1
+  - version: 1.26.2
+  - version: 1.26.3
+  - version: 1.26.4
+  - version: 1.27.1
+  - version: 1.27.2
+  - version: 1.27.3
+  - version: 1.28.0
