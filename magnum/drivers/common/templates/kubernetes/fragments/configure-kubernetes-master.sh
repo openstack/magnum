@@ -496,7 +496,14 @@ KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-fil
 
 # specified cgroup driver
 KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
+
 if [ ${CONTAINER_RUNTIME} = "containerd"  ] ; then
+    # check kubelet version, 1.27.0 dropped docker shim and --container-runtime command line option
+    KUBELET_VERSION=$(podman run ${CONTAINER_INFRA_PREFIX:-${HYPERKUBE_PREFIX}}hyperkube:${KUBE_TAG} kubelet --version | awk '{print $2}')
+    CONTAINER_RUNTIME_REMOTE_DROPPED="v1.27.0"
+    if [[ "${CONTAINER_RUNTIME_REMOTE_DROPPED}" != $(echo -e "${CONTAINER_RUNTIME_REMOTE_DROPPED}\n${KUBELET_VERSION}" | sort -V | head -n1) && "${KUBELET_VERSION}" != "devel" ]]; then
+        KUBELET_ARGS="${KUBELET_ARGS} --container-runtime=remote"
+    fi
     KUBELET_ARGS="${KUBELET_ARGS} --runtime-cgroups=/system.slice/containerd.service"
     KUBELET_ARGS="${KUBELET_ARGS} --runtime-request-timeout=15m"
     KUBELET_ARGS="${KUBELET_ARGS} --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
