@@ -47,7 +47,7 @@
     post-run: playbooks/container-publish.yaml
     secrets:
       - magnum_docker_login
-    timeout: 2400
+    timeout: 3600
 
 - project:
     queue: magnum
