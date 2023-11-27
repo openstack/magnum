@@ -41,11 +41,11 @@ CONF = magnum.conf.CONF
 
 class TemplateDefinitionTestCase(base.TestCase):
 
-    @mock.patch.object(driver, 'iter_entry_points')
-    def test_load_entry_points(self, mock_iter_entry_points):
+    @mock.patch.object(driver, 'metadata')
+    def test_load_entry_points(self, mock_metadata):
         mock_entry_point = mock.MagicMock()
         mock_entry_points = [mock_entry_point]
-        mock_iter_entry_points.return_value = mock_entry_points.__iter__()
+        mock_metadata.entry_points.return_value = mock_entry_points.__iter__()
 
         entry_points = driver.Driver.load_entry_points()
 
@@ -53,7 +53,7 @@ class TemplateDefinitionTestCase(base.TestCase):
              (actual_entry_point, loaded_cls)) in zip(mock_entry_points,
                                                       entry_points):
             self.assertEqual(expected_entry_point, actual_entry_point)
-            expected_entry_point.load.assert_called_once_with(require=False)
+            expected_entry_point.load.assert_called_once()
 
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_get_vm_atomic_kubernetes_definition(self, mock_driver):
