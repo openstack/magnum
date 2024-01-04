@@ -1,0 +1,10 @@
+---
+deprecations:
+  - |
+    Remove support for cluster upgrades with the Heat driver.
+    The Heat driver can longer support cluster upgrades due to these being
+    unreliable and untested. The action now returns an HTTP 500 error.
+    A Cluster API driver provides a way forward for Magnum to support this
+    api action again for Kubernetes.
+    In the meantime blue/green deployments, where a replacement cluster is
+    created, remain a viable alternative to cluster upgrades.

@@ -13,7 +13,6 @@
 import abc
 import collections
 import os
-from pbr.version import SemanticVersion as SV
 import six
 
 from string import ascii_letters
@@ -55,17 +54,6 @@ class HeatDriver(driver.Driver):
        Abstract class for implementing Drivers that leverage OpenStack Heat for
        orchestrating cluster lifecycle operations
     """
-
-    def _extract_template_definition_up(self, context, cluster,
-                                        cluster_template,
-                                        scale_manager=None):
-        ct_obj = conductor_utils.retrieve_ct_by_name_or_uuid(
-            context,
-            cluster_template)
-        definition = self.get_template_definition()
-        return definition.extract_definition(context, ct_obj,
-                                             cluster,
-                                             scale_manager=scale_manager)
 
     def _extract_template_definition(self, context, cluster,
                                      scale_manager=None,
@@ -319,123 +307,31 @@ class KubernetesDriver(HeatDriver):
 class FedoraKubernetesDriver(KubernetesDriver):
     """Base driver for Kubernetes clusters."""
 
-    def get_heat_params(self, cluster_template):
-        heat_params = {}
-        try:
-            kube_tag = cluster_template.labels["kube_tag"]
-            kube_tag_params = {
-                "kube_tag": kube_tag,
-                "kube_version": kube_tag,
-                "master_kube_tag": kube_tag,
-                "minion_kube_tag": kube_tag,
-            }
-            heat_params.update(kube_tag_params)
-        except KeyError:
-            LOG.debug(("Cluster template %s does not contain a "
-                       "valid kube_tag"), cluster_template.name)
-
-        # If both keys are present, only ostree_commit is chosen.
-        for ostree_tag in ["ostree_commit", "ostree_remote"]:
-            if ostree_tag not in cluster_template.labels:
-                continue
-            try:
-                ostree_param = {
-                    ostree_tag: cluster_template.labels[ostree_tag]
-                }
-                heat_params.update(ostree_param)
-                break
-            except KeyError:
-                LOG.debug("Cluster template %s does not define %s",
-                          cluster_template.name, ostree_tag)
-
-        upgrade_labels = ['kube_tag', 'ostree_remote', 'ostree_commit']
-        if not any([u in heat_params.keys() for u in upgrade_labels]):
-            reason = ("Cluster template %s does not contain any supported "
-                      "upgrade labels: [%s]") % (cluster_template.name,
-                                                 ', '.join(upgrade_labels))
-            raise exception.InvalidClusterTemplateForUpgrade(reason=reason)
-
-        return heat_params
-
-    @staticmethod
-    def get_new_labels(nodegroup, cluster_template):
-        new_labels = nodegroup.labels.copy()
-        if 'kube_tag' in cluster_template.labels:
-            new_kube_tag = cluster_template.labels['kube_tag']
-            new_labels.update({'kube_tag': new_kube_tag})
-        return new_labels
-
     def upgrade_cluster(self, context, cluster, cluster_template,  # noqa: C901
                         max_batch_size, nodegroup, scale_manager=None,
                         rollback=False):
-        osc = clients.OpenStackClients(context)
-
-        # Use this just to check that we are not downgrading.
-        heat_params = {
-            "update_max_batch_size": max_batch_size,
-        }
-
-        if 'kube_tag' in nodegroup.labels:
-            heat_params['kube_tag'] = nodegroup.labels['kube_tag']
-
-        current_addons = {}
-        new_addons = {}
-        for label in cluster_template.labels:
-            # This is upgrade API, so we don't introduce new stuff by this API,
-            # but just focus on the version change.
-            new_addons[label] = cluster_template.labels[label]
-            if ((label.endswith('_tag') or
-                 label.endswith('_version')) and label in heat_params):
-                current_addons[label] = heat_params[label]
-                try:
-                    if (SV.from_pip_string(new_addons[label]) <
-                            SV.from_pip_string(current_addons[label])):
-                        raise exception.InvalidVersion(tag=label)
-                except exception.InvalidVersion:
-                    raise
-                except Exception as e:
-                    # NOTE(flwang): Different cloud providers may use different
-                    # tag/version format which maybe not able to parse by
-                    # SemanticVersion. For this case, let's just skip it.
-                    LOG.debug("Failed to parse tag/version %s", str(e))
-
-        # Since the above check passed just
-        # hardcode what we want to send to heat.
-        # Rules: 1. No downgrade 2. Explicitly override 3. Merging based on set
-        # Update heat_params based on the data generated above
-        heat_params.update(self.get_heat_params(cluster_template))
-
-        stack_id = nodegroup.stack_id
-        if nodegroup is not None and not nodegroup.is_default:
-            heat_params['is_cluster_stack'] = False
-            # For now set the worker_role explicitly in order to
-            # make sure that the is_master condition fails.
-            heat_params['worker_role'] = nodegroup.role
-
-        # we need to set the whole dict to the object
-        # and not just update the existing labels. This
-        # is how obj_what_changed works.
-        nodegroup.labels = new_labels = self.get_new_labels(nodegroup,
-                                                            cluster_template)
-
-        if nodegroup.is_default:
-            cluster.cluster_template_id = cluster_template.uuid
-            cluster.labels = new_labels
-            if nodegroup.role == 'master':
-                other_default_ng = cluster.default_ng_worker
-            else:
-                other_default_ng = cluster.default_ng_master
-            other_default_ng.labels = new_labels
-            other_default_ng.save()
-
-        fields = {
-            'existing': True,
-            'parameters': heat_params,
-            'disable_rollback': not rollback
-        }
-        LOG.info('Upgrading cluster %s stack %s with these params: %s',
-                 cluster.uuid, nodegroup.stack_id, heat_params)
-        osc.heat().stacks.update(stack_id, **fields)
+        # NOTE(dalees): The Heat driver no longer supports cluster upgrades.
+        # This is because at cluster creation time the Heat stack is written,
+        # and this must include all upgrade functionality in SoftwareConfig
+        # resources.
+        # Over time, when K8s upgrades are released, this script becomes unable
+        # to handle the full upgrade (flag changes, etc) and results in broken
+        # clusters.
+        # When an in-place upgrade does complete, scaling up results in the
+        # creation of a node using the original base image (which now may be
+        # insecure or unavailable).
+        # Fixing this requires the Heat stack to set a new image, which is not
+        # permitted in Magnum, and if allowed would result in the uncontrolled
+        # re-creation of all nodes.
+        # A workaround necessitates the use of node groups, not default-worker.
+        # Additionally, the burden of maintaining the upgrade shell script
+        # within the Magnum project to match the Kubernetes project is high.
+        # Alternatives include:
+        # - Blue-green deployments, by creating a new cluster.
+        # - Cluster API drivers, that leverage kubeadm and upgrades with node
+        #   replacement.
+        operation = _('Upgrading a cluster that uses the Magnum Heat driver')
+        raise exception.NotSupported(operation=operation)
 
     def get_nodegroup_extra_params(self, cluster, osc):
         network = osc.heat().resources.get(cluster.stack_id, 'network')

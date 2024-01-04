@@ -329,6 +329,7 @@ class Handler(object):
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
+
         # Upgrade cluster
         try:
             conductor_utils.notify_about_cluster_operation(
@@ -339,6 +340,13 @@ class Handler(object):
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             nodegroup.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None
+        except exception.NotSupported:
+            # If upgrade isn't support by the driver, nothing took place.
+            # So no need to set the cluster to failed status.
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
+            raise
         except Exception as e:
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)
