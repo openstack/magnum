@@ -132,6 +132,46 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_fixed_network,
                           mock_os_cli, 'test_net')
 
+    def test_validate_fixed_subnet_with_valid_subnet(self):
+        mock_neutron = mock.MagicMock()
+        mock_subnets = {'subnets': [{'name': 'test_subnet',
+                                     'id': 'test_subnet_id',
+                                     'network_id': 'test_net_id'}]}
+        mock_neutron.list_subnets.return_value = mock_subnets
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertEqual('test_subnet_id',
+                         attr_validator.validate_fixed_subnet(mock_os_cli,
+                                                              'test_subnet'))
+        mock_neutron.list_subnets.assert_called_with()
+
+    def test_validate_fixed_subnet_with_invalid_subnet(self):
+        mock_neutron = mock.MagicMock()
+        mock_subnets = {'subnets': [{'name': 'test_subnet',
+                                     'id': 'test_subnet_id',
+                                     'network_id': 'test_net_id'}]}
+        mock_neutron.list_subnets.return_value = mock_subnets
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.FixedSubnetNotFound,
+                          attr_validator.validate_fixed_subnet,
+                          mock_os_cli, 'test_subnet_not_found')
+
+    def test_validate_fixed_subnet_with_multiple_valid_subnet(self):
+        mock_neutron = mock.MagicMock()
+        mock_subnets = {'subnets': [{'name': 'test_subnet',
+                                     'id': 'test_subnet_id',
+                                     'network_id': 'test_net_id'},
+                                    {'name': 'test_subnet',
+                                     'id': 'test_subnet_id2',
+                                     'network_id': 'test_net_id2'}]}
+        mock_neutron.list_subnets.return_value = mock_subnets
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.Conflict,
+                          attr_validator.validate_fixed_subnet,
+                          mock_os_cli, 'test_subnet')
+
     def test_validate_keypair_with_no_keypair(self):
         mock_keypair = mock.MagicMock()
         mock_keypair.id = None
@@ -288,6 +328,47 @@ class TestAttrValidator(base.BaseTestCase):
         mock_context = mock.MagicMock()
         attr_validator.validate_os_resources(mock_context,
                                              mock_cluster_template)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_validate_os_resources_with_valid_fixed_subnet(self,
+                                                           os_clients_klass):
+        mock_cluster_template = {'fixed_network': 'test_net',
+                                 'fixed_subnet': 'test_subnet'}
+        mock_context = mock.MagicMock()
+        mock_os_cli = mock.MagicMock()
+        os_clients_klass.return_value = mock_os_cli
+        mock_neutron = mock.MagicMock()
+        mock_networks = {'networks': [{'name': 'test_net',
+                                       'id': 'test_net_id'}]}
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_subnets = {'subnets': [{'name': 'test_subnet',
+                                     'id': 'test_subnet_id',
+                                     'network_id': 'test_net_id'}]}
+        mock_neutron.list_subnets.return_value = mock_subnets
+        mock_os_cli.neutron.return_value = mock_neutron
+        attr_validator.validate_os_resources(mock_context,
+                                             mock_cluster_template)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_validate_os_resources_with_invalid_fixed_subnet(self,
+                                                             os_clients_klass):
+        mock_cluster_template = {'fixed_network': 'test_net',
+                                 'fixed_subnet': 'test_subnet2'}
+        mock_context = mock.MagicMock()
+        mock_os_cli = mock.MagicMock()
+        os_clients_klass.return_value = mock_os_cli
+        mock_neutron = mock.MagicMock()
+        mock_networks = {'networks': [{'name': 'test_net',
+                                       'id': 'test_net_id'}]}
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_subnets = {'subnets': [{'name': 'test_subnet',
+                                     'id': 'test_subnet_id',
+                                     'network_id': 'test_net_id'}]}
+        mock_neutron.list_subnets.return_value = mock_subnets
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.FixedSubnetNotFound,
+                          attr_validator.validate_os_resources, mock_context,
+                          mock_cluster_template)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_validate_os_resources_with_cluster(self, mock_os_cli):
