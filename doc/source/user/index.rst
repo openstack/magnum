@@ -31,7 +31,6 @@ created and managed by Magnum to support the COE's.
 #. `Container Monitoring`_
 #. `Kubernetes Post Install Manifest`_
 #. `Kubernetes External Load Balancer`_
-#. `Rolling Upgrade`_
 #. `Keystone Authentication and Authorization for Kubernetes`_
 #. `Node Groups`_
 #. `Kubernetes Health Monitoring`_
@@ -2965,11 +2964,6 @@ Kubernetes External Load Balancer
 =================================
 
 .. include:: kubernetes-load-balancer.rst
-
-Rolling Upgrade
-===============
-
-.. include:: rolling-upgrade.rst
 
 
 Keystone Authentication and Authorization for Kubernetes
