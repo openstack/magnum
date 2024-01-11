@@ -15,8 +15,8 @@
 import abc
 import six
 
+import importlib_metadata as metadata
 from oslo_config import cfg
-from pkg_resources import iter_entry_points
 from stevedore import driver
 
 from magnum.common import exception
@@ -33,9 +33,9 @@ class Driver(object):
 
     @classmethod
     def load_entry_points(cls):
-        for entry_point in iter_entry_points('magnum.drivers'):
+        for entry_point in metadata.entry_points(group='magnum.drivers'):
             if entry_point.name not in CONF.drivers.disabled_drivers:
-                yield entry_point, entry_point.load(require=False)
+                yield entry_point, entry_point.load()
 
     @classmethod
     def get_drivers(cls):
