@@ -528,6 +528,7 @@ class HeatPoller(object):
                 self.nodegroup.stack_id, resolve_outputs=False)
 
             if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
+                                      fields.ClusterStatus.CREATE_FAILED,
                                       fields.ClusterStatus.UPDATE_COMPLETE):
                 # Resolve all outputs if the stack is COMPLETE
                 stack = self.openstack_client.heat().stacks.get(
