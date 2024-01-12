@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add Cilium as a supported network driver of Kubernetes

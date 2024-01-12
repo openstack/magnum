@@ -319,7 +319,12 @@ class Validator(object):
 
 class K8sValidator(Validator):
 
-    supported_network_drivers = ['flannel', 'calico']
+    # NOTE(okozachenko): Cilium is added in the supported list because some
+    # cluster drivers like capi-driver supports this. But the Heat driver
+    # doesn't support this yet.
+    # In the future, supported network driver list should be fetched from
+    # cluster driver implementation instead of this fixed values.
+    supported_network_drivers = ['flannel', 'calico', 'cilium']
     supported_server_types = ['vm', 'bm']
     allowed_network_drivers = (
         CONF.cluster_template.kubernetes_allowed_network_drivers)

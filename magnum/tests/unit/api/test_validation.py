@@ -159,7 +159,9 @@ class TestValidation(base.BaseTestCase):
 
     def test_enforce_network_driver_types_default_config_create(self):
         cluster_template = self._test_enforce_network_driver_types_create(
-            network_driver_type=None, validator_default_network_driver="type1"
+            network_driver_type=None,
+            validator_allowed_network_drivers=["type1"],
+            validator_default_network_driver="type1",
         )
         self.assertEqual("type1", cluster_template.network_driver)
 
