@@ -831,7 +831,7 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_cluster_template_with_network_driver(self):
         cluster_template_dict = {'coe': 'kubernetes',
-                                 'network_driver': 'flannel'}
+                                 'network_driver': 'calico'}
         config_dict = {}    # Default config
         expect_errors_flag = False
         expect_default_driver_flag = False
