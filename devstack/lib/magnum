@@ -347,6 +347,19 @@ function install_magnum {
     setup_develop $MAGNUM_DIR
 }
 
+# install_sonobuoy() - Download and extract sonobuoy
+function install_sonobuoy {
+    MAGNUM_SONOBUOY_TAG=${MAGNUM_SONOBUOY_TAG:-$(wget -qO-  https://api.github.com/repos/vmware-tanzu/sonobuoy/releases/latest | grep tag_name | awk '{ print $2}' | tr -d \",)}
+    wget -t 2 -c -qO- https://github.com/vmware-tanzu/sonobuoy/releases/download/$MAGNUM_SONOBUOY_TAG/sonobuoy_${MAGNUM_SONOBUOY_TAG:1}_linux_amd64.tar.gz | sudo tar -zxf - -C /opt/stack/bin sonobuoy
+}
+
+# install_kubectl() - Download and extract kubectl
+function install_kubectl {
+    MAGNUM_KUBECTL_TAG=${MAGNUM_KUBECTL_TAG:-$(wget -qO- https://dl.k8s.io/release/stable.txt)}
+    sudo wget -t 2 -c -q -O /opt/stack/bin/kubectl https://dl.k8s.io/release/${MAGNUM_KUBECTL_TAG}/bin/linux/amd64/kubectl
+    sudo chmod +x /opt/stack/bin/kubectl
+}
+
 # start_magnum_api() - Start the API process ahead of other things
 function start_magnum_api {
     run_process magnum-api "$(which uwsgi) --procname-prefix magnum-api --ini $MAGNUM_UWSGI_CONF"
