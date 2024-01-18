@@ -23,7 +23,6 @@ from stevedore import exception as stevedore_exception
 from magnum.common import exception
 from magnum.objects import cluster_template
 
-
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
@@ -218,6 +217,15 @@ class Driver(object, metaclass=abc.ABCMeta):
                        node_count, nodes_to_remove, nodegroup=None):
         raise NotImplementedError("Subclasses must implement "
                                   "'resize_cluster'.")
+
+    def validate_master_size(self, node_count):
+        if node_count % 2 == 0 or node_count < 1:
+            raise exception.MasterNGSizeInvalid(
+                requested_size=node_count)
+
+    def validate_master_resize(self, node_count):
+        # Base driver does not support resizing masters.
+        raise exception.MasterNGResizeNotSupported()
 
     @abc.abstractmethod
     def create_federation(self, context, federation):

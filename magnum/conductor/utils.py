@@ -185,11 +185,9 @@ def _get_nodegroup_object(context, cluster, node_count, is_master=False):
     else:
         ng.flavor_id = cluster.flavor_id or cluster.cluster_template.flavor_id
         ng.role = "worker"
-    if (cluster.labels != wtypes.Unset and cluster.labels is not None
-       and 'min_node_count' in cluster.labels):
-        ng.min_node_count = cluster.labels['min_node_count']
-    else:
-        ng.min_node_count = 0
+        if (cluster.labels != wtypes.Unset and cluster.labels is not None
+                and 'min_node_count' in cluster.labels):
+            ng.min_node_count = cluster.labels['min_node_count']
     ng.name = "default-%s" % ng.role
     ng.is_default = True
     ng.status = fields.ClusterStatus.CREATE_IN_PROGRESS

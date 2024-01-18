@@ -434,8 +434,14 @@ class NodeGroupNotFound(ResourceNotFound):
     message = _("Nodegroup %(nodegroup)s could not be found.")
 
 
+class MasterNGSizeInvalid(InvalidParameterValue):
+    message = _("master nodegroup size of %(requested_size)s is invalid, "
+                "size cannot be an even number.")
+
+
 class MasterNGResizeNotSupported(NotSupported):
-    message = _("Resizing a master nodegroup is not supported.")
+    message = _("Resizing the master nodegroup is not supported "
+                "by this driver.")
 
 
 class ZeroNodeCountNotSupported(NotSupported):

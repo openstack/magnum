@@ -475,6 +475,7 @@ class ClustersController(base.Controller):
     @validation.ct_not_found_to_bad_request()
     @validation.enforce_cluster_type_supported()
     @validation.enforce_cluster_volume_storage_size()
+    @validation.enforce_cluster_master_size_supported()
     def post(self, cluster):
         if cluster.node_count == 0:
             raise exception.ZeroNodeCountNotSupported()
@@ -484,6 +485,7 @@ class ClustersController(base.Controller):
     @expose.expose(ClusterID, body=Cluster, status_code=202)
     @validation.enforce_cluster_type_supported()
     @validation.enforce_cluster_volume_storage_size()
+    @validation.enforce_cluster_master_size_supported()
     def post(self, cluster):  # noqa
         return self._post(cluster)
 
@@ -545,8 +547,8 @@ class ClustersController(base.Controller):
         attr_validator.validate_os_resources(context,
                                              cluster_template.as_dict(),
                                              cluster_dict)
-        attr_validator.validate_master_count(cluster_dict,
-                                             cluster_template.as_dict())
+        attr_validator.validate_master_count(context,
+                                             cluster_dict)
 
         cluster_dict['project_id'] = context.project_id
         cluster_dict['user_id'] = context.user_id

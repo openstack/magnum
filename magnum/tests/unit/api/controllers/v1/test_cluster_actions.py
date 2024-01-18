@@ -80,8 +80,24 @@ class TestClusterResize(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
-    def test_resize_with_master_nodegroup(self):
-        new_node_count = 6
+    def test_resize_with_master_nodegroup_even_unsupported(self):
+        new_node_count = 4
+        nodegroup = self.cluster_obj.default_ng_master
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.9",
+                                           "X-Roles": "member"},
+                                  expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
+    def test_resize_with_master_nodegroup_odd_unsupported(self):
+        new_node_count = 3
         nodegroup = self.cluster_obj.default_ng_master
         cluster_resize_req = {
             "node_count": new_node_count,

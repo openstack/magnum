@@ -20,6 +20,7 @@ from magnum.api import expose
 from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum.common import policy
+from magnum.drivers.common.driver import Driver
 from magnum import objects
 
 
@@ -114,21 +115,23 @@ class ActionsController(base.Controller):
             nodegroup = objects.NodeGroup.get(
                 context, cluster.uuid, cluster_resize_req.nodegroup)
 
-        if nodegroup.role == 'master':
-            # NOTE(ttsiouts): Restrict the resize to worker nodegroups
-            raise exception.MasterNGResizeNotSupported()
-
         # NOTE(ttsiouts): Make sure that the new node count is within
         # the configured boundaries of the selected nodegroup.
-        if nodegroup.min_node_count > cluster_resize_req.node_count:
+        if (nodegroup.role != "master" and
+           nodegroup.min_node_count > cluster_resize_req.node_count):
             raise exception.NGResizeOutBounds(
                 nodegroup=nodegroup.name, min_nc=nodegroup.min_node_count,
                 max_nc=nodegroup.max_node_count)
-        if (nodegroup.max_node_count and
+        if (nodegroup.role != "master" and nodegroup.max_node_count and
                 nodegroup.max_node_count < cluster_resize_req.node_count):
             raise exception.NGResizeOutBounds(
                 nodegroup=nodegroup.name, min_nc=nodegroup.min_node_count,
                 max_nc=nodegroup.max_node_count)
+
+        if nodegroup.role == "master":
+            cluster_driver = Driver.get_driver_for_cluster(context, cluster)
+            cluster_driver.validate_master_resize(
+                cluster_resize_req.node_count)
 
         pecan.request.rpcapi.cluster_resize_async(
             cluster,
