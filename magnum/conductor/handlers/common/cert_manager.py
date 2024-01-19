@@ -189,22 +189,21 @@ def create_client_files(cluster, context=None):
             magnum_cert = get_cluster_magnum_cert(cluster, context)
 
             ca_file = open(cached_ca_file, "w+")
+            os.chmod(cached_ca_file, 0o600)
             ca_file.write(encodeutils.safe_decode(ca_cert.get_certificate()))
             ca_file.flush()
 
             key_file = open(cached_key_file, "w+")
+            os.chmod(cached_key_file, 0o600)
             key_file.write(encodeutils.safe_decode(
                 magnum_cert.get_decrypted_private_key()))
             key_file.flush()
 
             cert_file = open(cached_cert_file, "w+")
+            os.chmod(cached_cert_file, 0o600)
             cert_file.write(
                 encodeutils.safe_decode(magnum_cert.get_certificate()))
             cert_file.flush()
-
-            os.chmod(cached_ca_file, 0o600)
-            os.chmod(cached_key_file, 0o600)
-            os.chmod(cached_cert_file, 0o600)
 
         else:
             ca_file = open(cached_ca_file, "r")
