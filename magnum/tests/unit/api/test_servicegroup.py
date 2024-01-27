@@ -14,7 +14,6 @@ import datetime
 from unittest import mock
 
 from oslo_utils import timeutils
-import pytz
 
 from magnum.api import servicegroup as svc_grp
 from magnum.tests.unit.api import base as api_base
@@ -69,19 +68,23 @@ class TestServiceGroup(api_base.FunctionalTest):
         self.assertTrue(is_up)
 
     def test_service_is_up_alive_with_latest_update(self):
-        kwarg = {'created_at': datetime.datetime(1970, 1, 1,
-                                                 tzinfo=pytz.UTC),
-                 'updated_at': datetime.datetime(1970, 1, 1,
-                                                 tzinfo=pytz.UTC),
-                 'last_seen_up': timeutils.utcnow(True)}
+        kwarg = {
+            'created_at': datetime.datetime(1970, 1, 1,
+                                            tzinfo=datetime.timezone.utc),
+            'updated_at': datetime.datetime(1970, 1, 1,
+                                            tzinfo=datetime.timezone.utc),
+            'last_seen_up': timeutils.utcnow(True)
+        }
         magnum_object = obj_util.get_test_magnum_service_object(
             self.context, **kwarg)
         is_up = self.servicegroup_api.service_is_up(magnum_object)
         self.assertTrue(is_up)
 
     def test_service_is_up_down(self):
-        kwarg = {'last_seen_up': datetime.datetime(1970, 1, 1,
-                                                   tzinfo=pytz.UTC)}
+        kwarg = {
+            'last_seen_up': datetime.datetime(1970, 1, 1,
+                                              tzinfo=datetime.timezone.utc)
+        }
         magnum_object = obj_util.get_test_magnum_service_object(
             self.context, **kwarg)
         is_up = self.servicegroup_api.service_is_up(magnum_object)
@@ -89,7 +92,7 @@ class TestServiceGroup(api_base.FunctionalTest):
 
     def test_service_is_up_down_with_create(self):
         kwarg = {'created_at': datetime.datetime(1970, 1, 1,
-                                                 tzinfo=pytz.UTC)}
+                                                 tzinfo=datetime.timezone.utc)}
         magnum_object = obj_util.get_test_magnum_service_object(
             self.context, **kwarg)
         is_up = self.servicegroup_api.service_is_up(magnum_object)
@@ -97,29 +100,33 @@ class TestServiceGroup(api_base.FunctionalTest):
 
     def test_service_is_up_down_with_update(self):
         kwarg = {'updated_at': datetime.datetime(1970, 1, 1,
-                                                 tzinfo=pytz.UTC)}
+                                                 tzinfo=datetime.timezone.utc)}
         magnum_object = obj_util.get_test_magnum_service_object(
             self.context, **kwarg)
         is_up = self.servicegroup_api.service_is_up(magnum_object)
         self.assertFalse(is_up)
 
     def test_service_is_up_down_with_all_three(self):
-        kwarg = {'last_seen_up': datetime.datetime(1970, 1, 1,
-                                                   tzinfo=pytz.UTC),
-                 'created_at': datetime.datetime(1970, 1, 1,
-                                                 tzinfo=pytz.UTC),
-                 'updated_at': datetime.datetime(1970, 1, 1,
-                                                 tzinfo=pytz.UTC)}
+        kwarg = {
+            'last_seen_up': datetime.datetime(1970, 1, 1,
+                                              tzinfo=datetime.timezone.utc),
+            'created_at': datetime.datetime(1970, 1, 1,
+                                            tzinfo=datetime.timezone.utc),
+            'updated_at': datetime.datetime(1970, 1, 1,
+                                            tzinfo=datetime.timezone.utc)
+        }
         magnum_object = obj_util.get_test_magnum_service_object(
             self.context, **kwarg)
         is_up = self.servicegroup_api.service_is_up(magnum_object)
         self.assertFalse(is_up)
 
     def test_service_is_up_down_with_old_update(self):
-        kwarg = {'last_seen_up': datetime.datetime(1970, 1, 1,
-                                                   tzinfo=pytz.UTC),
-                 'created_at': timeutils.utcnow(True),
-                 'updated_at': timeutils.utcnow(True)}
+        kwarg = {
+            'last_seen_up': datetime.datetime(1970, 1, 1,
+                                              tzinfo=datetime.timezone.utc),
+            'created_at': timeutils.utcnow(True),
+            'updated_at': timeutils.utcnow(True)
+        }
         magnum_object = obj_util.get_test_magnum_service_object(
             self.context, **kwarg)
         is_up = self.servicegroup_api.service_is_up(magnum_object)
