@@ -14,8 +14,6 @@ Utils for testing the API service.
 """
 import datetime
 
-import pytz
-
 from magnum.api.controllers.v1 import cluster as cluster_controller
 from magnum.api.controllers.v1 import cluster_template as cluster_tmp_ctrl
 from magnum.api.controllers.v1 import federation as federation_controller
@@ -58,7 +56,7 @@ def quota_post_data(**kw):
 
 def mservice_get_data(**kw):
     """Simulate what the RPC layer will get from DB """
-    faketime = datetime.datetime(2001, 1, 1, tzinfo=pytz.UTC)
+    faketime = datetime.datetime(2001, 1, 1, tzinfo=datetime.timezone.utc)
     return {
         'binary': kw.get('binary', 'magnum-conductor'),
         'host': kw.get('host', 'fake-host'),
