@@ -81,108 +81,110 @@ class TestValidation(base.BaseTestCase):
                          exc.message)
 
     def _test_enforce_network_driver_types_create(
-            self,
-            network_driver_type,
-            network_driver_config_dict,
-            coe='kubernetes',
-            assert_raised=False):
-
+        self,
+        network_driver_type,
+        validator_allowed_network_drivers=None,
+        validator_default_network_driver=None,
+        coe="kubernetes",
+        assert_raised=False,
+    ):
         @v.enforce_network_driver_types_create()
         def test(self, cluster_template):
             pass
-
-        for key, val in network_driver_config_dict.items():
-            CONF.set_override(key, val, 'cluster_template')
 
         cluster_template = mock.MagicMock()
         cluster_template.name = 'test_cluster_template'
         cluster_template.network_driver = network_driver_type
         cluster_template.coe = coe
 
-        # Reload the validator module so that ClusterTemplate configs are
-        # re-evaluated.
-        reload_module(v)
-        validator = v.K8sValidator
-        validator.supported_network_drivers = ['flannel', 'type1', 'type2']
-
-        if assert_raised:
-            self.assertRaises(exception.InvalidParameterValue,
-                              test, self, cluster_template)
-        else:
-            test(self, cluster_template)
+        # NOTE(dalees): Patch the validator class variables directly, so the
+        #               changes are removed after the test.
+        with mock.patch.multiple(
+            v.K8sValidator,
+            supported_network_drivers=["flannel", "type1", "type2"],
+            allowed_network_drivers=validator_allowed_network_drivers
+            or v.K8sValidator.allowed_network_drivers,
+            default_network_driver=validator_default_network_driver
+            or v.K8sValidator.default_network_driver,
+        ):
+            if assert_raised:
+                self.assertRaises(
+                    exception.InvalidParameterValue,
+                    test,
+                    self,
+                    cluster_template,
+                )
+            else:
+                test(self, cluster_template)
         return cluster_template
 
     def test_enforce_network_driver_types_one_allowed_create(self):
         self._test_enforce_network_driver_types_create(
-            network_driver_type='type1',
-            network_driver_config_dict={
-                'kubernetes_allowed_network_drivers': ['type1']})
+            network_driver_type="type1",
+            validator_allowed_network_drivers=["type1"],
+        )
 
     def test_enforce_network_driver_types_two_allowed_create(self):
         self._test_enforce_network_driver_types_create(
-            network_driver_type='type1',
-            network_driver_config_dict={
-                'kubernetes_allowed_network_drivers': ['type1', 'type2']})
+            network_driver_type="type1",
+            validator_allowed_network_drivers=["type1", "type2"],
+        )
 
     def test_enforce_network_driver_types_not_allowed_create(self):
         self._test_enforce_network_driver_types_create(
-            network_driver_type='type1',
-            network_driver_config_dict={
-                'kubernetes_allowed_network_drivers': ['type2']},
-            assert_raised=True)
+            network_driver_type="type1",
+            validator_allowed_network_drivers=["type2"],
+            assert_raised=True,
+        )
 
     def test_enforce_network_driver_types_all_allowed_create(self):
         for driver in ['flannel', 'type1', 'type2']:
             self._test_enforce_network_driver_types_create(
                 network_driver_type=driver,
-                network_driver_config_dict={
-                    'kubernetes_allowed_network_drivers': ['all']})
+                validator_allowed_network_drivers=["all"],
+            )
 
     def test_enforce_network_driver_types_invalid_coe_create(self):
         self._test_enforce_network_driver_types_create(
-            network_driver_type='flannel',
-            network_driver_config_dict={},
-            coe='invalid_coe_type',
-            assert_raised=True)
+            network_driver_type="flannel",
+            coe="invalid_coe_type",
+            assert_raised=True,
+        )
 
     def test_enforce_network_driver_types_default_create(self):
         cluster_template = self._test_enforce_network_driver_types_create(
-            network_driver_type=None,
-            network_driver_config_dict={})
-        self.assertEqual('flannel', cluster_template.network_driver)
+            network_driver_type=None
+        )
+        self.assertEqual("flannel", cluster_template.network_driver)
 
     def test_enforce_network_driver_types_default_config_create(self):
         cluster_template = self._test_enforce_network_driver_types_create(
-            network_driver_type=None,
-            network_driver_config_dict={
-                'kubernetes_default_network_driver': 'type1'})
-        self.assertEqual('type1', cluster_template.network_driver)
+            network_driver_type=None, validator_default_network_driver="type1"
+        )
+        self.assertEqual("type1", cluster_template.network_driver)
 
     def test_enforce_network_driver_types_default_invalid_create(self):
         self._test_enforce_network_driver_types_create(
             network_driver_type=None,
-            network_driver_config_dict={
-                'kubernetes_default_network_driver': 'invalid_driver'},
-            assert_raised=True)
+            validator_default_network_driver="invalid_driver",
+            assert_raised=True,
+        )
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.api.utils.get_resource')
     def _test_enforce_network_driver_types_update(
-            self,
-            mock_get_resource,
-            mock_pecan_request,
-            network_driver_type,
-            network_driver_config_dict,
-            assert_raised=False):
-
+        self,
+        mock_get_resource,
+        mock_pecan_request,
+        network_driver_type,
+        validator_allowed_network_drivers=None,
+        assert_raised=False,
+    ):
         @v.enforce_network_driver_types_update()
         def test(self, cluster_template_ident, patch):
             pass
 
-        for key, val in network_driver_config_dict.items():
-            CONF.set_override(key, val, 'cluster_template')
-
-        cluster_template_ident = 'test_uuid_or_name'
+        cluster_template_ident = "test_uuid_or_name"
 
         patch = [{'path': '/network_driver', 'value': network_driver_type,
                   'op': 'replace'}]
@@ -192,45 +194,53 @@ class TestValidation(base.BaseTestCase):
         cluster_template.network_driver = network_driver_type
         mock_get_resource.return_value = cluster_template
 
-        # Reload the validator module so that ClusterTemplate configs are
-        # re-evaluated.
-        reload_module(v)
-        validator = v.K8sValidator
-        validator.supported_network_drivers = ['flannel', 'type1', 'type2']
-
-        if assert_raised:
-            self.assertRaises(exception.InvalidParameterValue,
-                              test, self, cluster_template_ident, patch)
-        else:
-            test(self, cluster_template_ident, patch)
-            mock_get_resource.assert_called_once_with(
-                'ClusterTemplate', cluster_template_ident)
+        # NOTE(dalees): Patch the validator class variables directly, so the
+        #               changes are removed after the test.
+        with mock.patch.multiple(
+            v.K8sValidator,
+            supported_network_drivers=["flannel", "type1", "type2"],
+            allowed_network_drivers=validator_allowed_network_drivers
+            or v.K8sValidator.allowed_network_drivers,
+        ):
+            if assert_raised:
+                self.assertRaises(
+                    exception.InvalidParameterValue,
+                    test,
+                    self,
+                    cluster_template_ident,
+                    patch,
+                )
+            else:
+                test(self, cluster_template_ident, patch)
+                mock_get_resource.assert_called_once_with(
+                    "ClusterTemplate", cluster_template_ident
+                )
 
     def test_enforce_network_driver_types_one_allowed_update(self):
         self._test_enforce_network_driver_types_update(
-            network_driver_type='type1',
-            network_driver_config_dict={
-                'kubernetes_allowed_network_drivers': ['type1']})
+            network_driver_type="type1",
+            validator_allowed_network_drivers=["type1"],
+        )
 
     def test_enforce_network_driver_types_two_allowed_update(self):
         self._test_enforce_network_driver_types_update(
-            network_driver_type='type1',
-            network_driver_config_dict={
-                'kubernetes_allowed_network_drivers': ['type1', 'type2']})
+            network_driver_type="type1",
+            validator_allowed_network_drivers=["type1", "type2"],
+        )
 
     def test_enforce_network_driver_types_not_allowed_update(self):
         self._test_enforce_network_driver_types_update(
-            network_driver_type='type1',
-            network_driver_config_dict={
-                'kubernetes_allowed_network_drivers': ['type2']},
-            assert_raised=True)
+            network_driver_type="type1",
+            validator_allowed_network_drivers=["type2"],
+            assert_raised=True,
+        )
 
     def test_enforce_network_driver_types_all_allowed_update(self):
         for driver in ['flannel', 'type1', 'type2']:
             self._test_enforce_network_driver_types_update(
                 network_driver_type=driver,
-                network_driver_config_dict={
-                    'kubernetes_allowed_network_drivers': ['all']})
+                validator_allowed_network_drivers=["all"],
+            )
 
     def _test_enforce_volume_driver_types_create(
             self,
@@ -320,15 +330,23 @@ class TestValidation(base.BaseTestCase):
         # re-evaluated.
         reload_module(v)
         validator = v.K8sValidator
-        validator.supported_volume_driver = ['cinder']
 
-        if assert_raised:
-            self.assertRaises(exception.InvalidParameterValue,
-                              test, self, cluster_template_ident, patch)
-        else:
-            test(self, cluster_template_ident, patch)
-            mock_get_resource.assert_called_once_with(
-                'ClusterTemplate', cluster_template_ident)
+        with mock.patch.multiple(
+            validator, supported_volume_driver=["cinder"]
+        ):
+            if assert_raised:
+                self.assertRaises(
+                    exception.InvalidParameterValue,
+                    test,
+                    self,
+                    cluster_template_ident,
+                    patch,
+                )
+            else:
+                test(self, cluster_template_ident, patch)
+                mock_get_resource.assert_called_once_with(
+                    "ClusterTemplate", cluster_template_ident
+                )
 
     def test_enforce_volume_driver_types_supported_replace_update(self):
         self._test_enforce_volume_driver_types_update(
