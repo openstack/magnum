@@ -2735,17 +2735,6 @@ The following software are managed as systemd services:
 
 The login user for this image is *core*.
 
-Kubernetes on Ironic
---------------------
-
-This image is built manually using diskimagebuilder. The scripts and
-instructions are included in `Magnum code repo
-<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/k8s_fedora_ironic_v1/image/kubernetes>`_.
-Currently Ironic is not fully supported yet, therefore more details will be
-provided when this driver has been fully tested.
-
-
-
 Notification
 ============
 

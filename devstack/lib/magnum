@@ -296,12 +296,6 @@ function magnum_register_image {
     if [ ! -z "$fedora_coreos" ]; then
         magnum_image_property=$magnum_image_property"fedora-coreos"
     fi
-    # os_distro property for fedora ironic image
-    local fedora_ironic="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -i "ironic" \
-                                                        | grep -io "fedora" || true;)"
-    if [ ! -z "$fedora_ironic" ]; then
-        magnum_image_property=$magnum_image_property"fedora"
-    fi
 
     # get the image name
     local image_filename=$(basename "$MAGNUM_GUEST_IMAGE_URL")

@@ -49,16 +49,6 @@
               export DEVSTACK_SUBNODE_CONFIG+=$'\n'"disable_service tempest"
           fi
 
-          if [ "{{ ironic }}" -eq 1 ] ; then
-              export PROJECTS="openstack/ironic $PROJECTS"
-              export PROJECTS="openstack/ironic-lib $PROJECTS"
-              export PROJECTS="openstack/ironic-python-agent $PROJECTS"
-              export PROJECTS="openstack/python-ironicclient $PROJECTS"
-              export PROJECTS="x/pyghmi $PROJECTS"
-              export PROJECTS="openstack/virtualbmc $PROJECTS"
-              export MAGNUM_GATE_SPECIAL="-ironic"
-          fi
-
           if [ "{{ horizon }}" -eq 0 ] ; then
               export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service horizon"
           else

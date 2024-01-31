@@ -13,7 +13,6 @@
 # under the License.
 
 import abc
-from neutronclient.common import exceptions as n_exception
 from unittest import mock
 
 import six
@@ -26,8 +25,6 @@ from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8sa_dr
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
 from magnum.drivers.k8s_fedora_coreos_v1 import driver as k8s_fcos_dr
 from magnum.drivers.k8s_fedora_coreos_v1 import template_def as k8s_fcos_tdef
-from magnum.drivers.k8s_fedora_ironic_v1 import driver as k8s_i_dr
-from magnum.drivers.k8s_fedora_ironic_v1 import template_def as k8si_tdef
 from magnum.tests import base
 
 from requests import exceptions as req_exceptions
@@ -61,17 +58,6 @@ class TemplateDefinitionTestCase(base.TestCase):
 
         self.assertIsInstance(definition,
                               k8sa_tdef.AtomicK8sTemplateDefinition)
-
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_get_bm_fedora_kubernetes_ironic_definition(self, mock_driver):
-        mock_driver.return_value = k8s_i_dr.Driver()
-        cluster_driver = driver.Driver.get_driver('bm',
-                                                  'fedora',
-                                                  'kubernetes')
-        definition = cluster_driver.get_template_definition()
-
-        self.assertIsInstance(definition,
-                              k8si_tdef.FedoraK8sIronicTemplateDefinition)
 
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_get_vm_fcos_kubernetes_definition(self, mock_driver):
@@ -1553,107 +1539,3 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         self.assertEqual(extra_params["master_lb_allowed_cidrs"],
                          "192.168.0.0/16,172.24.0.0/16")
-
-
-class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
-
-    def get_definition(self):
-        return k8s_i_dr.Driver().get_template_definition()
-
-    def assert_neutron_find(self, mock_neutron_v20_find,
-                            osc, cluster_template):
-        mock_neutron_v20_find.assert_called_once_with(
-            osc.neutron(),
-            'subnet',
-            cluster_template.fixed_subnet
-        )
-
-    def assert_raises_from_get_fixed_network_id(
-        self,
-        mock_neutron_v20_find,
-        exeption_from_neutron_client,
-        expected_exception_class
-    ):
-        definition = self.get_definition()
-        osc = mock.MagicMock()
-        cluster_template = mock.MagicMock()
-        mock_neutron_v20_find.side_effect = exeption_from_neutron_client
-
-        self.assertRaises(
-            expected_exception_class,
-            definition.get_fixed_network_id,
-            osc,
-            cluster_template
-        )
-
-    @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
-    def test_get_fixed_network_id(self, mock_neutron_v20_find):
-        expected_network_id = 'expected_network_id'
-
-        osc = mock.MagicMock()
-        cluster_template = mock.MagicMock()
-        definition = self.get_definition()
-        mock_neutron_v20_find.return_value = {
-            'ip_version': 4,
-            'network_id': expected_network_id,
-        }
-
-        self.assertEqual(
-            expected_network_id,
-            definition.get_fixed_network_id(osc, cluster_template)
-        )
-        self.assert_neutron_find(mock_neutron_v20_find, osc, cluster_template)
-
-    @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
-    def test_get_fixed_network_id_with_invalid_ip_ver(self,
-                                                      mock_neutron_v20_find):
-        osc = mock.MagicMock()
-        cluster_template = mock.MagicMock()
-        definition = self.get_definition()
-        mock_neutron_v20_find.return_value = {
-            'ip_version': 6,
-            'network_id': 'expected_network_id',
-        }
-
-        self.assertRaises(
-            exception.InvalidSubnet,
-            definition.get_fixed_network_id,
-            osc,
-            cluster_template
-        )
-
-    @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
-    def test_get_fixed_network_id_with_duplicated_name(self,
-                                                       mock_neutron_v20_find):
-        ex = n_exception.NeutronClientNoUniqueMatch(
-            resource='subnet',
-            name='duplicated-name'
-        )
-
-        self.assert_raises_from_get_fixed_network_id(
-            mock_neutron_v20_find,
-            ex,
-            exception.InvalidSubnet,
-        )
-
-    @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
-    def test_get_fixed_network_id_with_client_error(self,
-                                                    mock_neutron_v20_find):
-        ex = n_exception.BadRequest()
-
-        self.assert_raises_from_get_fixed_network_id(
-            mock_neutron_v20_find,
-            ex,
-            exception.InvalidSubnet,
-        )
-
-    @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
-    def test_get_fixed_network_id_with_server_error(self,
-                                                    mock_neutron_v20_find):
-        ex = n_exception.ServiceUnavailable()
-
-        self.assert_raises_from_get_fixed_network_id(
-            mock_neutron_v20_find,
-            ex,
-            n_exception.ServiceUnavailable,
-        )
