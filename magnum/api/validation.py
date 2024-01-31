@@ -68,7 +68,8 @@ def enforce_driver_supported():
     def wrapper(func, *args, **kwargs):
         cluster_template = args[1]
         cluster_distro = cluster_template.cluster_distro
-        if not cluster_distro:
+        driver_name = cluster_template.driver
+        if not cluster_distro or not driver_name:
             try:
                 cli = clients.OpenStackClients(pecan.request.context)
                 image_id = cluster_template.image_id
@@ -76,11 +77,13 @@ def enforce_driver_supported():
                                                          image_id,
                                                          'images')
                 cluster_distro = image.get('os_distro')
+                driver_name = image.get('magnum_driver')
             except Exception:
                 pass
         cluster_type = (cluster_template.server_type,
                         cluster_distro,
-                        cluster_template.coe)
+                        cluster_template.coe,
+                        driver_name)
         driver.Driver.get_driver(*cluster_type)
         return func(*args, **kwargs)
 

@@ -146,7 +146,8 @@ class Handler(object):
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
-                                                  ct.coe)
+                                                  ct.coe,
+                                                  ct.driver)
         # Update cluster
         try:
             conductor_utils.notify_about_cluster_operation(
@@ -182,7 +183,8 @@ class Handler(object):
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
-                                                  ct.coe)
+                                                  ct.coe,
+                                                  ct.driver)
         try:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING,
@@ -263,7 +265,8 @@ class Handler(object):
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
-                                                  ct.coe)
+                                                  ct.coe,
+                                                  ct.driver)
         # Backup the old node count so that we can restore it
         # in case of an exception.
         old_node_count = nodegroup.node_count
@@ -327,7 +330,8 @@ class Handler(object):
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
-                                                  ct.coe)
+                                                  ct.coe,
+                                                  ct.driver)
 
         # Upgrade cluster
         try:

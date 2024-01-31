@@ -1177,6 +1177,18 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_with_driver_name(self, mock_image_data):
+        mock_image = {'name': 'mock_name',
+                      'os_distro': 'fedora-atomic',
+                      'magnum_driver': 'mock_driver'}
+        mock_image_data.return_value = mock_image
+        bdict = apiutils.cluster_template_post_data()
+        resp = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, resp.status_int)
+        self.assertEqual(resp.json['driver'],
+                         mock_image.get('magnum_driver'))
+
 
 class TestDelete(api_base.FunctionalTest):
 

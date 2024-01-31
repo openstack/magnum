@@ -17,6 +17,7 @@ import abc
 import importlib_metadata as metadata
 from oslo_config import cfg
 from stevedore import driver
+from stevedore import exception as stevedore_exception
 
 from magnum.common import exception
 from magnum.objects import cluster_template
@@ -84,7 +85,7 @@ class Driver(object, metaclass=abc.ABCMeta):
         return cls.definitions
 
     @classmethod
-    def get_driver(cls, server_type, os, coe):
+    def get_driver(cls, server_type, os, coe, driver_name=None):
         """Get Driver.
 
         Returns the Driver class for the provided cluster_type.
@@ -121,6 +122,16 @@ class Driver(object, metaclass=abc.ABCMeta):
         definition_map = cls.get_drivers()
         cluster_type = (server_type, os, coe)
 
+        # if driver_name is specified, use that
+        if driver_name:
+            try:
+                found = driver.DriverManager("magnum.drivers",
+                                             driver_name).driver()
+                return found
+            except stevedore_exception.NoMatches:
+                raise exception.ClusterDriverNotSupported(
+                    driver_name=driver_name)
+
         if cluster_type not in definition_map:
             raise exception.ClusterTypeNotSupported(
                 server_type=server_type,
@@ -137,7 +148,8 @@ class Driver(object, metaclass=abc.ABCMeta):
     def get_driver_for_cluster(cls, context, cluster):
         ct = cluster_template.ClusterTemplate.get_by_uuid(
             context, cluster.cluster_template_id)
-        return cls.get_driver(ct.server_type, ct.cluster_distro, ct.coe)
+        return cls.get_driver(ct.server_type, ct.cluster_distro, ct.coe,
+                              ct.driver)
 
     def update_cluster_status(self, context, cluster, use_admin_ctx=False):
         """Update the cluster status based on underlying orchestration

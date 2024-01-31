@@ -267,6 +267,10 @@ class ClusterTypeNotSupported(NotSupported):
                 " not supported.")
 
 
+class ClusterDriverNotSupported(NotSupported):
+    message = _("Cluster driver (%(driver_name)s) not supported.")
+
+
 class RequiredParameterNotProvided(Invalid):
     message = _("Required parameter %(heat_param)s not provided.")
 

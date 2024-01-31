@@ -158,6 +158,9 @@ class ClusterTemplate(base.APIBase):
     tags = wtypes.StringType(min_length=0, max_length=255)
     """A comma separated list of tags."""
 
+    driver = wtypes.StringType(min_length=0, max_length=255)
+    """Driver name set explicitly"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.ClusterTemplate.fields:
@@ -413,6 +416,9 @@ class ClusterTemplatesController(base.Controller):
         cluster_template_dict['cluster_distro'] = image_data['os_distro']
         cluster_template_dict['project_id'] = context.project_id
         cluster_template_dict['user_id'] = context.user_id
+        # NOTE(jake): read driver from image for now, update client to provide
+        # this as param in the future
+        cluster_template_dict['driver'] = image_data.get('magnum_driver')
         # check permissions for making cluster_template public or hidden
         if cluster_template_dict['public'] or cluster_template_dict['hidden']:
             if not policy.enforce(context, "clustertemplate:publish", None,

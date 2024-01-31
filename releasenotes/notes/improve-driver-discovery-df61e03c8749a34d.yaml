@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Add a feature to prevent drivers clashing when multiple drivers are able to
+    provide the same functionality.
+
+    Drivers used to be selected based on a tuple of (server_type, os, coe). This
+    can be a problem if multiple drivers provides the same functionality, e.g. a
+    tuple like (vm, ubuntu, kubernetes).
+
+    To allow for this, it is now possible to explicitly specify a driver name,
+    instead of relying on the lookup. The driver name is the same as the
+    entrypoint name, and can be specified by a Cluster Template through the
+    Glance image property "magnum_driver".

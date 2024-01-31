@@ -58,6 +58,7 @@ def get_test_cluster_template(**kw):
         'floating_ip_enabled': kw.get('floating_ip_enabled', True),
         'hidden': kw.get('hidden', False),
         'tags': kw.get('tags', ""),
+        'driver': kw.get('driver', ""),
     }
 
 
