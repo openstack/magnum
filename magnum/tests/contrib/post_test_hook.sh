@@ -29,10 +29,7 @@ function create_test_data {
 
     coe=$1
     special=$2
-    if [ $coe == 'k8s-coreos' ]; then
-        local image_name="coreos"
-        local container_format="bare"
-    elif [ "${coe}${special}" == 'k8s-ironic' ]; then
+    if [ "${coe}${special}" == 'k8s-ironic' ]; then
         local bm_flavor_id=$(openstack flavor show baremetal -f value -c id)
         die_if_not_set $LINENO bm_flavor_id "Failed to get id of baremetal flavor"
         # NOTE(TheJulia): This issue was fixed in Feb 2018 as part of change

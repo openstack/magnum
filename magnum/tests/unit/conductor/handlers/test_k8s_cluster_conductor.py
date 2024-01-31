@@ -16,8 +16,8 @@ from unittest import mock
 from unittest.mock import patch
 
 import magnum.conf
-from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
 from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_dr
+from magnum.drivers.k8s_fedora_coreos_v1 import driver as k8s_fcos_dr
 from magnum import objects
 from magnum.tests import base
 
@@ -698,16 +698,21 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_extract_template_definition_coreos_with_disovery(
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_extract_template_definition_fcos_with_discovery(
             self,
+            mock_generate_csr_and_key,
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             mock_get_subnet):
-        self.cluster_template_dict['cluster_distro'] = 'coreos'
+        self.cluster_template_dict['cluster_distro'] = 'fedora-coreos'
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
@@ -720,7 +725,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
-        mock_driver.return_value = k8s_coreos_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
         mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
@@ -729,6 +734,16 @@ class TestClusterConductorWithK8s(base.TestCase):
                                                                  cluster)
 
         expected = {
+            'boot_volume_size': '60',
+            'boot_volume_type': 'lvmdriver-1',
+            'etcd_volume_type': '',
+            'max_node_count': 2,
+            'post_install_manifest_url': '',
+            'project_id': 'project_id',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy,
+            'kube_service_account_key': 'public_key',
+            'kube_service_account_private_key': 'private_key',
+            'cloud_provider_enabled': 'false',
             'ssh_key_name': 'keypair_id',
             'external_network': 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e',
             'fixed_network': 'fixed_network',
@@ -780,7 +795,6 @@ class TestClusterConductorWithK8s(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'ssh_public_key': 'ssh-rsa AAAAB3Nz',
-            'openstack_ca_coreos': '',
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
@@ -818,27 +832,32 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_extract_template_definition_coreos_no_discoveryurl(
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_extract_template_definition_fcos_no_discoveryurl(
             self,
+            mock_generate_csr_and_key,
             mock_driver,
             mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             reqget,
             mock_get_subnet):
-        self.cluster_template_dict['cluster_distro'] = 'coreos'
+        self.cluster_template_dict['cluster_distro'] = 'fedora-coreos'
         self.cluster_dict['discovery_url'] = None
         mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3',
                                   status_code=200)
         reqget.return_value = mock_req
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
-        mock_driver.return_value = k8s_coreos_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
         mock_get_subnet.return_value = self.fixed_subnet_cidr
 
         (template_path,
@@ -847,6 +866,16 @@ class TestClusterConductorWithK8s(base.TestCase):
                                                                  cluster)
 
         expected = {
+            'boot_volume_size': '60',
+            'boot_volume_type': 'lvmdriver-1',
+            'etcd_volume_type': '',
+            'max_node_count': 2,
+            'post_install_manifest_url': '',
+            'project_id': 'project_id',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy,
+            'kube_service_account_key': 'public_key',
+            'kube_service_account_private_key': 'private_key',
+            'cloud_provider_enabled': 'false',
             'ssh_key_name': 'keypair_id',
             'availability_zone': 'az_1',
             'external_network': 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e',
@@ -898,7 +927,6 @@ class TestClusterConductorWithK8s(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'ssh_public_key': 'ssh-rsa AAAAB3Nz',
-            'openstack_ca_coreos': '',
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
