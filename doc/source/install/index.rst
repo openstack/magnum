@@ -14,7 +14,7 @@ Magnum Installation Guide
 
 The Container Infrastructure Management service codenamed (magnum) is an
 OpenStack API service developed by the OpenStack Containers Team making
-container orchestration engines (COE) such as Docker Swarm and Kubernetes
+container orchestration engines (COE) such as Kubernetes
 available as first class resources in OpenStack. Magnum uses
 Heat to orchestrate an OS image which contains Docker and Kubernetes and
 runs that image in either virtual machines or bare metal in a cluster

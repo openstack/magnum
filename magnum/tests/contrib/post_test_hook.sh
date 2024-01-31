@@ -155,7 +155,7 @@ export MAGNUM_DIR="$BASE/new/magnum"
 sudo chown -R $USER:stack $MAGNUM_DIR
 
 # Run functional tests
-# Currently we support functional-api, functional-k8s, will support swarm.
+# Currently we support functional-api, functional-k8s.
 
 echo "Running magnum functional test suite for $1"
 

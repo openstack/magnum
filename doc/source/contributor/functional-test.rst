@@ -129,4 +129,4 @@ To run a specific test or group of tests, specify the test path as a positional 
 To avoid creating multiple clusters simultaneously, you can execute the tests
 with concurrency 1::
 
-    tox -e functional-swarm -- --concurrency 1
+    tox -e functional-k8s -- --concurrency 1

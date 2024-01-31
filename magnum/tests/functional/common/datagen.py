@@ -32,8 +32,6 @@ def random_int(min_int=1, max_int=100):
 def gen_coe_dep_network_driver(coe):
     allowed_driver_types = {
         'kubernetes': ['flannel', None],
-        'swarm': ['docker', 'flannel', None],
-        'swarm-mode': ['docker', None],
     }
     driver_types = allowed_driver_types[coe]
     return driver_types[random.randrange(0, len(driver_types))]
@@ -42,8 +40,6 @@ def gen_coe_dep_network_driver(coe):
 def gen_coe_dep_volume_driver(coe):
     allowed_driver_types = {
         'kubernetes': ['cinder', None],
-        'swarm': ['rexray', None],
-        'swarm-mode': ['rexray', None],
     }
     driver_types = allowed_driver_types[coe]
     return driver_types[random.randrange(0, len(driver_types))]
@@ -109,7 +105,7 @@ def cluster_template_data(**kwargs):
 
     data = {
         "name": data_utils.rand_name('cluster'),
-        "coe": "swarm-mode",
+        "coe": "kubernetes",
         "tls_disabled": False,
         "network_driver": None,
         "volume_driver": None,
@@ -249,26 +245,6 @@ def cluster_template_valid_data_with_specific_coe(coe):
 
     return cluster_template_data(keypair_id=config.Config.keypair_id,
                                  image_id=config.Config.image_id, coe=coe)
-
-
-def valid_swarm_mode_cluster_template(is_public=False):
-    """Generates a valid swarm-mode cluster_template with valid data
-
-    :returns: ClusterTemplateEntity with generated data
-    """
-    master_flavor_id = config.Config.master_flavor_id
-    return cluster_template_data(image_id=config.Config.image_id,
-                                 flavor_id=config.Config.flavor_id,
-                                 public=is_public,
-                                 dns_nameserver=config.Config.dns_nameserver,
-                                 master_flavor_id=master_flavor_id,
-                                 coe="swarm-mode",
-                                 cluster_distro=None,
-                                 external_network_id=config.Config.nic_id,
-                                 http_proxy=None, https_proxy=None,
-                                 no_proxy=None, network_driver=None,
-                                 volume_driver=None, labels={},
-                                 tls_disabled=False)
 
 
 def cluster_data(name=data_utils.rand_name('cluster'),

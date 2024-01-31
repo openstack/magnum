@@ -42,7 +42,7 @@ def get_test_cluster_template(**kw):
         'docker_storage_driver': kw.get('docker_storage_driver',
                                         'devicemapper'),
         'cluster_distro': kw.get('cluster_distro', 'fedora-atomic'),
-        'coe': kw.get('coe', 'swarm'),
+        'coe': kw.get('coe', 'kubernetes'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
         'labels': kw.get('labels', {'key1': 'val1', 'key2': 'val2'}),

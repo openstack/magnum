@@ -100,53 +100,6 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u kube-enable-monitoring --no-pager" kube-enable-monitoring.service.log
     remote_exec $SSH_USER "sudo atomic containers list" atomic-containers-list.log
     remote_exec $SSH_USER "sudo atomic images list" atomic-images-list.log
-elif [[ "$COE" == "swarm" || "$COE" == "swarm-mode" ]]; then
-    SSH_USER=fedora
-    remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
-    remote_exec $SSH_USER "sudo journalctl -u cloud-config --no-pager" cloud-config.log
-    remote_exec $SSH_USER "sudo journalctl -u cloud-final --no-pager" cloud-final.log
-    remote_exec $SSH_USER "sudo journalctl -u cloud-init-local --no-pager" cloud-init-local.log
-    remote_exec $SSH_USER "sudo journalctl -u cloud-init --no-pager" cloud-init.log
-    remote_exec $SSH_USER "sudo cat /var/log/cloud-init-output.log" cloud-init-output.log
-    remote_exec $SSH_USER "sudo journalctl -u etcd --no-pager" etcd.log
-    remote_exec $SSH_USER "sudo journalctl -u swarm-manager --no-pager" swarm-manager.log
-    remote_exec $SSH_USER "sudo journalctl -u swarm-agent --no-pager" swarm-agent.log
-    remote_exec $SSH_USER "sudo journalctl -u swarm-worker --no-pager" swarm-worker.log
-    remote_exec $SSH_USER "sudo journalctl -u docker-storage-setup --no-pager" docker-storage-setup.log
-    remote_exec $SSH_USER "sudo systemctl status docker-storage-setup -l" docker-storage-setup.service.status.log
-    remote_exec $SSH_USER "sudo systemctl show docker-storage-setup --no-pager" docker-storage-setup.service.show.log
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-storage-setup 2>/dev/null" docker-storage-setup.sysconfig.env.log
-    remote_exec $SSH_USER "sudo journalctl -u docker --no-pager" docker.log
-    remote_exec $SSH_USER "sudo journalctl -u docker-containerd --no-pager" docker-containerd.log
-    remote_exec $SSH_USER "sudo systemctl status docker.socket -l" docker.socket.status.log
-    remote_exec $SSH_USER "sudo systemctl show docker.socket --no-pager" docker.socket.show.log
-    remote_exec $SSH_USER "sudo systemctl status docker -l" docker.service.status.log
-    remote_exec $SSH_USER "sudo systemctl show docker --no-pager" docker.service.show.log
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker" docker.sysconfig.env.log
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-storage" docker-storage.sysconfig.env.log
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-network" docker-network.sysconfig.env.log
-    remote_exec $SSH_USER "sudo timeout 60s docker ps --all=true --no-trunc=true" docker-containers.log
-    remote_exec $SSH_USER "sudo tar zcvf - /var/lib/docker/containers 2>/dev/null" docker-container-configs.tar.gz
-    remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
-    remote_exec $SSH_USER "sudo ip a" ipa.log
-    remote_exec $SSH_USER "sudo netstat -an" netstat.log
-    remote_exec $SSH_USER "sudo df -h" dfh.log
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/heat-params" heat-params
-    remote_exec $SSH_USER "sudo cat /etc/etcd/etcd.conf" etcd.conf
-    remote_exec $SSH_USER "sudo ls -lR /etc/docker" docker-certs
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/flanneld" flanneld.sysconfig
-    remote_exec $SSH_USER "sudo cat /etc/sysconfig/flannel-network.json" flannel-network.json.sysconfig
-    remote_exec $SSH_USER "sudo cat /usr/local/bin/flannel-docker-bridge" bin-flannel-docker-bridge
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/docker.service.d/flannel.conf" docker-flannel.conf
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf" flannel-docker-bridge.conf
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flannel-docker-bridge.service" flannel-docker-bridge.service
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-manager.service" swarm-manager.service
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-manager-failure.service" swarm-manager-failure.service
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-agent.service" swarm-agent.service
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-agent-failure.service" swarm-agent-failure.service
-    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-worker.service" swarm-worker.service
-    remote_exec $SSH_USER "sudo cat /usr/local/bin/magnum-start-swarm-manager" bin-magnum-start-swarm-manager
-    remote_exec $SSH_USER "sudo cat /usr/local/bin/magnum-start-swarm-worker" bin-magnum-start-swarm-worker
 else
     echo "ERROR: Unknown COE '${COE}'"
     EXIT_CODE=1

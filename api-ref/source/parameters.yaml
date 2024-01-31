@@ -96,9 +96,8 @@ coe:
   required: true
   description: |
     Specify the Container Orchestration Engine to use. Supported COEs
-    include ``kubernetes``, ``swarm``. If your environment has
-    additional cluster drivers installed, refer to the cluster driver
-    documentation for the new COE names.
+    include ``kubernetes``. If your environment has additional cluster drivers
+    installed, refer to the cluster driver documentation for the new COE names.
 coe_version:
   type: string
   in: body

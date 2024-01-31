@@ -99,9 +99,9 @@ class ContainerStatus(fields.Enum):
 
 class ClusterType(fields.Enum):
     ALL = (
-        KUBERNETES, SWARM, SWARM_MODE,
+        KUBERNETES,
     ) = (
-        'kubernetes', 'swarm', 'swarm-mode',
+        'kubernetes',
     )
 
     def __init__(self):

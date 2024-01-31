@@ -52,16 +52,3 @@ any coe type. All of proxy parameters are optional.
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
 
-.. code-block:: console
-
-   $ openstack coe cluster template create swarm-cluster-template \
-                       --image fedora-atomic-latest \
-                       --keypair testkey \
-                       --external-network public \
-                       --dns-nameserver 8.8.8.8 \
-                       --flavor m1.small \
-                       --coe swarm \
-                       --http-proxy <http://abc-proxy.com:8080> \
-                       --https-proxy <https://abc-proxy.com:8080> \
-                       --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
-

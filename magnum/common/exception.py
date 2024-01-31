@@ -333,10 +333,6 @@ class UnsupportedK8sQuantityFormat(Invalid):
     message = _("Unsupported quantity format for k8s cluster.")
 
 
-class UnsupportedDockerQuantityFormat(Invalid):
-    message = _("Unsupported quantity format for Swarm cluster.")
-
-
 class FlavorNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
     message = _("Unable to find flavor %(flavor)s.")

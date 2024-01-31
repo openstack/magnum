@@ -281,11 +281,6 @@ class ClusterTemplatesController(base.Controller):
         "The fedora ironic driver is deprecated. "
         "The driver will be removed in a future Magnum version.")
 
-    _docker_swarm_deprecation_note = (
-        "The swarm coe is deprecated as the fedora_atomic distro is EOL. "
-        "Please migrate to using the kubernetes coe. "
-        "The swarm coe will be removed in a future Magnum version.")
-
     def _generate_name_for_cluster_template(self, context):
         """Generate a random name like: zeta-22-model."""
 
@@ -458,12 +453,6 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._fedora_ironic_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._fedora_ironic_deprecation_note)
-
-        if (cluster_template_dict['coe'] == 'swarm' or
-                cluster_template_dict['coe'] == 'swarm-mode'):
-            warnings.warn(self._docker_swarm_deprecation_note,
-                          DeprecationWarning)
-            LOG.warning(self._docker_swarm_deprecation_note)
 
         # NOTE(yuywz): We will generate a random human-readable name for
         # cluster_template if the name is not specified by user.

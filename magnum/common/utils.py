@@ -233,35 +233,6 @@ def get_k8s_quantity(quantity):
         raise exception.UnsupportedK8sQuantityFormat()
 
 
-def get_docker_quantity(quantity):
-    """This function is used to get swarm Memory quantity.
-
-     Memory format must be in the format of:
-
-        <unsignedNumber><suffix>
-        suffix = b | k | m | g
-
-    eg:  100m = 104857600
-    :raises: exception.UnsupportedDockerQuantityFormat if the quantity string
-             is a unsupported value
-    """
-    matched_unsigned_number = re.search(r"(^\d+)", quantity)
-
-    if matched_unsigned_number is None:
-        raise exception.UnsupportedDockerQuantityFormat()
-    else:
-        unsigned_number = matched_unsigned_number.group(0)
-
-    suffix = quantity.replace(unsigned_number, '', 1)
-    if suffix == '':
-        return int(quantity)
-
-    if re.search(r"^(b|k|m|g)$", suffix):
-        return int(unsigned_number) * DOCKER_MEMORY_UNITS[suffix]
-
-    raise exception.UnsupportedDockerQuantityFormat()
-
-
 def generate_password(length, symbolgroups=None):
     """Generate a random password from the supplied symbol groups.
 
