@@ -22,8 +22,8 @@ import six.moves.urllib.parse as urlparse
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer
+from sqlalchemy.orm import declarative_base
 from sqlalchemy import schema
 from sqlalchemy import Text
 from sqlalchemy.types import TypeDecorator, TEXT, String
