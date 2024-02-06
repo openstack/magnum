@@ -62,8 +62,8 @@
               labels:
                 kube_tag: v1.27.8-rancher2
                 container_runtime: containerd
-                containerd_version: 1.7.5
-                containerd_tarball_sha256: 21ff8709d9a0b09701f2f276d93b8aa298431c3c21a130fc123e8d74bb9556d5
+                containerd_version: 1.6.28
+                containerd_tarball_sha256: f70736e52d61e5ad225f4fd21643b5ca1220013ab8b6c380434caeefb572da9b
 
 - job:
     name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
