@@ -28,16 +28,12 @@ The installation of these services is controlled with the following labels:
 _`metrics_server_enabled`
   metrics_server_enabled is used to enable disable the installation of
   the metrics server.
-  To use this service tiller_enabled must be true when using
-  helm_client_tag<v3.0.0.
   Train default: true
   Stein default: true
 
 _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the
   stable/prometheus-operator helm chart.
-  To use this service tiller_enabled must be true when using
-  helm_client_tag<v3.0.0.
   Default: false
 
 _`prometheus_adapter_enabled`

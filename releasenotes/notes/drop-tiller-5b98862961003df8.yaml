@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    ``Tiller`` support has been dropped, following labels are not functional
+    anymore:
+    * ``tiller_enabled``
+    * ``tiller_tag``
+    * ``tiller_namespace``
