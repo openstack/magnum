@@ -598,7 +598,7 @@ parameters:
   calico_tag:
     type: string
     description: tag of the calico containers used to provision the calico node
-    default: v3.21.2
+    default: v3.25.2
 
   calico_kube_controllers_tag:
     type: string
@@ -1125,6 +1125,10 @@ resources:
         - protocol: tcp
           port_range_min: 179
           port_range_max: 179
+          # Calico - Typha
+        - protocol: tcp
+          port_range_min: 5473
+          port_range_max: 5473
         - protocol: tcp
           port_range_min: 7080
           port_range_max: 7080
@@ -1502,6 +1506,7 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/enable-cinder-csi.sh
             # Helm Based Installation Configuration Scripts
             - get_file: ../../common/templates/kubernetes/fragments/install-helm.sh
+            - get_file: ../../common/templates/kubernetes/helm/calico-service.sh
             - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/helm/prometheus-operator.sh}
