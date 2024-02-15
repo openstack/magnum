@@ -2265,8 +2265,6 @@ network-driver
   +========+=============+
   | Flannel| supported   |
   +--------+-------------+
-  | Docker | unsupported |
-  +--------+-------------+
   | Calico | supported   |
   +--------+-------------+
 

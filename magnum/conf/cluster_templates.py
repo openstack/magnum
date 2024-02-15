@@ -19,11 +19,8 @@ cluster_template_group = cfg.OptGroup(name='cluster_template',
 
 cluster_template_opts = [
     cfg.ListOpt('kubernetes_allowed_network_drivers',
-                default=['all'],
-                help=_("Allowed network drivers for kubernetes "
-                       "cluster-templates. Use 'all' keyword to allow all "
-                       "drivers supported for kubernetes cluster-templates. "
-                       "Supported network drivers include flannel."),
+                default=['flannel', 'calico'],
+                help=_("Allowed network drivers for kubernetes."),
                 ),
     cfg.StrOpt('kubernetes_default_network_driver',
                default='flannel',
