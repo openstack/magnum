@@ -19,8 +19,6 @@ from cryptography import x509 as c_x509
 from cryptography.x509.oid import NameOID
 from unittest import mock
 
-import six
-
 from magnum.common import exception
 from magnum.common.x509 import operations
 from magnum.tests import base
@@ -30,11 +28,11 @@ class TestX509(base.BaseTestCase):
 
     def setUp(self):
         super(TestX509, self).setUp()
-        self.issuer_name = six.u("fake-issuer")
-        self.subject_name = six.u("fake-subject")
-        self.organization_name = six.u("fake-organization")
-        self.ca_encryption_password = six.b("fake-ca-password")
-        self.encryption_password = six.b("fake-password")
+        self.issuer_name = "fake-issuer"
+        self.subject_name = "fake-subject"
+        self.organization_name = "fake-organization"
+        self.ca_encryption_password = b"fake-ca-password"
+        self.encryption_password = b"fake-password"
 
     def _load_pems(self, keypairs, encryption_password):
         private_key = serialization.load_pem_private_key(
@@ -131,7 +129,7 @@ class TestX509(base.BaseTestCase):
         self.assertIn(basic_constraints, cert.extensions)
 
     def test_generate_ca_certificate_with_bytes_issuer_name(self):
-        issuer_name = six.b("bytes-issuer-name")
+        issuer_name = b"bytes-issuer-name"
         cert, _ = self._generate_ca_certificate(issuer_name)
 
         issuer_name = issuer_name.decode('utf-8')
@@ -194,16 +192,16 @@ class TestX509(base.BaseTestCase):
         private_key = self._generate_private_key()
         private_key = self._private_bytes(private_key)
 
-        self.assertIsInstance(private_key, six.binary_type)
+        self.assertIsInstance(private_key, bytes)
         private_key = operations._load_pem_private_key(private_key)
         self.assertIsInstance(private_key, rsa.RSAPrivateKey)
 
     def test_load_pem_private_key_with_unicode_private_key(self):
         private_key = self._generate_private_key()
         private_key = self._private_bytes(private_key)
-        private_key = six.text_type(private_key.decode('utf-8'))
+        private_key = private_key.decode('utf-8')
 
-        self.assertIsInstance(private_key, six.text_type)
+        self.assertIsInstance(private_key, str)
         private_key = operations._load_pem_private_key(private_key)
         self.assertIsInstance(private_key, rsa.RSAPrivateKey)
 
@@ -213,7 +211,7 @@ class TestX509(base.BaseTestCase):
         private_key = self._generate_private_key()
         csr_obj = self._build_csr(private_key)
         csr = csr_obj.public_bytes(serialization.Encoding.PEM)
-        csr = six.text_type(csr.decode('utf-8'))
+        csr = csr.decode('utf-8')
 
         mock_load_pem.return_value = csr_obj
         operations.sign(csr, self.issuer_name, ca_key,
@@ -225,7 +223,7 @@ class TestX509(base.BaseTestCase):
         private_key = self._generate_private_key()
         csr_obj = self._build_csr(private_key)
         csr = csr_obj.public_bytes(serialization.Encoding.PEM)
-        csr = six.text_type(csr.decode('utf-8'))
+        csr = csr.decode('utf-8')
 
         mock_load_pem.return_value = csr_obj
         certificate = operations.sign(csr, self.issuer_name,
@@ -238,7 +236,6 @@ class TestX509(base.BaseTestCase):
     def test_sign_with_invalid_csr(self):
         ca_key = self._generate_private_key()
         csr = 'test'
-        csr = six.u(csr)
 
         self.assertRaises(exception.InvalidCsr,
                           operations.sign,
