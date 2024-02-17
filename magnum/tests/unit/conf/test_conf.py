@@ -16,7 +16,6 @@ import collections
 from unittest import mock
 
 from oslo_config import cfg
-import six
 
 from magnum.conf import opts
 from magnum.tests import base
@@ -26,7 +25,7 @@ class ConfTestCase(base.TestCase):
 
     def test_list_opts(self):
         for group, opt_list in opts.list_opts():
-            if isinstance(group, six.string_types):
+            if isinstance(group, str):
                 self.assertEqual(group, 'DEFAULT')
             else:
                 self.assertIsInstance(group, cfg.OptGroup)

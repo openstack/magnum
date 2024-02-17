@@ -17,8 +17,6 @@
 from unittest import mock
 from unittest.mock import patch
 
-import six
-
 from heatclient import exc
 from oslo_service import loopingcall
 from pycadf import cadftaxonomy as taxonomy
@@ -380,9 +378,9 @@ class TestHandler(db_base.DbTestCase):
                                               mock_cert_manager,
                                               mock_trust_manager,
                                               mock_cluster_create):
-        error_message = six.u("""Invalid stack name 测试集群-zoyh253geukk
-                              must contain only alphanumeric or "_-."
-                              characters, must start with alpha""")
+        error_message = ("Invalid stack name 测试集群-zoyh253geukk must "
+                         "contain only alphanumeric or \"_-.\" characters, "
+                         "must start with alpha")
         mock_dr = mock.MagicMock()
         mock_driver.return_value = mock_dr
         mock_dr.create_cluster.side_effect = exc.HTTPBadRequest(error_message)
