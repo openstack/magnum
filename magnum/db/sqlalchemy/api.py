@@ -13,7 +13,6 @@
 # under the License.
 
 """SQLAlchemy storage backend."""
-import six
 
 from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
@@ -440,7 +439,7 @@ class Connection(api.Connection):
                 # NOTE(flwang): We only allow to update ClusterTemplate to be
                 # public, hidden and rename
                 if (not self._is_publishing_cluster_template(values) and
-                        list(six.viewkeys(values)) != ["name"]):
+                        list(values.keys()) != ["name"]):
                     raise exception.ClusterTemplateReferenced(
                         clustertemplate=cluster_template_id)
 

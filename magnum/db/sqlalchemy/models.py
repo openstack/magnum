@@ -15,10 +15,10 @@
 """
 SQLAlchemy models for container service
 """
+from urllib import parse as urlparse
 
 from oslo_db.sqlalchemy import models
 from oslo_serialization import jsonutils
-import six.moves.urllib.parse as urlparse
 from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import DateTime
