@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import importlib
 from unittest import mock
-
-from six.moves import reload_module
 
 from magnum.api import validation as v
 from magnum.common import exception
@@ -330,7 +329,7 @@ class TestValidation(base.BaseTestCase):
 
         # Reload the validator module so that ClusterTemplate configs are
         # re-evaluated.
-        reload_module(v)
+        importlib.reload(v)
         validator = v.K8sValidator
 
         with mock.patch.multiple(

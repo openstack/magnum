@@ -12,9 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import io
 from unittest import mock
-
-import six
 
 from magnum.cmd import db_manage
 from magnum.tests import base
@@ -35,7 +34,7 @@ class TestMagnumDbManage(base.TestCase):
     @mock.patch('magnum.db.migration.version')
     @mock.patch('sys.argv', ['magnum-db-manage', 'version'])
     def test_db_manage_version(self, mock_version):
-        with mock.patch('sys.stdout', new=six.StringIO()) as fakeOutput:
+        with mock.patch('sys.stdout', new=io.StringIO()) as fakeOutput:
             mock_version.return_value = '123456'
             db_manage.main()
             self.assertEqual('Current DB revision is 123456\n',

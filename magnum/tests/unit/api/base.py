@@ -19,12 +19,12 @@
 
 # NOTE(deva): import auth_token so we can override a config option
 from unittest import mock
+from urllib import parse as urlparse
 
 from keystonemiddleware import auth_token  # noqa
 from oslo_config import cfg
 import pecan
 import pecan.testing
-from six.moves.urllib import parse as urlparse
 
 from magnum.api import hooks
 from magnum.tests.unit.db import base

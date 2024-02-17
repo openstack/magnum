@@ -15,8 +15,6 @@
 
 from unittest import mock
 
-import six
-
 from oslo_config import cfg
 import oslo_messaging as messaging
 
@@ -107,13 +105,8 @@ class TestNoExceptionTracebackHook(api_base.FunctionalTest):
         # instead of'\n'.join(trace). But since RemoteError is kind of very
         # rare thing (happens due to wrong deserialization settings etc.)
         # we don't care about this garbage.
-        if six.PY2:
-            expected_msg = ("Remote error: %s %s"
-                            % (test_exc_type, self.MSG_WITHOUT_TRACE)
-                            + "\n[u'")
-        else:
-            expected_msg = ("Remote error: %s %s"
-                            % (test_exc_type, self.MSG_WITHOUT_TRACE) + "\n['")
+        expected_msg = ("Remote error: %s %s"
+                        % (test_exc_type, self.MSG_WITHOUT_TRACE) + "\n['")
         actual_msg = response.json['errors'][0]['detail']
         self.assertEqual(expected_msg, actual_msg)
 

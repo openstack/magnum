@@ -12,11 +12,11 @@
 
 import datetime
 from unittest import mock
+from urllib import parse as urlparse
 
 from oslo_config import cfg
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-from six.moves.urllib import parse as urlparse
 from webtest.app import AppError
 from wsme import types as wtypes
 
