@@ -16,8 +16,6 @@ import abc
 from neutronclient.common import exceptions as n_exception
 from unittest import mock
 
-import six
-
 from magnum.common import exception
 import magnum.conf
 from magnum.drivers.common import driver
@@ -259,8 +257,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         )
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseK8sTemplateDefinitionTestCase(base.TestCase):
+class BaseK8sTemplateDefinitionTestCase(base.TestCase, metaclass=abc.ABCMeta):
 
     def setUp(self):
         super(BaseK8sTemplateDefinitionTestCase, self).setUp()
