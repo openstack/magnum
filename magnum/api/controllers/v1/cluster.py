@@ -19,7 +19,6 @@ from oslo_log import log as logging
 from oslo_utils import strutils
 from oslo_utils import timeutils
 import pecan
-import six
 import warnings
 import wsme
 from wsme import types as wtypes
@@ -92,10 +91,10 @@ class Cluster(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
-                                                          six.integer_types,
-                                                          bool,
-                                                          float))
+    labels = wtypes.DictType(
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """One or more key/value pairs"""
 
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
@@ -167,17 +166,19 @@ class Cluster(base.APIBase):
 
     labels_overridden = wtypes.DictType(
             wtypes.text, types.MultiType(
-                wtypes.text, six.integer_types, bool, float))
+                wtypes.text, int, bool, float))
     """Contains labels that have a value different than the parent labels."""
 
     labels_added = wtypes.DictType(
-            wtypes.text, types.MultiType(
-                wtypes.text, six.integer_types, bool, float))
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """Contains labels that do not exist in the parent."""
 
     labels_skipped = wtypes.DictType(
-            wtypes.text, types.MultiType(
-                wtypes.text, six.integer_types, bool, float))
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """Contains labels that exist in the parent but were not inherited."""
 
     master_lb_enabled = wsme.wsattr(types.boolean)

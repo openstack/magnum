@@ -14,7 +14,6 @@
 #    under the License.
 
 import inspect
-import six
 
 from oslo_utils import strutils
 from oslo_utils import uuidutils
@@ -29,7 +28,7 @@ from magnum.i18n import _
 class DNSListType(wtypes.UserType):
     """A comman delimited dns nameserver list"""
 
-    basetype = six.string_types
+    basetype = str
     name = "dnslist"
 
     @staticmethod

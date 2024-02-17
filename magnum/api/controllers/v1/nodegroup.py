@@ -14,7 +14,6 @@
 #    under the License.
 
 import pecan
-import six
 import uuid
 import wsme
 from wsme import types as wtypes
@@ -80,10 +79,10 @@ class NodeGroup(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
-                                                          six.integer_types,
-                                                          bool,
-                                                          float))
+    labels = wtypes.DictType(
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """One or more key/value pairs"""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -130,18 +129,21 @@ class NodeGroup(base.APIBase):
     """Indicates whether the labels will be merged with the cluster labels."""
 
     labels_overridden = wtypes.DictType(
-            wtypes.text, types.MultiType(
-                wtypes.text, six.integer_types, bool, float))
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """Contains labels that have a value different than the parent labels."""
 
     labels_added = wtypes.DictType(
-            wtypes.text, types.MultiType(
-                wtypes.text, six.integer_types, bool, float))
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """Contains labels that do not exist in the parent."""
 
     labels_skipped = wtypes.DictType(
-            wtypes.text, types.MultiType(
-                wtypes.text, six.integer_types, bool, float))
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """Contains labels that exist in the parent but were not inherited."""
 
     def __init__(self, **kwargs):

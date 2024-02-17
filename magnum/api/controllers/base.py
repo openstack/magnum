@@ -14,7 +14,6 @@
 
 import datetime
 import operator
-import six
 
 from magnum.api.controllers import versions
 from magnum.api import versioned_method
@@ -90,8 +89,7 @@ class ControllerMetaclass(type):
                                                        cls_dict)
 
 
-@six.add_metaclass(ControllerMetaclass)
-class Controller(rest.RestController):
+class Controller(rest.RestController, metaclass=ControllerMetaclass):
     """Base Rest Controller"""
 
     def __getattribute__(self, key):

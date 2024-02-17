@@ -15,7 +15,6 @@
 from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
-import six
 import warnings
 import wsme
 from wsme import types as wtypes
@@ -117,10 +116,10 @@ class ClusterTemplate(base.APIBase):
     registry_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the docker registry is enabled"""
 
-    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
-                                                          six.integer_types,
-                                                          bool,
-                                                          float))
+    labels = wtypes.DictType(
+        wtypes.text,
+        types.MultiType(wtypes.text, int, bool, float)
+    )
     """One or more key/value pairs"""
 
     tls_disabled = wsme.wsattr(types.boolean, default=False)
