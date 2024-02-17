@@ -23,7 +23,6 @@ from magnum.drivers.heat import k8s_template_def
 from magnum.drivers.heat import template_def
 from magnum.i18n import _
 from oslo_config import cfg
-import six
 
 CONF = cfg.CONF
 
@@ -165,8 +164,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             extra_params['cert_manager_api'] = cert_manager_api
             ca_cert = cert_manager.get_cluster_ca_certificate(cluster,
                                                               context=context)
-            if six.PY3 and isinstance(ca_cert.get_private_key_passphrase(),
-                                      six.text_type):
+            if isinstance(ca_cert.get_private_key_passphrase(), str):
                 extra_params['ca_key'] = x509.decrypt_key(
                     ca_cert.get_private_key(),
                     ca_cert.get_private_key_passphrase().encode()

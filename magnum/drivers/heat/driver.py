@@ -13,7 +13,6 @@
 import abc
 import collections
 import os
-import six
 
 from string import ascii_letters
 from string import digits
@@ -47,8 +46,7 @@ NodeGroupStatus = collections.namedtuple('NodeGroupStatus',
                                          'name status reason is_default')
 
 
-@six.add_metaclass(abc.ABCMeta)
-class HeatDriver(driver.Driver):
+class HeatDriver(driver.Driver, metaclass=abc.ABCMeta):
     """Base Driver class for using Heat
 
        Abstract class for implementing Drivers that leverage OpenStack Heat for

@@ -13,7 +13,6 @@
 # under the License.
 
 import abc
-import six
 
 import importlib_metadata as metadata
 from oslo_config import cfg
@@ -26,8 +25,7 @@ from magnum.objects import cluster_template
 CONF = cfg.CONF
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Driver(object):
+class Driver(object, metaclass=abc.ABCMeta):
 
     definitions = None
 

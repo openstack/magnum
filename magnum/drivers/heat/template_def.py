@@ -18,7 +18,6 @@ from oslo_log import log as logging
 from oslo_utils import strutils
 from oslo_utils import uuidutils
 import requests
-import six
 
 from magnum.common import clients
 from magnum.common import exception
@@ -188,8 +187,7 @@ class NodeGroupOutputMapping(OutputMapping):
         return None
 
 
-@six.add_metaclass(abc.ABCMeta)
-class TemplateDefinition(object):
+class TemplateDefinition(object, metaclass=abc.ABCMeta):
     """A mapping between Magnum objects and Heat templates.
 
     A TemplateDefinition is essentially a mapping between Magnum objects
