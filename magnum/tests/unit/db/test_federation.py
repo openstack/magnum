@@ -12,7 +12,6 @@
 
 """Tests for manipulating Federations via the DB API"""
 from oslo_utils import uuidutils
-import six
 
 from magnum.common import context
 from magnum.common import exception
@@ -73,7 +72,7 @@ class DbFederationTestCase(base.DbTestCase):
         for _ in range(5):
             federation = utils.create_test_federation(
                 uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(federation.uuid))
+            uuids.append(str(federation.uuid))
 
         res = self.dbapi.get_federation_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -84,7 +83,7 @@ class DbFederationTestCase(base.DbTestCase):
         for _ in range(5):
             federation = utils.create_test_federation(
                 uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(federation.uuid))
+            uuids.append(str(federation.uuid))
 
         res = self.dbapi.get_federation_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -179,7 +178,7 @@ class DbFederationTestCase(base.DbTestCase):
             federation = utils.create_test_federation(
                 uuid=uuidutils.generate_uuid(),
                 project_id=uuidutils.generate_uuid())
-            uuids.append(six.text_type(federation['uuid']))
+            uuids.append(str(federation['uuid']))
 
         ctx = context.make_admin_context(all_tenants=True)
         res = self.dbapi.get_federation_list(ctx)

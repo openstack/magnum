@@ -15,7 +15,6 @@
 
 """Tests for manipulating ClusterTemplate via the DB API"""
 from oslo_utils import uuidutils
-import six
 
 from magnum.common import exception
 from magnum.tests.unit.db import base
@@ -32,7 +31,7 @@ class DbClusterTemplateTestCase(base.DbTestCase):
         for i in range(1, 6):
             ct = utils.create_test_cluster_template(
                 id=i, uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(ct['uuid']))
+            uuids.append(str(ct['uuid']))
         res = self.dbapi.get_cluster_template_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
@@ -42,7 +41,7 @@ class DbClusterTemplateTestCase(base.DbTestCase):
         for _ in range(5):
             ct = utils.create_test_cluster_template(
                 uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(ct['uuid']))
+            uuids.append(str(ct['uuid']))
         res = self.dbapi.get_cluster_template_list(self.context,
                                                    sort_key='uuid')
         res_uuids = [r.uuid for r in res]

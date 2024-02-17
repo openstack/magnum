@@ -15,7 +15,6 @@
 
 """Tests for manipulating Clusters via the DB API"""
 from oslo_utils import uuidutils
-import six
 
 from magnum.common import context
 from magnum.common import exception
@@ -112,7 +111,7 @@ class DbClusterTestCase(base.DbTestCase):
         uuids = []
         for i in range(1, 6):
             cluster = utils.create_test_cluster(uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(cluster['uuid']))
+            uuids.append(str(cluster['uuid']))
         res = self.dbapi.get_cluster_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
@@ -121,7 +120,7 @@ class DbClusterTestCase(base.DbTestCase):
         uuids = []
         for _ in range(5):
             cluster = utils.create_test_cluster(uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(cluster.uuid))
+            uuids.append(str(cluster.uuid))
         res = self.dbapi.get_cluster_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), res_uuids)
@@ -214,7 +213,7 @@ class DbClusterTestCase(base.DbTestCase):
                 uuid=uuidutils.generate_uuid(),
                 project_id=uuidutils.generate_uuid(),
                 user_id=uuidutils.generate_uuid())
-            uuids.append(six.text_type(cluster['uuid']))
+            uuids.append(str(cluster['uuid']))
         ctx = context.make_admin_context(all_tenants=True)
         res = self.dbapi.get_cluster_list(ctx)
         res_uuids = [r.uuid for r in res]

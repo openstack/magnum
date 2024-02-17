@@ -20,7 +20,6 @@ import datetime
 import iso8601
 import netaddr
 from oslo_utils import timeutils
-import six
 
 from magnum.common import exception
 from magnum.i18n import _
@@ -216,7 +215,7 @@ def datetime_or_none(dt):
 
 
 def datetime_or_str_or_none(val):
-    if isinstance(val, six.string_types):
+    if isinstance(val, str):
         return timeutils.parse_isotime(val)
     return datetime_or_none(val)
 
@@ -234,7 +233,7 @@ def str_or_none(val):
     if val is None:
         return val
     else:
-        return six.text_type(val)
+        return str(val)
 
 
 def ip_or_none(version):

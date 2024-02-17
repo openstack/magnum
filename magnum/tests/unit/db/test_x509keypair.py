@@ -16,7 +16,6 @@
 """Tests for manipulating X509KeyPairs via the DB API"""
 
 from oslo_utils import uuidutils
-import six
 
 from magnum.common import context
 from magnum.common import exception
@@ -61,7 +60,7 @@ class DbX509KeyPairTestCase(base.DbTestCase):
         for i in range(1, 6):
             x509keypair = utils.create_test_x509keypair(
                 uuid=uuidutils.generate_uuid())
-            uuids.append(six.text_type(x509keypair['uuid']))
+            uuids.append(str(x509keypair['uuid']))
         res = self.dbapi.get_x509keypair_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
@@ -73,7 +72,7 @@ class DbX509KeyPairTestCase(base.DbTestCase):
                 uuid=uuidutils.generate_uuid(),
                 project_id=uuidutils.generate_uuid(),
                 user_id=uuidutils.generate_uuid())
-            uuids.append(six.text_type(x509keypair['uuid']))
+            uuids.append(str(x509keypair['uuid']))
         ctx = context.make_admin_context(all_tenants=True)
         res = self.dbapi.get_x509keypair_list(ctx)
         res_uuids = [r.uuid for r in res]
