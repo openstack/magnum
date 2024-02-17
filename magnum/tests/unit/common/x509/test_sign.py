@@ -208,8 +208,7 @@ class TestX509(base.BaseTestCase):
         self.assertIsInstance(private_key, rsa.RSAPrivateKey)
 
     @mock.patch('cryptography.x509.load_pem_x509_csr')
-    @mock.patch('six.b')
-    def test_sign_with_unicode_csr(self, mock_six, mock_load_pem):
+    def test_sign_with_unicode_csr(self, mock_load_pem):
         ca_key = self._generate_private_key()
         private_key = self._generate_private_key()
         csr_obj = self._build_csr(private_key)
@@ -219,7 +218,6 @@ class TestX509(base.BaseTestCase):
         mock_load_pem.return_value = csr_obj
         operations.sign(csr, self.issuer_name, ca_key,
                         skip_validation=True)
-        mock_six.assert_called_once_with(csr)
 
     @mock.patch('cryptography.x509.load_pem_x509_csr')
     def test_sign_empty_chars(self, mock_load_pem):

@@ -12,11 +12,11 @@
 #    under the License.
 
 """Utility for fetching a resource (e.g. a manifest) from a URL."""
+import urllib
 
 from oslo_log import log as logging
 import requests
 from requests import exceptions
-from six.moves import urllib
 
 from magnum.common import exception
 import magnum.conf

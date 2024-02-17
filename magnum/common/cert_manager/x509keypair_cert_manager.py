@@ -14,7 +14,6 @@
 
 from magnum.common.cert_manager import cert_manager
 from magnum import objects
-import six
 
 
 class Cert(cert_manager.Cert):
@@ -59,9 +58,9 @@ class CertManager(cert_manager.CertManager):
 
         :returns: the UUID of the stored cert
         """
-        if six.PY3 and isinstance(certificate, six.binary_type):
+        if isinstance(certificate, bytes):
             certificate = certificate.decode()
-        if six.PY3 and isinstance(private_key, six.binary_type):
+        if isinstance(private_key, bytes):
             private_key = private_key.decode()
         x509keypair = {'certificate': certificate, 'private_key': private_key,
                        'private_key_passphrase': private_key_passphrase,

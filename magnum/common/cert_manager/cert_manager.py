@@ -17,13 +17,10 @@ Certificate manager API
 """
 import abc
 
-import six
-
 from magnum.common.x509 import operations
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Cert(object):
+class Cert(object, metaclass=abc.ABCMeta):
     """Base class to represent all certificates."""
 
     @abc.abstractmethod
@@ -52,8 +49,7 @@ class Cert(object):
         pass
 
 
-@six.add_metaclass(abc.ABCMeta)
-class CertManager(object):
+class CertManager(object, metaclass=abc.ABCMeta):
     """Base Cert Manager Interface
 
     A Cert Manager is responsible for managing certificates for TLS.

@@ -24,7 +24,6 @@ import sys
 from keystoneclient import exceptions as keystone_exceptions
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
 
 import magnum.conf
 from magnum.i18n import _
@@ -104,9 +103,7 @@ class MagnumException(Exception):
         super(MagnumException, self).__init__(self.message)
 
     def __str__(self):
-        if six.PY3:
-            return self.message
-        return self.message.encode('utf-8')
+        return self.message
 
     def __unicode__(self):
         return self.message
@@ -115,7 +112,7 @@ class MagnumException(Exception):
         if self.__class__.__name__.endswith('_Remote'):
             return self.args[0]
         else:
-            return six.text_type(self)
+            return str(self)
 
 
 class ObjectNotFound(MagnumException):

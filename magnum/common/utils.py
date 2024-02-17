@@ -29,7 +29,6 @@ import netaddr
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_utils import netutils
-import six
 
 from magnum.common import exception
 import magnum.conf
@@ -164,7 +163,7 @@ def safe_rstrip(value, chars=None):
     :return: Stripped value.
 
     """
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, str):
         LOG.warning("Failed to remove trailing character. "
                     "Returning original object. "
                     "Supplied object is not a string: %s,", value)
