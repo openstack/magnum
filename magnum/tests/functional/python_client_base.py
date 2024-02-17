@@ -17,14 +17,13 @@ test_magnum
 Tests for `magnum` module.
 """
 
+import configparser
 import os
 import subprocess
 import tempfile
 import time
 
 import fixtures
-from six.moves import configparser
-
 from heatclient import client as heatclient
 from keystoneauth1.identity import v3 as ksa_v3
 from keystoneauth1 import session as ksa_session

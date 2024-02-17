@@ -11,16 +11,14 @@
 # under the License.
 
 import abc
+from urllib import parse
 
-import six
-from six.moves.urllib import parse
 from tempest.lib.common import rest_client
 
 from magnum.tests.functional.common import config
 
 
-@six.add_metaclass(abc.ABCMeta)
-class MagnumClient(rest_client.RestClient):
+class MagnumClient(rest_client.RestClient, metaclass=abc.ABCMeta):
     """Abstract class responsible for setting up auth provider"""
 
     def __init__(self, auth_provider):
