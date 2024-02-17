@@ -25,7 +25,6 @@ from magnum.i18n import _
 from magnum import objects
 from magnum.objects import fields
 
-import six
 LOG = logging.getLogger(__name__)
 
 
@@ -53,7 +52,7 @@ class Handler(object):
                                                          certificate.csr,
                                                          ca_cert_type,
                                                          context=context)
-        if six.PY3 and isinstance(signed_cert, six.binary_type):
+        if isinstance(signed_cert, bytes):
             certificate.pem = signed_cert.decode()
         else:
             certificate.pem = signed_cert
@@ -63,7 +62,7 @@ class Handler(object):
         ca_cert = cert_manager.get_cluster_ca_certificate(
             cluster, context=context, ca_cert_type=ca_cert_type)
         certificate = objects.Certificate.from_object_cluster(cluster)
-        if six.PY3 and isinstance(ca_cert.get_certificate(), six.binary_type):
+        if isinstance(ca_cert.get_certificate(), bytes):
             certificate.pem = ca_cert.get_certificate().decode()
         else:
             certificate.pem = ca_cert.get_certificate()
@@ -101,13 +100,13 @@ class Handler(object):
             cluster.status_reason = None
         except Exception as e:
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
-            cluster.status_reason = six.text_type(e)
+            cluster.status_reason = str(e)
             cluster.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
             if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=six.text_type(e))
+                e = exception.InvalidParameterValue(message=str(e))
                 raise e
             raise
 

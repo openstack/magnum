@@ -18,7 +18,6 @@ import functools
 
 from heatclient import exc
 from oslo_log import log as logging
-import six
 
 from magnum.common import exception
 from magnum.common import profiler
@@ -86,12 +85,12 @@ class Handler(object):
             nodegroup.save()
         except Exception as e:
             nodegroup.status = fields.ClusterStatus.CREATE_FAILED
-            nodegroup.status_reason = six.text_type(e)
+            nodegroup.status_reason = str(e)
             nodegroup.save()
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.save()
             if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=six.text_type(e))
+                e = exception.InvalidParameterValue(message=str(e))
                 raise e
             raise
         return nodegroup
@@ -110,12 +109,12 @@ class Handler(object):
             nodegroup.save()
         except Exception as e:
             nodegroup.status = fields.ClusterStatus.UPDATE_FAILED
-            nodegroup.status_reason = six.text_type(e)
+            nodegroup.status_reason = str(e)
             nodegroup.save()
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.save()
             if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=six.text_type(e))
+                e = exception.InvalidParameterValue(message=str(e))
                 raise e
             raise
 
@@ -144,7 +143,7 @@ class Handler(object):
             raise exception.NgOperationInProgress(nodegroup=nodegroup.name)
         except Exception as e:
             nodegroup.status = fields.ClusterStatus.DELETE_FAILED
-            nodegroup.status_reason = six.text_type(e)
+            nodegroup.status_reason = str(e)
             nodegroup.save()
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.save()
