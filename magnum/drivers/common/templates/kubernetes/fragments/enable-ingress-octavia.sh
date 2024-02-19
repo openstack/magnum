@@ -51,7 +51,7 @@ EOF
 writeFile $OCTAVIA_INGRESS_CONTROLLER_CONFIGMAP "$OCTAVIA_INGRESS_CONTROLLER_CONFIGMAP_CONTENT"
 
 # octavia-ingress-controller deployment
-oic_image="${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}octavia-ingress-controller:${OCTAVIA_INGRESS_CONTROLLER_TAG}"
+oic_image="${CONTAINER_INFRA_PREFIX:-registry.k8s.io/provider-os/}octavia-ingress-controller:${OCTAVIA_INGRESS_CONTROLLER_TAG}"
 OCTAVIA_INGRESS_CONTROLLER=/srv/magnum/kubernetes/manifests/octavia-ingress-controller.yaml
 OCTAVIA_INGRESS_CONTROLLER_CONTENT=$(cat <<EOF
 ---

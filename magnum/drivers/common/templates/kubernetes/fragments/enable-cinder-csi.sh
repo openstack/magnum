@@ -315,7 +315,7 @@ spec:
             - mountPath: /var/lib/csi/sockets/pluginproxy/
               name: socket-dir
         - name: cinder-csi-plugin
-          image: ${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}cinder-csi-plugin:${CINDER_CSI_PLUGIN_TAG}
+          image: ${CONTAINER_INFRA_PREFIX:-registry.k8s.io/provider-os/}cinder-csi-plugin:${CINDER_CSI_PLUGIN_TAG}
           args:
             - /bin/cinder-csi-plugin
             - "--endpoint=\$(CSI_ENDPOINT)"
@@ -451,7 +451,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: ${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}cinder-csi-plugin:${CINDER_CSI_PLUGIN_TAG}
+          image: ${CONTAINER_INFRA_PREFIX:-registry.k8s.io/provider-os/}cinder-csi-plugin:${CINDER_CSI_PLUGIN_TAG}
           args:
             - /bin/cinder-csi-plugin
             - "--endpoint=\$(CSI_ENDPOINT)"

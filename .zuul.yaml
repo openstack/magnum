@@ -64,6 +64,11 @@
                 container_runtime: containerd
                 containerd_version: 1.6.28
                 containerd_tarball_sha256: f70736e52d61e5ad225f4fd21643b5ca1220013ab8b6c380434caeefb572da9b
+                cloud_provider_tag: v1.27.3
+                cinder_csi_plugin_tag: v1.27.3
+                k8s_keystone_auth_tag: v1.27.3
+                magnum_auto_healer_tag: v1.27.3
+                octavia_ingress_controller_tag: v1.27.3
 
 - job:
     name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico

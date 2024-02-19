@@ -239,7 +239,7 @@ EOF
 
 function enable_magnum_auto_healer {
     echo "Installing magnum_auto_healer"
-    image_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}
+    image_prefix=${CONTAINER_INFRA_PREFIX:-registry.k8s.io/provider-os/}
     image_prefix=${image_prefix%/}
     magnum_auto_healer_manifest=/srv/magnum/kubernetes/manifests/magnum_auto_healer.yaml
 

@@ -1,0 +1,18 @@
+---
+upgrade:
+  - |
+    The registry for cloud-provider-openstack has been updated from
+    `docker.io/k8scloudprovider` to `registry.k8s.io/provider-os/`.
+critical:
+  - |
+    Magnum Core Team has historically limit changing of defaults in labels.
+    This is because existing Cluster Templates in a deployment falls back to
+    using the defaults in code if a specific label is not specified. If
+    defaults change, an existing deployment's Cluster Templates may stop
+    working after a Magnum upgrade.
+
+    Magnum will now no longer keep image tag labels (e.g. cloud_provider_tag,
+    flannel_tag) static. Please specify explicitly all image tags for the
+    images your Cluster Templates will be using, to prevent a future change
+    breaking your Cluster Templates. Refer to the documentation under
+    'Supported Labels' for a list of labels Magnum is tested with.
