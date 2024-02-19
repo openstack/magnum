@@ -199,7 +199,7 @@ function create_magnum_conf {
     fi
 
     # Register SSL certificates if provided
-    if is_ssl_enabled_service magnum; then
+    if is_service_enabled tls-proxy; then
         ensure_certificates MAGNUM
 
         iniset $MAGNUM_CONF DEFAULT ssl_cert_file "$MAGNUM_SSL_CERT"
