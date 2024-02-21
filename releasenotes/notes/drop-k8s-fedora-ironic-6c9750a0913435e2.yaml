@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    ``k8s_fedora_ironic_v1`` driver has been dropped.

@@ -41,51 +41,6 @@ if [[ -e /etc/ci/mirror_info.sh ]]; then
     source /etc/ci/mirror_info.sh
 fi
 
-if [ "${coe}${special}" = "k8s-ironic" ]; then
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='https://fedorapeople.org/groups/magnum/fedora-kubernetes-ironic-latest.tar.gz'"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-kubernetes-ironic-latest'"
-
-    export DEVSTACK_GATE_VIRT_DRIVER="ironic"
-    # NOTE(strigazi) keep cinder
-    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service cinder c-sch c-api c-vol"
-
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic https://git.openstack.org/openstack/ironic"
-
-    # NOTE(TheJulia): Ironic switched to "hardware types" in Queens and
-    # removed legacy "drivers" in Rocky. "ipmi" superceeds *_ipmitool drivers.
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=ipmi"
-    # NOTE(ykarel) Ironic to work with magnum, requires devstack to be configured with IP_VERSION=4
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IP_VERSION=4"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_LOG_DIR=/opt/stack/new/ironic-bm-logs"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"DEFAULT_INSTANCE_TYPE=baremetal"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"BUILD_TIMEOUT=600"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_CALLBACK_TIMEOUT=600"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"Q_AGENT=openvswitch"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"Q_ML2_TENANT_NETWORK_TYPE=vxlan"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BUILD_DEPLOY_RAMDISK=False"
-
-    # We don't enable swift in Gate Jobs so not required
-    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_ENABLE_TEMPURLS=True"
-    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_TEMPURL_KEY=password"
-    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_HASH=password"
-    # NOTE(TheJulia): Enable interface order will result in the iscsi
-    # deployment method being used by default.
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_ENABLED_DEPLOY_INTERFACES=iscsi,direct"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"VOLUME_BACKING_FILE_SIZE=24G"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"FORCE_CONFIG_DRIVE=True"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_RAMDISK_TYPE=tinyipa"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_IPXE_ENABLED=False"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_COUNT=2"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SSH_PORT=22"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SPECS_RAM=1024"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SPECS_DISK=10"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_EPHEMERAL_DISK=5"
-else
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/35.20220116.3.0/x86_64/fedora-coreos-35.20220116.3.0-openstack.x86_64.qcow2.xz'"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-coreos-35.20220116.3.0-openstack.x86_64'"
-fi
-
 # Enable magnum plugin in the last step
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin magnum https://git.openstack.org/openstack/magnum"
 

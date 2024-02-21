@@ -271,10 +271,6 @@ class ClusterTemplatesController(base.Controller):
         "driver. Please migrate to the fedora_coreos driver. fedora_atomic "
         "driver will be removed in a future Magnum version.")
 
-    _fedora_ironic_deprecation_note = (
-        "The fedora ironic driver is deprecated. "
-        "The driver will be removed in a future Magnum version.")
-
     def _generate_name_for_cluster_template(self, context):
         """Generate a random name like: zeta-22-model."""
 
@@ -440,13 +436,6 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._coreos_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._coreos_deprecation_note)
-
-        if (cluster_template_dict['coe'] == 'kubernetes' and
-                cluster_template_dict['cluster_distro'] == 'fedora' and
-                cluster_template_dict['server_type'] == 'bm'):
-            warnings.warn(self._fedora_ironic_deprecation_note,
-                          DeprecationWarning)
-            LOG.warning(self._fedora_ironic_deprecation_note)
 
         # NOTE(yuywz): We will generate a random human-readable name for
         # cluster_template if the name is not specified by user.
