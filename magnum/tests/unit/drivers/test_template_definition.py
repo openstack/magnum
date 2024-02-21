@@ -20,10 +20,10 @@ from magnum.common import exception
 import magnum.conf
 from magnum.drivers.common import driver
 from magnum.drivers.heat import template_def as cmn_tdef
-from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
-from magnum.drivers.k8s_coreos_v1 import template_def as k8s_coreos_tdef
 from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8sa_dr
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
+from magnum.drivers.k8s_fedora_coreos_v1 import driver as k8s_fcos_dr
+from magnum.drivers.k8s_fedora_coreos_v1 import template_def as k8s_fcos_tdef
 from magnum.drivers.k8s_fedora_ironic_v1 import driver as k8s_i_dr
 from magnum.drivers.k8s_fedora_ironic_v1 import template_def as k8si_tdef
 from magnum.tests import base
@@ -72,13 +72,15 @@ class TemplateDefinitionTestCase(base.TestCase):
                               k8si_tdef.FedoraK8sIronicTemplateDefinition)
 
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_get_vm_coreos_kubernetes_definition(self, mock_driver):
-        mock_driver.return_value = k8s_coreos_dr.Driver()
-        cluster_driver = driver.Driver.get_driver('vm', 'coreos', 'kubernetes')
+    def test_get_vm_fcos_kubernetes_definition(self, mock_driver):
+        mock_driver.return_value = k8s_fcos_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'fedora-coreos',
+                                                  'kubernetes')
         definition = cluster_driver.get_template_definition()
 
         self.assertIsInstance(definition,
-                              k8s_coreos_tdef.CoreOSK8sTemplateDefinition)
+                              k8s_fcos_tdef.FCOSK8sTemplateDefinition)
 
     def test_get_driver_not_supported(self):
         self.assertRaises(exception.ClusterTypeNotSupported,

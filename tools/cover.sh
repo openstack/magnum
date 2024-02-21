@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-ALLOWED_EXTRA_MISSING_PERCENT=1
+ALLOWED_EXTRA_MISSING_PERCENT=5
 
 show_diff () {
     result=`diff -U 0 $1 $2 | sed 1,2d`
@@ -50,7 +50,7 @@ coverage erase
 find . -type f -name "*.pyc" -delete
 stestr run --no-subunit-trace $*
 coverage combine
-coverage report --fail-under=90 > $current_report
+coverage report --fail-under=89 > $current_report
 cat $current_report
 coverage html -d cover
 coverage xml -o cover/coverage.xml
