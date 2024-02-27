@@ -21,10 +21,13 @@ from oslo_service import periodic_task
 
 from pycadf import cadftaxonomy as taxonomy
 
+from magnum.common import clients
 from magnum.common import context
 from magnum.common import exception
 from magnum.common import profiler
 from magnum.common import rpc
+from magnum.conductor.handlers.common import cert_manager
+from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import monitors
 from magnum.conductor import utils as conductor_utils
 import magnum.conf
@@ -95,6 +98,14 @@ class ClusterUpdateJob(object):
                 taxonomy.OUTCOME_FAILURE, self.cluster)
         # if we're done with it, delete it
         if self.cluster.status == objects.fields.ClusterStatus.DELETE_COMPLETE:
+            # Clean up trusts and certificates, if they still exist.
+            os_client = clients.OpenStackClients(self.ctx)
+            LOG.debug("Calling delete_trustee_and_trusts from periodic "
+                      "DELETE_COMPLETE")
+            trust_manager.delete_trustee_and_trust(os_client, self.ctx,
+                                                   self.cluster)
+            cert_manager.delete_certificates_from_cluster(self.cluster,
+                                                          context=self.ctx)
             # delete all the nodegroups that belong to this cluster
             for ng in objects.NodeGroup.list(self.ctx, self.cluster.uuid):
                 ng.destroy()

@@ -44,20 +44,20 @@ def create_trustee_and_trust(osc, cluster):
 
 
 def delete_trustee_and_trust(osc, context, cluster):
+    kst = osc.keystone()
     try:
-        kst = osc.keystone()
-
-        # The cluster which is upgraded from Liberty doesn't have trust_id
         if cluster.trust_id:
             kst.delete_trust(context, cluster)
+            cluster.trust_id = None
     except Exception:
         # Exceptions are already logged by keystone().delete_trust
         pass
     try:
-        # The cluster which is upgraded from Liberty doesn't have
-        # trustee_user_id
         if cluster.trustee_user_id:
-            osc.keystone().delete_trustee(cluster.trustee_user_id)
+            kst.delete_trustee(cluster.trustee_user_id)
+            cluster.trustee_user_id = None
+            cluster.trustee_username = None
+            cluster.trustee_password = None
     except Exception:
         # Exceptions are already logged by keystone().delete_trustee
         pass

@@ -89,7 +89,7 @@ class TrustManagerTestCase(base.BaseTestCase):
             context, mock_cluster
         )
         mock_keystone.delete_trustee.assert_called_once_with(
-            mock_cluster.trustee_user_id,
+            'trustee_user_id',
         )
 
     def test_delete_trustee_and_trust_without_trust_id(self):
@@ -105,7 +105,7 @@ class TrustManagerTestCase(base.BaseTestCase):
 
         self.assertEqual(0, mock_keystone.delete_trust.call_count)
         mock_keystone.delete_trustee.assert_called_once_with(
-            mock_cluster.trustee_user_id,
+            'trustee_user_id',
         )
 
     def test_delete_trustee_and_trust_without_trustee_user_id(self):
