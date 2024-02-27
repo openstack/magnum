@@ -13,5 +13,5 @@
 #    limitations under the License.
 
 version = '1.0.0'
-driver = 'k8s_fedora_atomic_v1'
+driver = 'k8s_fedora_coreos_v1'
 container_version = '1.12.6'

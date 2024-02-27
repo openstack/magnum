@@ -205,12 +205,12 @@ class TestAttrValidator(base.BaseTestCase):
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_name(self, mock_os_res):
-        mock_image = {'name': 'fedora-21-atomic-5',
+        mock_image = {'name': 'fedora-21-coreos-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': 'fedora-atomic'}
+                      'os_distro': 'fedora-coreos'}
         mock_os_res.return_value = mock_image
         mock_os_cli = mock.MagicMock()
-        attr_validator.validate_image(mock_os_cli, 'fedora-21-atomic-5')
+        attr_validator.validate_image(mock_os_cli, 'fedora-21-coreos-5')
         self.assertTrue(mock_os_res.called)
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
@@ -222,13 +222,13 @@ class TestAttrValidator(base.BaseTestCase):
         mock_os_cli = mock.MagicMock()
         self.assertRaises(exception.ImageNotAuthorized,
                           attr_validator.validate_image, mock_os_cli,
-                          'fedora-21-atomic-5')
+                          'fedora-21-coreos-5')
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_id(self, mock_os_res):
-        mock_image = {'name': 'fedora-21-atomic-5',
+        mock_image = {'name': 'fedora-21-coreos-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': 'fedora-atomic'}
+                      'os_distro': 'fedora-coreos'}
         mock_os_res.return_value = mock_image
         mock_os_cli = mock.MagicMock()
         attr_validator.validate_image(mock_os_cli,
@@ -241,7 +241,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_os_cli = mock.MagicMock()
         self.assertRaises(exception.ImageNotFound,
                           attr_validator.validate_image,
-                          mock_os_cli, 'fedora-21-atomic-5')
+                          mock_os_cli, 'fedora-21-coreos-5')
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_nonexist_image_by_id(self, mock_os_res):
@@ -249,7 +249,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_os_cli = mock.MagicMock()
         self.assertRaises(exception.ImageNotFound,
                           attr_validator.validate_image,
-                          mock_os_cli, 'fedora-21-atomic-5')
+                          mock_os_cli, 'fedora-21-coreos-5')
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_multi_images_same_name(self, mock_os_res):
@@ -257,28 +257,28 @@ class TestAttrValidator(base.BaseTestCase):
         mock_os_cli = mock.MagicMock()
         self.assertRaises(exception.Conflict,
                           attr_validator.validate_image,
-                          mock_os_cli, 'fedora-21-atomic-5')
+                          mock_os_cli, 'fedora-21-coreos-5')
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_without_os_distro(self, mock_os_res):
-        mock_image = {'name': 'fedora-21-atomic-5',
+        mock_image = {'name': 'fedora-21-coreos-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302'}
         mock_os_res.return_value = mock_image
         mock_os_cli = mock.MagicMock()
         self.assertRaises(exception.OSDistroFieldNotFound,
                           attr_validator.validate_image,
-                          mock_os_cli, 'fedora-21-atomic-5')
+                          mock_os_cli, 'fedora-21-coreos-5')
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_when_user_forbidden(self, mock_os_res):
-        mock_image = {'name': 'fedora-21-atomic-5',
+        mock_image = {'name': 'fedora-21-coreos-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302',
                       'os_distro': ''}
         mock_os_res.return_value = mock_image
         mock_os_cli = mock.MagicMock()
         self.assertRaises(exception.OSDistroFieldNotFound,
                           attr_validator.validate_image,
-                          mock_os_cli, 'fedora-21-atomic-5')
+                          mock_os_cli, 'fedora-21-coreos-5')
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_validate_os_resources_with_invalid_flavor(self,
@@ -355,9 +355,9 @@ class TestAttrValidator(base.BaseTestCase):
         }
         mock_keypair = mock.MagicMock()
         mock_keypair.id = 'test-keypair'
-        mock_image = {'name': 'fedora-21-atomic-5',
+        mock_image = {'name': 'fedora-21-coreos-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': 'fedora-atomic'}
+                      'os_distro': 'fedora-coreos'}
         mock_nova = mock.MagicMock()
         mock_nova.keypairs.get.return_value = mock_keypair
         mock_nova.images.get.return_value = mock_image

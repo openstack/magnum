@@ -60,7 +60,7 @@ class TestValidation(base.BaseTestCase):
             self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request):
 
-        cluster_type = ('vm', 'fedora-atomic', 'kubernetes')
+        cluster_type = ('vm', 'fedora-coreos', 'kubernetes')
         self._test_enforce_cluster_type_supported(
             mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type)
