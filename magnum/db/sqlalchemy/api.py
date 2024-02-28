@@ -47,9 +47,7 @@ _FACADE = None
 def _create_facade_lazily():
     global _FACADE
     if _FACADE is None:
-        # FIXME(karolinku): autocommit=True it's not compatible with
-        # SQLAlchemy 2.0, and will be removed in future
-        _FACADE = db_session.EngineFacade.from_config(CONF, autocommit=True)
+        _FACADE = db_session.EngineFacade.from_config(CONF)
         if profiler_sqlalchemy:
             if CONF.profiler.enabled and CONF.profiler.trace_sqlalchemy:
                 profiler_sqlalchemy.add_tracing(sa, _FACADE.get_engine(), "db")
