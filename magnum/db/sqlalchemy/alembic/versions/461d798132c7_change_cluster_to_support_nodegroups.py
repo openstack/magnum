@@ -65,7 +65,7 @@ def upgrade():
 
     connection = op.get_bind()
     # Fetching all required info from existing cluster
-    res = connection.execute(
+    res = connection.execute(sa.text(
         "SELECT "
         "cluster.uuid, "
         "cluster.name, "
@@ -82,7 +82,7 @@ def upgrade():
         "cluster_template.flavor_id, "
         "cluster_template.image_id "
         "FROM cluster INNER JOIN cluster_template "
-        "ON cluster.cluster_template_id=cluster_template.uuid"
+        "ON cluster.cluster_template_id=cluster_template.uuid")
     )
 
     results = res.fetchall()

@@ -33,11 +33,11 @@ def upgrade():
                             default=False))
     # Populate existing cluster with the cluster template_id
     connection = op.get_bind()
-    connection.execute(
+    connection.execute(sa.text(
         "UPDATE cluster "
         "INNER JOIN cluster_template "
         "ON cluster_template.uuid=cluster.cluster_template_id "
         "SET cluster.master_lb_enabled=cluster_template.master_lb_enabled "
         "WHERE cluster_template.uuid=cluster.cluster_template_id and "
-        "cluster.master_lb_enabled is NULL"
+        "cluster.master_lb_enabled is NULL")
     )
