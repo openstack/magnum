@@ -239,6 +239,8 @@ function create_magnum_conf {
     default_volume_type=$(iniget /etc/cinder/cinder.conf DEFAULT default_volume_type)
     iniset $MAGNUM_CONF cinder default_docker_volume_type $default_volume_type
 
+    iniset $MAGNUM_CONF drivers enabled_beta_drivers $MAGNUM_BETA_DRIVERS
+
     iniset $MAGNUM_CONF kubernetes keystone_auth_default_policy $MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY
 
     write_uwsgi_config "$MAGNUM_UWSGI_CONF" "$MAGNUM_UWSGI" "/container-infra"
