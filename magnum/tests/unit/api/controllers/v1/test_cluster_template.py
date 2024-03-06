@@ -641,7 +641,7 @@ class TestPost(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
 
         response = self.post_json('/clustertemplates', bdict)
         self.assertEqual(201, response.status_int)
@@ -663,7 +663,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data()
             self.post_json('/clustertemplates', bdict)
             cc_mock.assert_called_once_with(mock.ANY)
@@ -679,7 +679,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(image_id='my-image')
             response = self.post_json('/clustertemplates', bdict)
             self.assertEqual(bdict['image_id'], response.json['image_id'])
@@ -695,7 +695,7 @@ class TestPost(api_base.FunctionalTest):
             mock.patch('magnum.api.attr_validator.validate_image')\
                 as mock_image_data:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(**kwargs)
             self.assertRaises(AppError, self.post_json, '/clustertemplates',
                               bdict)
@@ -753,7 +753,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(
                 labels={'key1': 'val1', 'key2': 'val2'})
             response = self.post_json('/clustertemplates', bdict)
@@ -769,7 +769,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(docker_volume_size=99)
             response = self.post_json('/clustertemplates', bdict)
             self.assertEqual(bdict['docker_volume_size'],
@@ -783,7 +783,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(
                 docker_volume_size=1, docker_storage_driver="overlay")
             note = 'deprecated in favor of overlay2'
@@ -803,7 +803,7 @@ class TestPost(api_base.FunctionalTest):
             expect_default_driver,
             mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         for k, v in cluster_template_config_dict.items():
             cfg.CONF.set_override(k, v, 'cluster_template')
         with mock.patch.object(
@@ -900,7 +900,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data()
             response = self.post_json('/clustertemplates', bdict)
             self.assertEqual(bdict['volume_driver'],
@@ -917,7 +917,7 @@ class TestPost(api_base.FunctionalTest):
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_policy.return_value = True
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(public=True)
             response = self.post_json('/clustertemplates', bdict)
             self.assertTrue(response.json['public'])
@@ -937,7 +937,7 @@ class TestPost(api_base.FunctionalTest):
             # make policy enforcement fail
             mock_policy.return_value = False
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(public=True)
             self.assertRaises(AppError, self.post_json, '/clustertemplates',
                               bdict)
@@ -950,7 +950,7 @@ class TestPost(api_base.FunctionalTest):
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(public=False)
             response = self.post_json('/clustertemplates', bdict)
             self.assertFalse(response.json['public'])
@@ -969,7 +969,7 @@ class TestPost(api_base.FunctionalTest):
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_policy.return_value = True
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(hidden=True)
             response = self.post_json('/clustertemplates', bdict)
             self.assertTrue(response.json['hidden'])
@@ -989,7 +989,7 @@ class TestPost(api_base.FunctionalTest):
             # make policy enforcement fail
             mock_policy.return_value = False
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data(hidden=True)
             self.assertRaises(AppError, self.post_json, '/clustertemplates',
                               bdict)
@@ -1008,7 +1008,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_template_with_os_distro_image(self,
                                                           mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         del bdict['uuid']
         response = self.post_json('/clustertemplates', bdict,
@@ -1019,7 +1019,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_template_with_image_name(self,
                                                      mock_image_data):
         mock_image = {'name': 'mock_name',
-                      'os_distro': 'fedora-atomic'}
+                      'os_distro': 'fedora-coreos'}
         mock_image_data.return_value = mock_image
         bdict = apiutils.cluster_template_post_data()
         del bdict['uuid']
@@ -1058,7 +1058,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_template_without_keypair_id(self,
                                                         mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         del bdict['keypair_id']
         response = self.post_json('/clustertemplates', bdict)
@@ -1068,7 +1068,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_template_with_dns(self,
                                               mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict)
         self.assertEqual(201, response.status_int)
@@ -1080,7 +1080,7 @@ class TestPost(api_base.FunctionalTest):
                                                            mock_image_data):
         self.mock_valid_os_res.side_effect = exception.KeyPairNotFound("Test")
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict,
                                   expect_errors=True)
@@ -1090,7 +1090,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_template_with_flavor(self,
                                                  mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict)
         self.assertEqual(201, response.status_int)
@@ -1104,7 +1104,7 @@ class TestPost(api_base.FunctionalTest):
                                                           mock_image_data):
         self.mock_valid_os_res.side_effect = exception.FlavorNotFound("flavor")
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict,
                                   expect_errors=True)
@@ -1114,7 +1114,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_template_with_external_network(self,
                                                            mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict)
         self.assertEqual(201, response.status_int)
@@ -1127,7 +1127,7 @@ class TestPost(api_base.FunctionalTest):
         self.mock_valid_os_res.side_effect = exception.ExternalNetworkNotFound(
             "test")
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict,
                                   expect_errors=True)
@@ -1138,7 +1138,7 @@ class TestPost(api_base.FunctionalTest):
         with mock.patch.object(self.dbapi, 'create_cluster_template',
                                wraps=self.dbapi.create_cluster_template):
             mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
+                                            'os_distro': 'fedora-coreos'}
             bdict = apiutils.cluster_template_post_data()
             bdict.pop('name')
             resp = self.post_json('/clustertemplates', bdict)
@@ -1162,7 +1162,7 @@ class TestPost(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
         mock_image_data.return_value = {'name': 'mock_name',
-                                        'os_distro': 'fedora-atomic'}
+                                        'os_distro': 'fedora-coreos'}
 
         response = self.post_json('/clustertemplates', bdict)
         self.assertEqual(201, response.status_int)
@@ -1180,7 +1180,7 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_cluster_template_with_driver_name(self, mock_image_data):
         mock_image = {'name': 'mock_name',
-                      'os_distro': 'fedora-atomic',
+                      'os_distro': 'fedora-coreos',
                       'magnum_driver': 'mock_driver'}
         mock_image_data.return_value = mock_image
         bdict = apiutils.cluster_template_post_data()

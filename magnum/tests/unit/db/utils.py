@@ -41,7 +41,7 @@ def get_test_cluster_template(**kw):
         'docker_volume_size': kw.get('docker_volume_size', 20),
         'docker_storage_driver': kw.get('docker_storage_driver',
                                         'devicemapper'),
-        'cluster_distro': kw.get('cluster_distro', 'fedora-atomic'),
+        'cluster_distro': kw.get('cluster_distro', 'fedora-coreos'),
         'coe': kw.get('coe', 'kubernetes'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),

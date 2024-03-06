@@ -90,7 +90,7 @@ class ClusterTemplate(base.APIBase):
     """The size in GB of the docker volume"""
 
     cluster_distro = wtypes.StringType(min_length=1, max_length=255)
-    """The Cluster distro for the Cluster, e.g. coreos, fedora-atomic, etc."""
+    """The Cluster distro for the Cluster, e.g. coreos, fedora-coreos, etc."""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated ClusterTemplate links"""
@@ -205,7 +205,7 @@ class ClusterTemplate(base.APIBase):
             apiserver_port=8080,
             docker_volume_size=25,
             docker_storage_driver='devicemapper',
-            cluster_distro='fedora-atomic',
+            cluster_distro='fedora-coreos',
             coe=fields.ClusterType.KUBERNETES,
             http_proxy='http://proxy.com:123',
             https_proxy='https://proxy.com:123',
@@ -268,11 +268,6 @@ class ClusterTemplatesController(base.Controller):
         "and overlay storage drivers are recommended to migrate to a "
         "different storage driver, such as overlay2. overlay2 will be set "
         "as the default storage driver from Victoria cycle in Magnum.")
-
-    _fedora_atomic_deprecation_note = (
-        "The fedora_atomic driver is deprecated in favor of the fedora_coreos "
-        "driver. Please migrate to the fedora_coreos driver. fedora_atomic "
-        "driver will be removed in a future Magnum version.")
 
     def _generate_name_for_cluster_template(self, context):
         """Generate a random name like: zeta-22-model."""
@@ -430,12 +425,6 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._devicemapper_overlay_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._devicemapper_overlay_deprecation_note)
-
-        if (cluster_template_dict['coe'] == 'kubernetes' and
-                cluster_template_dict['cluster_distro'] == 'fedora-atomic'):
-            warnings.warn(self._fedora_atomic_deprecation_note,
-                          DeprecationWarning)
-            LOG.warning(self._fedora_atomic_deprecation_note)
 
         if (cluster_template_dict['coe'] == 'kubernetes' and
                 cluster_template_dict['cluster_distro'] == 'coreos'):

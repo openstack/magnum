@@ -18,7 +18,7 @@ from oslo_utils import uuidutils
 
 import magnum.conf
 from magnum.drivers.heat import driver as heat_driver
-from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_atomic_dr
+from magnum.drivers.k8s_fedora_coreos_v1 import driver as k8s_fcos_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
@@ -128,10 +128,10 @@ class TestHeatPoller(base.TestCase):
         cluster_template = objects.ClusterTemplate(self.context,
                                                    **cluster_template_dict)
         mock_retrieve_cluster_template.return_value = cluster_template
-        mock_driver.return_value = k8s_atomic_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
         poller = heat_driver.HeatPoller(mock_openstack_client,
                                         mock.MagicMock(), cluster,
-                                        k8s_atomic_dr.Driver())
+                                        k8s_fcos_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (cluster, poller)
 

@@ -24,7 +24,7 @@ from pycadf import cadftaxonomy as taxonomy
 from magnum.common import exception
 from magnum.conductor.handlers import cluster_conductor
 import magnum.conf
-from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_atomic_dr
+from magnum.drivers.k8s_fedora_coreos_v1 import driver as k8s_fcos_dr
 from magnum import objects
 from magnum.objects.fields import ClusterHealthStatus
 from magnum.objects.fields import ClusterStatus as cluster_status
@@ -410,7 +410,7 @@ class TestHandler(db_base.DbTestCase):
     @patch('heatclient.common.template_utils.get_template_contents')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
-    @patch('magnum.drivers.k8s_fedora_atomic_v1.driver.Driver.'
+    @patch('magnum.drivers.k8s_fedora_coreos_v1.driver.Driver.'
            '_extract_template_definition')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
@@ -429,7 +429,7 @@ class TestHandler(db_base.DbTestCase):
         mock_poller = mock.MagicMock()
         mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
         mock_heat_poller_class.return_value = mock_poller
-        mock_driver.return_value = k8s_atomic_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
         mock_short_id.return_value = 'short_id'
 
         mock_extract_tmpl_def.return_value = (
@@ -508,7 +508,7 @@ class TestHandler(db_base.DbTestCase):
     def test_cluster_delete(self, mock_octavia, mock_driver,
                             mock_openstack_client_class, cert_manager):
         mock_octavia.return_value = False
-        mock_driver.return_value = k8s_atomic_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPNotFound
@@ -544,7 +544,7 @@ class TestHandler(db_base.DbTestCase):
                                      mock_openstack_client_class,
                                      cert_manager):
         mock_octavia.return_value = False
-        mock_driver.return_value = k8s_atomic_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPConflict
@@ -575,7 +575,7 @@ class TestHandler(db_base.DbTestCase):
     def test_cluster_delete_with_lb(self, mock_delete_lb, mock_octavia,
                                     mock_clients, mock_driver):
         mock_octavia.return_value = True
-        mock_driver.return_value = k8s_atomic_dr.Driver()
+        mock_driver.return_value = k8s_fcos_dr.Driver()
 
         self.master.create()
         self.worker.create()
