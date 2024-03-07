@@ -100,13 +100,13 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - magnum-tempest-plugin-tests-api-rbac
+        - magnum-tempest-plugin-tests-api
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
         - magnum-container-build
     gate:
       jobs:
-        - magnum-tempest-plugin-tests-api-rbac
+        - magnum-tempest-plugin-tests-api
     post:
       jobs:
         - magnum-container-publish
