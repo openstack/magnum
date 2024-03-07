@@ -20,10 +20,6 @@ conductor_service_opts = [
     cfg.StrOpt('topic',
                default='magnum-conductor',
                help='The queue to add conductor tasks to.'),
-    cfg.IntOpt('conductor_life_check_timeout',
-               default=4,
-               help=('RPC timeout for the conductor liveness check that is '
-                     'used for cluster locking.')),
     cfg.IntOpt('workers',
                help='Number of magnum-conductor processes to fork and run. '
                     'Default to number of CPUs on the host.')
