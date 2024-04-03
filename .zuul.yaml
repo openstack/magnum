@@ -69,6 +69,7 @@
                 k8s_keystone_auth_tag: v1.27.3
                 magnum_auto_healer_tag: v1.27.3
                 octavia_ingress_controller_tag: v1.27.3
+                calico_tag: v3.26.4
 
 - job:
     name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
