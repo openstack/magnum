@@ -34,7 +34,8 @@ class MonitorBase(object, metaclass=abc.ABCMeta):
         self.context = context
         self.cluster = cluster
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def metrics_spec(self):
         """Metric specification."""
 

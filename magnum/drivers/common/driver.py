@@ -174,7 +174,8 @@ class Driver(object, metaclass=abc.ABCMeta):
         """
         return
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def provides(self):
         """return a list of (server_type, os, coe) tuples
 
