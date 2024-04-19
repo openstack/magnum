@@ -61,7 +61,7 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'kube_tag', 'container_infra_prefix',
                       'availability_zone',
                       'calico_tag',
-                      'calico_kube_controllers_tag', 'calico_ipv4pool',
+                      'calico_ipv4pool',
                       'calico_ipv4pool_ipip',
                       'etcd_tag', 'flannel_tag']
 

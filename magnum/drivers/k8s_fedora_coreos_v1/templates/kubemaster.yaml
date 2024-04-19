@@ -373,10 +373,6 @@ parameters:
     type: string
     description: tag of the calico containers used to provision the calico node
 
-  calico_kube_controllers_tag:
-    type: string
-    description: tag of the kube_controllers used to provision the calico node
-
   calico_ipv4pool:
     type: string
     description: Configure the IP pool from which Pod IPs will be chosen
@@ -847,7 +843,6 @@ resources:
                   "$CERT_MANAGER_API": {get_param: cert_manager_api}
                   "$CA_KEY": {get_param: ca_key}
                   "$CALICO_TAG": {get_param: calico_tag}
-                  "$CALICO_KUBE_CONTROLLERS_TAG": {get_param: calico_kube_controllers_tag}
                   "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
                   "$CALICO_IPV4POOL_IPIP": {get_param: calico_ipv4pool_ipip}
                   "$INGRESS_CONTROLLER": {get_param: ingress_controller}

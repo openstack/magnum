@@ -423,8 +423,6 @@ class FCOSK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         cert_manager_api = mock_cluster.labels.get('cert_manager_api')
         calico_tag = mock_cluster.labels.get(
             'calico_tag')
-        calico_kube_controllers_tag = mock_cluster.labels.get(
-            'calico_kube_controllers_tag')
         calico_ipv4pool = mock_cluster.labels.get(
             'calico_ipv4pool')
         calico_ipv4pool_ipip = mock_cluster.labels.get(
@@ -602,7 +600,6 @@ class FCOSK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'availability_zone': availability_zone,
             'cert_manager_api': cert_manager_api,
             'calico_tag': calico_tag,
-            'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
             'calico_ipv4pool_ipip': calico_ipv4pool_ipip,
             'cgroup_driver': cgroup_driver,
@@ -977,8 +974,6 @@ class FCOSK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         cert_manager_api = mock_cluster.labels.get('cert_manager_api')
         calico_tag = mock_cluster.labels.get(
             'calico_tag')
-        calico_kube_controllers_tag = mock_cluster.labels.get(
-            'calico_kube_controllers_tag')
         calico_ipv4pool = mock_cluster.labels.get(
             'calico_ipv4pool')
         calico_ipv4pool_ipip = mock_cluster.labels.get(
@@ -1160,7 +1155,6 @@ class FCOSK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'availability_zone': availability_zone,
             'cert_manager_api': cert_manager_api,
             'calico_tag': calico_tag,
-            'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
             'calico_ipv4pool_ipip': calico_ipv4pool_ipip,
             'cgroup_driver': cgroup_driver,
