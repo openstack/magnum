@@ -81,7 +81,7 @@ spec:
         - effect: NoExecute
           operator: Exists
       nodeSelector:
-        node-role.kubernetes.io/master: "" # octavia-ingress-controller needs to access /etc/kubernetes folder.
+        node-role.kubernetes.io/control-plane: "" # octavia-ingress-controller needs to access /etc/kubernetes folder.
       containers:
         - name: octavia-ingress-controller
           image: ${oic_image}

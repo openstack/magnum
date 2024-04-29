@@ -53,7 +53,7 @@ manifests = manifests.replace(
         - key: CriticalAddonsOnly
           operator: Exists
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
 """).replace(
 """
             - --csi-address=/csi/csi.sock

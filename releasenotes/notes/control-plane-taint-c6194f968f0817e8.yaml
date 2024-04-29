@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Adds initial support for Kubernetes v1.28
+upgrade:
+  - |
+    The taint for control plane nodes have been updated from
+    'node-role.kubernetes.io/master' to
+    'node-role.kubernetes.io/control-plane', in line with upstream. Starting
+    from v1.28, the old taint no longer passes conformance.
+    New clusters from existing cluster templates will have this change.
+    Existing clusters are not affected.
+    This will be a breaking change for Kubernetes <v1.20, which is EOL and not
+    supported in this version of Magnum.
