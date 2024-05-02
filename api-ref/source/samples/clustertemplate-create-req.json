@@ -16,6 +16,7 @@
    "image_id":"fedora-atomic-latest",
    "volume_driver":"cinder",
    "registry_enabled":false,
+   "insecure_registry":null,
    "docker_storage_driver":"devicemapper",
    "name":"k8s-bm2",
    "network_driver":"flannel",

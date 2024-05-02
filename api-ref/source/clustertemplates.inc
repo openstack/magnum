@@ -47,6 +47,7 @@ Request
   - image_id: image_id
   - volume_driver: volume_driver
   - registry_enabled: registry_enabled
+  - insecure_registry: insecure_registry
   - docker_storage_driver: docker_storage_driver
   - name: name
   - network_driver: network_driver
