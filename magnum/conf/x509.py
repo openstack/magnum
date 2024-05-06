@@ -11,11 +11,12 @@
 # limitations under the License.
 
 from oslo_config import cfg
+from oslo_config import types
 
 from magnum.common.x509 import extensions
 from magnum.i18n import _
 
-ALLOWED_EXTENSIONS = ['"%s"' % e.value for e in extensions.Extensions]
+ALLOWED_EXTENSIONS = [str(e.value) for e in extensions.Extensions]
 DEFAULT_ALLOWED_EXTENSIONS = [
     extensions.Extensions.KEY_USAGE.value,
     extensions.Extensions.EXTENDED_KEY_USAGE.value,
@@ -23,7 +24,7 @@ DEFAULT_ALLOWED_EXTENSIONS = [
     extensions.Extensions.BASIC_CONSTRAINTS.value,
     extensions.Extensions.SUBJECT_KEY_IDENTIFIER.value]
 
-ALLOWED_KEY_USAGE = ['"%s"' % e.value[0] for e in extensions.KeyUsages]
+ALLOWED_KEY_USAGE = [str(e.value[0]) for e in extensions.KeyUsages]
 DEFAULT_ALLOWED_KEY_USAGE = [
     extensions.KeyUsages.DIGITAL_SIGNATURE.value[0],
     extensions.KeyUsages.KEY_ENCIPHERMENT.value[0],
@@ -38,12 +39,14 @@ x509_opts = [
                 help=_('Certificate can get the CA flag in x509 extensions.')),
     cfg.ListOpt('allowed_extensions',
                 default=DEFAULT_ALLOWED_EXTENSIONS,
+                item_type=types.String(choices=ALLOWED_EXTENSIONS),
                 help=_('List of allowed x509 extensions. Available values: '
-                       '%s') % ', '.join(ALLOWED_EXTENSIONS)),
+                       '"%s"') % '", "'.join(ALLOWED_EXTENSIONS)),
     cfg.ListOpt('allowed_key_usage',
                 default=DEFAULT_ALLOWED_KEY_USAGE,
+                item_type=types.String(choices=ALLOWED_KEY_USAGE),
                 help=_('List of allowed x509 key usage. Available values: '
-                       '%s') % ', '.join(ALLOWED_KEY_USAGE)),
+                       '"%s"') % '", "'.join(ALLOWED_KEY_USAGE)),
     cfg.IntOpt('term_of_validity',
                default=365 * 5,
                help=_('Number of days for which a certificate is valid.')),
