@@ -32,11 +32,11 @@ api_service_opts = [
                ),
     cfg.StrOpt('ssl_cert_file',
                help="This option allows setting path to the SSL certificate "
-                    "of API server. "),
+                    "of API server."),
     cfg.StrOpt('ssl_key_file',
                help="This option specifies the path to the file where SSL "
                     "private key of API server is stored when SSL is in "
-                    "effect. "),
+                    "effect."),
     cfg.BoolOpt('enabled_ssl',
                 default=False,
                 help='Enable SSL Magnum API service'),
