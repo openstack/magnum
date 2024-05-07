@@ -208,7 +208,7 @@ spec:
       namespace: kube-system
     spec:
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
       hostNetwork: true
       tolerations:
         - effect: NoSchedule
@@ -220,7 +220,7 @@ spec:
         - key: node.cloudprovider.kubernetes.io/uninitialized
           value: "true"
           effect: NoSchedule
-        - key: node-role.kubernetes.io/master
+        - key: node-role.kubernetes.io/control-plane
           effect: NoSchedule
       containers:
       # You'll want to change these labels and conditions to suit your deployment.
@@ -336,7 +336,7 @@ spec:
         - effect: NoExecute
           operator: Exists
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
       containers:
         - name: magnum-auto-healer
           image: ${image_prefix}/magnum-auto-healer:${MAGNUM_AUTO_HEALER_TAG}

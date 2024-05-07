@@ -230,7 +230,7 @@ spec:
         - key: CriticalAddonsOnly
           operator: Exists
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
       containers:
         - name: csi-attacher
           image: ${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/sig-storage/}csi-attacher:${CSI_ATTACHER_TAG}

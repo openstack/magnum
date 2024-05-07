@@ -117,7 +117,7 @@ spec:
         - effect: NoExecute
           operator: Exists
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        node-role.kubernetes.io/control-plane: ""
       containers:
         - name: k8s-keystone-auth
           image: ${_prefix}k8s-keystone-auth:${K8S_KEYSTONE_AUTH_TAG}
