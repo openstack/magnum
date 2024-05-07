@@ -48,7 +48,7 @@ x509_opts = [
                default=365 * 5,
                help=_('Number of days for which a certificate is valid.')),
     cfg.IntOpt('rsa_key_size',
-               default=2048, help=_('Size of generated private key. '))]
+               default=2048, help=_('Size of generated private key.'))]
 
 
 def register_opts(conf):

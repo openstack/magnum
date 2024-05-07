@@ -23,15 +23,13 @@ certificates_group = cfg.OptGroup(name='certificates',
 cert_manager_opts = [
     cfg.StrOpt('cert_manager_type',
                default=DEFAULT_CERT_MANAGER,
-               help='Certificate Manager plugin. '
-                    'Defaults to {0}.'.format(DEFAULT_CERT_MANAGER))
+               help='Certificate Manager plugin.')
 ]
 
 local_cert_manager_opts = [
     cfg.StrOpt('storage_path',
                default=TLS_STORAGE_DEFAULT,
-               help='Absolute path of the certificate storage directory. '
-                    'Defaults to /var/lib/magnum/certificates/.')
+               help='Absolute path of the certificate storage directory.')
 ]
 
 ALL_OPTS = list(itertools.chain(
