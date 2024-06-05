@@ -132,6 +132,14 @@ def add_policy_attributes(target):
     return target
 
 
+def get_enforcer():
+    # This method is used by oslopolicy CLI scripts in order to generate policy
+    # files from overrides on disk and defaults in code.
+    cfg.CONF([], project='magnum')
+    init()
+    return _ENFORCER
+
+
 def check_is_admin(context):
     """Whether or not user is admin according to policy setting.
 
