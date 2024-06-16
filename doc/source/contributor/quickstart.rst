@@ -476,11 +476,11 @@ the CSR.::
         -key client.key \
         -out client.csr
 
-Now that you have your client CSR, you can use the Magnum CLI to send it off
+Now that you have your client CSR, you can use the OpenStack CLI to send it off
 to Magnum to get it signed and also download the signing cert.::
 
-    magnum ca-sign --cluster k8s-cluster --csr client.csr > client.crt
-    magnum ca-show --cluster k8s-cluster > ca.crt
+    openstack coe ca sign k8s-cluster client.csr > client.crt
+    openstack coe ca show k8s-cluster > ca.crt
 
 Here's how to set up the replicated redis example. Now we create a pod for the
 redis-master::
