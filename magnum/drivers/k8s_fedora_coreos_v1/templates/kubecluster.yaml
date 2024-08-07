@@ -806,7 +806,7 @@ parameters:
     description: >
       release tag of helm client
       https://github.com/helm/helm/releases
-    default: "v3.2.1"
+    default: "v3.13.3"
 
   auto_healing_enabled:
     type: boolean
