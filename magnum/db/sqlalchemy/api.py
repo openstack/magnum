@@ -131,13 +131,16 @@ class Connection(api.Connection):
         kst = osc.keystone()
 
         # User in a regular project (not in the trustee domain)
-        if context.project_id and context.domain_id != kst.trustee_domain_id:
+        if (
+            context.project_id
+            and context.user_domain_id != kst.trustee_domain_id
+        ):
             query = query.filter_by(project_id=context.project_id)
         # Match project ID component in trustee user's user name against
         # cluster's project_id to associate per-cluster trustee users who have
         # no project information with the project their clusters/cluster models
         # reside in. This is equivalent to the project filtering above.
-        elif context.domain_id == kst.trustee_domain_id:
+        elif context.user_domain_id == kst.trustee_domain_id:
             user_name = kst.client.users.get(context.user_id).name
             user_project = user_name.split('_', 2)[1]
             query = query.filter_by(project_id=user_project)
