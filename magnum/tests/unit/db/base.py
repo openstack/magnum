@@ -16,10 +16,10 @@
 """Magnum DB test base class."""
 
 import fixtures
+from oslo_db.sqlalchemy import enginefacade
 
 import magnum.conf
 from magnum.db import api as dbapi
-from magnum.db.sqlalchemy import api as sqla_api
 from magnum.db.sqlalchemy import migration
 from magnum.db.sqlalchemy import models
 from magnum.tests import base
@@ -32,16 +32,15 @@ _DB_CACHE = None
 
 class Database(fixtures.Fixture):
 
-    def __init__(self, db_api, db_migrate, sql_connection):
+    def __init__(self, engine, db_migrate, sql_connection):
         self.sql_connection = sql_connection
 
-        self.engine = db_api.get_engine()
+        self.engine = engine
         self.engine.dispose()
-        conn = self.engine.connect()
-        self.setup_sqlite(db_migrate)
-        self.post_migrations()
-
-        self._DB = "".join(line for line in conn.connection.iterdump())
+        with self.engine.connect() as conn:
+            self.setup_sqlite(db_migrate)
+            self.post_migrations()
+            self._DB = "".join(line for line in conn.connection.iterdump())
         self.engine.dispose()
 
     def setup_sqlite(self, db_migrate):
@@ -50,9 +49,10 @@ class Database(fixtures.Fixture):
         models.Base.metadata.create_all(self.engine)
         db_migrate.stamp('head')
 
-    def _setUp(self):
-        conn = self.engine.connect()
-        conn.connection.executescript(self._DB)
+    def setUp(self):
+        super(Database, self).setUp()
+        with self.engine.connect() as conn:
+            conn.connection.executescript(self._DB)
         self.addCleanup(self.engine.dispose)
 
     def post_migrations(self):
@@ -68,6 +68,8 @@ class DbTestCase(base.TestCase):
 
         global _DB_CACHE
         if not _DB_CACHE:
-            _DB_CACHE = Database(sqla_api, migration,
+            engine = enginefacade.writer.get_engine()
+            _DB_CACHE = Database(engine, migration,
                                  sql_connection=CONF.database.connection)
+            engine.dispose()
         self.useFixture(_DB_CACHE)
