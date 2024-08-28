@@ -13,8 +13,8 @@
 from logging import config as log_config
 
 from alembic import context
+from oslo_db.sqlalchemy import enginefacade
 
-from magnum.db.sqlalchemy import api as sqla_api
 from magnum.db.sqlalchemy import models
 
 # this is the Alembic Config object, which provides
@@ -43,7 +43,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    engine = sqla_api.get_engine()
+    engine = enginefacade.writer.get_engine()
     with engine.connect() as connection:
         context.configure(connection=connection,
                           target_metadata=target_metadata)

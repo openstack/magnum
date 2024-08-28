@@ -12,6 +12,7 @@
 
 from eventlet.green import threading
 from oslo_context import context
+from oslo_db.sqlalchemy import enginefacade
 
 from magnum.common import policy
 
@@ -20,6 +21,7 @@ import magnum.conf
 CONF = magnum.conf.CONF
 
 
+@enginefacade.transaction_context_provider
 class RequestContext(context.RequestContext):
     """Extends security contexts from the OpenStack common library."""
 
