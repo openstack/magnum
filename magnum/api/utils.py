@@ -86,7 +86,8 @@ def apply_jsonpatch(doc, patch):
                                       p['path'] == '/health_status_reason')):
             try:
                 val = p['value']
-                dict_val = val if type(val) == dict else ast.literal_eval(val)
+                dict_val = (val if isinstance(val, dict)
+                            else ast.literal_eval(val))
                 p['value'] = dict_val
             except (SyntaxError, ValueError, AssertionError) as e:
                 raise exception.PatchError(patch=patch, reason=e)

@@ -94,7 +94,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject):
         :param uuid: the uuid of a x509keypair.
         :param context: Security context
         :returns: a :class:`X509KeyPair` object.
-        """
+        """  # noqa: E501
         db_x509keypair = cls.dbapi.get_x509keypair_by_uuid(context, uuid)
         x509keypair = X509KeyPair._from_db_object(cls(context), db_x509keypair)
         return x509keypair

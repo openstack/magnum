@@ -184,7 +184,7 @@ class Cluster(base.APIBase):
     master_lb_enabled = wsme.wsattr(types.boolean)
     """Indicates whether created clusters should have a load balancer for master
        nodes or not.
-       """
+       """  # noqa: E501
 
     def __init__(self, **kwargs):
         super(Cluster, self).__init__()

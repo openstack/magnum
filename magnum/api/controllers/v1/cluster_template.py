@@ -141,7 +141,7 @@ class ClusterTemplate(base.APIBase):
     master_lb_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether created clusters should have a load balancer for master
        nodes or not.
-       """
+       """  # noqa: E501
 
     floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
     """Indicates whether created clusters should have a floating ip or not."""

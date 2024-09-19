@@ -691,7 +691,7 @@ class TestPost(api_base.FunctionalTest):
         # Create mock for db and image data
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
-                wraps=self.dbapi.create_cluster_template) as cc_mock,\
+                wraps=self.dbapi.create_cluster_template) as cc_mock, \
             mock.patch('magnum.api.attr_validator.validate_image')\
                 as mock_image_data:
             mock_image_data.return_value = {'name': 'mock_name',

@@ -206,7 +206,7 @@ class TestPatch(api_base.FunctionalTest):
 
         # make sure it was added:
         fed = self.get_json('/federations/%s' % f.uuid)
-        self.assertTrue(new_member.uuid in fed['member_ids'])
+        self.assertIn(new_member.uuid, fed['member_ids'])
 
     def test_member_unjoin(self):
         member = obj_utils.create_test_cluster(self.context)
@@ -221,7 +221,7 @@ class TestPatch(api_base.FunctionalTest):
 
         # make sure it was deleted:
         fed = self.get_json('/federations/%s' % federation.uuid)
-        self.assertFalse(member.uuid in fed['member_ids'])
+        self.assertNotIn(member.uuid, fed['member_ids'])
 
     def test_join_non_existent_cluster(self):
         foo_uuid = uuidutils.generate_uuid()

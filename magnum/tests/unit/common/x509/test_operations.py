@@ -46,5 +46,5 @@ class TestX509Operations(base.BaseTestCase):
     def test_generate_csr_and_key(self):
         csr_keys = operations.generate_csr_and_key(u"Test")
         self.assertIsNotNone(csr_keys)
-        self.assertTrue("public_key" in csr_keys)
-        self.assertTrue("private_key" in csr_keys)
+        self.assertIn("public_key", csr_keys)
+        self.assertIn("private_key", csr_keys)

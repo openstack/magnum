@@ -158,11 +158,11 @@ class TestQuota(api_base.FunctionalTest):
         expected = [r.project_id for r in quota_list[:2]]
         res_proj_ids = [r['project_id'] for r in response['quotas']]
         self.assertEqual(sorted(expected), sorted(res_proj_ids))
-        self.assertTrue('http://localhost/v1/quotas?' in response['next'])
-        self.assertTrue('sort_key=id' in response['next'])
-        self.assertTrue('sort_dir=asc' in response['next'])
-        self.assertTrue('limit=2' in response['next'])
-        self.assertTrue('marker=%s' % quota_list[1].id in response['next'])
+        self.assertIn('http://localhost/v1/quotas?', response['next'])
+        self.assertIn('sort_key=id', response['next'])
+        self.assertIn('sort_dir=asc', response['next'])
+        self.assertIn('limit=2', response['next'])
+        self.assertIn('marker=%s' % quota_list[1].id, response['next'])
 
     @mock.patch("magnum.common.policy.enforce")
     @mock.patch("magnum.common.context.make_context")

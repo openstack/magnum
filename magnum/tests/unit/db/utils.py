@@ -221,7 +221,7 @@ def create_test_magnum_service(**kw):
 
     :param kw: kwargs with overriding values for magnum_service's attributes.
     :returns: Test magnum_service DB object.
-    """
+    """  # noqa: E501
     magnum_service = get_test_magnum_service(**kw)
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
