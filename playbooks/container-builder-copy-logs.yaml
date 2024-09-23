@@ -6,6 +6,7 @@
           mkdir -p logs
           # copy system log
           sudo cp -r /var/log logs/system_log
+          sudo rm -f logs/system_log/README
           if which journalctl ; then
               # the journal gives us syslog() and kernel output, so is like
               # a concatenation of the above.
