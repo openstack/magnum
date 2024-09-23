@@ -18,7 +18,6 @@ import os
 import shutil
 import stat
 import subprocess
-import six
 import sys
 
 import requests
@@ -94,7 +93,7 @@ def invoke_hook(c, log):
     hot_inputs = c.get('inputs', [])
     for hot_input in hot_inputs:
         if hot_input.get('type', None) == 'String' and \
-                not isinstance(hot_input['value'], six.string_types):
+                not isinstance(hot_input['value'], str):
             hot_input['value'] = str(hot_input['value'])
     iv = dict((i['name'], i['value']) for i in c['inputs'])
     # The group property indicates whether it is softwarecomponent or
