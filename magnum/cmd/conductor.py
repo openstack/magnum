@@ -20,6 +20,7 @@ import sys
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_reports import guru_meditation_report as gmr
+from oslo_reports import opts as gmr_opts
 from oslo_service import service
 
 from magnum.common import rpc_service
@@ -41,7 +42,8 @@ LOG = logging.getLogger(__name__)
 def main():
     magnum_service.prepare_service(sys.argv)
 
-    gmr.TextGuruMeditation.setup_autorun(version)
+    gmr_opts.set_defaults(CONF)
+    gmr.TextGuruMeditation.setup_autorun(version, conf=CONF)
 
     LOG.info('Starting server in PID %s', os.getpid())
     LOG.debug("Configuration:")
