@@ -20,6 +20,7 @@ import sys
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_reports import guru_meditation_report as gmr
+from oslo_reports import opts as gmr_opts
 from werkzeug import serving
 
 from magnum.api import app as api_app
@@ -56,7 +57,8 @@ def _get_ssl_configs(use_ssl):
 def main():
     service.prepare_service(sys.argv)
 
-    gmr.TextGuruMeditation.setup_autorun(version)
+    gmr_opts.set_defaults(CONF)
+    gmr.TextGuruMeditation.setup_autorun(version, conf=CONF)
 
     # Enable object backporting via the conductor
     base.MagnumObject.indirection_api = base.MagnumObjectIndirectionAPI()
