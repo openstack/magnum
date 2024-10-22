@@ -144,6 +144,7 @@
     check:
       jobs:
         - magnum-tempest-plugin-tests-api
+        - magnum-tempest-plugin-tests-api-jammy
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-flannel
@@ -152,6 +153,7 @@
     gate:
       jobs:
         - magnum-tempest-plugin-tests-api
+        - magnum-tempest-plugin-tests-api-jammy
     post:
       jobs:
         - magnum-container-publish
