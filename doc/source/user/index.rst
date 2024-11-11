@@ -1403,7 +1403,8 @@ _`helm_client_url`
 
 _`helm_client_sha256`
   SHA256 checksum of the helm client binary.
-  Ussuri default: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+  Ussuri default:
+  018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
 
 _`helm_client_tag`
   This label allows users to override the default container tag for Helm
