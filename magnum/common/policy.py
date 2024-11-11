@@ -18,7 +18,6 @@
 import decorator
 from oslo_config import cfg
 from oslo_log import log as logging
-from oslo_policy import opts
 from oslo_policy import policy
 from oslo_utils import importutils
 import pecan
@@ -31,15 +30,6 @@ from magnum.common import policies
 LOG = logging.getLogger(__name__)
 _ENFORCER = None
 CONF = cfg.CONF
-
-# TODO(ricolin): Remove overriding the default value of config options
-# 'policy_file' once oslo_policy change its default value to what
-# is overridden here.
-DEFAULT_POLICY_FILE = 'policy.yaml'
-opts.set_defaults(
-    CONF,
-    DEFAULT_POLICY_FILE
-)
 
 
 # we can get a policy enforcer by this init.
