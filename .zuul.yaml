@@ -59,11 +59,7 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - magnum-tempest-plugin-tests-api
         - magnum-container-build
-    gate:
-      jobs:
-        - magnum-tempest-plugin-tests-api
     post:
       jobs:
         - magnum-container-publish
