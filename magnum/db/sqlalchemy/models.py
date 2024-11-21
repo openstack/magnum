@@ -87,15 +87,6 @@ class MagnumBase(models.TimestampMixin,
             d[c.name] = self[c.name]
         return d
 
-    def save(self, session=None):
-        import magnum.db.sqlalchemy.api as db_api
-
-        if session is None:
-            session = db_api.get_session()
-
-        with session.begin():
-            super(MagnumBase, self).save(session)
-
 
 Base = declarative_base(cls=MagnumBase)
 

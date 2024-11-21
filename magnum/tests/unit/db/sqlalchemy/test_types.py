@@ -26,16 +26,22 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
         # Create ClusterTemplate w/o labels
         cluster_template1_id = uuidutils.generate_uuid()
         self.dbapi.create_cluster_template({'uuid': cluster_template1_id})
-        cluster_template1 = sa_api.model_query(
-            models.ClusterTemplate).filter_by(uuid=cluster_template1_id).one()
+        with sa_api._session_for_read() as session:
+            cluster_template1 = (session.query(
+                models.ClusterTemplate)
+                .filter_by(uuid=cluster_template1_id)
+                .one())
         self.assertEqual({}, cluster_template1.labels)
 
         # Create ClusterTemplate with labels
         cluster_template2_id = uuidutils.generate_uuid()
         self.dbapi.create_cluster_template(
             {'uuid': cluster_template2_id, 'labels': {'bar': 'foo'}})
-        cluster_template2 = sa_api.model_query(
-            models.ClusterTemplate).filter_by(uuid=cluster_template2_id).one()
+        with sa_api._session_for_read() as session:
+            cluster_template2 = (session.query(
+                models.ClusterTemplate)
+                .filter_by(uuid=cluster_template2_id)
+                .one())
         self.assertEqual('foo', cluster_template2.labels['bar'])
 
     def test_JSONEncodedDict_type_check(self):
@@ -48,8 +54,9 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
         # Create nodegroup w/o node_addresses
         nodegroup1_id = uuidutils.generate_uuid()
         self.dbapi.create_nodegroup({'uuid': nodegroup1_id})
-        nodegroup1 = sa_api.model_query(
-            models.NodeGroup).filter_by(uuid=nodegroup1_id).one()
+        with sa_api._session_for_read() as session:
+            nodegroup1 = session.query(
+                models.NodeGroup).filter_by(uuid=nodegroup1_id).one()
         self.assertEqual([], nodegroup1.node_addresses)
 
         # Create nodegroup with node_addresses
@@ -59,8 +66,9 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
             'node_addresses': ['mynode_address1',
                                'mynode_address2']
         })
-        nodegroup2 = sa_api.model_query(
-            models.NodeGroup).filter_by(uuid=nodegroup2_id).one()
+        with sa_api._session_for_read() as session:
+            nodegroup2 = session.query(
+                models.NodeGroup).filter_by(uuid=nodegroup2_id).one()
         self.assertEqual(['mynode_address1', 'mynode_address2'],
                          nodegroup2.node_addresses)
 
