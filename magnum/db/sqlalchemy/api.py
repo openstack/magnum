@@ -64,7 +64,8 @@ def _session_for_write():
 
 
 def _wrap_session(session):
-    if CONF.profiler.enabled and CONF.profiler.trace_sqlalchemy:
+    if (hasattr(CONF, 'profiler') and CONF.profiler.enabled and
+       CONF.profiler.trace_sqlalchemy):
         session = profiler_sqlalchemy.wrap_session(sa, session)
     return session
 
