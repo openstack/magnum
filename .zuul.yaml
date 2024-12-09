@@ -51,7 +51,7 @@
 
 - job:
     name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1
+    parent: magnum-tempest-plugin-tests-cluster-2024-1
     vars:
       devstack_localrc:
         MAGNUM_KUBECTL_TAG: v1.27.8
