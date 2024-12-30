@@ -41,7 +41,6 @@ GITBRANCH["python-magnumclient"]=${MAGNUMCLIENT_BRANCH:-master}
 GITDIR["python-magnumclient"]=$DEST/python-magnumclient
 
 MAGNUM_STATE_PATH=${MAGNUM_STATE_PATH:=$DATA_DIR/magnum}
-MAGNUM_AUTH_CACHE_DIR=${MAGNUM_AUTH_CACHE_DIR:-/var/cache/magnum}
 MAGNUM_CERTIFICATE_CACHE_DIR=${MAGNUM_CERTIFICATE_CACHE_DIR:-/var/lib/magnum/certificate-cache}
 
 MAGNUM_CONF_DIR=/etc/magnum
@@ -86,7 +85,7 @@ function is_magnum_enabled {
 # cleanup_magnum() - Remove residual data files, anything left over from previous
 # runs that a clean run would need to clean up
 function cleanup_magnum {
-    sudo rm -rf $MAGNUM_STATE_PATH $MAGNUM_AUTH_CACHE_DIR $MAGNUM_CERTIFICATE_CACHE_DIR
+    sudo rm -rf $MAGNUM_STATE_PATH $MAGNUM_CERTIFICATE_CACHE_DIR
     sudo rm -f $(apache_site_config_for magnum-api)
     remove_uwsgi_config "$MAGNUM_UWSGI_CONF" "$MAGNUM_UWSGI"
 }
@@ -168,7 +167,7 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF keystone_auth project_domain_id default
     iniset $MAGNUM_CONF keystone_auth user_domain_id default
 
-    configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
+    configure_keystone_authtoken_middleware $MAGNUM_CONF magnum
 
     iniset $MAGNUM_CONF keystone_auth auth_url $KEYSTONE_AUTH_URI_V3
 
@@ -274,7 +273,6 @@ function init_magnum {
         # Migrate magnum database
         $MAGNUM_BIN_DIR/magnum-db-manage upgrade
     fi
-    create_magnum_cache_dir $MAGNUM_AUTH_CACHE_DIR
     create_magnum_cache_dir $MAGNUM_CERTIFICATE_CACHE_DIR
 }
 
