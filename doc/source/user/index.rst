@@ -751,11 +751,11 @@ repositories for your distribution:
 
 Install using distribution packages for RHEL/CentOS/Fedora::
 
-    $ sudo yum install python-magnumclient
+    $ sudo dnf install python3-magnumclient
 
 Install using distribution packages for Ubuntu/Debian::
 
-    $ sudo apt-get install python-magnumclient
+    $ sudo apt-get install python3-magnumclient
 
 Install using distribution packages for openSUSE and SUSE Enterprise Linux::
 

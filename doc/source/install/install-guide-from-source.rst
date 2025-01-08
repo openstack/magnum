@@ -27,7 +27,7 @@ Install and configure components
 
         .. code-block:: console
 
-           # yum install python-devel openssl-devel mariadb-devel \
+           # dnf install python-devel openssl-devel mariadb-devel \
                          libxml2-devel libxslt-devel postgresql-devel git \
                          libffi-devel gettext gcc
 
@@ -35,7 +35,7 @@ Install and configure components
 
         .. code-block:: console
 
-           # yum install python-devel openssl-devel mysql-devel \
+           # dnf install python-devel openssl-devel mysql-devel \
                          libxml2-devel libxslt-devel postgresql-devel git \
                          libffi-devel gettext gcc
 
@@ -224,7 +224,7 @@ Install the command-line client
 
      .. code-block:: console
 
-        # yum install python-devel openssl-devel python-virtualenv \
+        # dnf install python-devel openssl-devel python-virtualenv \
                       libffi-devel git gcc
 
    * Fedora 22 or higher
