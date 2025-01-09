@@ -18,16 +18,21 @@ import uuid
 import wsme
 from wsme import types as wtypes
 
+from magnum.api import attr_validator
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
+from magnum.common import clients
 from magnum.common import exception
 from magnum.common import policy
+import magnum.conf
 from magnum import objects
 from magnum.objects import fields
+
+CONF = magnum.conf.CONF
 
 
 def _validate_node_count(ng):
@@ -350,6 +355,13 @@ class NodeGroupController(base.Controller):
                 labels.update(nodegroup.labels)
                 nodegroup.labels = labels
 
+        # check root volume size
+        boot_volume_size = cluster.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        cli = clients.OpenStackClients(context)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, nodegroup.flavor_id, boot_volume_size)
+
         nodegroup_dict = nodegroup.as_dict()
         nodegroup_dict['cluster_id'] = cluster.uuid
         nodegroup_dict['project_id'] = context.project_id
@@ -414,6 +426,15 @@ class NodeGroupController(base.Controller):
                 patch_val = None
             if nodegroup[field] != patch_val:
                 nodegroup[field] = patch_val
+
+        # check root volume size
+        cluster = api_utils.get_resource('Cluster', cluster_uuid)
+        boot_volume_size = cluster.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        cli = clients.OpenStackClients(context)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, nodegroup.flavor_id, boot_volume_size)
+
         _validate_node_count(nodegroup)
 
         return nodegroup

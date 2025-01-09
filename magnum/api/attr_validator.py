@@ -177,6 +177,26 @@ def validate_master_count(context, cluster):
             "master_count must be 1 when master_lb_enabled is False"))
 
 
+def validate_flavor_root_volume_size(cli, flavor, boot_volume_size):
+    """Validate flavor root volume size."""
+
+    if boot_volume_size > 0:
+        return
+
+    flavor_obj = None
+    flavor_list = cli.nova().flavors.list()
+    for f in flavor_list:
+        if f.name == flavor or f.id == flavor:
+            flavor_obj = f
+            break
+
+    if flavor_obj is None:
+        raise exception.FlavorNotFound(flavor=flavor)
+
+    if flavor_obj.disk == 0 and boot_volume_size == 0:
+        raise exception.FlavorZeroRootVolumeNotSupported()
+
+
 def validate_federation_hostcluster(cluster_uuid):
     """Validate Federation `hostcluster_id` parameter.
 

@@ -269,6 +269,10 @@ class TestPatch(api_base.FunctionalTest):
             labels={'key1': 'val1', 'key2': 'val2'},
             hidden=False
         )
+        p = mock.patch.object(
+            attr_validator, 'validate_flavor_root_volume_size')
+        self.mock_valid_flavor_disk = p.start()
+        self.addCleanup(p.stop)
 
     def test_update_not_found(self):
         uuid = uuidutils.generate_uuid()
@@ -482,6 +486,19 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['errors'])
 
+    def test_replace_cluster_template_with_invalid_flavor(self):
+        self.mock_valid_flavor_disk.side_effect = \
+            exception.FlavorZeroRootVolumeNotSupported()
+        response = self.patch_json('/clustertemplates/%s' %
+                                   self.cluster_template.uuid,
+                                   [{'path': '/flavor_id', 'value': 'aaa',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(self.mock_valid_flavor_disk.called)
+        self.assertTrue(response.json['errors'])
+
     def test_replace_cluster_template_with_no_exist_keypair_id(self):
         self.mock_valid_os_res.side_effect = exception.KeyPairNotFound("aaa")
         response = self.patch_json('/clustertemplates/%s' %
@@ -631,6 +648,10 @@ class TestPost(api_base.FunctionalTest):
         super(TestPost, self).setUp()
         p = mock.patch.object(attr_validator, 'validate_os_resources')
         self.mock_valid_os_res = p.start()
+        self.addCleanup(p.stop)
+        p = mock.patch.object(
+            attr_validator, 'validate_flavor_root_volume_size')
+        self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
@@ -1108,6 +1129,21 @@ class TestPost(api_base.FunctionalTest):
         bdict = apiutils.cluster_template_post_data()
         response = self.post_json('/clustertemplates', bdict,
                                   expect_errors=True)
+        self.assertEqual(400, response.status_int)
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_with_invalid_flavor(
+        self,
+        mock_image_data
+    ):
+        self.mock_valid_flavor_disk.side_effect = \
+            exception.FlavorZeroRootVolumeNotSupported()
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-coreos'}
+        bdict = apiutils.cluster_template_post_data()
+        response = self.post_json('/clustertemplates', bdict,
+                                  expect_errors=True)
+        self.assertTrue(self.mock_valid_flavor_disk.called)
         self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')

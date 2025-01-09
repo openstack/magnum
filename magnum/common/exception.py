@@ -449,6 +449,11 @@ class ZeroNodeCountNotSupported(NotSupported):
                 "provided microversion.")
 
 
+class FlavorZeroRootVolumeNotSupported(NotSupported):
+    message = _("Flavor with zero root volume size is not supported "
+                "when boot_volume_size is zero.")
+
+
 class ClusterUpgradeNotSupported(NotSupported):
     message = _("Cluster upgrade is not supported in the "
                 "provided microversion.")
