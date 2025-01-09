@@ -13,6 +13,10 @@ best meets your needs and how to develop a driver for a new COE.
 Section 10-15 describe the low level OpenStack infrastructure that is
 created and managed by Magnum to support the COE's.
 
+.. warning::
+  The heat driver described here is deprecated in favor of the k8s_capi_helm
+  or k8s_cluster_api driver and will be removed in a future Magnum version.
+
 #. `Overview`_
 #. `Python Client`_
 #. `Horizon Interface`_
