@@ -34,6 +34,10 @@ from magnum.common import policy
 from magnum import objects
 from magnum.objects import fields
 
+from oslo_config import cfg
+
+CONF = cfg.CONF
+
 LOG = logging.getLogger(__name__)
 
 
@@ -420,6 +424,14 @@ class ClusterTemplatesController(base.Controller):
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
 
+        # check root volume size
+        boot_volume_size = cluster_template.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, cluster_template.flavor_id, boot_volume_size)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, cluster_template.master_flavor_id, boot_volume_size)
+
         if (cluster_template.docker_storage_driver in ('devicemapper',
                                                        'overlay')):
             warnings.warn(self._devicemapper_overlay_deprecation_note,
@@ -486,6 +498,15 @@ class ClusterTemplatesController(base.Controller):
             if not policy.enforce(context, "clustertemplate:publish", None,
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
+
+        # check root volume size
+        boot_volume_size = cluster_template.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        cli = clients.OpenStackClients(context)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, new_cluster_template.flavor_id, boot_volume_size)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, new_cluster_template.master_flavor_id, boot_volume_size)
 
         # Update only the fields that have changed
         for field in objects.ClusterTemplate.fields:

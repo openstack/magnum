@@ -33,6 +33,7 @@ from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
 from magnum.api import validation
+from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
 from magnum.common import policy
@@ -540,6 +541,15 @@ class ClustersController(base.Controller):
                     not getattr(cluster, attr)):
                 setattr(cluster, attr, getattr(cluster_template, attr))
 
+        # check root volume size
+        boot_volume_size = cluster.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        cli = clients.OpenStackClients(context)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, cluster.flavor_id, boot_volume_size)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, cluster.master_flavor_id, boot_volume_size)
+
         cluster_dict = cluster.as_dict()
 
         attr_validator.validate_os_resources(context,
@@ -657,6 +667,15 @@ class ClustersController(base.Controller):
         for field in new_cluster.fields:
             if getattr(cluster, field) != getattr(new_cluster, field):
                 delta.add(field)
+
+        # check root volume size
+        boot_volume_size = new_cluster.labels.get(
+            'boot_volume_size', CONF.cinder.default_boot_volume_size)
+        cli = clients.OpenStackClients(context)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, new_cluster.flavor_id, boot_volume_size)
+        attr_validator.validate_flavor_root_volume_size(
+            cli, new_cluster.master_flavor_id, boot_volume_size)
 
         validation.validate_cluster_properties(delta)
 

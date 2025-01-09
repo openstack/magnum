@@ -288,6 +288,10 @@ class TestPatch(api_base.FunctionalTest):
         self.mock_cluster_update = p.start()
         self.mock_cluster_update.side_effect = self._sim_rpc_cluster_update
         self.addCleanup(p.stop)
+        p = mock.patch.object(
+            attr_validator, 'validate_flavor_root_volume_size')
+        self.mock_valid_flavor_disk = p.start()
+        self.addCleanup(p.stop)
 
     def _sim_rpc_cluster_update(self, cluster, node_count, health_status,
                                 health_status_reason, rollback=False):
@@ -612,6 +616,10 @@ class TestPost(api_base.FunctionalTest):
         p = mock.patch.object(attr_validator, 'validate_os_resources')
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
+        p = mock.patch.object(
+            attr_validator, 'validate_flavor_root_volume_size')
+        self.mock_valid_flavor_disk = p.start()
+        self.addCleanup(p.stop)
 
     def _simulate_cluster_create(self, cluster, master_count, node_count,
                                  create_timeout):
@@ -837,6 +845,15 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(self.mock_valid_os_res.called)
+        self.assertEqual(400, response.status_int)
+
+    def test_create_cluster_with_invalid_flavor_disk_size(self):
+        bdict = apiutils.cluster_post_data()
+        self.mock_valid_flavor_disk.side_effect = \
+            exception.FlavorZeroRootVolumeNotSupported()
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(self.mock_valid_flavor_disk.called)
         self.assertEqual(400, response.status_int)
 
     def test_create_cluster_with_invalid_ext_network(self):
