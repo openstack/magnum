@@ -223,6 +223,12 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
         builder = builder.add_extension(extention.value,
                                         critical=extention.critical)
 
+    subject_key_identifier = x509.SubjectKeyIdentifier.from_public_key(
+        csr.public_key())
+    builder = builder.add_extension(
+            subject_key_identifier, critical=False
+    )
+
     certificate = builder.sign(
         private_key=ca_key, algorithm=hashes.SHA256(),
     ).public_bytes(serialization.Encoding.PEM).strip()

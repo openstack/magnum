@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add subject key identifier extension to x509 operations
+    signing function. Allows for magnum Kubernetes clusters
+    to generate certificates with authority key
+    identifier extension.
