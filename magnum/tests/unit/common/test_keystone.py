@@ -156,7 +156,7 @@ class KeystoneClientTest(base.TestCase):
         ks_client.create_trust(trustee_user='888888')
 
         mock_ks.return_value.trusts.create.assert_called_once_with(
-            delegation_depth=0,
+            allow_redelegation=False,
             trustor_user='123456', project='654321',
             trustee_user='888888', role_names=['role1', 'role2'],
             impersonation=True)
@@ -173,7 +173,7 @@ class KeystoneClientTest(base.TestCase):
         ks_client.create_trust(trustee_user='888888')
 
         mock_ks.return_value.trusts.create.assert_called_once_with(
-            delegation_depth=0,
+            allow_redelegation=False,
             trustor_user='123456', project='654321',
             trustee_user='888888', role_names=['role3'],
             impersonation=True)
