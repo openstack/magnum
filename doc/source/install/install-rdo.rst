@@ -4,7 +4,8 @@ Install and configure for Red Hat Enterprise Linux and CentOS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section describes how to install and configure the Container
-Infrastructure Management service for Red Hat Enterprise Linux 7 and CentOS 7.
+Infrastructure Management service for Red Hat Enterprise Linux 9
+and CentOS Stream 9.
 
 .. include:: common/prerequisites.rst
 
@@ -15,7 +16,7 @@ Install and configure components
 
    .. code-block:: console
 
-      # dnf install openstack-magnum-api openstack-magnum-conductor python-magnumclient
+      # dnf install openstack-magnum-api openstack-magnum-conductor python3-magnumclient
 
 .. include:: common/configure_2_edit_magnum_conf.rst
 
