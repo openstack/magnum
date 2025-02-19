@@ -708,7 +708,7 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_cluster_with_cluster_template_name(self):
         modelname = self.cluster_template.name
-        bdict = apiutils.cluster_post_data(cluster_template_id=modelname)
+        bdict = apiutils.cluster_post_data(name=modelname)
         response = self.post_json('/clusters', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
@@ -766,6 +766,40 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
+
+    def test_create_cluster_with_even_master_count_oldmicroversion(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['master_count'] = 2
+        response = self.post_json(
+            '/clusters',
+            bdict,
+            expect_errors=True,
+            headers={"Openstack-Api-Version": "container-infra 1.9"}
+        )
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_cluster_with_even_master_count(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['master_count'] = 2
+        response = self.post_json(
+            '/clusters',
+            bdict,
+            expect_errors=True,
+            headers={"Openstack-Api-Version": "container-infra 1.10"}
+        )
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_cluster_with_negative_master_count(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['master_count'] = -1
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
 
     def test_create_cluster_with_invalid_name(self):
         invalid_names = ['x' * 243, '123456', '123456test_cluster',
@@ -874,7 +908,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(self.mock_valid_os_res.called)
         self.assertEqual(409, response.status_int)
 
-    def test_create_cluster_with_on_os_distro_image(self):
+    def test_create_cluster_with_no_os_distro_image(self):
         bdict = apiutils.cluster_post_data()
         self.mock_valid_os_res.side_effect = \
             exception.OSDistroFieldNotFound('img')

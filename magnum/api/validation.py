@@ -90,6 +90,19 @@ def enforce_driver_supported():
     return wrapper
 
 
+def enforce_cluster_master_size_supported():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        cluster = args[1]
+        cluster_driver = driver.Driver.get_driver_for_cluster(
+            pecan.request.context, cluster)
+        # Call into the driver to validate initial master size
+        cluster_driver.validate_master_size(cluster.master_count)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def enforce_cluster_volume_storage_size():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
