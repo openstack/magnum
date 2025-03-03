@@ -17,7 +17,6 @@
 
 import datetime
 
-import iso8601
 import netaddr
 from oslo_utils import timeutils
 
@@ -208,7 +207,7 @@ def datetime_or_none(dt):
             # NOTE(danms): Legacy objects from sqlalchemy are stored in UTC,
             # but are returned without a timezone attached.
             # As a transitional aid, assume a tz-naive object is in UTC.
-            return dt.replace(tzinfo=iso8601.UTC)
+            return dt.replace(tzinfo=datetime.timezone.utc)
         else:
             return dt
     raise ValueError(_("A datetime.datetime is required here"))

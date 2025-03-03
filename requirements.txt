@@ -10,7 +10,6 @@ alembic>=0.9.6 # MIT
 cliff!=2.9.0,>=2.8.0 # Apache-2.0
 decorator>=3.4.0 # BSD
 eventlet>=0.28.0 # MIT
-iso8601>=0.1.11 # MIT
 jsonpatch!=1.20,>=1.16 # BSD
 keystoneauth1>=3.14.0 # Apache-2.0
 keystonemiddleware>=9.0.0 # Apache-2.0
