@@ -1,0 +1,11 @@
+---
+deprecations:
+  - |
+    Deprecate the use of 'heat' driver in favor of modern
+    Kubernetes Cluster API based drivers: 'k8s_capi_helm' [1] or
+    'k8s_cluster_api' [2]. User still using 'heat' driver are encouraged to
+    migrate to one of the abovementioned as 'heat' driver will be removed in
+    the future.
+
+    [1] https://docs.openstack.org/magnum-capi-helm/latest/
+    [2] https://vexxhost.github.io/magnum-cluster-api/
