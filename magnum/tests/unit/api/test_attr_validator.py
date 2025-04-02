@@ -367,3 +367,50 @@ class TestAttrValidator(base.BaseTestCase):
         attr_validator.validate_os_resources(mock_context,
                                              mock_cluster_template,
                                              mock_cluster)
+
+    def test_validate_flavor_root_volume_size_with_valid_boot_volume_size(
+        self
+    ):
+        boot_volume_size = 100
+        mock_flavor = mock.MagicMock()
+        mock_flavor.name = 'test_flavor'
+        mock_flavor.id = 'test_flavor_id'
+        mock_flavor.disk = 0
+        mock_flavors = [mock_flavor]
+        mock_nova = mock.MagicMock()
+        mock_nova.flavors.list.return_value = mock_flavors
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        attr_validator.validate_flavor_root_volume_size(
+            mock_os_cli, 'test_flavor', boot_volume_size)
+        self.assertFalse(mock_nova.flavors.list.called)
+
+    def test_validate_flavor_root_volume_size_with_valid_flavor(self):
+        boot_volume_size = 0
+        mock_flavor = mock.MagicMock()
+        mock_flavor.name = 'test_flavor'
+        mock_flavor.id = 'test_flavor_id'
+        mock_flavor.disk = 100
+        mock_flavors = [mock_flavor]
+        mock_nova = mock.MagicMock()
+        mock_nova.flavors.list.return_value = mock_flavors
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        attr_validator.validate_flavor_root_volume_size(
+            mock_os_cli, 'test_flavor', boot_volume_size)
+        self.assertTrue(mock_nova.flavors.list.called)
+
+    def test_validate_flavor_root_volume_size_with_invalid_resources(self):
+        boot_volume_size = 0
+        mock_flavor = mock.MagicMock()
+        mock_flavor.name = 'test_flavor'
+        mock_flavor.id = 'test_flavor_id'
+        mock_flavor.disk = 0
+        mock_flavors = [mock_flavor]
+        mock_nova = mock.MagicMock()
+        mock_nova.flavors.list.return_value = mock_flavors
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        self.assertRaises(exception.FlavorZeroRootVolumeNotSupported,
+                          attr_validator.validate_flavor_root_volume_size,
+                          mock_os_cli, 'test_flavor', boot_volume_size)

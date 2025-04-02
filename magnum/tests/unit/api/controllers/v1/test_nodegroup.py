@@ -19,6 +19,7 @@ from unittest import mock
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 
+from magnum.api import attr_validator
 from magnum.api.controllers.v1 import nodegroup as api_nodegroup
 from magnum.conductor import api as rpcapi
 import magnum.conf
@@ -265,6 +266,10 @@ class TestPost(NodeGroupControllerTest):
         self.mock_ng_create.side_effect = self._simulate_nodegroup_create
         self.addCleanup(p.stop)
         self.url = "/clusters/%s/nodegroups" % self.cluster.uuid
+        p = mock.patch.object(
+            attr_validator, 'validate_flavor_root_volume_size')
+        self.mock_valid_flavor_disk = p.start()
+        self.addCleanup(p.stop)
 
     def _simulate_nodegroup_create(self, cluster, nodegroup):
         nodegroup.create()
@@ -571,6 +576,10 @@ class TestPatch(NodeGroupControllerTest):
         self.mock_ng_update.side_effect = self._simulate_nodegroup_update
         self.addCleanup(p.stop)
         self.url = "/clusters/%s/nodegroups/" % self.cluster.uuid
+        p = mock.patch.object(
+            attr_validator, 'validate_flavor_root_volume_size')
+        self.mock_valid_flavor_disk = p.start()
+        self.addCleanup(p.stop)
 
     def _simulate_nodegroup_update(self, cluster, nodegroup):
         nodegroup.save()
