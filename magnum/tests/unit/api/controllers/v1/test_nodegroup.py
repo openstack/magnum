@@ -253,6 +253,24 @@ class TestListNodegroups(NodeGroupControllerTest):
         response = self.get_json(url, headers=headers, expect_errors=True)
         self.assertEqual(406, response.status_code)
 
+    def test_get_all_api_minor_version_above_range(self):
+        headers = {"Openstack-Api-Version": "container-infra 1.999"}
+        url = '/clusters/%s/nodegroups/' % (self.cluster.uuid)
+        response = self.get_json(url, headers=headers, expect_errors=True)
+        self.assertEqual(406, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+        self.assertEqual('magnum.microversion-unsupported',
+                         response.json['errors'][0]['code'])
+
+    def test_get_all_api_major_version_above_range(self):
+        headers = {"Openstack-Api-Version": "container-infra 2.11"}
+        url = '/clusters/%s/nodegroups/' % (self.cluster.uuid)
+        response = self.get_json(url, headers=headers, expect_errors=True)
+        self.assertEqual(406, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+        self.assertEqual('magnum.microversion-unsupported',
+                         response.json['errors'][0]['code'])
+
 
 class TestPost(NodeGroupControllerTest):
     def setUp(self):

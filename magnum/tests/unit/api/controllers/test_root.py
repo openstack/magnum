@@ -222,9 +222,12 @@ class TestHeathcheck(api_base.FunctionalTest):
 
 class TestV1Routing(api_base.FunctionalTest):
     def test_route_checks_version(self):
+        # Temporarily instantiate mock for Controller._check_version
+        self._check_version = self.patch_check_version.start()
         self.get_json('/')
         self._check_version.assert_called_once_with(mock.ANY,
                                                     mock.ANY)
+        self.patch_check_version.stop()
 
 
 class TestCheckVersions(test_base.TestCase):
