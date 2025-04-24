@@ -784,6 +784,21 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_without_labels(self, mock_image_data):
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-coreos'}
+            bdict = apiutils.cluster_template_post_data()
+            bdict.pop("labels")
+            response = self.post_json('/clustertemplates', bdict)
+            self.assertEqual(dict(),
+                             response.json['labels'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_cluster_template_with_docker_volume_size(self,
                                                              mock_image_data):
         with mock.patch.object(
