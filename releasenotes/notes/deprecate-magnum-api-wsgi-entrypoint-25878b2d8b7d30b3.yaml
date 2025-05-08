@@ -1,0 +1,9 @@
+---
+deprecations:
+  - |
+    The 'magnum-api-wsgi' wsgi entrypoint has been deprecated will be removed
+    in a future release. This is due to changes in Python packaging. Operators
+    using the 'magnum-api-wsgi' should migrate away from it.  See the
+    `OpenStack goverance page
+    <https://governance.openstack.org/tc/goals/proposed/migrate-from-wsgi-scripts-to-module-paths.html>`_
+    for more info.
