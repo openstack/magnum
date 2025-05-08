@@ -91,48 +91,6 @@
             magnum:
               network_driver: flannel
 
-- job:
-    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1
-    vars:
-      devstack_localrc:
-        MAGNUM_KUBECTL_TAG: v1.27.8
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            magnum:
-              labels:
-                kube_tag: v1.27.8-rancher2
-                container_runtime: containerd
-                containerd_version: 1.6.28
-                containerd_tarball_sha256: f70736e52d61e5ad225f4fd21643b5ca1220013ab8b6c380434caeefb572da9b
-                cloud_provider_tag: v1.27.3
-                cinder_csi_plugin_tag: v1.27.3
-                k8s_keystone_auth_tag: v1.27.3
-                magnum_auto_healer_tag: v1.27.3
-                octavia_ingress_controller_tag: v1.27.3
-                calico_tag: v3.26.4
-
-- job:
-    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            magnum:
-              network_driver: calico
-
-- job:
-    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            magnum:
-              network_driver: flannel
-
 - project:
     queue: magnum
     templates:
@@ -145,8 +103,6 @@
       jobs:
         - magnum-tempest-plugin-tests-api
         - magnum-tempest-plugin-tests-api-jammy
-        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
-        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-flannel
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-calico
         - magnum-container-build
