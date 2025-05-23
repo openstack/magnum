@@ -1,0 +1,6 @@
+---
+other:
+  - |
+    When debug logging is enabled, periodic update logging will
+    now output Cluster UUID instead of database ID to better
+    identify the object being updated.

@@ -67,7 +67,7 @@ class ClusterUpdateJob(object):
         self.cluster = cluster
 
     def update_status(self):
-        LOG.debug("Updating status for cluster %s", self.cluster.id)
+        LOG.debug("Updating status for cluster %s", self.cluster.uuid)
         # get the driver for the cluster
         cdriver = driver.Driver.get_driver_for_cluster(self.ctx, self.cluster)
         # ask the driver to sync status
@@ -85,7 +85,7 @@ class ClusterUpdateJob(object):
                 raise
 
         LOG.debug("Status for cluster %s updated to %s (%s)",
-                  self.cluster.id, self.cluster.status,
+                  self.cluster.uuid, self.cluster.status,
                   self.cluster.status_reason)
         # status update notifications
         if self.cluster.status.endswith("_COMPLETE"):
@@ -144,10 +144,10 @@ class ClusterHealthUpdateJob(object):
             self.cluster.save()
 
     def update_health_status(self):
-        LOG.debug("Updating health status for cluster %s", self.cluster.id)
+        LOG.debug("Updating health status for cluster %s", self.cluster.uuid)
         self._update_health_status()
         LOG.debug("Status for cluster %s updated to %s (%s)",
-                  self.cluster.id, self.cluster.health_status,
+                  self.cluster.uuid, self.cluster.health_status,
                   self.cluster.health_status_reason)
         # TODO(flwang): Health status update notifications?
         # end the "loop"
