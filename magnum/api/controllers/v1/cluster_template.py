@@ -429,13 +429,16 @@ class ClusterTemplatesController(base.Controller):
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
 
+        # explicitly define labels as empty dict if not defined
+        cluster_template_dict.setdefault("labels", {})
+
         # check root volume size
-        boot_volume_size = cluster_template.labels.get(
+        boot_volume_size = cluster_template_dict['labels'].get(
             'boot_volume_size', CONF.cinder.default_boot_volume_size)
         attr_validator.validate_flavor_root_volume_size(
-            cli, cluster_template.flavor_id, boot_volume_size)
+            cli, cluster_template_dict['flavor_id'], boot_volume_size)
         attr_validator.validate_flavor_root_volume_size(
-            cli, cluster_template.master_flavor_id, boot_volume_size)
+            cli, cluster_template_dict['master_flavor_id'], boot_volume_size)
 
         if (cluster_template.docker_storage_driver in ('devicemapper',
                                                        'overlay')):
