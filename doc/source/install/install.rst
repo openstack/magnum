@@ -49,7 +49,6 @@ Optionally, you can install the following components:
    :maxdepth: 2
 
    install-debian-manual.rst
-   install-obs.rst
    install-rdo.rst
    install-ubuntu.rst
    install-guide-from-source.rst

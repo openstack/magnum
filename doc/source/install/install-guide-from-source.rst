@@ -47,14 +47,6 @@ Install and configure components
                          libxml2-devel libxslt-devel postgresql-devel git \
                          libffi-devel gettext gcc
 
-      * openSUSE Leap 42.1
-
-        .. code-block:: console
-
-           # zypper install git libffi-devel libmysqlclient-devel \
-                            libopenssl-devel libxml2-devel libxslt-devel \
-                            postgresql-devel python-devel gettext-runtime gcc
-
    b. Create magnum user and necessary directories:
 
       * Create user:
@@ -179,8 +171,7 @@ Finalize installation
 
 #. Create init scripts and services:
 
-   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7 or openSUSE
-     Leap 42.1:
+   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7:
 
      .. code-block:: console
 
@@ -192,8 +183,7 @@ Finalize installation
 
 #. Start magnum-api and magnum-conductor:
 
-   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7 or openSUSE
-     Leap 42.1:
+   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7:
 
      .. code-block:: console
 
@@ -207,8 +197,7 @@ Finalize installation
 
 #. Verify that magnum-api and magnum-conductor services are running:
 
-   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7 or openSUSE
-     Leap 42.1:
+   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7:
 
      .. code-block:: console
 
@@ -241,13 +230,6 @@ Install the command-line client
         # apt update
         # apt install python-dev libssl-dev python-virtualenv \
                       libffi-dev git gcc
-
-   * openSUSE Leap 42.1
-
-     .. code-block:: console
-
-        # zypper install python-devel libopenssl-devel python-virtualenv \
-                         libffi-devel git gcc
 
 #. Install the client in a virtual environment:
 

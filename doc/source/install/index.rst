@@ -2,7 +2,6 @@
 Magnum Installation Guide
 =========================
 
-
 .. toctree::
    :maxdepth: 2
 
@@ -22,4 +21,3 @@ configuration.
 
 This chapter assumes a working setup of OpenStack following `OpenStack
 Installation Tutorial <https://docs.openstack.org/#install-guides>`_.
-
