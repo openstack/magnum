@@ -10,12 +10,13 @@ that a user has to explicitly ask for their request to be treated with
 a particular version of the API. So breaking changes can be added to
 the API without breaking users who don't specifically ask for it. This
 is done with an HTTP header ``OpenStack-API-Version`` which has as its
-value a string containing the name of the service, ``container-infra``,
-and a monotonically increasing semantic version number starting
-from ``1.1``.
+value a string containing the name of the service,
+``container-infrastructure-management`` or one of its aliases,
+``container-infrastructure`` or ``container-infra``, along with a monotonically
+increasing semantic version number starting from ``1.1``.
 The full form of the header takes the form::
 
-    OpenStack-API-Version: container-infra 1.1
+    OpenStack-API-Version: container-infrastructure-management 1.1
 
 If a user makes a request without specifying a version, they will get
 the ``BASE_VER`` as defined in

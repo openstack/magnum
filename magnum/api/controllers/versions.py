@@ -52,7 +52,13 @@ class Version(object):
     max_string = 'OpenStack-API-Maximum-Version'
     """HTTP response header"""
 
-    service_string = 'container-infra'
+    service_strings = (
+        'container-infrastructure-management',
+        'container-infrastructure',
+        'container-infra',
+    )
+
+    service_string = service_strings[0]
 
     def __init__(self, headers, default_version, latest_version,
                  from_string=None):
@@ -98,7 +104,7 @@ class Version(object):
         if version_str.lower() == 'latest':
             version_service, version_str = latest_version.split()
 
-        if version_service != Version.service_string:
+        if version_service not in Version.service_strings:
             raise exc.HTTPNotAcceptable(_(
                 "Invalid service type for %s header") % Version.string)
         try:
