@@ -211,7 +211,7 @@ class Controller(controllers_base.Controller):
                 min_version=str(MIN_VER))
 
     @pecan.expose()
-    def _route(self, args):
+    def _route(self, args, request):
         version = ver.Version(
             pecan.request.headers, MIN_VER_STR, MAX_VER_STR)
 

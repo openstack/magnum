@@ -94,7 +94,7 @@ class RootController(rest.RestController):
         return Root.convert()
 
     @pecan.expose()
-    def _route(self, args):
+    def _route(self, args, request):
         """Overrides the default routing behavior.
 
         It redirects the request to the default version of the magnum API
