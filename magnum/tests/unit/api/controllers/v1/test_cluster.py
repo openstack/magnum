@@ -959,17 +959,17 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual('keypair2', cluster[0].keypair)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual('keypair2', cluster.keypair)
 
     def test_create_cluster_without_keypair(self):
         bdict = apiutils.cluster_post_data()
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
+        cluster = self.mock_cluster_create.call_args.args[0]
         # Verify keypair from ClusterTemplate is used
-        self.assertEqual('keypair1', cluster[0].keypair)
+        self.assertEqual('keypair1', cluster.keypair)
 
     def test_create_cluster_with_multi_keypair_same_name(self):
         bdict = apiutils.cluster_post_data()
@@ -985,8 +985,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual(3, cluster[0].docker_volume_size)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual(3, cluster.docker_volume_size)
 
     def test_create_cluster_with_labels(self):
         bdict = apiutils.cluster_post_data()
@@ -994,8 +994,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual({'key': 'value'}, cluster[0].labels)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual({'key': 'value'}, cluster.labels)
 
     def test_create_cluster_without_docker_volume_size(self):
         bdict = apiutils.cluster_post_data()
@@ -1004,9 +1004,9 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
+        cluster = self.mock_cluster_create.call_args.args[0]
         # Verify docker_volume_size from ClusterTemplate is used
-        self.assertEqual(20, cluster[0].docker_volume_size)
+        self.assertEqual(20, cluster.docker_volume_size)
 
     def test_create_cluster_without_labels(self):
         bdict = apiutils.cluster_post_data()
@@ -1014,9 +1014,9 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
+        cluster = self.mock_cluster_create.call_args.args[0]
         # Verify labels from ClusterTemplate is used
-        self.assertEqual({'key1': u'val1', 'key2': u'val2'}, cluster[0].labels)
+        self.assertEqual({'key1': u'val1', 'key2': u'val2'}, cluster.labels)
 
     def test_create_cluster_with_invalid_docker_volume_size(self):
         invalid_values = [(-1, None), ('notanint', None),
@@ -1042,17 +1042,17 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual('m2.small', cluster[0].master_flavor_id)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual('m2.small', cluster.master_flavor_id)
 
     def test_create_cluster_without_master_flavor_id(self):
         bdict = apiutils.cluster_post_data()
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
+        cluster = self.mock_cluster_create.call_args.args[0]
         # Verify master_flavor_id from ClusterTemplate is used
-        self.assertEqual('m1.small', cluster[0].master_flavor_id)
+        self.assertEqual('m1.small', cluster.master_flavor_id)
 
     def test_create_cluster_with_flavor_id(self):
         bdict = apiutils.cluster_post_data()
@@ -1060,17 +1060,17 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual('m2.small', cluster[0].flavor_id)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual('m2.small', cluster.flavor_id)
 
     def test_create_cluster_without_flavor_id(self):
         bdict = apiutils.cluster_post_data()
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
+        cluster = self.mock_cluster_create.call_args.args[0]
         # Verify flavor_id from ClusterTemplate is used
-        self.assertEqual('m1.small', cluster[0].flavor_id)
+        self.assertEqual('m1.small', cluster.flavor_id)
 
     def test_create_cluster_with_cinder_csi_disabled(self):
         self.cluster_template.volume_driver = 'cinder'
@@ -1091,8 +1091,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual(cluster_labels, cluster[0].labels)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual(cluster_labels, cluster.labels)
 
     def test_create_cluster_with_merge_labels(self):
         self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
@@ -1103,10 +1103,10 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
+        cluster = self.mock_cluster_create.call_args.args[0]
         expected = self.cluster_template.labels
         expected.update(cluster_labels)
-        self.assertEqual(expected, cluster[0].labels)
+        self.assertEqual(expected, cluster.labels)
 
     def test_create_cluster_with_merge_labels_no_labels(self):
         self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
@@ -1116,8 +1116,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
-        cluster, timeout = self.mock_cluster_create.call_args
-        self.assertEqual(self.cluster_template.labels, cluster[0].labels)
+        cluster = self.mock_cluster_create.call_args.args[0]
+        self.assertEqual(self.cluster_template.labels, cluster.labels)
 
 
 class TestDelete(api_base.FunctionalTest):
