@@ -435,10 +435,14 @@ class ClusterTemplatesController(base.Controller):
         # check root volume size
         boot_volume_size = cluster_template_dict['labels'].get(
             'boot_volume_size', CONF.cinder.default_boot_volume_size)
-        attr_validator.validate_flavor_root_volume_size(
-            cli, cluster_template_dict['flavor_id'], boot_volume_size)
-        attr_validator.validate_flavor_root_volume_size(
-            cli, cluster_template_dict['master_flavor_id'], boot_volume_size)
+        if 'flavor_id' in cluster_template_dict:
+            attr_validator.validate_flavor_root_volume_size(
+                cli, cluster_template_dict['flavor_id'], boot_volume_size)
+        if 'master_flavor_id' in cluster_template_dict:
+            attr_validator.validate_flavor_root_volume_size(
+                cli,
+                cluster_template_dict['master_flavor_id'],
+                boot_volume_size)
 
         if (cluster_template.docker_storage_driver in ('devicemapper',
                                                        'overlay')):

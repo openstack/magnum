@@ -1136,6 +1136,19 @@ class TestPost(api_base.FunctionalTest):
                          response.json['master_flavor_id'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_without_flavor(self,
+                                                    mock_image_data):
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-coreos'}
+        bdict = apiutils.cluster_template_post_data()
+        del bdict['flavor_id']
+        del bdict['master_flavor_id']
+        response = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, response.status_int)
+        self.assertIsNone(response.json['flavor_id'])
+        self.assertIsNone(response.json['master_flavor_id'])
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_cluster_template_with_no_exist_flavor(self,
                                                           mock_image_data):
         self.mock_valid_os_res.side_effect = exception.FlavorNotFound("flavor")
