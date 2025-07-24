@@ -175,6 +175,14 @@ class API(rpc_service.API):
     def nodegroup_update_async(self, cluster, nodegroup):
         self._cast('nodegroup_update', cluster=cluster, nodegroup=nodegroup)
 
+    # Credential Operations
+
+    def credential_rotate(self, cluster):
+        return self._call('credential_rotate', cluster=cluster)
+
+    def credential_rotate_async(self, cluster):
+        return self._cast('credential_rotate', cluster=cluster)
+
 
 @profiler.trace_cls("rpc")
 class ListenerAPI(rpc_service.API):

@@ -257,6 +257,10 @@ class Driver(object, metaclass=abc.ABCMeta):
         raise NotImplementedError("Subclasses must implement "
                                   "'delete_nodegroup'.")
 
+    def rotate_credential(self, context, cluster):
+        raise NotImplementedError(
+            "Driver does not support credential rotate.")
+
     def get_monitor(self, context, cluster):
         """return the monitor with container data for this driver."""
 

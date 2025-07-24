@@ -34,10 +34,11 @@ REST_API_VERSION_HISTORY = """REST API Version History:
     * 1.9 - Add nodegroup API
     * 1.10 - Allow nodegroups with 0 nodes
     * 1.11 - Remove bay and baymodel objects
+    * 1.12 - Add credential API
 """
 
 BASE_VER = '1.1'
-CURRENT_MAX_VER = '1.11'
+CURRENT_MAX_VER = '1.12'
 
 
 class Version(object):

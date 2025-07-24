@@ -27,6 +27,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import cluster
 from magnum.api.controllers.v1 import cluster_template
+from magnum.api.controllers.v1 import credential
 from magnum.api.controllers.v1 import federation
 from magnum.api.controllers.v1 import magnum_services
 from magnum.api.controllers.v1 import quota
@@ -98,6 +99,9 @@ class V1(controllers_base.APIBase):
     nodegroups = [link.Link]
     """Links to the nodegroups resource"""
 
+    credentials = [link.Link]
+    """Links to the credentials resource"""
+
     @staticmethod
     def convert():
         v1 = V1()
@@ -162,6 +166,12 @@ class V1(controllers_base.APIBase):
                                              'clusters/{cluster_id}',
                                              'nodegroups',
                                              bookmark=True)]
+        v1.credentials = [link.Link.make_link('self', pecan.request.host_url,
+                                              'credentials', ''),
+                          link.Link.make_link('bookmark',
+                                              pecan.request.host_url,
+                                              'credentials', '',
+                                              bookmark=True)]
 
         return v1
 
@@ -176,6 +186,7 @@ class Controller(controllers_base.Controller):
     mservices = magnum_services.MagnumServiceController()
     stats = stats.StatsController()
     federations = federation.FederationsController()
+    credentials = credential.CredentialsController()
 
     @expose.expose(V1)
     def get(self):

@@ -29,6 +29,7 @@ from magnum.common import short_id
 from magnum.conductor.handlers import ca_conductor
 from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers import conductor_listener
+from magnum.conductor.handlers import credential_conductor
 from magnum.conductor.handlers import federation_conductor
 from magnum.conductor.handlers import indirection_api
 from magnum.conductor.handlers import nodegroup_conductor
@@ -54,6 +55,7 @@ def main():
         indirection_api.Handler(),
         cluster_conductor.Handler(),
         conductor_listener.Handler(),
+        credential_conductor.Handler(),
         ca_conductor.Handler(),
         federation_conductor.Handler(),
         nodegroup_conductor.Handler(),

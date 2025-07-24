@@ -41,7 +41,7 @@ class TestRootController(api_base.FunctionalTest):
                                [{u'href': u'http://localhost/v1/',
                                  u'rel': u'self'}],
                            u'status': u'CURRENT',
-                           u'max_version': u'1.11',
+                           u'max_version': u'1.12',
                            u'min_version': u'1.1'}]}
 
         self.v1_expected = {
@@ -71,6 +71,10 @@ class TestRootController(api_base.FunctionalTest):
                   u'rel': u'self'},
                  {u'href': u'http://localhost/clustertemplates/',
                   u'rel': u'bookmark'}],
+            u'credentials': [{u'href': u'http://localhost/v1/credentials/',
+                              u'rel': u'self'},
+                             {u'href': u'http://localhost/credentials/',
+                              u'rel': u'bookmark'}],
             u'id': u'v1',
             u'certificates': [{u'href': u'http://localhost/v1/certificates/',
                                u'rel': u'self'},

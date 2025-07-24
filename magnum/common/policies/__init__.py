@@ -18,6 +18,7 @@ from magnum.common.policies import base
 from magnum.common.policies import certificate
 from magnum.common.policies import cluster
 from magnum.common.policies import cluster_template
+from magnum.common.policies import credential
 from magnum.common.policies import federation
 from magnum.common.policies import magnum_service
 from magnum.common.policies import nodegroup
@@ -31,6 +32,7 @@ def list_rules():
         certificate.list_rules(),
         cluster.list_rules(),
         cluster_template.list_rules(),
+        credential.list_rules(),
         federation.list_rules(),
         magnum_service.list_rules(),
         quota.list_rules(),
