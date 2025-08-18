@@ -24,73 +24,6 @@
           UbRYBPi1hBrBmd9/UjYVVaXESXkZEe81yDFwCR77eGQVVNSZljBJy+VErUv7+RgwTuN/z
           CtGD6IpE16AHl3i31/1f00t5/t857qzVbdMLJBU8ivKbLPwGAjHMwM0f+y4Ogc=
 
-- job:
-    name: magnum-container-build
-    pre-run: playbooks/container-builder-setup-gate.yaml
-    run: playbooks/container-builder.yaml
-    post-run: playbooks/container-builder-copy-logs.yaml
-    roles:
-      - zuul: openstack/openstack-zuul-jobs
-    timeout: 3600
-    irrelevant-files:
-      - ^.*\.rst$
-      - ^api-ref/.*$
-      - ^doc/.*$
-      - ^specs/.*$
-      - ^install-guide/.*$
-      - ^releasenotes/.*$
-      - ^magnum/.*$
-
-- job:
-    name: magnum-container-publish
-    parent: magnum-container-build
-    post-run: playbooks/container-publish.yaml
-    secrets:
-      - magnum_docker_login
-    timeout: 7200
-
-- job:
-    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1
-    vars:
-      devstack_localrc:
-        MAGNUM_KUBECTL_TAG: v1.28.9
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            magnum:
-              labels:
-                kube_tag: v1.28.9-rancher1
-                container_runtime: containerd
-                containerd_version: 1.6.31
-                containerd_tarball_sha256: 75afb9b9674ff509ae670ef3ab944ffcdece8ea9f7d92c42307693efa7b6109d
-                cloud_provider_tag: v1.27.3
-                cinder_csi_plugin_tag: v1.27.3
-                k8s_keystone_auth_tag: v1.27.3
-                magnum_auto_healer_tag: v1.27.3
-                octavia_ingress_controller_tag: v1.27.3
-                calico_tag: v3.26.4
-
-- job:
-    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-calico
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            magnum:
-              network_driver: calico
-
-- job:
-    name: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-flannel
-    parent: magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            magnum:
-              network_driver: flannel
-
 - project:
     queue: magnum
     templates:
@@ -103,13 +36,7 @@
       jobs:
         - magnum-tempest-plugin-tests-api
         - magnum-tempest-plugin-tests-api-jammy
-        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-flannel
-        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-calico
-        - magnum-container-build
     gate:
       jobs:
         - magnum-tempest-plugin-tests-api
         - magnum-tempest-plugin-tests-api-jammy
-    post:
-      jobs:
-        - magnum-container-publish

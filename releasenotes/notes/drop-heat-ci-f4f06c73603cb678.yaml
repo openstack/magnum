@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    Test jobs for testing cluster creation using ``Heat`` driver have been
+    removed, following deprecation in ``2025.1`` release.
+  - |
+    Container publish jobs for images used in ``Heat`` driver have been
+    removed, following deprecation in ``2025.1`` release.
