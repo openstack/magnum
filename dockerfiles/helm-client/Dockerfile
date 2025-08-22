@@ -1,5 +1,5 @@
 ARG HELM_VERSION=v3.2.0
-FROM debian:buster-slim
+FROM debian/eol:buster-slim
 
 ARG HELM_VERSION
 

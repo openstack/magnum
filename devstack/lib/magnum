@@ -49,7 +49,7 @@ MAGNUM_API_PASTE=$MAGNUM_CONF_DIR/api-paste.ini
 MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY=$MAGNUM_CONF_DIR/k8s_keystone_auth_default_policy.json
 MAGNUM_POLICY=$MAGNUM_CONF_DIR/policy.yaml
 
-MAGNUM_UWSGI=$MAGNUM_BIN_DIR/magnum-api-wsgi
+MAGNUM_UWSGI=magnum.wsgi.api:application
 MAGNUM_UWSGI_CONF=$MAGNUM_CONF_DIR/magnum-api-uwsgi.ini
 
 # Public facing bits
@@ -242,7 +242,7 @@ function create_magnum_conf {
 
     iniset $MAGNUM_CONF kubernetes keystone_auth_default_policy $MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY
 
-    write_uwsgi_config "$MAGNUM_UWSGI_CONF" "$MAGNUM_UWSGI" "/container-infra"
+    write_uwsgi_config "$MAGNUM_UWSGI_CONF" "$MAGNUM_UWSGI" "/container-infra" "" "magnum-api"
 }
 
 function create_api_paste_conf {

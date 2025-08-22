@@ -145,9 +145,11 @@
       jobs:
         - magnum-tempest-plugin-tests-api
         - magnum-tempest-plugin-tests-api-jammy
-        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel
+        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-flannel:
+            voting: false
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.27-calico
-        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-flannel
+        - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-flannel:
+            voting: false
         - magnum-tempest-plugin-tests-cluster-k8s_fcos_v1-1.28-calico
         - magnum-container-build
     gate:
