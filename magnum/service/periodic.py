@@ -194,9 +194,6 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             # synchronize with underlying orchestration
             for cluster in clusters:
                 job = ClusterUpdateJob(ctx, cluster)
-                # though this call isn't really looping, we use this
-                # abstraction anyway to avoid dealing directly with eventlet
-                # hooey
                 lc = loopingcall.FixedIntervalLoopingCall(f=job.update_status)
                 lc.start(1, stop_on_exception=True)
 
@@ -231,9 +228,6 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             # synchronize using native COE API
             for cluster in clusters:
                 job = ClusterHealthUpdateJob(ctx, cluster)
-                # though this call isn't really looping, we use this
-                # abstraction anyway to avoid dealing directly with eventlet
-                # hooey
                 lc = loopingcall.FixedIntervalLoopingCall(
                     f=job.update_health_status)
                 lc.start(1, stop_on_exception=True)
@@ -248,5 +242,6 @@ def setup(conf, tg):
     pt = MagnumPeriodicTasks(conf)
     tg.add_dynamic_timer(
         pt.run_periodic_tasks,
+        initial_delay=None,
         periodic_interval_max=conf.periodic_interval_max,
         context=None)

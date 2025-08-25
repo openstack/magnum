@@ -10,9 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from eventlet.green import threading
 from oslo_context import context
 from oslo_db.sqlalchemy import enginefacade
+import threading
 
 from magnum.common import policy
 

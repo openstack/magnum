@@ -14,6 +14,7 @@
 
 """Common RPC service and API tools for Magnum."""
 
+from oslo_log import log as logging
 import oslo_messaging as messaging
 from oslo_service import service
 
@@ -26,6 +27,7 @@ from magnum.servicegroup import magnum_service_periodic as servicegroup
 
 
 CONF = magnum.conf.CONF
+LOG = logging.getLogger(__name__)
 
 
 class Service(service.Service):
@@ -51,10 +53,17 @@ class Service(service.Service):
         servicegroup.setup(CONF, self.binary, self.tg)
 
     def stop(self):
-        if self._server:
-            self._server.stop()
-            self._server.wait()
+        try:
+            if self._server:
+                self._server.stop()
+        except Exception as e:
+            LOG.debug("Ignored exception during stop: %s", str(e))
         super(Service, self).stop()
+
+    def wait(self):
+        if self._server:
+            self._server.wait()
+        super(Service, self).wait()
 
     @classmethod
     def create(cls, topic, server, handlers, binary):

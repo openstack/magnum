@@ -59,5 +59,6 @@ def setup(conf, binary, tg):
     pt = MagnumServicePeriodicTasks(conf, binary)
     tg.add_dynamic_timer(
         pt.run_periodic_tasks,
+        initial_delay=None,
         periodic_interval_max=conf.periodic_interval_max,
         context=None)

@@ -10,10 +10,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import warnings
+
+from oslo_service import backend
 import threading
 
 import pbr.version
 
+try:
+    backend.init_backend(backend.BackendType.THREADING)
+except backend.exceptions.BackendAlreadySelected:
+    warnings.warn('The selected oslo_service backend is "eventlet"')
 
 __version__ = pbr.version.VersionInfo(
     'magnum').version_string()
