@@ -111,8 +111,8 @@ class Federation(base.APIBase):
     @classmethod
     def convert_with_links(cls, rpc_federation, expand=True):
         federation = Federation(**rpc_federation.as_dict())
-        return cls._convert_with_links(federation, pecan.request.host_url,
-                                       expand)
+        return cls._convert_with_links(
+            federation, pecan.request.application_url, expand)
 
     @classmethod
     def sample(cls, expand=True):

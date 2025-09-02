@@ -229,8 +229,8 @@ class Cluster(base.APIBase):
     def convert_with_links(cls, rpc_cluster, expand=True):
         cluster = Cluster(**rpc_cluster.as_dict())
         parent_labels = rpc_cluster.cluster_template.labels
-        return cls._convert_with_links(cluster, pecan.request.host_url, expand,
-                                       parent_labels)
+        return cls._convert_with_links(
+            cluster, pecan.request.application_url, expand, parent_labels)
 
     @classmethod
     def sample(cls, expand=True):

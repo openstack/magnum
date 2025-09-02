@@ -188,8 +188,8 @@ class ClusterTemplate(base.APIBase):
     @classmethod
     def convert_with_links(cls, rpc_cluster_template):
         cluster_template = ClusterTemplate(**rpc_cluster_template.as_dict())
-        return cls._convert_with_links(cluster_template,
-                                       pecan.request.host_url)
+        return cls._convert_with_links(
+            cluster_template, pecan.request.application_url)
 
     @classmethod
     def sample(cls):
