@@ -106,72 +106,72 @@ class V1(controllers_base.APIBase):
     def convert():
         v1 = V1()
         v1.id = "v1"
-        v1.links = [link.Link.make_link('self', pecan.request.host_url,
-                                        'v1', '', bookmark=True),
-                    link.Link.make_link('describedby',
-                                        'http://docs.openstack.org',
-                                        'developer/magnum/dev',
-                                        'api-spec-v1.html',
-                                        bookmark=True, type='text/html')]
-        v1.media_types = [MediaType('application/json',
-                          'application/vnd.openstack.magnum.v1+json')]
-        v1.clustertemplates = [link.Link.make_link('self',
-                                                   pecan.request.host_url,
-                                                   'clustertemplates', ''),
-                               link.Link.make_link('bookmark',
-                                                   pecan.request.host_url,
-                                                   'clustertemplates', '',
-                                                   bookmark=True)]
-        v1.clusters = [link.Link.make_link('self', pecan.request.host_url,
-                                           'clusters', ''),
-                       link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'clusters', '',
-                                           bookmark=True)]
-        v1.quotas = [link.Link.make_link('self', pecan.request.host_url,
-                                         'quotas', ''),
-                     link.Link.make_link('bookmark',
-                                         pecan.request.host_url,
-                                         'quotas', '',
-                                         bookmark=True)]
-        v1.certificates = [link.Link.make_link('self', pecan.request.host_url,
-                                               'certificates', ''),
-                           link.Link.make_link('bookmark',
-                                               pecan.request.host_url,
-                                               'certificates', '',
-                                               bookmark=True)]
-        v1.mservices = [link.Link.make_link('self', pecan.request.host_url,
-                                            'mservices', ''),
-                        link.Link.make_link('bookmark',
-                                            pecan.request.host_url,
-                                            'mservices', '',
-                                            bookmark=True)]
-        v1.stats = [link.Link.make_link('self', pecan.request.host_url,
-                                        'stats', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'stats', '',
-                                        bookmark=True)]
-        v1.federations = [link.Link.make_link('self', pecan.request.host_url,
-                                              'federations', ''),
-                          link.Link.make_link('bookmark',
-                                              pecan.request.host_url,
-                                              'federations', '',
-                                              bookmark=True)]
-        v1.nodegroups = [link.Link.make_link('self', pecan.request.host_url,
-                                             'clusters/{cluster_id}',
-                                             'nodegroups'),
-                         link.Link.make_link('bookmark',
-                                             pecan.request.host_url,
-                                             'clusters/{cluster_id}',
-                                             'nodegroups',
-                                             bookmark=True)]
-        v1.credentials = [link.Link.make_link('self', pecan.request.host_url,
-                                              'credentials', ''),
-                          link.Link.make_link('bookmark',
-                                              pecan.request.host_url,
-                                              'credentials', '',
-                                              bookmark=True)]
+        v1.links = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'v1', '', bookmark=True),
+            link.Link.make_link(
+                'describedby', 'http://docs.openstack.org',
+                'developer/magnum/dev', 'api-spec-v1.html', bookmark=True,
+                type='text/html')]
+        v1.media_types = [
+            MediaType(
+                'application/json',
+                'application/vnd.openstack.magnum.v1+json')]
+        v1.clustertemplates = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'clustertemplates', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'clustertemplates', '',
+                bookmark=True)]
+        v1.clusters = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'clusters', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'clusters', '',
+                bookmark=True)]
+        v1.quotas = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'quotas', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'quotas', '',
+                bookmark=True)]
+        v1.certificates = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'certificates', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'certificates', '',
+                bookmark=True)]
+        v1.mservices = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'mservices', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'mservices', '',
+                bookmark=True)]
+        v1.stats = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'stats', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'stats', '',
+                bookmark=True)]
+        v1.federations = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'federations', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'federations', '',
+                bookmark=True)]
+        v1.nodegroups = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'clusters/{cluster_id}',
+                'nodegroups'),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'clusters/{cluster_id}',
+                'nodegroups', bookmark=True)]
+        v1.credentials = [
+            link.Link.make_link(
+                'self', pecan.request.host_url, 'credentials', ''),
+            link.Link.make_link(
+                'bookmark', pecan.request.host_url, 'credentials', '',
+                bookmark=True)]
 
         return v1
 
