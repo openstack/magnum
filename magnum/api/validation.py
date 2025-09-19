@@ -94,8 +94,12 @@ def enforce_cluster_master_size_supported():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         cluster = args[1]
-        cluster_driver = driver.Driver.get_driver_for_cluster(
-            pecan.request.context, cluster)
+        cluster_template = objects.ClusterTemplate.get(
+            pecan.request.context, cluster.cluster_template_id)
+        cluster_type = (cluster_template.server_type,
+                        cluster_template.cluster_distro,
+                        cluster_template.coe)
+        cluster_driver = driver.Driver.get_driver(*cluster_type)
         # Call into the driver to validate initial master size
         cluster_driver.validate_master_size(cluster.master_count)
         return func(*args, **kwargs)
