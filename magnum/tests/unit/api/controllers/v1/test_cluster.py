@@ -706,10 +706,10 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    def test_create_cluster_with_cluster_template_name(self):
+    def test_create_cluster_with_cluster_template_name_as_id(self):
         modelname = self.cluster_template.name
-        bdict = apiutils.cluster_post_data(name=modelname)
-        response = self.post_json('/clusters', bdict, expect_errors=True)
+        bdict = apiutils.cluster_post_data(cluster_template_id=modelname)
+        response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
 
