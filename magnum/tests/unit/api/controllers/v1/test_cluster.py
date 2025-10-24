@@ -1079,8 +1079,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(cluster_labels, cluster.labels)
 
     def test_create_cluster_with_merge_labels(self):
-        self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}
-        self.cluster_template.save()
+        orig_ct_labels = self.cluster_template.labels.copy()
         cluster_labels = {'label2': 'value3', 'label4': 'value4'}
         bdict = apiutils.cluster_post_data(labels=cluster_labels,
                                            merge_labels=True)
@@ -1088,9 +1087,10 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         cluster = self.mock_cluster_create.call_args.args[0]
-        expected = self.cluster_template.labels
+        expected = self.cluster_template.labels.copy()
         expected.update(cluster_labels)
         self.assertEqual(expected, cluster.labels)
+        self.assertEqual(orig_ct_labels, self.cluster_template.labels)
 
     def test_create_cluster_with_merge_labels_no_labels(self):
         self.cluster_template.labels = {'label1': 'value1', 'label2': 'value2'}

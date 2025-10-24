@@ -532,12 +532,12 @@ class ClustersController(base.Controller):
 
         # If labels is not present, use cluster_template value
         if cluster.labels == wtypes.Unset or not cluster.labels:
-            cluster.labels = cluster_template.labels
+            cluster.labels = cluster_template.labels.copy()
         else:
             # If labels are provided check if the user wishes to merge
             # them with the values from the cluster template.
             if cluster.merge_labels:
-                labels = cluster_template.labels
+                labels = cluster_template.labels.copy()
                 labels.update(cluster.labels)
                 cluster.labels = labels
 
