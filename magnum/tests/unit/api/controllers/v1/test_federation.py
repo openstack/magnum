@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
 from unittest import mock
 
 from oslo_config import cfg
@@ -285,13 +284,10 @@ class TestPost(api_base.FunctionalTest):
         federation.create()
         return federation
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_federation(self, mock_utcnow):
+    def test_create_federation(self):
         bdict = apiutils.federation_post_data(
             uuid=uuidutils.generate_uuid(),
             hostcluster_id=self.hostcluster.uuid)
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json('/federations', bdict)
         self.assertEqual('application/json', response.content_type)

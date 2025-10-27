@@ -293,11 +293,8 @@ class TestPost(NodeGroupControllerTest):
         nodegroup.create()
         return nodegroup
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup(self, mock_utcnow):
+    def test_create_nodegroup(self):
         ng_dict = apiutils.nodegroup_post_data()
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
@@ -305,12 +302,9 @@ class TestPost(NodeGroupControllerTest):
         self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
         self.assertFalse(response.json['is_default'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_without_node_count(self, mock_utcnow):
+    def test_create_nodegroup_without_node_count(self):
         ng_dict = apiutils.nodegroup_post_data()
         del ng_dict['node_count']
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
@@ -318,13 +312,10 @@ class TestPost(NodeGroupControllerTest):
         # Verify node_count defaults to 1
         self.assertEqual(1, response.json['node_count'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_with_zero_nodes(self, mock_utcnow):
+    def test_create_nodegroup_with_zero_nodes(self):
         ng_dict = apiutils.nodegroup_post_data()
         ng_dict['node_count'] = 0
         ng_dict['min_node_count'] = 0
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
@@ -332,67 +323,49 @@ class TestPost(NodeGroupControllerTest):
         # Verify node_count is set to zero
         self.assertEqual(0, response.json['node_count'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_with_max_node_count(self, mock_utcnow):
+    def test_create_nodegroup_with_max_node_count(self):
         ng_dict = apiutils.nodegroup_post_data(max_node_count=5)
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertEqual(5, response.json['max_node_count'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_with_role(self, mock_utcnow):
+    def test_create_nodegroup_with_role(self):
         ng_dict = apiutils.nodegroup_post_data(role='test-role')
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertEqual('test-role', response.json['role'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_with_labels(self, mock_utcnow):
+    def test_create_nodegroup_with_labels(self):
         labels = {'label1': 'value1'}
         ng_dict = apiutils.nodegroup_post_data(labels=labels)
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertEqual(labels, response.json['labels'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_with_image_id(self, mock_utcnow):
+    def test_create_nodegroup_with_image_id(self):
         ng_dict = apiutils.nodegroup_post_data(image_id='test_image')
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertEqual('test_image', response.json['image_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_with_flavor(self, mock_utcnow):
+    def test_create_nodegroup_with_flavor(self):
         ng_dict = apiutils.nodegroup_post_data(flavor_id='test_flavor')
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertEqual('test_flavor', response.json['flavor_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_only_name(self, mock_utcnow):
+    def test_create_nodegroup_only_name(self):
         ng_dict = {'name': 'test_ng'}
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict)
         self.assertEqual('application/json', response.content_type)
@@ -409,11 +382,8 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual(1, response.json['node_count'])
         self.assertIsNone(response.json['max_node_count'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_nodegroup_invalid_node_count(self, mock_utcnow):
+    def test_create_nodegroup_invalid_node_count(self):
         ng_dict = apiutils.nodegroup_post_data(node_count=7, max_node_count=5)
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json(self.url, ng_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -710,11 +680,7 @@ class TestPatch(NodeGroupControllerTest):
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_remove_internal_attr(self, mock_utcnow):
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
-
+    def test_remove_internal_attr(self):
         response = self.patch_json(self.url + self.nodegroup.name,
                                    [{'path': '/node_count',
                                      'op': 'remove'}], expect_errors=True)
@@ -722,11 +688,7 @@ class TestPatch(NodeGroupControllerTest):
         self.assertEqual(400, response.status_code)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_remove_non_existent_property(self, mock_utcnow):
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
-
+    def test_remove_non_existent_property(self):
         response = self.patch_json(self.url + self.nodegroup.name,
                                    [{'path': '/not_there',
                                      'op': 'remove'}], expect_errors=True)

@@ -386,11 +386,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_replace_ok_by_name_not_found(self, mock_utcnow):
+    def test_replace_ok_by_name_not_found(self):
         name = 'not_found'
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.patch_json('/clusters/%s' % name,
                                    [{'path': '/name', 'value': name,
@@ -399,11 +396,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(404, response.status_code)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_replace_ok_by_uuid_not_found(self, mock_utcnow):
+    def test_replace_ok_by_uuid_not_found(self):
         uuid = uuidutils.generate_uuid()
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.patch_json('/clusters/%s' % uuid,
                                    [{'path': '/cluster_id', 'value': uuid,
@@ -425,11 +419,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_replace_ok_by_name_multiple_cluster(self, mock_utcnow):
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
-
+    def test_replace_ok_by_name_multiple_cluster(self):
         obj_utils.create_test_cluster(self.context, name='test_cluster',
                                       uuid=uuidutils.generate_uuid())
         obj_utils.create_test_cluster(self.context, name='test_cluster',
@@ -626,25 +616,19 @@ class TestPost(api_base.FunctionalTest):
         cluster.create()
         return cluster
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_cluster(self, mock_utcnow):
+    def test_create_cluster(self):
         bdict = apiutils.cluster_post_data()
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_cluster_resource_limit_reached(self, mock_utcnow):
+    def test_create_cluster_resource_limit_reached(self):
         # override max_cluster_per_project to 1
         CONF.set_override('max_clusters_per_project', 1, group='quotas')
 
         bdict = apiutils.cluster_post_data()
-        test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
 
         # create first cluster
         response = self.post_json('/clusters', bdict)
