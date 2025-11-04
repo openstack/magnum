@@ -13,7 +13,7 @@ if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
     else
         attempts=60
         while [ ${attempts} -gt 0 ]; do
-            device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${DOCKER_VOLUME:0:20} | head -n1)
+            device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${DOCKER_VOLUME:0:20}$)
             if [ -n "${device_name}" ]; then
                 break
             fi
@@ -32,10 +32,41 @@ if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
     fi
 fi
 
-$configure_docker_storage_driver
+runtime=${CONTAINER_RUNTIME}
 
-if [ "$DOCKER_STORAGE_DRIVER" = "devicemapper" ]; then
-    configure_devicemapper
-else
-    configure_storage_driver_generic $DOCKER_STORAGE_DRIVER
+# Initialize configuration flag
+need_configure=1
+
+# Check if containerd is already running
+if [ "$($ssh_cmd systemctl is-active containerd)" = "active" ]; then
+    echo "Containerd is already running, skipping storage driver configuration"
+    need_configure=0
+fi
+
+if [ "$need_configure" -eq 1 ]; then
+    if [ ${CONTAINER_RUNTIME} = "containerd"  ] ; then
+        storage_dir="/var/lib/containerd"
+    else
+        storage_dir="/var/lib/docker"
+        runtime="docker"
+    fi
+
+    # stop docker
+    $ssh_cmd systemctl stop ${runtime}
+    # clear storage graph
+    $ssh_cmd rm -rf ${storage_dir}
+    $ssh_cmd mkdir -p ${storage_dir}
+ 
+    if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
+        $ssh_cmd mkfs.xfs -f ${device_path}
+        echo "${device_path} ${storage_dir} xfs defaults 0 0" >> /etc/fstab
+        $ssh_cmd mount -a
+        $ssh_cmd restorecon -R ${storage_dir}
+    fi
+    if [ ${CONTAINER_RUNTIME} = "host-docker"  ] ; then
+        sed -i -E 's/^OPTIONS=("|'"'"')/OPTIONS=\1--storage-driver='$DOCKER_STORAGE_DRIVER' /' /etc/sysconfig/docker
+        # NOTE(flwang): The default nofile limit it too low, update it to
+        # match the default value in containerd
+        sed -i -E 's/--default-ulimit nofile=1024:1024/--default-ulimit nofile=1048576:1048576/' /etc/sysconfig/docker
+    fi
 fi

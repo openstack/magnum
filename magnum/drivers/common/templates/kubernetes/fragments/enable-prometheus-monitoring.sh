@@ -1,3 +1,5 @@
+#!/bin/sh
+
 step="enable-prometheus-monitoring"
 printf "Starting to run ${step}\n"
 
@@ -462,7 +464,7 @@ if [ "$(echo $PROMETHEUS_MONITORING | tr '[:upper:]' '[:lower:]')" = "true" ]; t
 
     # Write the binary for enable-monitoring
     KUBE_MON_BIN_CONTENT='''#!/bin/sh
-until  [ "ok" = "$(kubectl get --raw='/healthz')" ]
+until  [ "ok" = "$(kubectl get --raw='/healthz' 2>nil)" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5

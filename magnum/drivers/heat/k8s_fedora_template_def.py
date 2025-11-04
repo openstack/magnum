@@ -75,7 +75,6 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         extra_params['cloud_provider_enabled'] = cloud_provider_enabled
 
         label_list = ['coredns_tag',
-                      'hyperkube_prefix',
                       'kube_tag', 'container_infra_prefix',
                       'availability_zone',
                       'cgroup_driver',
@@ -86,6 +85,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'calico_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
                       'calico_ipv4pool_ipip',
+                      'manila_csi_plugin_enabled',
+                      'cinder_csi_plugin_enabled',
                       'cinder_csi_enabled', 'cinder_csi_plugin_tag',
                       'csi_attacher_tag', 'csi_provisioner_tag',
                       'csi_snapshotter_tag', 'csi_resizer_tag',
@@ -119,7 +120,9 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'min_node_count', 'max_node_count', 'npd_enabled',
                       'ostree_remote', 'ostree_commit',
                       'use_podman', 'kube_image_digest',
-                      'metrics_scraper_tag']
+                      'metrics_scraper_tag',
+                      'kubernetes_tarball_sha512',
+                      'kubernetes_tarball_url']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 
@@ -138,6 +141,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         extra_params['project_id'] = cluster.project_id
         extra_params['post_install_manifest_url'] = \
             CONF.kubernetes.post_install_manifest_url
+
 
         if not extra_params.get('max_node_count'):
             extra_params['max_node_count'] = cluster.node_count + 1

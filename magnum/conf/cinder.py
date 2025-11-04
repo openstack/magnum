@@ -59,7 +59,7 @@ cinder_client_opts = [
                help=_('Type of endpoint in Identity service catalog to use '
                       'for communication with the OpenStack service.')),
     cfg.StrOpt('api_version',
-               default='2',
+               default='3',
                help=_('Version of Cinder API to use in cinderclient.'))
 ]
 

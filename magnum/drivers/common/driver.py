@@ -137,11 +137,16 @@ class Driver(object):
 
     @classmethod
     def get_driver_for_cluster(cls, context, cluster):
-        ct = cluster_template.ClusterTemplate.get_by_uuid(
-            context, cluster.cluster_template_id)
+        if (cluster.labels is not None and 'cluster_template_id' in cluster.labels):
+            ct_id = cluster.labels['cluster_template_id']
+        else:
+            ct_id = cluster.cluster_template_id
+
+        ct = cluster_template.ClusterTemplate.get_by_uuid(context, ct_id)
+
         return cls.get_driver(ct.server_type, ct.cluster_distro, ct.coe)
 
-    def update_cluster_status(self, context, cluster):
+    def update_cluster_status(self, context, cluster, use_admin_ctx=False):
         """Update the cluster status based on underlying orchestration
 
            This is an optional method if your implementation does not need

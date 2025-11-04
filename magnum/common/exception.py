@@ -441,6 +441,16 @@ class MasterNGResizeNotSupported(NotSupported):
     message = _("Resizing a master nodegroup is not supported.")
 
 
+class ZeroNodeCountNotSupported(NotSupported):
+    message = _("Resizing a nodegroup to zero is not supported in the "
+                "provided microversion.")
+
+
+class ClusterUpgradeNotSupported(NotSupported):
+    message = _("Cluster upgrade is not supported in the "
+                "provided microversion.")
+
+
 class NGResizeOutBounds(Invalid):
     message = _("Resizing %(nodegroup)s outside the allowed range: "
                 "min_node_count = %(min_nc)s, "
@@ -470,3 +480,8 @@ class InvalidClusterTemplateForUpgrade(Conflict):
 
 class ClusterAPIAddressUnavailable(Conflict):
     message = _("Cluster API address is not available yet")
+
+
+class ObjectError(MagnumException):
+    message = _("Failed to perform action %{action}s on %{obj_name}s with "
+                "uuid %{obj_id}s: %{reason}s")

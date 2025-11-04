@@ -2,7 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$(echo $REGISTRY_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+if [ "$REGISTRY_ENABLED" = "True" ]; then
     ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
     $ssh_cmd cat > /etc/sysconfig/registry-config.yml << EOF
 version: 0.1

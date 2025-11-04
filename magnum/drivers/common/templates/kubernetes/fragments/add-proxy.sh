@@ -1,3 +1,5 @@
+#!/bin/sh
+
 set +x
 . /etc/sysconfig/heat-params
 set -x
@@ -18,7 +20,7 @@ NO_PROXY_CONF=${SERVICE_DIR}/no_proxy.conf
 
 RUNTIME_RESTART=0
 
-BASH_RC=/etc/bashrc
+BASH_RC=~/.bashrc
 
 mkdir -p ${SERVICE_DIR}
 

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Copyright 2014 The Kubernetes Authors All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +19,6 @@
 set -x
 set -o errexit
 set -o nounset
-set -o pipefail
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
@@ -83,6 +84,12 @@ function generate_certificates {
     _KEY=$cert_dir/${1}.key
     _CONF=$2
 
+    # Skip if certificate already exists
+    if [ -f "${_CERT}" ] && [ -f "${_KEY}" ]; then
+        echo "Certificate ${1} already exists, skipping generation"
+        return 0
+    fi
+
     #Get a token by user credentials and trust
     auth_json=$(cat << EOF
 {
@@ -97,6 +104,11 @@ function generate_certificates {
                     "password": "$TRUSTEE_PASSWORD"
                 }
             }
+        },
+        "scope": {
+            "OS-TRUST:trust": {
+                "id": "$TRUST_ID"
+            }
         }
     }
 }
@@ -108,11 +120,13 @@ EOF
     USER_TOKEN=`curl $VERIFY_CA -s -i -X POST -H "$content_type" -d "$auth_json" $url \
         | grep -i X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
-    # Get CA certificate for this cluster
-    curl $VERIFY_CA -X GET \
-        -H "X-Auth-Token: $USER_TOKEN" \
-        -H "OpenStack-API-Version: container-infra latest" \
-        $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' >> ${CA_CERT}
+    # Get CA certificate for this cluster if it doesn't exist
+    if [ ! -f "${CA_CERT}" ]; then
+        curl $VERIFY_CA -X GET \
+            -H "X-Auth-Token: $USER_TOKEN" \
+            -H "OpenStack-API-Version: container-infra latest" \
+            $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' > ${CA_CERT}
+    fi
 
     # Generate server's private key and csr
     $ssh_cmd openssl genrsa -out "${_KEY}" 4096
@@ -131,6 +145,8 @@ EOF
         -H "Content-Type: application/json" \
         -d "$csr_req" \
         $MAGNUM_URL/certificates | python -c 'import sys, json; print(json.load(sys.stdin)["pem"])' > ${_CERT}
+
+    rm -f ${_CSR}
 }
 
 # Create config for server's csr
@@ -144,6 +160,61 @@ CN = kubernetes
 [req_ext]
 subjectAltName = ${sans}
 extendedKeyUsage = clientAuth,serverAuth
+EOF
+
+
+#kube-proxy Certs
+cat > ${cert_dir}/proxy.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = system:kube-proxy
+O=system:node-proxier
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
+[req_ext]
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth
+EOF
+
+#kube-scheduler Certs
+cat > ${cert_dir}/scheduler.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = system:kube-scheduler
+O=system:kube-scheduler
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
+[req_ext]
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth,serverAuth
+EOF
+
+#kube-controller Certs
+cat > ${cert_dir}/controller.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = system:kube-controller-manager
+O=system:kube-controller-manager
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
+[req_ext]
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth,serverAuth
 EOF
 
 #Kubelet Certs
@@ -185,20 +256,51 @@ EOF
 generate_certificates server ${cert_dir}/server.conf
 generate_certificates kubelet ${cert_dir}/kubelet.conf
 generate_certificates admin ${cert_dir}/admin.conf
+generate_certificates proxy ${cert_dir}/proxy.conf
+generate_certificates controller ${cert_dir}/controller.conf
+generate_certificates scheduler ${cert_dir}/scheduler.conf
 
-# Generate service account key and private key
-echo -e "${KUBE_SERVICE_ACCOUNT_KEY}" > ${cert_dir}/service_account.key
-echo -e "${KUBE_SERVICE_ACCOUNT_PRIVATE_KEY}" > ${cert_dir}/service_account_private.key
+# Generate service account keys if they don't exist
+if [ ! -f "${cert_dir}/service_account.key" ]; then
+    echo -e "${KUBE_SERVICE_ACCOUNT_KEY}" > ${cert_dir}/service_account.key
+fi
+
+if [ ! -f "${cert_dir}/service_account_private.key" ]; then
+    echo -e "${KUBE_SERVICE_ACCOUNT_PRIVATE_KEY}" > ${cert_dir}/service_account_private.key
+fi
+
+# Function to check if a user exists
+user_exists() {
+  $ssh_cmd id "$1" >/dev/null 2>&1
+}
+
+# Check if the user exists
+if user_exists "etcd"; then
+  echo "User etcd already exists."
+else
+  # Create the user with the specified shell and as a system user
+  $ssh_cmd useradd -s "/sbin/nologin" --system "etcd"
+  echo "User etcd has been created."
+fi
+if user_exists "kube"; then
+  echo "User kube already exists."
+else
+  # Create the user with the specified shell and as a system user
+  $ssh_cmd useradd -s "/sbin/nologin" --system "kube"
+  echo "User kube has been created."
+fi
 
 # Common certs and key are created for both etcd and kubernetes services.
 # Both etcd and kube user should have permission to access the certs and key.
-if [ -z "`cat /etc/group | grep kube_etcd`" ]; then
-    $ssh_cmd groupadd kube_etcd
-    $ssh_cmd usermod -a -G kube_etcd etcd
-    $ssh_cmd usermod -a -G kube_etcd kube
-    $ssh_cmd chmod 550 "${cert_dir}"
-    $ssh_cmd chown -R kube:kube_etcd "${cert_dir}"
-    $ssh_cmd chmod 440 "$cert_dir/server.key"
-    $ssh_cmd mkdir -p /etc/etcd/certs
-    $ssh_cmd cp ${cert_dir}/* /etc/etcd/certs
-fi
+$ssh_cmd groupadd kube_etcd -f
+$ssh_cmd usermod -a -G kube_etcd etcd
+$ssh_cmd usermod -a -G kube_etcd kube
+$ssh_cmd chmod 550 "${cert_dir}"
+$ssh_cmd chown -R kube:kube_etcd "${cert_dir}"
+$ssh_cmd chmod 440 "$cert_dir/server.key"
+$ssh_cmd chmod 440 "${cert_dir}/proxy.key"
+$ssh_cmd chmod 440 "${cert_dir}/controller.key"
+$ssh_cmd chmod 440 "${cert_dir}/scheduler.key"
+$ssh_cmd chmod 440 "${cert_dir}/kubelet.key"
+$ssh_cmd mkdir -p /etc/etcd/certs
+$ssh_cmd cp ${cert_dir}/* /etc/etcd/certs

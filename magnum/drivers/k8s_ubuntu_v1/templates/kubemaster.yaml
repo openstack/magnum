@@ -1,0 +1,1478 @@
+heat_template_version: rocky
+
+description: >
+  This is a nested stack that defines a single Kubernetes master, This stack is
+  included by an ResourceGroup resource in the parent template
+  (kubecluster.yaml).
+
+parameters:
+  name:
+    type: string
+    description: server name
+
+  is_upgrade:
+    type: boolean
+    default: false
+
+  is_resize:
+    type: boolean
+    description: Flag indicating if the stack is being resized
+    default: false
+
+  number_of_masters:
+    type: number
+    description: number of masters in the cluster
+
+  timestamp_upgrade:
+    type: string
+    description: A timestamp value that changes on every stack upgrade
+    default: ""
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  master_flavor:
+    type: string
+    description: flavor to use when booting the server
+
+  nodegroup_role:
+    type: string
+    description: the role of the nodegroup
+
+  nodegroup_name:
+    type: string
+    description: the name of the nodegroup where the node belongs
+
+  heapster_enabled:
+    type: boolean
+    description: enable/disable the use of heapster
+
+  metrics_server_enabled:
+    type: boolean
+    description: enable/disable the use of metrics-server
+
+  metrics_server_chart_tag:
+    type: string
+    description: tag of the stable/metrics-server chart to install
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  ssh_public_key:
+    type: string
+    description: The public ssh key to add in all nodes
+
+  external_network:
+    type: string
+    description: uuid of a network to use for floating ip addresses
+
+  portal_network_cidr:
+    type: string
+    description: >
+      address range used by kubernetes for service portals
+
+  kube_allow_priv:
+    type: string
+    description: >
+      whether or not kubernetes should permit privileged containers.
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  boot_volume_size:
+    type: number
+    description: >
+      size of the cinder boot volume for nodes root volume
+    default: 0
+
+  boot_volume_type:
+    type: string
+    description: >
+      type of the cinder boot volume for nodes root volume
+
+  etcd_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate for etcd storage
+
+  etcd_volume_type:
+    type: string
+    description: >
+      type of a cinder volume to allocate for etcd storage
+
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_volume_type:
+    type: string
+    description: >
+      type of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    default: "devicemapper"
+
+  cgroup_driver:
+    type: string
+    description: >
+      cgroup driver name that kubelet should use, ideally the same as
+      the docker cgroup driver.
+    default: "cgroupfs"
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+
+  flannel_network_subnetlen:
+    type: number
+    description: size of subnet assigned to each master
+
+  flannel_backend:
+    type: string
+    description: >
+      specify the backend for flannel, default udp backend
+    constraints:
+      - allowed_values: ["udp", "vxlan", "host-gw"]
+
+  system_pods_initial_delay:
+    type: number
+    description: >
+      health check, time to wait for system pods (podmaster, scheduler) to boot
+      (in seconds)
+    default: 30
+
+  system_pods_timeout:
+    type: number
+    description: >
+      health check, timeout for system pods (podmaster, scheduler) to answer.
+      (in seconds)
+    default: 5
+
+  admission_control_list:
+    type: string
+    description: >
+      List of admission control plugins to activate
+
+  discovery_url:
+    type: string
+    description: >
+      Discovery URL used for bootstrapping the etcd cluster.
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+
+  traefik_ingress_controller_tag:
+    type: string
+    description: tag of the traefik containers to be used.
+
+  kube_dashboard_enabled:
+    type: boolean
+    description: whether or not to disable kubernetes dashboard
+
+  influx_grafana_dashboard_enabled:
+    type: boolean
+    description: Enable influxdb with grafana dashboard for data from heapster
+
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
+  kubernetes_port:
+    type: number
+    description: >
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+
+  cluster_uuid:
+    type: string
+    description: identifier for the cluster this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  prometheus_monitoring:
+    type: boolean
+    description: >
+      whether or not to have prometheus and grafana deployed
+
+  api_public_address:
+    type: string
+    description: Public IP address of the Kubernetes master server.
+    default: ""
+
+  api_private_address:
+    type: string
+    description: Private IP address of the Kubernetes master server.
+    default: ""
+
+  fixed_network:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_network_name:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+
+  secgroup_kube_master_id:
+    type: string
+    description: ID of the security group for kubernetes master.
+
+  api_pool_id:
+    type: string
+    description: ID of the load balancer pool of k8s API server.
+
+  etcd_pool_id:
+    type: string
+    description: ID of the load balancer pool of etcd server.
+
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
+  kube_tag:
+    type: string
+    description: tag of the k8s containers used to provision the kubernetes cluster
+
+  kubernetes_tarball_sha512:
+    type: string
+
+  kubernetes_tarball_url:
+    type: string
+
+  cloud_provider_tag:
+    type: string
+    description: tag of the kubernetes/cloud-provider-openstack
+      https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/
+
+  cloud_provider_enabled:
+    type: boolean
+    description: Enable or disable the openstack kubernetes cloud provider
+
+  etcd_tag:
+    type: string
+    description: tag of the etcd system container
+
+  coredns_tag:
+    type: string
+    description: tag of the coredns container
+
+  flannel_tag:
+    type: string
+    description: tag of the flannel system containers
+
+  flannel_cni_tag:
+    type: string
+    description: tag of the flannel cni container
+
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+
+  kube_dashboard_version:
+    type: string
+    description: version of kubernetes dashboard used for kubernetes cluster
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    hidden: true
+
+  insecure_registry_url:
+    type: string
+    description: insecure registry url
+
+  container_infra_prefix:
+    type: string
+    description: >
+      prefix of container images used in the cluster, kubernetes components,
+      kubernetes-dashboard, coredns etc
+
+  etcd_lb_vip:
+    type: string
+    description: >
+      etcd lb vip private used to generate certs on master.
+    default: ""
+
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
+  nodes_server_group_id:
+    type: string
+    description: ID of the server group for kubernetes cluster nodes.
+
+  availability_zone:
+    type: string
+    description: >
+      availability zone for master and nodes
+    default: ""
+
+  ca_key:
+    type: string
+    description: key of internal ca for the kube certificate api manager
+    hidden: true
+
+  cert_manager_api:
+    type: boolean
+    description: true if the kubernetes cert api manager should be enabled
+    default: false
+
+  calico_tag:
+    type: string
+    description: tag of the calico containers used to provision the calico node
+
+  calico_kube_controllers_tag:
+    type: string
+    description: tag of the kube_controllers used to provision the calico node
+
+  calico_ipv4pool:
+    type: string
+    description: Configure the IP pool from which Pod IPs will be chosen
+
+  calico_ipv4pool_ipip:
+    type: string
+    description: IPIP Mode to use for the IPv4 POOL created at start up
+
+  pods_network_cidr:
+    type: string
+    description: Configure the IP pool/range from which pod IPs will be chosen
+
+  ingress_controller:
+    type: string
+    description: >
+      ingress controller backend to use
+
+  ingress_controller_role:
+    type: string
+    description: >
+      node role where the ingress controller should run
+
+  octavia_ingress_controller_tag:
+    type: string
+    description: Octavia ingress controller docker image tag.
+
+  kubelet_options:
+    type: string
+    description: >
+      additional options to be passed to the kubelet
+
+  kubeapi_options:
+    type: string
+    description: >
+      additional options to be passed to the api
+
+  kubecontroller_options:
+    type: string
+    description: >
+      additional options to be passed to the controller manager
+
+  kubeproxy_options:
+    type: string
+    description: >
+      additional options to be passed to the kube proxy
+
+  kubescheduler_options:
+    type: string
+    description: >
+      additional options to be passed to the scheduler
+
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
+  kube_service_account_key:
+    type: string
+    hidden: true
+    description: >
+      The signed cert will be used to verify the k8s service account tokens
+      during authentication.
+
+  kube_service_account_private_key:
+    type: string
+    hidden: true
+    description: >
+      The private key will be used to sign generated k8s service account
+      tokens.
+
+  prometheus_tag:
+    type: string
+    description: tag of prometheus container
+
+  grafana_tag:
+    type: string
+    description: tag of grafana container
+
+  heat_container_agent_tag:
+    type: string
+    description: tag of the heat_container_agent system container
+
+  keystone_auth_enabled:
+    type: boolean
+    description: >
+      true if the keystone authN and authZ should be enabled
+    default: false
+
+  k8s_keystone_auth_tag:
+    type: string
+    description: tag of the k8s_keystone_auth container
+
+  monitoring_enabled:
+    type: boolean
+    description: Enable or disable prometheus-operator monitoring solution.
+
+  prometheus_operator_chart_tag:
+    type: string
+    description: The stable/prometheus-operator chart version to use.
+
+  prometheus_adapter_enabled:
+    type: boolean
+    description: Enable or disable prometheus-adapter custom metrics.
+
+  prometheus_adapter_chart_tag:
+    type: string
+    description: The stable/prometheus-adapter chart version to use.
+
+  prometheus_adapter_configmap:
+    type: string
+    description: The prometheus adapter rules ConfigMap name to use as overwrite.
+
+  project_id:
+    type: string
+    description: >
+      project id of current project
+
+  tiller_enabled:
+    type: string
+    description: Whether to enable tiller or not
+
+  tiller_tag:
+    type: string
+    description: tag of tiller container
+
+  tiller_namespace:
+    type: string
+    description: namespace where tiller will be installed
+
+  helm_client_url:
+    type: string
+    description: url of helm client tarball
+
+  helm_client_sha256:
+    type: string
+    description: sha256 of helm client tarball
+
+  helm_client_tag:
+    type: string
+    description: >
+      release tag of helm client
+      https://github.com/helm/helm/releases
+
+  auto_healing_enabled:
+    type: boolean
+    description: >
+      true if the auto healing feature should be enabled
+
+  auto_healing_controller:
+    type: string
+    description: >
+      The service to be deployed for auto-healing.
+    default: "draino"
+
+  magnum_auto_healer_tag:
+    type: string
+    description: tag of the magnum-auto-healer service.
+    default: "v1.15.0"
+
+  auto_scaling_enabled:
+    type: boolean
+    description: >
+      true if the auto scaling feature should be enabled
+
+  manila_csi_plugin_enabled:
+    type: boolean
+    description: >
+      true if the manila csi plugin feature should be enabled
+
+  cinder_csi_plugin_enabled:
+    type: boolean
+    description: >
+      true if the cinder csi plugin feature should be enabled
+
+  cinder_csi_enabled:
+    type: boolean
+    description: >
+      true if the cinder csi feature should be enabled
+
+  cinder_csi_plugin_tag:
+    type: string
+    description: tag of cinder csi plugin
+
+  csi_attacher_tag:
+    type: string
+    description: tag of csi attacher
+
+  csi_provisioner_tag:
+    type: string
+    description: tag of csi provisioner
+
+  csi_snapshotter_tag:
+    type: string
+    description: tag of csi snapshotter
+
+  csi_resizer_tag:
+    type: string
+    description: tag of csi resizer
+
+  csi_node_driver_registrar_tag:
+    type: string
+    description: tag of csi node driver registrar
+
+  node_problem_detector_tag:
+    type: string
+    description: tag of the node problem detector container
+
+  nginx_ingress_controller_tag:
+    type: string
+    description: nginx ingress controller docker image tag
+
+  nginx_ingress_controller_chart_tag:
+    type: string
+    description: nginx ingress controller helm chart tag
+
+  draino_tag:
+    type: string
+    description: tag of the draino container
+
+  autoscaler_tag:
+    type: string
+    description: tag of the autoscaler container
+
+  min_node_count:
+    type: number
+    description: >
+      minimum node count of cluster workers when doing scale down
+
+  max_node_count:
+    type: number
+    description: >
+      maximum node count of cluster workers when doing scale up
+
+  npd_enabled:
+    type: boolean
+    description: >
+      true if the npd service should be launched
+    default: true
+
+  ostree_remote:
+    type: string
+    description: The ostree remote branch to upgrade
+
+  ostree_commit:
+    type: string
+    description: The ostree commit to deploy
+
+  use_podman:
+    type: boolean
+    description: >
+      If true, run system containers for kubernetes, etcd and heat-agent
+
+  selinux_mode:
+    type: string
+    description: >
+      Choose SELinux mode
+
+  kube_image_digest:
+    type: string
+    description: >
+      The digest of the image which should match the given kube_tag
+    default: ""
+
+  container_runtime:
+    type: string
+    description: The container runtime to install
+
+  containerd_version:
+    type: string
+    description: The containerd version to download from https://storage.googleapis.com/cri-containerd-release/
+
+  containerd_tarball_url:
+    type: string
+    description: Url location of the containerd tarball.
+
+  containerd_tarball_sha256:
+    type: string
+    description: sha256 of the target containerd tarball.
+
+  post_install_manifest_url:
+    type: string
+    description: >
+      Post install manifest url to setup some cloud provider/vendor
+      specific configs
+
+  metrics_scraper_tag:
+    type: string
+    description: >
+      Tag of metrics-scraper for kubernetes dashboard.
+
+conditions:
+  image_based: { equals: [{ get_param: boot_volume_size }, 0] }
+  volume_based:
+    not:
+      equals:
+        - get_param: boot_volume_size
+        - 0
+  create_masters:
+    equals:
+      - get_param: is_upgrade
+      - false
+  upgrade_masters:
+    equals:
+      - get_param: is_upgrade
+      - true
+
+  upgrade_or_resize_masters:
+    or:
+      - equals:
+          - get_param: is_upgrade
+          - true
+      - equals:
+          - get_param: is_resize
+          - true
+
+resources:
+  ######################################################################
+  #
+  # resource that exposes the IPs of either the kube master or the API
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: { get_param: api_public_address }
+      pool_private_ip: { get_param: api_private_address }
+      master_public_ip:
+        { get_attr: [kube_master_floating, floating_ip_address] }
+      master_private_ip:
+        { get_attr: [kube_master_eth0, fixed_ips, 0, ip_address] }
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  agent_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        users:
+          - name: ubuntu
+            groups: [adm, audio, cdrom, dialout, dip, floppy, lxd, netdev, plugdev, sudo, video]
+            shell: /bin/bash
+            sudo: ['ALL=(ALL) NOPASSWD:ALL']
+            ssh_authorized_keys:
+              - { get_param: ssh_public_key }
+        write_files:
+          - path: /etc/sysctl.d/max-user-watches.conf
+            permissions: "0644"
+            content: |
+              fs.inotify.max_user_watches=16184
+          - path: /etc/sysctl.d/k8s_custom.conf
+            permissions: "0644"
+            content: |
+              net.ipv4.conf.default.rp_filter=2
+              net.ipv4.conf.all.rp_filter=2
+              net.ipv4.conf.all.promote_secondaries=1
+              net.ipv4.conf.default.accept_source_route=1
+              net.ipv4.conf.all.accept_source_route=1
+          - path: /etc/hostname
+            permissions: "0644"
+            content: { get_param: name }
+          - path: /etc/ssl/certs/openstack-ca.pem
+            permissions: "0644"
+            content: { get_param: openstack_ca }
+          - path: /etc/systemd/network/50-flannel.link
+            permissions: "0644"
+            owner: root
+            group: root
+            content: |
+              [Match]
+              OriginalName=flannel*
+                
+              [Link]
+              MACAddressPolicy=none
+          - path: /root/configure-agent-env.sh
+            permissions: "0755"
+            content:
+              str_replace:
+                template: |
+                  #!/bin/bash
+
+                  set -x
+                  set -e
+                  set +u
+
+                  until [ -f /etc/ssl/certs/openstack-ca.pem ]
+                  do
+                      echo "waiting for /etc/ssl/certs/openstack-ca.pem"
+                      sleep 3s
+                  done
+
+                  update-ca-certificates
+
+                  HTTP_PROXY="$HTTP_PROXY"
+                  HTTPS_PROXY="$HTTPS_PROXY"
+                  NO_PROXY="$NO_PROXY"
+
+                  if [ -n "${HTTP_PROXY}" ]; then
+                      export HTTP_PROXY
+                      echo "http_proxy=${HTTP_PROXY}" >> /etc/environment
+                  fi
+
+                  if [ -n "${HTTPS_PROXY}" ]; then
+                      export HTTPS_PROXY
+                      echo "https_proxy=${HTTPS_PROXY}" >> /etc/environment
+                  fi
+
+                  if [ -n "${NO_PROXY}" ]; then
+                      export NO_PROXY
+                      echo "no_proxy=${NO_PROXY}" >> /etc/environment
+                  fi
+
+                  id
+                  echo "=== Setting up Heat Agent SSH keys ==="
+                  mkdir -p /srv/magnum/.ssh
+                  chmod 0700 /srv/magnum/.ssh
+                  ssh-keygen -q -t rsa -N '' -f /tmp/heat_agent_rsa
+                  mv /tmp/heat_agent_rsa /srv/magnum/.ssh/heat_agent_rsa
+                  mv /tmp/heat_agent_rsa.pub /srv/magnum/.ssh/heat_agent_rsa.pub
+                  chmod 0400 /srv/magnum/.ssh/heat_agent_rsa
+                  chmod 0400 /srv/magnum/.ssh/heat_agent_rsa.pub
+                  echo "Heat agent SSH keys created successfully"
+                  
+                  echo "=== Setting up Ubuntu user SSH access ==="
+                  # Configure SSH access for ubuntu user
+                  mkdir -p /home/ubuntu/.ssh
+                  chmod 0700 /home/ubuntu/.ssh
+                  chown ubuntu:ubuntu /home/ubuntu/.ssh
+                  cat /srv/magnum/.ssh/heat_agent_rsa.pub >> /home/ubuntu/.ssh/authorized_keys
+                  
+                  chmod 0600 /home/ubuntu/.ssh/authorized_keys
+                  chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+                  echo "Ubuntu user SSH access configured"
+                  
+                  echo "=== Setting up Root user SSH access ==="
+                  # Also setup for root for heat agent operations
+                  mkdir -p /root/.ssh
+                  chmod 0700 /root/.ssh
+                  cat /srv/magnum/.ssh/heat_agent_rsa.pub > /root/.ssh/authorized_keys
+                  echo "Root user SSH access configured"
+                  
+                  echo "=== Setting up SSH known hosts and config ==="
+                  ssh-keyscan 127.0.0.1 > /srv/magnum/.ssh/known_hosts
+                  cat > /srv/magnum/.ssh/config <<EOF
+                  Host localhost
+                      HostName 127.0.0.1
+                      User ubuntu
+                      IdentityFile /srv/magnum/.ssh/heat_agent_rsa
+                      UserKnownHostsFile /srv/magnum/.ssh/known_hosts
+                  EOF
+                  echo "SSH config and known_hosts configured"
+
+                  echo "=== Configuring SSH daemon ==="
+                  # Backup original sshd_config
+                  cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+                  echo "SSH config backed up"
+                  
+                  # Configure SSH to disable root password login but allow key-based login
+                  sed -i '/^#*PermitRootLogin/ s/.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+                  sed -i '/^#*PasswordAuthentication/ s/.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+                  echo "SSH daemon basic security configured"
+                  
+                  # Allow ubuntu user SSH access
+                  if ! grep -q "^AllowUsers" /etc/ssh/sshd_config; then
+                      echo "AllowUsers ubuntu root" >> /etc/ssh/sshd_config
+                      echo "AllowUsers directive added to SSH config"
+                  fi
+
+                  echo "=== Final SSH configuration check ==="
+                  echo "SSH daemon config test:"
+                  /usr/sbin/sshd -t && echo "SSH config syntax: OK" || echo "SSH config syntax: ERROR"
+                  
+                  echo "Ubuntu user home directory permissions:"
+                  ls -la /home/ubuntu/.ssh/
+                  
+                  echo "Root .ssh directory permissions:"
+                  ls -la /root/.ssh/
+                  
+                  echo "=== Restarting SSH service ==="
+                  systemctl restart ssh
+                  if systemctl is-active --quiet ssh; then
+                      echo "SSH service restarted successfully"
+                  else
+                      echo "ERROR: SSH service failed to restart"
+                      systemctl status ssh
+                  fi
+
+                params:
+                  $HTTP_PROXY: { get_param: http_proxy }
+                  $HTTPS_PROXY: { get_param: https_proxy }
+                  $NO_PROXY: { get_param: no_proxy }
+          - path: /lib/systemd/system/heat-container-agent.service
+            permissions: "0655"
+            content:
+              str_replace:
+                template: |
+                  [Unit]
+                  Description=Run heat-container-agent
+                  After=network-online.target configure-agent-env.service
+                  Wants=network-online.target
+
+                  [Service]
+                  EnvironmentFile=-/etc/environment
+                  ExecStartPre=mkdir -p /var/lib/heat-container-agent
+                  ExecStartPre=mkdir -p /var/run/heat-config
+                  ExecStartPre=mkdir -p /var/run/os-collect-config
+                  ExecStartPre=mkdir -p /opt/stack/os-config-refresh
+                  ExecStartPre=-mv /var/lib/os-collect-config/local-data /var/lib/cloud/data/cfn-init-data
+                  ExecStartPre=mkdir -p /srv/magnum
+                  ExecStartPre=-/bin/podman kill heat-container-agent
+                  ExecStartPre=-/bin/podman rm heat-container-agent
+                  ExecStartPre=-/bin/podman pull __CONTAINER_INFRA_PREFIX__heat-container-agent:__HEAT_CONTAINER_AGENT_TAG__
+                  ExecStart=/bin/podman run \
+                          --name heat-container-agent \
+                          --privileged \
+                          --net=host \
+                          --volume /srv/magnum:/srv/magnum \
+                          --volume /opt/stack/os-config-refresh:/opt/stack/os-config-refresh \
+                          --volume /run/systemd:/run/systemd \
+                          --volume /etc/:/etc/ \
+                          --volume /var/lib:/var/lib \
+                          --volume /var/run:/var/run \
+                          --volume /var/log:/var/log \
+                          --volume /tmp:/tmp \
+                          --volume /dev:/dev \
+                          --env REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+                          __CONTAINER_INFRA_PREFIX__heat-container-agent:__HEAT_CONTAINER_AGENT_TAG__ \
+                          /usr/bin/start-heat-container-agent
+                  TimeoutStartSec=10min
+
+                  ExecStop=/bin/podman stop heat-container-agent
+
+                  [Install]
+                  WantedBy=multi-user.target
+                params:
+                  __CONTAINER_INFRA_PREFIX__:
+                    if:
+                      - equals:
+                          - get_param: container_infra_prefix
+                          - ""
+                      - "docker.io/openstackmagnum/"
+                      - get_param: container_infra_prefix
+                  __HEAT_CONTAINER_AGENT_TAG__:
+                    { get_param: heat_container_agent_tag }
+
+        packages:
+          - containerd
+          - podman
+          - python-is-python3
+          - policycoreutils
+
+        runcmd:
+          - mkdir -p /var/lib/cloud/data
+          - chmod 0755 /var/lib/cloud/data
+          - mkdir -p /var/lib/heat-cfntools
+          - chmod 0755 /var/lib/heat-cfntools
+          - bash /root/configure-agent-env.sh
+          - mkdir -p /etc/pki/tls/certs/
+          - ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
+          - mkdir -p /etc/pki/ca-trust/extracted/pem
+          - cp /etc/ssl/certs/* /etc/pki/ca-trust/extracted/pem
+          - systemctl enable --now containerd
+          - systemctl enable --now heat-container-agent
+          - sysctl -p /etc/sysctl.d/max-user-watches.conf
+          - sysctl -p /etc/sysctl.d/k8s_custom.conf
+
+  master_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        list_join:
+          - "\n"
+          - - str_replace:
+                template:
+                  {
+                    get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh,
+                  }
+                params:
+                  $INSTANCE_NAME: { get_param: name }
+                  $HEAPSTER_ENABLED: { get_param: heapster_enabled }
+                  $METRICS_SERVER_ENABLED: { get_param: metrics_server_enabled }
+                  $METRICS_SERVER_CHART_TAG:
+                    { get_param: metrics_server_chart_tag }
+                  $PROMETHEUS_MONITORING: { get_param: prometheus_monitoring }
+                  $KUBE_API_PUBLIC_ADDRESS:
+                    { get_attr: [api_address_switch, public_ip] }
+                  $KUBE_API_PRIVATE_ADDRESS:
+                    { get_attr: [api_address_switch, private_ip] }
+                  $KUBE_API_PORT: { get_param: kubernetes_port }
+                  $KUBE_NODE_PUBLIC_IP:
+                    { get_attr: [kube_master_floating, floating_ip_address] }
+                  $KUBE_NODE_IP:
+                    { get_attr: [kube_master_eth0, fixed_ips, 0, ip_address] }
+                  $KUBE_ALLOW_PRIV: { get_param: kube_allow_priv }
+                  $ETCD_VOLUME: { get_resource: etcd_volume }
+                  $ETCD_VOLUME_SIZE: { get_param: etcd_volume_size }
+                  $DOCKER_VOLUME: { get_resource: docker_volume }
+                  $DOCKER_VOLUME_SIZE: { get_param: docker_volume_size }
+                  $DOCKER_STORAGE_DRIVER: { get_param: docker_storage_driver }
+                  $CGROUP_DRIVER: { get_param: cgroup_driver }
+                  $NETWORK_DRIVER: { get_param: network_driver }
+                  $FLANNEL_NETWORK_CIDR: { get_param: flannel_network_cidr }
+                  $FLANNEL_NETWORK_SUBNETLEN:
+                    { get_param: flannel_network_subnetlen }
+                  $FLANNEL_BACKEND: { get_param: flannel_backend }
+                  $SYSTEM_PODS_INITIAL_DELAY:
+                    { get_param: system_pods_initial_delay }
+                  $SYSTEM_PODS_TIMEOUT: { get_param: system_pods_timeout }
+                  $PODS_NETWORK_CIDR: { get_param: pods_network_cidr }
+                  $PORTAL_NETWORK_CIDR: { get_param: portal_network_cidr }
+                  $ADMISSION_CONTROL_LIST: { get_param: admission_control_list }
+                  $ETCD_DISCOVERY_URL: { get_param: discovery_url }
+                  $AUTH_URL: { get_param: auth_url }
+                  $USERNAME: { get_param: username }
+                  $PASSWORD: { get_param: password }
+                  $CLUSTER_NETWORK: { get_param: fixed_network }
+                  $CLUSTER_NETWORK_NAME: { get_param: fixed_network_name }
+                  $CLUSTER_SUBNET: { get_param: fixed_subnet }
+                  $TLS_DISABLED: { get_param: tls_disabled }
+                  $TRAEFIK_INGRESS_CONTROLLER_TAG:
+                    { get_param: traefik_ingress_controller_tag }
+                  $KUBE_DASHBOARD_ENABLED: { get_param: kube_dashboard_enabled }
+                  $INFLUX_GRAFANA_DASHBOARD_ENABLED:
+                    { get_param: influx_grafana_dashboard_enabled }
+                  $VERIFY_CA: { get_param: verify_ca }
+                  $CLUSTER_UUID: { get_param: cluster_uuid }
+                  $MAGNUM_URL: { get_param: magnum_url }
+                  $VOLUME_DRIVER: { get_param: volume_driver }
+                  $REGION_NAME: { get_param: region_name }
+                  $HTTP_PROXY: { get_param: http_proxy }
+                  $HTTPS_PROXY: { get_param: https_proxy }
+                  $NO_PROXY: { get_param: no_proxy }
+                  $KUBE_TAG: { get_param: kube_tag }
+                  $KUBERNETES_TARBALL_SHA512:
+                    { get_param: kubernetes_tarball_sha512 }
+                  $KUBERNETES_TARBALL_URL: { get_param: kubernetes_tarball_url }
+                  $CLOUD_PROVIDER_TAG: { get_param: cloud_provider_tag }
+                  $CLOUD_PROVIDER_ENABLED: { get_param: cloud_provider_enabled }
+                  $ETCD_TAG: { get_param: etcd_tag }
+                  $COREDNS_TAG: { get_param: coredns_tag }
+                  $FLANNEL_TAG: { get_param: flannel_tag }
+                  $NUMBER_OF_MASTERS: { get_param: number_of_masters }
+                  $FLANNEL_CNI_TAG: { get_param: flannel_cni_tag }
+                  $KUBE_VERSION: { get_param: kube_version }
+                  $KUBE_DASHBOARD_VERSION: { get_param: kube_dashboard_version }
+                  $TRUSTEE_USER_ID: { get_param: trustee_user_id }
+                  $TRUSTEE_PASSWORD: { get_param: trustee_password }
+                  $TRUST_ID: { get_param: trust_id }
+                  $INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
+                  $CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
+                  $ETCD_LB_VIP: { get_param: etcd_lb_vip }
+                  $DNS_SERVICE_IP: { get_param: dns_service_ip }
+                  $DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
+                  $CERT_MANAGER_API: { get_param: cert_manager_api }
+                  $CA_KEY: { get_param: ca_key }
+                  $CALICO_TAG: { get_param: calico_tag }
+                  $CALICO_KUBE_CONTROLLERS_TAG:
+                    { get_param: calico_kube_controllers_tag }
+                  $CALICO_IPV4POOL: { get_param: calico_ipv4pool }
+                  $CALICO_IPV4POOL_IPIP: { get_param: calico_ipv4pool_ipip }
+                  $INGRESS_CONTROLLER: { get_param: ingress_controller }
+                  $INGRESS_CONTROLLER_ROLE:
+                    { get_param: ingress_controller_role }
+                  $OCTAVIA_INGRESS_CONTROLLER_TAG:
+                    { get_param: octavia_ingress_controller_tag }
+                  $KUBELET_OPTIONS: { get_param: kubelet_options }
+                  $KUBEAPI_OPTIONS: { get_param: kubeapi_options }
+                  $KUBECONTROLLER_OPTIONS: { get_param: kubecontroller_options }
+                  $KUBEPROXY_OPTIONS: { get_param: kubeproxy_options }
+                  $KUBESCHEDULER_OPTIONS: { get_param: kubescheduler_options }
+                  $OCTAVIA_ENABLED: { get_param: octavia_enabled }
+                  $KUBE_SERVICE_ACCOUNT_KEY:
+                    { get_param: kube_service_account_key }
+                  $KUBE_SERVICE_ACCOUNT_PRIVATE_KEY:
+                    { get_param: kube_service_account_private_key }
+                  $PROMETHEUS_TAG: { get_param: prometheus_tag }
+                  $GRAFANA_TAG: { get_param: grafana_tag }
+                  $HEAT_CONTAINER_AGENT_TAG:
+                    { get_param: heat_container_agent_tag }
+                  $KEYSTONE_AUTH_ENABLED: { get_param: keystone_auth_enabled }
+                  $K8S_KEYSTONE_AUTH_TAG: { get_param: k8s_keystone_auth_tag }
+                  $MONITORING_ENABLED: { get_param: monitoring_enabled }
+                  $PROMETHEUS_OPERATOR_CHART_TAG:
+                    { get_param: prometheus_operator_chart_tag }
+                  $PROMETHEUS_ADAPTER_ENABLED:
+                    { get_param: prometheus_adapter_enabled }
+                  $PROMETHEUS_ADAPTER_CHART_TAG:
+                    { get_param: prometheus_adapter_chart_tag }
+                  $PROMETHEUS_ADAPTER_CONFIGMAP:
+                    { get_param: prometheus_adapter_configmap }
+                  $PROJECT_ID: { get_param: project_id }
+                  $EXTERNAL_NETWORK_ID: { get_param: external_network }
+                  $TILLER_ENABLED: { get_param: tiller_enabled }
+                  $TILLER_TAG: { get_param: tiller_tag }
+                  $TILLER_NAMESPACE: { get_param: tiller_namespace }
+                  $HELM_CLIENT_URL: { get_param: helm_client_url }
+                  $HELM_CLIENT_SHA256: { get_param: helm_client_sha256 }
+                  $HELM_CLIENT_TAG: { get_param: helm_client_tag }
+                  $NODE_PROBLEM_DETECTOR_TAG:
+                    { get_param: node_problem_detector_tag }
+                  $NGINX_INGRESS_CONTROLLER_TAG:
+                    { get_param: nginx_ingress_controller_tag }
+                  $NGINX_INGRESS_CONTROLLER_CHART_TAG:
+                    { get_param: nginx_ingress_controller_chart_tag }
+                  $AUTO_HEALING_ENABLED: { get_param: auto_healing_enabled }
+                  $AUTO_HEALING_CONTROLLER:
+                    { get_param: auto_healing_controller }
+                  $MAGNUM_AUTO_HEALER_TAG: { get_param: magnum_auto_healer_tag }
+                  $AUTO_SCALING_ENABLED: { get_param: auto_scaling_enabled }
+                  $MANILA_CSI_PLUGIN_ENABLED:
+                    { get_param: manila_csi_plugin_enabled }
+                  $CINDER_CSI_PLUGIN_ENABLED:
+                    { get_param: cinder_csi_plugin_enabled }
+                  $CINDER_CSI_ENABLED: { get_param: cinder_csi_enabled }
+                  $CINDER_CSI_PLUGIN_TAG: { get_param: cinder_csi_plugin_tag }
+                  $CSI_ATTACHER_TAG: { get_param: csi_attacher_tag }
+                  $CSI_PROVISIONER_TAG: { get_param: csi_provisioner_tag }
+                  $CSI_SNAPSHOTTER_TAG: { get_param: csi_snapshotter_tag }
+                  $CSI_RESIZER_TAG: { get_param: csi_resizer_tag }
+                  $CSI_NODE_DRIVER_REGISTRAR_TAG:
+                    { get_param: csi_node_driver_registrar_tag }
+                  $DRAINO_TAG: { get_param: draino_tag }
+                  $AUTOSCALER_TAG: { get_param: autoscaler_tag }
+                  $MIN_NODE_COUNT: { get_param: min_node_count }
+                  $MAX_NODE_COUNT: { get_param: max_node_count }
+                  $NPD_ENABLED: { get_param: npd_enabled }
+                  $NODEGROUP_ROLE: { get_param: nodegroup_role }
+                  $NODEGROUP_NAME: { get_param: nodegroup_name }
+                  $USE_PODMAN: { get_param: use_podman }
+                  $KUBE_IMAGE_DIGEST: { get_param: kube_image_digest }
+                  $CONTAINER_RUNTIME: { get_param: container_runtime }
+                  $CONTAINERD_VERSION: { get_param: containerd_version }
+                  $CONTAINERD_TARBALL_URL: { get_param: containerd_tarball_url }
+                  $CONTAINERD_TARBALL_SHA256:
+                    { get_param: containerd_tarball_sha256 }
+                  $POST_INSTALL_MANIFEST_URL:
+                    { get_param: post_install_manifest_url }
+                  $METRICS_SCRAPER_TAG: { get_param: metrics_scraper_tag }
+            - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
+            - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
+            - str_replace:
+                template:
+                  {
+                    get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh,
+                  }
+                params:
+                  "$CA_KEY": { get_param: ca_key }
+            - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
+            - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
+            - get_file: ../../common/templates/kubernetes/fragments/write-admin-kubeconfig.sh
+            - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh
+            - get_file: ../../common/templates/fragments/configure-docker-storage.sh
+            - get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh
+            - get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh
+
+  master_config_deployment:
+    condition: create_masters
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: { get_resource: master_config }
+      server: { get_resource: kube-master }
+      actions: ["CREATE"]
+
+  ######################################################################
+  #
+  # a single kubernetes master.
+  #
+
+  # do NOT use "_" (underscore) in the Nova server name
+  # it creates a mismatch between the generated Nova name and its hostname
+  # which can lead to weird problems
+  kube-master:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name }
+      image: { get_param: server_image }
+      flavor: { get_param: master_flavor }
+      user_data_format: SOFTWARE_CONFIG
+      # key_name: { get_param: ssh_key_name }
+      software_config_transport: POLL_SERVER_HEAT
+      user_data: { get_resource: agent_config }
+      networks:
+        - port: { get_resource: kube_master_eth0 }
+      scheduler_hints: { group: { get_param: nodes_server_group_id } }
+      availability_zone: { get_param: availability_zone }
+
+  kube_master_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: fixed_network }
+      security_groups:
+        - { get_param: secgroup_kube_master_id }
+      fixed_ips:
+        - subnet: { get_param: fixed_subnet }
+      allowed_address_pairs:
+        - ip_address: { get_param: pods_network_cidr }
+      replacement_policy: AUTO
+
+  kube_master_floating:
+    type: Magnum::Optional::KubeMaster::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: external_network }
+      port_id: { get_resource: kube_master_eth0 }
+    depends_on: kube-master
+
+  api_pool_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_param: api_pool_id }
+      address: { get_attr: [kube_master_eth0, fixed_ips, 0, ip_address] }
+      subnet: { get_param: fixed_subnet }
+      protocol_port: { get_param: kubernetes_port }
+
+  etcd_pool_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_param: etcd_pool_id }
+      address: { get_attr: [kube_master_eth0, fixed_ips, 0, ip_address] }
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 2379
+
+  ######################################################################
+  #
+  # etcd storage.  This allocates a cinder volume and attaches it
+  # to the master.
+  #
+
+  etcd_volume:
+    type: Magnum::Optional::Etcd::Volume
+    properties:
+      size: { get_param: etcd_volume_size }
+      volume_type: { get_param: etcd_volume_type }
+      availability_zone: { get_param: availability_zone }
+
+  etcd_volume_attach:
+    type: Magnum::Optional::Etcd::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: kube-master }
+      volume_id: { get_resource: etcd_volume }
+      mountpoint: /dev/vdc
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the minion.
+  #
+
+  docker_volume:
+    type: Magnum::Optional::Cinder::Volume
+    properties:
+      size: { get_param: docker_volume_size }
+      volume_type: { get_param: docker_volume_type }
+      availability_zone: { get_param: availability_zone }
+
+  docker_volume_attach:
+    type: Magnum::Optional::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: kube-master }
+      volume_id: { get_resource: docker_volume }
+      mountpoint: /dev/vdb
+
+  upgrade_kubernetes_config:
+    condition: upgrade_or_resize_masters
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      inputs:
+        - name: OS_STACK_ID
+      config:
+        list_join:
+          - "\n"
+          - - str_replace:
+                template:
+                  {
+                    get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh,
+                  }
+                params:
+                  $INSTANCE_NAME: { get_param: name }
+                  $IS_UPGRADE: { get_param: is_upgrade }
+                  $IS_RESIZE: { get_param: is_resize }
+                  $HEAPSTER_ENABLED: { get_param: heapster_enabled }
+                  $METRICS_SERVER_ENABLED: { get_param: metrics_server_enabled }
+                  $METRICS_SERVER_CHART_TAG:
+                    { get_param: metrics_server_chart_tag }
+                  $PROMETHEUS_MONITORING: { get_param: prometheus_monitoring }
+                  $KUBE_API_PUBLIC_ADDRESS:
+                    { get_attr: [api_address_switch, public_ip] }
+                  $KUBE_API_PRIVATE_ADDRESS:
+                    { get_attr: [api_address_switch, private_ip] }
+                  $KUBE_API_PORT: { get_param: kubernetes_port }
+                  $KUBE_NODE_PUBLIC_IP:
+                    { get_attr: [kube_master_floating, floating_ip_address] }
+                  $KUBE_NODE_IP:
+                    { get_attr: [kube_master_eth0, fixed_ips, 0, ip_address] }
+                  $KUBE_ALLOW_PRIV: { get_param: kube_allow_priv }
+                  $ETCD_VOLUME: { get_resource: etcd_volume }
+                  $ETCD_VOLUME_SIZE: { get_param: etcd_volume_size }
+                  $DOCKER_VOLUME: { get_resource: docker_volume }
+                  $DOCKER_VOLUME_SIZE: { get_param: docker_volume_size }
+                  $DOCKER_STORAGE_DRIVER: { get_param: docker_storage_driver }
+                  $CGROUP_DRIVER: { get_param: cgroup_driver }
+                  $NETWORK_DRIVER: { get_param: network_driver }
+                  $FLANNEL_NETWORK_CIDR: { get_param: flannel_network_cidr }
+                  $FLANNEL_NETWORK_SUBNETLEN:
+                    { get_param: flannel_network_subnetlen }
+                  $FLANNEL_BACKEND: { get_param: flannel_backend }
+                  $SYSTEM_PODS_INITIAL_DELAY:
+                    { get_param: system_pods_initial_delay }
+                  $SYSTEM_PODS_TIMEOUT: { get_param: system_pods_timeout }
+                  $PODS_NETWORK_CIDR: { get_param: pods_network_cidr }
+                  $PORTAL_NETWORK_CIDR: { get_param: portal_network_cidr }
+                  $ADMISSION_CONTROL_LIST: { get_param: admission_control_list }
+                  $ETCD_DISCOVERY_URL: { get_param: discovery_url }
+                  $AUTH_URL: { get_param: auth_url }
+                  $USERNAME: { get_param: username }
+                  $PASSWORD: { get_param: password }
+                  $CLUSTER_NETWORK: { get_param: fixed_network }
+                  $CLUSTER_NETWORK_NAME: { get_param: fixed_network_name }
+                  $CLUSTER_SUBNET: { get_param: fixed_subnet }
+                  $TLS_DISABLED: { get_param: tls_disabled }
+                  $TRAEFIK_INGRESS_CONTROLLER_TAG:
+                    { get_param: traefik_ingress_controller_tag }
+                  $KUBE_DASHBOARD_ENABLED: { get_param: kube_dashboard_enabled }
+                  $INFLUX_GRAFANA_DASHBOARD_ENABLED:
+                    { get_param: influx_grafana_dashboard_enabled }
+                  $VERIFY_CA: { get_param: verify_ca }
+                  $CLUSTER_UUID: { get_param: cluster_uuid }
+                  $MAGNUM_URL: { get_param: magnum_url }
+                  $VOLUME_DRIVER: { get_param: volume_driver }
+                  $REGION_NAME: { get_param: region_name }
+                  $HTTP_PROXY: { get_param: http_proxy }
+                  $HTTPS_PROXY: { get_param: https_proxy }
+                  $NO_PROXY: { get_param: no_proxy }
+                  $KUBE_TAG: { get_param: kube_tag }
+                  $KUBERNETES_TARBALL_SHA512:
+                    { get_param: kubernetes_tarball_sha512 }
+                  $KUBERNETES_TARBALL_URL: { get_param: kubernetes_tarball_url }
+                  $CLOUD_PROVIDER_TAG: { get_param: cloud_provider_tag }
+                  $CLOUD_PROVIDER_ENABLED: { get_param: cloud_provider_enabled }
+                  $ETCD_TAG: { get_param: etcd_tag }
+                  $COREDNS_TAG: { get_param: coredns_tag }
+                  $FLANNEL_TAG: { get_param: flannel_tag }
+                  $NUMBER_OF_MASTERS: { get_param: number_of_masters }
+                  $FLANNEL_CNI_TAG: { get_param: flannel_cni_tag }
+                  $KUBE_VERSION: { get_param: kube_version }
+                  $KUBE_DASHBOARD_VERSION: { get_param: kube_dashboard_version }
+                  $TRUSTEE_USER_ID: { get_param: trustee_user_id }
+                  $TRUSTEE_PASSWORD: { get_param: trustee_password }
+                  $TRUST_ID: { get_param: trust_id }
+                  $INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
+                  $CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
+                  $ETCD_LB_VIP: { get_param: etcd_lb_vip }
+                  $DNS_SERVICE_IP: { get_param: dns_service_ip }
+                  $DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
+                  $CERT_MANAGER_API: { get_param: cert_manager_api }
+                  $CA_KEY: { get_param: ca_key }
+                  $CALICO_TAG: { get_param: calico_tag }
+                  $CALICO_KUBE_CONTROLLERS_TAG:
+                    { get_param: calico_kube_controllers_tag }
+                  $CALICO_IPV4POOL: { get_param: calico_ipv4pool }
+                  $CALICO_IPV4POOL_IPIP: { get_param: calico_ipv4pool_ipip }
+                  $INGRESS_CONTROLLER: { get_param: ingress_controller }
+                  $INGRESS_CONTROLLER_ROLE:
+                    { get_param: ingress_controller_role }
+                  $OCTAVIA_INGRESS_CONTROLLER_TAG:
+                    { get_param: octavia_ingress_controller_tag }
+                  $KUBELET_OPTIONS: { get_param: kubelet_options }
+                  $KUBEAPI_OPTIONS: { get_param: kubeapi_options }
+                  $KUBECONTROLLER_OPTIONS: { get_param: kubecontroller_options }
+                  $KUBEPROXY_OPTIONS: { get_param: kubeproxy_options }
+                  $KUBESCHEDULER_OPTIONS: { get_param: kubescheduler_options }
+                  $OCTAVIA_ENABLED: { get_param: octavia_enabled }
+                  $KUBE_SERVICE_ACCOUNT_KEY:
+                    { get_param: kube_service_account_key }
+                  $KUBE_SERVICE_ACCOUNT_PRIVATE_KEY:
+                    { get_param: kube_service_account_private_key }
+                  $PROMETHEUS_TAG: { get_param: prometheus_tag }
+                  $GRAFANA_TAG: { get_param: grafana_tag }
+                  $HEAT_CONTAINER_AGENT_TAG:
+                    { get_param: heat_container_agent_tag }
+                  $KEYSTONE_AUTH_ENABLED: { get_param: keystone_auth_enabled }
+                  $K8S_KEYSTONE_AUTH_TAG: { get_param: k8s_keystone_auth_tag }
+                  $MONITORING_ENABLED: { get_param: monitoring_enabled }
+                  $PROMETHEUS_OPERATOR_CHART_TAG:
+                    { get_param: prometheus_operator_chart_tag }
+                  $PROMETHEUS_ADAPTER_ENABLED:
+                    { get_param: prometheus_adapter_enabled }
+                  $PROMETHEUS_ADAPTER_CHART_TAG:
+                    { get_param: prometheus_adapter_chart_tag }
+                  $PROMETHEUS_ADAPTER_CONFIGMAP:
+                    { get_param: prometheus_adapter_configmap }
+                  $PROJECT_ID: { get_param: project_id }
+                  $EXTERNAL_NETWORK_ID: { get_param: external_network }
+                  $TILLER_ENABLED: { get_param: tiller_enabled }
+                  $TILLER_TAG: { get_param: tiller_tag }
+                  $TILLER_NAMESPACE: { get_param: tiller_namespace }
+                  $HELM_CLIENT_URL: { get_param: helm_client_url }
+                  $HELM_CLIENT_SHA256: { get_param: helm_client_sha256 }
+                  $HELM_CLIENT_TAG: { get_param: helm_client_tag }
+                  $NODE_PROBLEM_DETECTOR_TAG:
+                    { get_param: node_problem_detector_tag }
+                  $NGINX_INGRESS_CONTROLLER_TAG:
+                    { get_param: nginx_ingress_controller_tag }
+                  $NGINX_INGRESS_CONTROLLER_CHART_TAG:
+                    { get_param: nginx_ingress_controller_chart_tag }
+                  $AUTO_HEALING_ENABLED: { get_param: auto_healing_enabled }
+                  $AUTO_HEALING_CONTROLLER:
+                    { get_param: auto_healing_controller }
+                  $MAGNUM_AUTO_HEALER_TAG: { get_param: magnum_auto_healer_tag }
+                  $AUTO_SCALING_ENABLED: { get_param: auto_scaling_enabled }
+                  $MANILA_CSI_PLUGIN_ENABLED:
+                    { get_param: manila_csi_plugin_enabled }
+                  $CINDER_CSI_PLUGIN_ENABLED:
+                    { get_param: cinder_csi_plugin_enabled }
+                  $CINDER_CSI_ENABLED: { get_param: cinder_csi_enabled }
+                  $CINDER_CSI_PLUGIN_TAG: { get_param: cinder_csi_plugin_tag }
+                  $CSI_ATTACHER_TAG: { get_param: csi_attacher_tag }
+                  $CSI_PROVISIONER_TAG: { get_param: csi_provisioner_tag }
+                  $CSI_SNAPSHOTTER_TAG: { get_param: csi_snapshotter_tag }
+                  $CSI_RESIZER_TAG: { get_param: csi_resizer_tag }
+                  $CSI_NODE_DRIVER_REGISTRAR_TAG:
+                    { get_param: csi_node_driver_registrar_tag }
+                  $DRAINO_TAG: { get_param: draino_tag }
+                  $AUTOSCALER_TAG: { get_param: autoscaler_tag }
+                  $MIN_NODE_COUNT: { get_param: min_node_count }
+                  $MAX_NODE_COUNT: { get_param: max_node_count }
+                  $NPD_ENABLED: { get_param: npd_enabled }
+                  $NODEGROUP_ROLE: { get_param: nodegroup_role }
+                  $NODEGROUP_NAME: { get_param: nodegroup_name }
+                  $USE_PODMAN: { get_param: use_podman }
+                  $KUBE_IMAGE_DIGEST: { get_param: kube_image_digest }
+                  $CONTAINER_RUNTIME: { get_param: container_runtime }
+                  $CONTAINERD_VERSION: { get_param: containerd_version }
+                  $CONTAINERD_TARBALL_URL: { get_param: containerd_tarball_url }
+                  $CONTAINERD_TARBALL_SHA256:
+                    { get_param: containerd_tarball_sha256 }
+                  $POST_INSTALL_MANIFEST_URL:
+                    { get_param: post_install_manifest_url }
+                  $METRICS_SCRAPER_TAG: { get_param: metrics_scraper_tag }
+            - str_replace:
+                template: |
+                  #!/bin/sh
+                  echo 'stack_id'
+                params:
+                  stack_id: { get_param: "OS::stack_id" }
+            - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
+            - get_file: ../../common/templates/kubernetes/fragments/write-admin-kubeconfig.sh
+            - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes-stop.sh
+            - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
+            - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh
+            - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes-start.sh
+
+  upgrade_kubernetes_deployment:
+    condition: upgrade_or_resize_masters
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: { get_resource: upgrade_kubernetes_config }
+      server: { get_resource: kube-master }
+      actions: ["CREATE", "UPDATE"]
+      input_values:
+        OS_STACK_ID: { get_param: "OS::stack_id" }
+        timestamp_upgrade: { get_param: timestamp_upgrade }
+
+outputs:
+  OS::stack_id:
+    value: { get_resource: kube-master }
+
+  kube_master_ip:
+    value: { get_attr: [kube_master_eth0, fixed_ips, 0, ip_address] }
+    description: >
+      This is the "private" IP address of the Kubernetes master node.
+
+  kube_master_external_ip:
+    value: { get_attr: [kube_master_floating, floating_ip_address] }
+    description: >
+      This is the "public" IP address of the Kubernetes master node.

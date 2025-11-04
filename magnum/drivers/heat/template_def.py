@@ -114,7 +114,7 @@ class OutputMapping(object):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack, cluster)
+        output_value = self.get_output_value(stack)
         if output_value is None:
             return
         setattr(cluster, self.cluster_attr, output_value)
@@ -122,19 +122,12 @@ class OutputMapping(object):
     def matched(self, output_key):
         return self.heat_output == output_key
 
-    def get_output_value(self, stack, cluster):
+    def get_output_value(self, stack):
         for output in stack.to_dict().get('outputs', []):
             if output['output_key'] == self.heat_output:
                 return output['output_value']
 
-        LOG.debug('cluster %(cluster_uuid)s, status %(cluster_status)s, '
-                  'stack %(stack_id)s does not have output_key '
-                  '%(heat_output)s',
-                  {'cluster_uuid': cluster.uuid,
-                   'cluster_status': cluster.status,
-                   'stack_id': stack.id,
-                   'heat_output': self.heat_output}
-                  )
+        LOG.warning('stack does not have output_key %s', self.heat_output)
         return None
 
 
@@ -157,7 +150,7 @@ class NodeGroupOutputMapping(OutputMapping):
         if self.nodegroup_attr is None:
             return
 
-        output_value = self.get_output_value(stack, cluster)
+        output_value = self.get_output_value(stack)
         if output_value is None:
             return
 
@@ -173,10 +166,9 @@ class NodeGroupOutputMapping(OutputMapping):
                 setattr(ng, self.nodegroup_attr, output_value)
                 ng.save()
 
-    def get_output_value(self, stack, cluster):
+    def get_output_value(self, stack):
         if not self.is_stack_param:
-            return super(NodeGroupOutputMapping, self).get_output_value(
-                stack, cluster)
+            return super(NodeGroupOutputMapping, self).get_output_value(stack)
         return self.get_param_value(stack)
 
     def get_param_value(self, stack):
@@ -538,7 +530,9 @@ class BaseTemplateDefinition(TemplateDefinition):
                 cluster.discovery_url = discovery_url
         return discovery_url
 
-    def get_scale_params(self, context, cluster, scale_manager=None):
+    def get_scale_params(self, context, cluster, node_count=None,
+                         scale_manager=None, nodes_to_remove=None, 
+                         nodegroup=None):
         return dict()
 
 

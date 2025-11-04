@@ -34,6 +34,20 @@ cluster_update_allowed_properties = set(['node_count', 'health_status',
 federation_update_allowed_properties = set(['member_ids', 'properties'])
 
 
+def ct_not_found_to_bad_request():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except exception.ClusterTemplateNotFound as e:
+            # Change error code because 404 (NotFound) is inappropriate
+            # response for a POST request to create a Cluster
+            e.code = 400  # BadRequest
+            raise
+
+    return wrapper
+
+
 def enforce_cluster_type_supported():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):

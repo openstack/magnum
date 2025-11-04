@@ -16,6 +16,7 @@ from heatclient import exc
 from oslo_log import log as logging
 from pycadf import cadftaxonomy as taxonomy
 import six
+from wsme import types as wtypes
 
 from magnum.common import clients
 from magnum.common import exception
@@ -314,7 +315,8 @@ class Handler(object):
             fields.ClusterStatus.ROLLBACK_COMPLETE,
             fields.ClusterStatus.SNAPSHOT_COMPLETE,
             fields.ClusterStatus.CHECK_COMPLETE,
-            fields.ClusterStatus.ADOPT_COMPLETE
+            fields.ClusterStatus.ADOPT_COMPLETE,
+            fields.ClusterStatus.UPDATE_FAILED,
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
@@ -324,12 +326,32 @@ class Handler(object):
                           '"%s"') % cluster.status
             raise exception.NotSupported(operation=operation)
 
-        # Get driver
-        ct = conductor_utils.retrieve_cluster_template(context, cluster)
+        # Get driver - use nodegroup's cluster_template_id if available for non-default nodegroups
+        if (nodegroup and not nodegroup.is_default and 
+            nodegroup.labels and 'cluster_template_id' in nodegroup.labels):
+            # Use the nodegroup's specific cluster template to get the driver
+            ng_cluster_template_id = nodegroup.labels['cluster_template_id']
+            current_ct = conductor_utils.retrieve_ct_by_name_or_uuid(context, ng_cluster_template_id)
+            ct = current_ct
+        else:
+            # Use the cluster's default template
+            current_ct = conductor_utils.retrieve_cluster_template(context, cluster)
+            ct = current_ct
+        
+        # Validate that the new cluster template has the same driver type
+        new_ct = cluster_template
+        if ((current_ct.server_type, current_ct.cluster_distro, current_ct.coe) != 
+            (new_ct.server_type, new_ct.cluster_distro, new_ct.coe)):
+            raise exception.InvalidParameterValue(
+                "Driver change during upgrade is not supported. "
+                f"Current driver: ({current_ct.server_type}, {current_ct.cluster_distro}, {current_ct.coe}), "
+                f"New driver: ({new_ct.server_type}, {new_ct.cluster_distro}, {new_ct.coe})")
+        
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
         # Upgrade cluster
+
         try:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING,
@@ -339,6 +361,12 @@ class Handler(object):
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             nodegroup.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None
+            if (cluster.labels != wtypes.Unset and cluster.labels is not None
+              and 'min_node_count' in cluster.labels):
+                nodegroup.min_node_count = cluster.labels['min_node_count']
+            if (cluster.labels != wtypes.Unset and cluster.labels is not None
+              and 'max_node_count' in cluster.labels):
+                nodegroup.max_node_count = cluster.labels['max_node_count']
         except Exception as e:
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)

@@ -35,7 +35,7 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
         if self.cluster_attr is None:
             return
 
-        output_value = self.get_output_value(stack, cluster)
+        output_value = self.get_output_value(stack)
         if output_value is not None:
             # TODO(yuanying): port number is hardcoded, this will be fix
             protocol = 'https'
@@ -125,6 +125,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         master_params = master_params or dict()
         worker_params = worker_params or dict()
         master_params.update({
+            'number_of_masters': 'node_count',
             'master_flavor': 'flavor_id',
             'master_image': 'image_id',
             'master_role': 'role',
@@ -153,6 +154,11 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                                 nodegroup_attr='node_addresses',
                                 nodegroup_uuid=nodegroup.uuid,
                                 mapping_type=MasterAddressOutputMapping)
+                self.add_output(
+                    'number_of_masters', nodegroup_attr='node_count',
+                    nodegroup_uuid=nodegroup.uuid,
+                    mapping_type=template_def.NodeGroupOutputMapping,
+                    is_stack_param=True)
             else:
                 self.add_output('kube_minions',
                                 nodegroup_attr='node_addresses',
@@ -307,13 +313,30 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             extra_params["master_lb_allowed_cidrs"] += "," + subnet_cidr
 
     def get_scale_params(self, context, cluster, node_count,
-                         scale_manager=None, nodes_to_remove=None):
+                         scale_manager=None, nodes_to_remove=None, 
+                         nodegroup=None):
         scale_params = dict()
-        if nodes_to_remove:
-            scale_params['minions_to_remove'] = nodes_to_remove
-        if scale_manager:
-            hosts = self.get_output('kube_minions_private')
-            scale_params['minions_to_remove'] = (
-                scale_manager.get_removal_nodes(hosts))
-        scale_params['number_of_minions'] = node_count
+        
+        # Determine if we're scaling masters or workers
+        is_master = (nodegroup and nodegroup.role == 'master')
+        
+        if is_master:
+            # Master scaling parameters
+            if nodes_to_remove:
+                scale_params['masters_to_remove'] = nodes_to_remove
+            if scale_manager:
+                hosts = self.get_output('kube_masters_private')
+                scale_params['masters_to_remove'] = (
+                    scale_manager.get_removal_nodes(hosts))
+            scale_params['number_of_masters'] = node_count
+        else:
+            # Worker scaling parameters (default/existing behavior)
+            if nodes_to_remove:
+                scale_params['minions_to_remove'] = nodes_to_remove
+            if scale_manager:
+                hosts = self.get_output('kube_minions_private')
+                scale_params['minions_to_remove'] = (
+                    scale_manager.get_removal_nodes(hosts))
+            scale_params['number_of_minions'] = node_count
+            
         return scale_params

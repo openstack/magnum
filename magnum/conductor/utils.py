@@ -18,6 +18,7 @@ from pycadf import cadftaxonomy as taxonomy
 from pycadf import cadftype
 from pycadf import eventfactory
 from pycadf import resource
+from wsme import types as wtypes
 
 from magnum.common import clients
 from magnum.common import rpc

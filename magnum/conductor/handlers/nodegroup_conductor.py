@@ -78,7 +78,8 @@ class Handler(object):
         cluster.save()
         nodegroup.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         nodegroup.create()
-
+        if (nodegroup.labels is not None and 'cluster_template_id' in nodegroup.labels):
+            cluster.labels['cluster_template_id'] = nodegroup.labels['cluster_template_id']
         try:
             cluster_driver = driver.Driver.get_driver_for_cluster(context,
                                                                   cluster)

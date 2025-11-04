@@ -5,14 +5,20 @@
 #
 # You can use podman or docker to generate the ignition formatted json:
 # podman run --rm \
-#   -v $(pwd)/fcct-config.yaml:/config.fcc \
-#   quay.io/coreos/fcct:release \
-#   --pretty --strict /config.fcc > ./user_data.json
+# -v ./fcct-config.yaml:/config.fcc:z \
+# quay.io/coreos/fcct:release \
+# --pretty --strict --input /config.fcc > ./user_data.json
 #
 # [0] https://github.com/coreos/fcct
 # [1] https://github.com/coreos/fedora-coreos-docs/blob/master/modules/ROOT/pages/producing-ign.adoc
+
+# docker run --rm \
+# --volume "${PWD}/magnum/drivers/k8s_fedora_coreos_v1/templates":/pwd --workdir /pwd \
+# quay.io/coreos/butane:release \
+# --pretty --strict /pwd/fcct-config.yaml > ./user_data.json
+
 variant: fcos
-version: 1.0.0
+version: 1.1.0
 passwd:
   users:
     - name: core
@@ -35,6 +41,42 @@ storage:
       group:
         name: root
   files:
+    - path: /etc/sysctl.d/max-user-watches.conf
+      mode: 420
+      group:
+        name: root
+      user:
+        name: root
+      contents:
+        inline: |
+          fs.inotify.max_user_watches=16184
+      overwrite: true
+    - path: /etc/sysctl.d/k8s_custom.conf
+      mode: 420
+      group:
+        name: root
+      user:
+        name: root
+      contents:
+        inline: |
+          net.ipv4.conf.default.rp_filter=2
+          net.ipv4.conf.*.rp_filter=2
+          net.ipv4.conf.all.promote_secondaries = 1
+          net.ipv4.conf.*.accept_source_route = 1
+      overwrite: true
+    - path: /etc/systemd/network/50-flannel.link
+      mode: 420
+      group:
+        name: root
+      user:
+        name: root
+      contents:
+        inline: |
+          [Match]
+          OriginalName=flannel*
+          [Link]
+          MACAddressPolicy=none
+      overwrite: true
     - path: /etc/selinux/config
       # 420 (decimal) == 644 (octal)
       mode: 420
@@ -56,7 +98,7 @@ storage:
           #     mls - Multi Level Security protection.
           SELINUXTYPE=targeted
       overwrite: true
-    - path: /etc/containers/libpod.conf
+    - path: /etc/containers/containers.conf
       # 420 (decimal) == 644 (octal)
       mode: 420
       user:
@@ -68,19 +110,8 @@ storage:
           # Maximum size of log files (in bytes)
           # -1 is unlimited
           # 50m
-          max_log_size = 52428800
-    - path: /etc/containers/__REGISTRIES_CONF__
-      # 420 (decimal) == 644 (octal)
-      mode: 420
-      user:
-        name: root
-      group:
-        name: root
-      append:
-        - inline: |
-            [[registry]]
-            location = "__INSECURE_REGISTRY_URL__"
-            insecure = true
+          [containers]
+          log_size_max = 52428800
     - path: /etc/hostname
       # 420 (decimal) == 644 (octal)
       mode: 420
@@ -112,11 +143,11 @@ storage:
       contents:
         inline: |
           #!/bin/bash
-          
+
           set -x
           set -e
           set +u
-          
+
           until [ -f /etc/pki/ca-trust/source/anchors/openstack-ca.pem ]
           do
               echo "waiting for /etc/pki/ca-trust/source/anchors/openstack-ca.pem"
@@ -124,28 +155,26 @@ storage:
           done
 
           /usr/bin/update-ca-trust
-          mkdir /etc/kubernetes/
-          cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
           HTTP_PROXY="__HTTP_PROXY__"
           HTTPS_PROXY="__HTTPS_PROXY__"
           NO_PROXY="__NO_PROXY__"
-          
+
           if [ -n "${HTTP_PROXY}" ]; then
               export HTTP_PROXY
               echo "http_proxy=${HTTP_PROXY}" >> /etc/environment
           fi
-          
+
           if [ -n "${HTTPS_PROXY}" ]; then
               export HTTPS_PROXY
               echo "https_proxy=${HTTPS_PROXY}" >> /etc/environment
           fi
-          
+
           if [ -n "${NO_PROXY}" ]; then
               export NO_PROXY
               echo "no_proxy=${NO_PROXY}" >> /etc/environment
           fi
-          
+
           # Create a keypair for the heat-container-agent to
           # access the node over ssh. It is useful to operate
           # in host mount namespace and apply configuration.
@@ -172,7 +201,7 @@ storage:
                IdentityFile /srv/magnum/.ssh/heat_agent_rsa
                UserKnownHostsFile /srv/magnum/.ssh/known_hosts
           EOF
-          
+
           sed -i '/^PermitRootLogin/ s/ .*/ without-password/' /etc/ssh/sshd_config
           # Security enhancement: Disable password authentication
           sed -i '/^PasswordAuthentication yes/ s/ yes/ no/' /etc/ssh/sshd_config
@@ -189,7 +218,45 @@ storage:
         inline: |
           [updates]
           enabled = false
-
+    - path: /etc/crypto-policies/state/current
+      overwrite: true
+      mode: 0644
+      contents:
+        inline: LEGACY
+  links:
+    - path: /etc/crypto-policies/back-ends/bind.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/bind.txt
+    - path: /etc/crypto-policies/back-ends/gnutls.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/gnutls.txt
+    - path: /etc/crypto-policies/back-ends/java.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/java.txt
+    - path: /etc/crypto-policies/back-ends/krb5.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/krb5.txt
+    - path: /etc/crypto-policies/back-ends/libreswan.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/libreswan.txt
+    - path: /etc/crypto-policies/back-ends/libssh.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/libssh.txt
+    - path: /etc/crypto-policies/back-ends/nss.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/nss.txt
+    - path: /etc/crypto-policies/back-ends/openssh.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/openssh.txt
+    - path: /etc/crypto-policies/back-ends/opensshserver.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/opensshserver.txt
+    - path: /etc/crypto-policies/back-ends/opensslcnf.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/opensslcnf.txt
+    - path: /etc/crypto-policies/back-ends/openssl.config
+      overwrite: true
+      target: /usr/share/crypto-policies/LEGACY/openssl.txt
 systemd:
   units:
     - name: configure-agent-env.service
@@ -198,14 +265,14 @@ systemd:
         [Unit]
         Description=Configure heat agent environment
         After=sshd.service
-        
+
         [Service]
         User=root
         Group=root
         Type=simple
         ExecStart=/bin/bash /root/configure-agent-env.sh
         Restart=on-failure
-        
+
         [Install]
         WantedBy=multi-user.target
     - name: heat-container-agent.service
@@ -215,7 +282,7 @@ systemd:
         Description=Run heat-container-agent
         After=network-online.target configure-agent-env.service
         Wants=network-online.target
-        
+
         [Service]
         EnvironmentFile=-/etc/environment
         ExecStartPre=mkdir -p /var/lib/heat-container-agent
@@ -244,8 +311,8 @@ systemd:
                 __CONTAINER_INFRA_PREFIX__heat-container-agent:__HEAT_CONTAINER_AGENT_TAG__ \
                 /usr/bin/start-heat-container-agent
         TimeoutStartSec=10min
-        
+
         ExecStop=/bin/podman stop heat-container-agent
-        
+
         [Install]
         WantedBy=multi-user.target

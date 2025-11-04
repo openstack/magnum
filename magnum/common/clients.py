@@ -13,7 +13,7 @@
 # under the License.
 
 from barbicanclient.v1 import client as barbicanclient
-from cinderclient.v2 import client as cinder_client
+from cinderclient.v3 import client as cinder_client
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient
 from keystoneauth1.exceptions import catalog

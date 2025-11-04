@@ -44,7 +44,7 @@ class ClusterResizeRequest(base.APIBase):
     This class enforces type checking and value constraints.
     """
 
-    node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), mandatory=True)
+    node_count = wsme.wsattr(wtypes.IntegerType(minimum=0), mandatory=True)
     """The expected node count after resize."""
 
     nodes_to_remove = wsme.wsattr([wtypes.text], mandatory=False,
@@ -104,8 +104,32 @@ class ActionsController(base.Controller):
                 context, cluster.uuid, cluster_resize_req.nodegroup)
 
         if nodegroup.role == 'master':
-            # NOTE(ttsiouts): Restrict the resize to worker nodegroups
-            raise exception.MasterNGResizeNotSupported()
+            cluster_template = cluster.cluster_template
+            if cluster_resize_req.node_count == 0:
+                raise exception.InvalidParameterValue(
+                    "Master node count cannot be 0. Kubernetes clusters require at least 1 master node.")
+            if (cluster_resize_req.node_count > 1 and 
+                not cluster_template.master_lb_enabled):
+                raise exception.InvalidParameterValue(
+                    "Master node count must be 1 when master_lb_enabled is False")
+            
+            # Enforce incremental scaling for master scale-down (safety for etcd quorum)
+            # Scale-up can be done in larger increments since adding nodes doesn't break quorum
+            current_count = nodegroup.node_count
+            target_count = cluster_resize_req.node_count
+            
+            if target_count < current_count:
+                # Only enforce incremental scaling for scale-down operations
+                scaling_difference = current_count - target_count
+                
+                if scaling_difference > 1:
+                    suggested_target = current_count - 1
+                    
+                    raise exception.InvalidParameterValue(
+                        f"Master nodes can only be scaled down by 1 at a time to maintain etcd quorum. "
+                        f"Cannot scale down from {current_count} to {target_count} masters. "
+                        f"Please scale down to {suggested_target} first, then continue scaling after "
+                        f"the operation completes successfully.")
 
         # NOTE(ttsiouts): Make sure that the new node count is within
         # the configured boundaries of the selected nodegroup.
@@ -155,13 +179,8 @@ class ActionsController(base.Controller):
         else:
             nodegroup = objects.NodeGroup.get(
                 context, cluster.uuid, cluster_upgrade_req.nodegroup)
-            if (new_cluster_template.uuid != cluster.cluster_template_id
-                    and not nodegroup.is_default):
-                reason = ("Nodegroup %s can be upgraded only to "
-                          "match cluster's template (%s).")
-                reason = reason % (nodegroup.name,
-                                   cluster.cluster_template.name)
-                raise exception.InvalidClusterTemplateForUpgrade(reason=reason)
+            # Allow non-default nodegroups to upgrade to any template
+            # The cluster_template_id label will be updated in the driver
 
         pecan.request.rpcapi.cluster_upgrade(
             cluster,

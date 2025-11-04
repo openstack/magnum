@@ -1,3 +1,5 @@
+#!/bin/sh
+
 . /etc/sysconfig/heat-params
 
 if [ "$VERIFY_CA" == "True" ]; then
@@ -11,7 +13,7 @@ WC_NOTIFY_SERVICE=/etc/systemd/system/wc-notify.service
 
 cat > $WC_NOTIFY_BIN <<EOF
 #!/bin/bash -v
-until  [ "ok" = "\$(kubectl get --raw='/healthz')" ]
+until  [ "ok" = "\$(kubectl get --raw='/healthz' 2>nil)" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5

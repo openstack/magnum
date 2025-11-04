@@ -1,97 +1,64 @@
+#!/bin/bash
+
 set -e
 set +x
 . /etc/sysconfig/heat-params
+
 set -x
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     _prefix=${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}
     FLANNEL_DEPLOY=/srv/magnum/kubernetes/manifests/flannel-deploy.yaml
 
-    [ -f ${FLANNEL_DEPLOY} ] || {
     echo "Writing File: $FLANNEL_DEPLOY"
     mkdir -p "$(dirname ${FLANNEL_DEPLOY})"
     set +x
     cat << EOF > ${FLANNEL_DEPLOY}
 ---
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
+kind: Namespace
+apiVersion: v1
 metadata:
-  name: psp.flannel.unprivileged
-  annotations:
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default
-    seccomp.security.alpha.kubernetes.io/defaultProfileName: docker/default
-    apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
-    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
-spec:
-  privileged: false
-  volumes:
-    - configMap
-    - secret
-    - emptyDir
-    - hostPath
-  allowedHostPaths:
-    - pathPrefix: "/etc/cni/net.d"
-    - pathPrefix: "/etc/kube-flannel"
-    - pathPrefix: "/run/flannel"
-  readOnlyRootFilesystem: false
-  # Users and groups
-  runAsUser:
-    rule: RunAsAny
-  supplementalGroups:
-    rule: RunAsAny
-  fsGroup:
-    rule: RunAsAny
-  # Privilege Escalation
-  allowPrivilegeEscalation: false
-  defaultAllowPrivilegeEscalation: false
-  # Capabilities
-  allowedCapabilities: ['NET_ADMIN']
-  defaultAddCapabilities: []
-  requiredDropCapabilities: []
-  # Host namespaces
-  hostPID: false
-  hostIPC: false
-  hostNetwork: true
-  hostPorts:
-  - min: 0
-    max: 65535
-  # SELinux
-  seLinux:
-    # SELinux is unsed in CaaSP
-    rule: 'RunAsAny'
+  name: kube-flannel
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: flannel
 rules:
-  - apiGroups: ['extensions']
-    resources: ['podsecuritypolicies']
-    verbs: ['use']
-    resourceNames: ['psp.flannel.unprivileged']
-  - apiGroups:
-      - ""
-    resources:
-      - pods
-    verbs:
-      - get
-  - apiGroups:
-      - ""
-    resources:
-      - nodes
-    verbs:
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - nodes/status
-    verbs:
-      - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+- apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - clustercidrs
+  verbs:
+  - list
+  - watch
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: flannel
 roleRef:
@@ -101,19 +68,19 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: flannel
-  namespace: kube-system
+  namespace: kube-flannel
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: flannel
-  namespace: kube-system
+  namespace: kube-flannel
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: kube-flannel-cfg
-  namespace: kube-system
+  namespace: kube-flannel
   labels:
     tier: node
     app: flannel
@@ -121,7 +88,7 @@ data:
   cni-conf.json: |
     {
       "name": "cbr0",
-      "cniVersion": "0.2.0",
+      "cniVersion": "1.0.0",
       "plugins": [
         {
           "type": "flannel",
@@ -146,26 +113,18 @@ data:
         "Type": "$FLANNEL_BACKEND"
       }
     }
-  magnum-install-cni.sh: |
-    #!/bin/sh
-    set -e -x;
-    if [ -w "/host/opt/cni/bin/" ]; then
-      cp /opt/cni/bin/* /host/opt/cni/bin/;
-      echo "Wrote CNI binaries to /host/opt/cni/bin/";
-    fi;
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: kube-flannel-ds
-  namespace: kube-system
+  namespace: kube-flannel
   labels:
     tier: node
     app: flannel
 spec:
   selector:
     matchLabels:
-      tier: node
       app: flannel
   template:
     metadata:
@@ -173,30 +132,35 @@ spec:
         tier: node
         app: flannel
     spec:
-      # https://pagure.io/atomic/kubernetes-sig/issue/3
-      # https://danwalsh.livejournal.com/74754.html
-      securityContext:
-        seLinuxOptions:
-          type: "spc_t"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
       hostNetwork: true
+      priorityClassName: system-node-critical
       tolerations:
       - operator: Exists
         effect: NoSchedule
       serviceAccountName: flannel
       initContainers:
-      - name: install-cni-plugins
-        image: ${_prefix}flannel-cni:${FLANNEL_CNI_TAG}
+      - name: install-cni-plugin
+        image: docker.io/flannelcni/flannel-cni-plugin:${FLANNEL_CNI_TAG}
         command:
-        - sh
+        - cp
         args:
-        - /etc/kube-flannel/magnum-install-cni.sh
+        - -f
+        - /flannel
+        - /opt/cni/bin/flannel
         volumeMounts:
-        - name: host-cni-bin
-          mountPath: /host/opt/cni/bin/
-        - name: flannel-cfg
-          mountPath: /etc/kube-flannel/
+        - name: cni-plugin
+          mountPath: /opt/cni/bin
       - name: install-cni
-        image: ${_prefix}flannel:${FLANNEL_TAG}
+        image: docker.io/flannel/flannel:${FLANNEL_TAG}
         command:
         - cp
         args:
@@ -210,7 +174,7 @@ spec:
           mountPath: /etc/kube-flannel/
       containers:
       - name: kube-flannel
-        image: ${_prefix}flannel:${FLANNEL_TAG}
+        image: docker.io/flannel/flannel:${FLANNEL_TAG}
         command:
         - /opt/bin/flanneld
         args:
@@ -220,13 +184,10 @@ spec:
           requests:
             cpu: "100m"
             memory: "50Mi"
-          limits:
-            cpu: "100m"
-            memory: "50Mi"
         securityContext:
           privileged: false
           capabilities:
-             add: ["NET_ADMIN"]
+            add: ["NET_ADMIN", "NET_RAW"]
         env:
         - name: POD_NAME
           valueFrom:
@@ -236,36 +197,50 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: EVENT_QUEUE_DEPTH
+          value: "5000"
         volumeMounts:
         - name: run
           mountPath: /run/flannel
         - name: flannel-cfg
           mountPath: /etc/kube-flannel/
+        - name: xtables-lock
+          mountPath: /run/xtables.lock
       volumes:
-        - name: host-cni-bin
-          hostPath:
-            path: /opt/cni/bin
-        - name: run
-          hostPath:
-            path: /run/flannel
-        - name: cni
-          hostPath:
-            path: /etc/cni/net.d
-        - name: flannel-cfg
-          configMap:
-            name: kube-flannel-cfg
+      - name: run
+        hostPath:
+          path: /run/flannel
+      - name: cni-plugin
+        hostPath:
+          path: /opt/cni/bin
+      - name: cni
+        hostPath:
+          path: /etc/cni/net.d
+      - name: flannel-cfg
+        configMap:
+          name: kube-flannel-cfg
+      - name: xtables-lock
+        hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
 EOF
-    }
+
     set -x
 
     if [ "$MASTER_INDEX" = "0" ]; then
 
-        until  [ "ok" = "$(kubectl get --raw='/healthz')" ]
+        until  [ "ok" = "$(kubectl get --raw='/healthz' 2>nil)" ]
         do
             echo "Waiting for Kubernetes API..."
             sleep 5
         done
     fi
+    ## delete old flannel before upgrade
+    $ssh_cmd kubectl delete ds kube-flannel-ds -n kube-system --ignore-not-found=true
+    $ssh_cmd kubectl delete ConfigMap kube-flannel-cfg -n kube-system --ignore-not-found=true
+    $ssh_cmd kubectl delete ServiceAccount flannel -n kube-system --ignore-not-found=true
+    $ssh_cmd kubectl delete ClusterRoleBinding flannel -n kube-system --ignore-not-found=true
+    $ssh_cmd kubectl delete ClusterRole flannel -n kube-system --ignore-not-found=true
 
-    /usr/bin/kubectl apply -f "${FLANNEL_DEPLOY}" --namespace=kube-system
+    $ssh_cmd kubectl apply -f "${FLANNEL_DEPLOY}" --wait=true
 fi
