@@ -163,7 +163,7 @@ class NodeGroup(base.APIBase):
 
     @classmethod
     def convert(cls, nodegroup, expand=True):
-        url = pecan.request.host_url
+        url = pecan.request.application_url
         cluster_path = 'clusters/%s' % nodegroup.cluster_id
         nodegroup_path = 'nodegroups/%s' % nodegroup.uuid
 

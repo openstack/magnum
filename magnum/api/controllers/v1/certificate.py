@@ -122,8 +122,8 @@ class Certificate(base.APIBase):
     @classmethod
     def convert_with_links(cls, rpc_cert, expand=True):
         cert = Certificate(**rpc_cert.as_dict())
-        return cls._convert_with_links(cert,
-                                       pecan.request.host_url, expand)
+        return cls._convert_with_links(
+            cert, pecan.request.application_url, expand)
 
     @classmethod
     def sample(cls, expand=True):

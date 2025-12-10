@@ -45,8 +45,9 @@ class Version(base.APIBase):
     def convert(id, status, max, min):
         version = Version()
         version.id = id
-        version.links = [link.Link.make_link('self', pecan.request.host_url,
-                                             id, '', bookmark=True)]
+        version.links = [
+            link.Link.make_link(
+                'self', pecan.request.application_url, id, '', bookmark=True)]
         version.status = status
         version.max_version = max
         version.min_version = min
