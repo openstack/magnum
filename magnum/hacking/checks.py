@@ -34,15 +34,6 @@ Guidelines for writing new hacking checks
 UNDERSCORE_IMPORT_FILES = []
 
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
-assert_equal_in_end_with_true_or_false_re = re.compile(
-    r"assertEqual\((\w|[][.'\"])+ in (\w|[][.'\", ])+, (True|False)\)")
-assert_equal_in_start_with_true_or_false_re = re.compile(
-    r"assertEqual\((True|False), (\w|[][.'\"])+ in (\w|[][.'\", ])+\)")
-assert_equal_with_is_not_none_re = re.compile(
-    r"assertEqual\(.*?\s+is+\s+not+\s+None\)$")
-assert_true_isinstance_re = re.compile(
-    r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
-    r"(\w|\.|\'|\"|\[|\])+\)\)")
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
 log_translation = re.compile(
     r"(.)*LOG\.(audit|error|critical)\(\s*('|\")")
@@ -65,39 +56,6 @@ def no_mutable_default_args(logical_line):
     msg = "M322: Method's default argument shouldn't be mutable!"
     if mutable_default_args.match(logical_line):
         yield (0, msg)
-
-
-@core.flake8ext
-def assert_equal_not_none(logical_line):
-    """Check for assertEqual(A is not None) sentences M302"""
-    msg = "M302: assertEqual(A is not None) sentences not allowed."
-    res = assert_equal_with_is_not_none_re.search(logical_line)
-    if res:
-        yield (0, msg)
-
-
-@core.flake8ext
-def assert_true_isinstance(logical_line):
-    """Check for assertTrue(isinstance(a, b)) sentences
-
-    M316
-    """
-    if assert_true_isinstance_re.match(logical_line):
-        yield (0, "M316: assertTrue(isinstance(a, b)) sentences not allowed")
-
-
-@core.flake8ext
-def assert_equal_in(logical_line):
-    """Check for assertEqual(True|False, A in B), assertEqual(A in B, True|False)
-
-    M338
-    """  # noqa: E501
-    res = (assert_equal_in_start_with_true_or_false_re.search(logical_line) or
-           assert_equal_in_end_with_true_or_false_re.search(logical_line))
-    if res:
-        yield (0, "M338: Use assertIn/NotIn(A, B) rather than "
-                  "assertEqual(A in B, True/False) when checking collection "
-                  "contents.")
 
 
 @core.flake8ext
