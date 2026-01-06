@@ -150,16 +150,6 @@ class HackingTestCase(base.TestCase):
         code = "self.assertTrue()"
         self._assert_has_no_errors(code, check)
 
-    def test_no_xrange(self):
-        errors = [(1, 0, "M339")]
-        check = checks.no_xrange
-
-        code = "xrange(45)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "range(45)"
-        self._assert_has_no_errors(code, check)
-
     def test_no_log_warn(self):
         errors = [(1, 0, "M352")]
         check = checks.no_log_warn
