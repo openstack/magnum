@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    Helm client version (configured by 'helm_client_tag' label) has been bumped
+    to v3.13.3. This version supports Kubernetes 1.28.x - 1.25.x.
