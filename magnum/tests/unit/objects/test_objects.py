@@ -154,16 +154,10 @@ class _TestObject(object):
         class Foo(base.MagnumPersistentObject, base.MagnumObject):
             fields = {'foobar': fields.IntegerField()}
         obj = Foo(self.context)
-        # NOTE(danms): Can't use assertRaisesRegexp() because of py26
-        raised = False
-        ex = None
-        try:
+
+        def fail():
             obj.foobar
-        except NotImplementedError as e:
-            raised = True
-            ex = e
-        self.assertTrue(raised)
-        self.assertIn('foobar', str(ex))
+        self.assertRaisesRegex(NotImplementedError, 'foobar', fail)
 
     def test_loaded_in_primitive(self):
         obj = MyObj(self.context)
