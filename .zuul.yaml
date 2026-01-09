@@ -35,8 +35,6 @@
     check:
       jobs:
         - magnum-tempest-plugin-tests-api
-        - magnum-tempest-plugin-tests-api-jammy
     gate:
       jobs:
         - magnum-tempest-plugin-tests-api
-        - magnum-tempest-plugin-tests-api-jammy
