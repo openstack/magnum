@@ -44,8 +44,6 @@ assert_true_isinstance_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
     r"(\w|\.|\'|\"|\[|\])+\)\)")
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
-assert_xrange_re = re.compile(
-    r"\s*xrange\s*\(")
 log_translation = re.compile(
     r"(.)*LOG\.(audit|error|critical)\(\s*('|\")")
 log_translation_info = re.compile(
@@ -100,16 +98,6 @@ def assert_equal_in(logical_line):
         yield (0, "M338: Use assertIn/NotIn(A, B) rather than "
                   "assertEqual(A in B, True/False) when checking collection "
                   "contents.")
-
-
-@core.flake8ext
-def no_xrange(logical_line):
-    """Disallow 'xrange()'
-
-    M339
-    """
-    if assert_xrange_re.match(logical_line):
-        yield (0, "M339: Do not use xrange().")
 
 
 @core.flake8ext
