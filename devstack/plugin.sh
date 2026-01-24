@@ -46,7 +46,6 @@ if is_service_enabled magnum-api magnum-cond; then
         start_magnum
 
         configure_iptables_magnum
-        configure_apache_magnum
     fi
 
     if [[ "$1" == "unstack" ]]; then
