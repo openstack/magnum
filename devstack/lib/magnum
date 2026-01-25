@@ -335,8 +335,6 @@ function install_magnumclient {
 
 # install_magnum() - Collect source and prepare
 function install_magnum {
-    install_apache_uwsgi
-
     git_clone $MAGNUM_REPO $MAGNUM_DIR $MAGNUM_BRANCH
     setup_develop $MAGNUM_DIR
 }
