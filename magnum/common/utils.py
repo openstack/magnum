@@ -84,7 +84,14 @@ def execute(*cmd, **kwargs):
         kwargs['env_variables'] = env
     if kwargs.get('run_as_root') and 'root_helper' not in kwargs:
         kwargs['root_helper'] = _get_root_helper()
-    result = processutils.execute(*cmd, **kwargs)
+
+    try:
+        result = processutils.execute(*cmd, **kwargs)
+    except TypeError as te:
+        # from 7.3.0, oslo.concurrency.processutils.execute no longer raises
+        # UnknownArgumentError, so we do it ourselves
+        raise processutils.UnknownArgumentError(te)
+
     LOG.debug('Execution completed, command line is "%s"',
               ' '.join(map(str, cmd)))
     LOG.debug('Command stdout is: "%s"', result[0])
