@@ -217,10 +217,8 @@ function create_magnum_conf {
 
     trustee_domain_id=$(get_or_create_domain magnum 'Owns users and projects created by magnum')
     trustee_domain_admin_id=$(get_or_create_user trustee_domain_admin $MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD $trustee_domain_id)
-    openstack --os-auth-url $KEYSTONE_SERVICE_URI_V3 \
-              --os-identity-api-version 3 role add \
-              --user $trustee_domain_admin_id --domain $trustee_domain_id \
-              admin
+    get_or_add_user_domain_role admin $trustee_domain_admin_id $trustee_domain_id
+
     iniset $MAGNUM_CONF trust cluster_user_trust True
     iniset $MAGNUM_CONF trust trustee_domain_name magnum
     iniset $MAGNUM_CONF trust trustee_domain_admin_name trustee_domain_admin
