@@ -16,8 +16,8 @@ echo "PATH=/srv/magnum/bin:\$PATH" >> ~/.bashrc
 echo "export HISTCONTROL=ignoredups" >> ~/.bashrc
 
 # Download to temporary files first
-$ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubelet.tmp https://cdn.dl.k8s.io/release/${KUBE_TAG}/bin/linux/${ARCH}/kubelet
-$ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubectl.tmp https://cdn.dl.k8s.io/release/${KUBE_TAG}/bin/linux/${ARCH}/kubectl
+$ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubelet.tmp https://dl.k8s.io/release/${KUBE_TAG}/bin/linux/${ARCH}/kubelet
+$ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubectl.tmp https://dl.k8s.io/release/${KUBE_TAG}/bin/linux/${ARCH}/kubectl
 
 # For kubelet
 if ! $ssh_cmd test -f /usr/local/bin/kubelet || ! $ssh_cmd cmp -s /usr/local/bin/kubelet.tmp /usr/local/bin/kubelet; then

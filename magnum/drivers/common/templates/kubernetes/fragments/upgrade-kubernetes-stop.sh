@@ -46,8 +46,8 @@ if [ "$(echo $USE_PODMAN | tr '[:upper:]' '[:lower:]')" == "true" ]; then
     $ssh_cmd rm /usr/local/bin/kube*
     $ssh_cmd mkdir -p /srv/magnum/k8s/
 
-    $ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubelet https://cdn.dl.k8s.io/release/${new_kube_tag}/bin/linux/${ARCH}/kubelet
-    $ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubectl https://cdn.dl.k8s.io/release/${new_kube_tag}/bin/linux/${ARCH}/kubectl
+    $ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubelet https://dl.k8s.io/release/${new_kube_tag}/bin/linux/${ARCH}/kubelet
+    $ssh_cmd curl --retry 5 --retry-delay 10 -L -o /usr/local/bin/kubectl https://dl.k8s.io/release/${new_kube_tag}/bin/linux/${ARCH}/kubectl
     $ssh_cmd chmod +x /usr/local/bin/kube*
 
     if [[ "$SELINUX_MODE" == "enforcing" ]] ; then
