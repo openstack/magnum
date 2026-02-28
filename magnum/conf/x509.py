@@ -45,7 +45,7 @@ x509_opts = [
                 help=_('List of allowed x509 key usage. Available values: '
                        '%s') % ', '.join(ALLOWED_KEY_USAGE)),
     cfg.IntOpt('term_of_validity',
-               default=365 * 5,
+               default=365 * 50,
                help=_('Number of days for which a certificate is valid.')),
     cfg.IntOpt('rsa_key_size',
                default=2048, help=_('Size of generated private key. '))]
