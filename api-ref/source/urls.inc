@@ -5,15 +5,22 @@
 =================
 
 All API calls through the rest of this document require authentication
-with the OpenStack Identity service. They also required a ``url`` that
-is extracted from the Identity token of type
-``container-infra``. This will be the root url that every call below will be
-added to build a full path.
+with the OpenStack Identity service. The Identity service includes a so-called
+Service Catalog in responses to valid requests for a new token. This service
+catalog defines a list of services, identified by both a name and a service
+type, along with a list of endpoints. In deployments where Magnum is installed,
+Magnum should appear in this list using the service type,
+``container-infrastructure-management``, or one of the aliases,
+``container-infrastructure`` or ``container-infra``. The endpoint URL provided
+will form the root url that every call below will be added to build a full
+path.
 
-Note that if using OpenStack Identity service API v2, ``url`` can be
-represented via ``adminURL``, ``internalURL`` or ``publicURL`` in endpoint
-catalog. In Identity service API v3, ``url`` is represented with field
-``interface`` including ``admin``, ``internal`` and ``public``.
+.. note::
+
+    If using OpenStack Identity service API v2, ``url`` can be represented via
+    ``adminURL``, ``internalURL`` or ``publicURL`` in endpoint catalog. In
+    Identity service API v3, ``url`` is represented with field ``interface``
+    including ``admin``, ``internal`` and ``public``.
 
 For instance, if the ``url`` is
 ``http://my-container-infra.org/magnum/v1`` then the full API call for
