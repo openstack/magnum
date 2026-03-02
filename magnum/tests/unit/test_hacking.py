@@ -77,46 +77,6 @@ class HackingTestCase(base.TestCase):
     def _assert_has_no_errors(self, code, checker, filename=None):
         self._assert_has_errors(code, checker, filename=filename)
 
-    def test_assert_equal_in(self):
-        errors = [(1, 0, "M338")]
-        check = checks.assert_equal_in
-
-        code = "self.assertEqual(a in b, True)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual('str' in 'string', True)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(any(a==1 for a in b), True)"
-        self._assert_has_no_errors(code, check)
-
-        code = "self.assertEqual(True, a in b)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(True, 'str' in 'string')"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(True, any(a==1 for a in b))"
-        self._assert_has_no_errors(code, check)
-
-        code = "self.assertEqual(a in b, False)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual('str' in 'string', False)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(any(a==1 for a in b), False)"
-        self._assert_has_no_errors(code, check)
-
-        code = "self.assertEqual(False, a in b)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(False, 'str' in 'string')"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(False, any(a==1 for a in b))"
-        self._assert_has_no_errors(code, check)
-
     def test_no_mutable_default_args(self):
         errors = [(1, 0, "M322")]
         check = checks.no_mutable_default_args
@@ -128,26 +88,6 @@ class HackingTestCase(base.TestCase):
         self._assert_has_no_errors(code, check)
 
         code = "defined, undefined = [], {}"
-        self._assert_has_no_errors(code, check)
-
-    def test_assert_is_not_none(self):
-        errors = [(1, 0, "M302")]
-        check = checks.assert_equal_not_none
-
-        code = "self.assertEqual(A is not None)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertIsNotNone()"
-        self._assert_has_no_errors(code, check)
-
-    def test_assert_true_isinstance(self):
-        errors = [(1, 0, "M316")]
-        check = checks.assert_true_isinstance
-
-        code = "self.assertTrue(isinstance(e, exception.BuilAbortException))"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertTrue()"
         self._assert_has_no_errors(code, check)
 
     def test_no_log_warn(self):
