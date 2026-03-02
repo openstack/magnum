@@ -20,4 +20,3 @@ Magnum Specific Commandments
 - [M338] Use assertIn/NotIn(A, B) rather than assertEqual(A in B, True/False).
 - [M340] Check for explicit import of the _ function.
 - [M352] LOG.warn is deprecated. Enforce use of LOG.warning.
-- [M353] String interpolation should be delayed at logging calls.
