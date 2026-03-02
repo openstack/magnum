@@ -1,15 +1,8 @@
-========================
-Team and repository tags
-========================
-
-.. image:: https://governance.openstack.org/badges/magnum.svg
-    :target: https://governance.openstack.org/reference/tags/index.html
-
-.. Change things from this point on
-
 ======
 Magnum
 ======
+
+.. image:: https://governance.openstack.org/badges/magnum.svg
 
 Magnum is an OpenStack project which offers container orchestration engines
 for deploying and managing containers as first class resources in OpenStack.
