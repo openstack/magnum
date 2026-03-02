@@ -7,7 +7,7 @@ Background
 Magnum uses a framework we call 'API Microversions' for allowing changes
 to the API while preserving backward compatibility. The basic idea is
 that a user has to explicitly ask for their request to be treated with
-a particular version of the API. So breaking changes can be added to
+a particular version of the API. Breaking changes can be added to
 the API without breaking users who don't specifically ask for it. This
 is done with an HTTP header ``OpenStack-API-Version`` which has as its
 value a string containing the name of the service,
@@ -32,37 +32,36 @@ changed. The user contract covers many kinds of information such as:
 
 - the Request
 
-  - the list of resource urls which exist on the server
+  - the list of resource URLs which exist on the server
 
-    Example: adding a new clusters/{ID}/foo which didn't exist in a
+    Example: adding a new ``clusters/{ID}/foo`` which didn't exist in a
     previous version of the code
 
-  - the list of query parameters that are valid on urls
+  - the list of query parameters that are valid on URLs
 
-    Example: adding a new parameter ``is_yellow`` clusters/{ID}?is_yellow=True
+    Example: adding a new parameter ``clusters/{ID}?is_yellow=True``
 
   - the list of query parameter values for non free form fields
 
-    Example: parameter filter_by takes a small set of constants/enums "A",
-    "B", "C". Adding support for new enum "D".
+    Example: parameter ``filter_by`` takes a small set of constants/enums
+    ``A``, ``B``, ``C``. Adding support for new enum ``D``.
 
   - new headers accepted on a request
 
   - the list of attributes and data structures accepted.
 
-    Example: adding a new attribute 'locked': True/False to the request body
-
+    Example: adding a new attribute ``'locked': ``<bool>`` to the request body
 
 - the Response
 
   - the list of attributes and data structures returned
 
-    Example: adding a new attribute 'locked': True/False to the output
-    of clusters/{ID}
+    Example: adding a new attribute ``'locked': <bool>`` to the output
+    of ``clusters/{ID}``
 
   - the allowed values of non free form fields
 
-    Example: adding a new allowed ``status`` to clusters/{ID}
+    Example: adding a new allowed ``status`` to ``clusters/{ID}``
 
   - the list of status codes allowed for a particular request
 
@@ -75,11 +74,14 @@ changed. The user contract covers many kinds of information such as:
 
     Example: changing the return code of an API from 501 to 400.
 
-    .. note:: Fixing a bug so that a 400+ code is returned rather than a 500 or
+    .. note::
+
+      Fixing a bug so that a 400+ code is returned rather than a 500 or
       503 does not require a microversion change. It's assumed that clients are
       not expected to handle a 500 or 503 response and therefore should not
       need to opt-in to microversion changes that fixes a 500 or 503 response
       from happening.
+
       According to the OpenStack API Working Group, a
       **500 Internal Server Error** should **not** be returned to the user for
       failures due to user error that can be fixed by changing the request on
@@ -89,7 +91,6 @@ changed. The user contract covers many kinds of information such as:
 
 The following flow chart attempts to walk through the process of "do
 we need a microversion".
-
 
 .. graphviz::
 
