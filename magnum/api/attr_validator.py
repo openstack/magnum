@@ -14,6 +14,7 @@
 
 from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exception
+from oslo_utils import strutils
 
 from magnum.api import utils as api_utils
 from magnum.common import clients
@@ -179,6 +180,9 @@ def validate_master_count(context, cluster):
 
 def validate_flavor_root_volume_size(cli, flavor, boot_volume_size):
     """Validate flavor root volume size."""
+
+    boot_volume_size = strutils.validate_integer(boot_volume_size,
+                                                 "boot_volume_size")
 
     if boot_volume_size > 0:
         return
