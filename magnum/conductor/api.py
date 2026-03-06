@@ -135,20 +135,29 @@ class API(rpc_service.API):
 
     # Versioned Objects indirection API
 
+    # TODO(stephenfin): Drop this. It's deprecated in o.vo
     def object_class_action(self, context, objname, objmethod, objver,
                             args, kwargs):
-        "Indirection API callback"
+        """Indirection API callback."""
         return self._client.call(context, 'object_class_action',
                                  objname=objname, objmethod=objmethod,
                                  objver=objver, args=args, kwargs=kwargs)
 
+    def object_class_action_versions(self, context, objname, objmethod,
+                                     object_versions, args, kwargs):
+        """Indirection API callback."""
+        return self._client.call(context, 'object_class_action_versions',
+                                 objname=objname, objmethod=objmethod,
+                                 object_versions=object_versions,
+                                 args=args, kwargs=kwargs)
+
     def object_action(self, context, objinst, objmethod, args, kwargs):
-        "Indirection API callback"
+        """Indirection API callback."""
         return self._client.call(context, 'object_action', objinst=objinst,
                                  objmethod=objmethod, args=args, kwargs=kwargs)
 
     def object_backport(self, context, objinst, target_version):
-        "Indirection API callback"
+        """Indirection API callback."""
         return self._client.call(context, 'object_backport', objinst=objinst,
                                  target_version=target_version)
 

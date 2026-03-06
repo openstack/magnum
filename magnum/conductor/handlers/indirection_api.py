@@ -18,7 +18,7 @@ from magnum.objects import base
 
 @profiler.trace_cls("rpc")
 class Handler(object):
-    "Indirection API callbacks"
+    """Indirection API callbacks"""
 
     def _object_dispatch(self, target, method, context, args, kwargs):
         """Dispatch a call to an object method.
@@ -44,6 +44,21 @@ class Handler(object):
         # but in this case, we need to honor the version the client is
         # asking for, so we do it before returning here.
         return (result.obj_to_primitive(target_version=objver)
+                if isinstance(result, base.MagnumObject) else result)
+
+    def object_class_action_versions(self, context, objname, objmethod,
+                                     object_versions, args, kwargs):
+        """Perform a classmethod action on an object."""
+        objclass = base.MagnumObject.obj_class_from_name(
+            objname, object_versions[objname])
+        result = self._object_dispatch(objclass, objmethod, context,
+                                       args, kwargs)
+        # NOTE(danms): The RPC layer will convert to primitives for us,
+        # but in this case, we need to honor the version the client is
+        # asking for, so we do it before returning here.
+        return (result.obj_to_primitive(
+            target_version=object_versions[objname],
+            version_manifest=object_versions)
                 if isinstance(result, base.MagnumObject) else result)
 
     def object_action(self, context, objinst, objmethod, args, kwargs):
