@@ -34,18 +34,6 @@ class Handler(object):
         except Exception:
             raise messaging.ExpectedException()
 
-    def object_class_action(self, context, objname, objmethod,
-                            objver, args, kwargs):
-        """Perform a classmethod action on an object."""
-        objclass = base.MagnumObject.obj_class_from_name(objname, objver)
-        result = self._object_dispatch(objclass, objmethod, context,
-                                       args, kwargs)
-        # NOTE(danms): The RPC layer will convert to primitives for us,
-        # but in this case, we need to honor the version the client is
-        # asking for, so we do it before returning here.
-        return (result.obj_to_primitive(target_version=objver)
-                if isinstance(result, base.MagnumObject) else result)
-
     def object_class_action_versions(self, context, objname, objmethod,
                                      object_versions, args, kwargs):
         """Perform a classmethod action on an object."""

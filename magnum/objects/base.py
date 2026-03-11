@@ -66,11 +66,6 @@ class MagnumObjectIndirectionAPI(ovoo_base.VersionedObjectIndirectionAPI):
         from magnum.conductor import api as conductor_api
         self._conductor = conductor_api.API()
 
-    def object_class_action(self, context, objname, objmethod, objver,
-                            args, kwargs):
-        return self._conductor.object_class_action(context, objname, objmethod,
-                                                   objver, args, kwargs)
-
     def object_class_action_versions(self, context, objname, objmethod,
                                      object_versions, args, kwargs):
         return self._conductor.object_class_action_versions(context, objname,

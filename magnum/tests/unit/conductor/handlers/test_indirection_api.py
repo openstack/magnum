@@ -13,6 +13,7 @@
 # under the License.
 
 import oslo_messaging as messaging
+from oslo_versionedobjects import base as ovo_base
 from oslo_versionedobjects import fields
 
 from magnum.conductor.handlers import indirection_api
@@ -43,8 +44,9 @@ class TestIndirectionApiConductor(base.TestCase):
 
         obj = TestObject()
         if is_classmethod:
-            result = self.conductor.object_class_action(
-                self.context, TestObject.obj_name(), 'bar', '1.0',
+            versions = ovo_base.obj_tree_get_versions(TestObject.obj_name())
+            result = self.conductor.object_class_action_versions(
+                self.context, TestObject.obj_name(), 'bar', versions,
                 tuple(), {'raise_exception': raise_exception})
         else:
             updates, result = self.conductor.object_action(
