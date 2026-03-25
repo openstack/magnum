@@ -68,5 +68,7 @@ class Handler(object):
         updates['obj_what_changed'] = objinst.obj_what_changed()
         return updates, result
 
-    def object_backport(self, context, objinst, target_version):
-        return objinst.obj_to_primitive(target_version=target_version)
+    def object_backport_versions(self, context, objinst, object_versions):
+        target = object_versions[objinst.obj_name()]
+        return objinst.obj_to_primitive(target_version=target,
+                                        version_manifest=object_versions)

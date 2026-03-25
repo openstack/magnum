@@ -148,10 +148,11 @@ class API(rpc_service.API):
         return self._client.call(context, 'object_action', objinst=objinst,
                                  objmethod=objmethod, args=args, kwargs=kwargs)
 
-    def object_backport(self, context, objinst, target_version):
+    def object_backport_versions(self, context, objinst, object_versions):
         """Indirection API callback."""
-        return self._client.call(context, 'object_backport', objinst=objinst,
-                                 target_version=target_version)
+        return self._client.call(context, 'object_backport_versions',
+                                 objinst=objinst,
+                                 object_versions=object_versions)
 
     # NodeGroup Operations
 

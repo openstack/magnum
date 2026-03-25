@@ -410,9 +410,8 @@ class TestObjectSerializer(test_base.TestCase):
                                        mock_indirection_api,
                                        my_version='1.6'):
         ser = base.MagnumObjectSerializer()
-        mock_indirection_api.object_backport_versions.side_effect \
-            = NotImplementedError()
-        mock_indirection_api.object_backport.return_value = 'backported'
+        mock_indirection_api.object_backport_versions.return_value = \
+            'backported'
 
         @base.MagnumObjectRegistry.register
         class MyTestObj(MyObj):
@@ -423,13 +422,11 @@ class TestObjectSerializer(test_base.TestCase):
         primitive = obj.obj_to_primitive()
         result = ser.deserialize_entity(self.context, primitive)
         if backported_to is None:
-            self.assertEqual(
-                False,
-                mock_indirection_api.object_backport.called)
+            mock_indirection_api.object_backport_versions.assert_not_called()
         else:
             self.assertEqual('backported', result)
-            mock_indirection_api.object_backport.assert_called_with(
-                self.context, primitive, backported_to)
+            mock_indirection_api.object_backport_versions.assert_called_with(
+                self.context, primitive, {'MyTestObj': my_version})
 
     def test_deserialize_entity_newer_version_backports_level1(self):
         "Test object with unsupported (newer) version"

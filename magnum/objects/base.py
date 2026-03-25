@@ -77,9 +77,9 @@ class MagnumObjectIndirectionAPI(ovoo_base.VersionedObjectIndirectionAPI):
         return self._conductor.object_action(context, objinst, objmethod,
                                              args, kwargs)
 
-    def object_backport(self, context, objinst, target_version):
-        return self._conductor.object_backport(context, objinst,
-                                               target_version)
+    def object_backport_versions(self, context, objinst, object_versions):
+        return self._conductor.object_backport_versions(context, objinst,
+                                                        object_versions)
 
 
 class MagnumObjectSerializer(ovoo_base.VersionedObjectSerializer):
