@@ -62,18 +62,46 @@ class Service(service.Service):
         return service_obj
 
 
+# Share a single RPCClient per unique (topic, server, timeout) tuple
+# for the lifetime of the worker process.  The per-request context is injected
+# via RPCClient.prepare(), which returns a lightweight _CallContext that reuses
+# the same underlying transport connections.
+_RPC_CLIENT_CACHE = {}
+
+
+def _get_cached_client(topic, server, timeout):
+    """Return a process-level cached RPCClient for the given target parameters.
+
+    The client is created once per (topic, server, timeout) combination and
+    reused across all requests.  This keeps the RabbitMQ connection pool warm
+    and avoids per-request TCP connect/disconnect cycles.
+    """
+
+    key = (topic, server, timeout)
+    client = _RPC_CLIENT_CACHE.get(key)
+    if client is None:
+        target = messaging.Target(topic=topic, server=server)
+        client = rpc.get_client(
+            target,
+            serializer=objects_base.MagnumObjectSerializer(),
+            timeout=timeout,
+        )
+        _RPC_CLIENT_CACHE[key] = client
+    return client
+
+
 class API(object):
     def __init__(self, context=None, topic=None, server=None,
                  timeout=None):
         self._context = context
         if topic is None:
             topic = ''
-        target = messaging.Target(topic=topic, server=server)
-        self._client = rpc.get_client(
-            target,
-            serializer=objects_base.MagnumObjectSerializer(),
-            timeout=timeout
-        )
+        # Fetch (or create) the shared RPCClient from the process-level cache.
+        # Storing it as self._client keeps the interface identical to the
+        # original code; subclasses (conductor_api.API) that access
+        # self._client directly for OVO indirection calls continue to work
+        # without any changes.
+        self._client = _get_cached_client(topic, server, timeout)
 
     def _call(self, method, *args, **kwargs):
         return self._client.call(self._context, method, *args, **kwargs)
