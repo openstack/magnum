@@ -111,10 +111,40 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         cluster.obj_reset_changes()
         return cluster
 
+    # Call-scoped nodegroups cache: None means inactive (no as_dict() in
+    # progress).  Set to a list by as_dict() before computing derived fields
+    # and cleared afterwards.  Outside of as_dict() _get_nodegroups() always
+    # goes directly to the DB, so nodegroup mutations (create/delete) in
+    # conductor code and tests are always visible.
+    _nodegroups_cache = None
+
+    def _get_nodegroups(self):
+        """Fetch nodegroups, using a call-scoped cache when active.
+
+        as_dict() accesses four derived properties (node_count, master_count,
+        node_addresses, master_addresses) that each call self.nodegroups.
+        Without caching, a single as_dict() triggers four identical
+        NodeGroup.list() RPC calls.
+
+        Rather than caching for the object lifetime (which would return stale
+        data if nodegroups are created/deleted after first access, as happens
+        in conductor and test code), the cache is scoped to a single
+        as_dict() call: as_dict() populates _nodegroups_cache before
+        computing derived fields and clears it on exit.  At all other times
+        _nodegroups_cache is None and this method goes directly to the DB.
+        """
+        if self._nodegroups_cache is not None:
+            return self._nodegroups_cache
+        return NodeGroup.list(self._context, self.uuid)
+
+    def _invalidate_nodegroups_cache(self):
+        """Clear the call-scoped nodegroups cache."""
+        self._nodegroups_cache = None
+
     @property
     def nodegroups(self):
         # Returns all nodegroups that belong to the cluster.
-        return NodeGroup.list(self._context, self.uuid)
+        return self._get_nodegroups()
 
     @property
     def default_ng_worker(self):
@@ -342,12 +372,20 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
 
     def as_dict(self):
         dict_ = super(Cluster, self).as_dict()
-        # Update the dict with the attributes coming form
-        # the cluster's nodegroups.
-        dict_.update({
-            'node_count': self.node_count,
-            'master_count': self.master_count,
-            'node_addresses': self.node_addresses,
-            'master_addresses': self.master_addresses
-        })
+        # Populate the call-scoped nodegroups cache so that the four derived
+        # properties below (node_count, master_count, node_addresses,
+        # master_addresses) all share a single NodeGroup.list() fetch instead
+        # of each issuing their own RPC call.  The cache is cleared on exit
+        # so that any subsequent access (e.g. from conductor code that has
+        # mutated nodegroups) sees a fresh DB result.
+        self._nodegroups_cache = NodeGroup.list(self._context, self.uuid)
+        try:
+            dict_.update({
+                'node_count': self.node_count,
+                'master_count': self.master_count,
+                'node_addresses': self.node_addresses,
+                'master_addresses': self.master_addresses
+            })
+        finally:
+            self._nodegroups_cache = None
         return dict_
