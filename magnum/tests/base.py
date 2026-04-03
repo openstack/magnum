@@ -27,6 +27,7 @@ import testscenarios
 
 from magnum.common import context as magnum_context
 from magnum.common import keystone as magnum_keystone
+from magnum.common import policy as magnum_policy
 from magnum.objects import base as objects_base
 from magnum.tests import conf_fixture
 from magnum.tests import fake_notifier
@@ -118,6 +119,12 @@ class TestCase(base.BaseTestCase):
 
         self.mock_make_trustee_domain_id = q.start()
         self.addCleanup(q.stop)
+
+        # Reset the module-level trustee_domain_id cache in policy.py so that
+        # it is re-resolved on the first policy.enforce() call of the next
+        # test.  Without this, a test that exercises the Keystone-discovery
+        # path could leave a stale value that bypasses mocks in later tests.
+        self.addCleanup(magnum_policy._reset_trustee_domain_id_cache)
 
         self.useFixture(conf_fixture.ConfFixture())
         self.useFixture(fixtures.NestedTempfile())
