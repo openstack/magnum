@@ -30,6 +30,18 @@ from magnum.common import policies
 LOG = logging.getLogger(__name__)
 _ENFORCER = None
 CONF = cfg.CONF
+_TRUSTEE_DOMAIN_ID_CACHE = None
+
+
+def _reset_trustee_domain_id_cache():
+    """Reset the trustee_domain_id Keystone lookup cache.
+
+    Intended for use in test teardown only.  In production the value is
+    either read from CONF (free) or fetched once and cached for the process
+    lifetime.
+    """
+    global _TRUSTEE_DOMAIN_ID_CACHE
+    _TRUSTEE_DOMAIN_ID_CACHE = None
 
 
 # we can get a policy enforcer by this init.
@@ -112,10 +124,21 @@ def enforce(context, rule=None, target=None,
 
 def add_policy_attributes(target):
     """Adds extra information for policy enforcement to raw target object"""
-    context = importutils.import_module('magnum.common.context')
-    admin_context = context.make_admin_context()
-    admin_osc = clients.OpenStackClients(admin_context)
-    trustee_domain_id = admin_osc.keystone().trustee_domain_id
+    global _TRUSTEE_DOMAIN_ID_CACHE
+
+    # When trustee_domain_id is set - we don't need to do any operations
+    trustee_domain_id = CONF.trust.trustee_domain_id
+    if not trustee_domain_id:
+        # Fallback for deployments that rely on auto-discovery via Keystone.
+        # Cache the result for the process lifetime so the call happens
+        # at most once.
+        if _TRUSTEE_DOMAIN_ID_CACHE is None:
+            ctx = importutils.import_module('magnum.common.context')
+            admin_context = ctx.make_admin_context()
+            admin_osc = clients.OpenStackClients(admin_context)
+            _TRUSTEE_DOMAIN_ID_CACHE = admin_osc.keystone().trustee_domain_id
+        trustee_domain_id = _TRUSTEE_DOMAIN_ID_CACHE
+
     target['trustee_domain_id'] = trustee_domain_id
     return target
 
