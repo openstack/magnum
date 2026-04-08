@@ -458,7 +458,7 @@ management, therefore if it fails to start, these other components
 will not be running correctly either.
 Check that etcd is running on the master nodes by::
 
-    sudo service etcd status -l
+    sudo systemctl status etcd
 
 If it is running correctly, you should see that the service is
 successfully deployed::
@@ -484,7 +484,7 @@ something like::
 
 In this case, try restarting etcd by::
 
-    sudo service etcd start
+    sudo systemctl start etcd
 
 If etcd continues to fail, check the following:
 
@@ -534,7 +534,7 @@ confirmed by running *ping* or *curl* from one container to another.
 The Flannel daemon is run as a systemd service on each node of the cluster.
 To check Flannel, run on each node::
 
-    sudo service flanneld status
+    sudo systemctl status flanneld
 
 If the daemon is running, you should see that the service is successfully
 deployed::
@@ -562,7 +562,7 @@ Check the following:
   If the etcd service failed, once it has been restored successfully, the
   Flannel service can be restarted by::
 
-    sudo service flanneld restart
+    sudo systemctl restart flanneld
 
 - Magnum writes the configuration for Flannel in a local file on each master
   node.  Check for this file on the master nodes by::
