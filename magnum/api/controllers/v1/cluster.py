@@ -292,6 +292,24 @@ class ClusterCollection(collection.Collection):
     def convert_with_links(rpc_clusters, limit, url=None, expand=False,
                            **kwargs):
         collection = ClusterCollection()
+        # Pre-fetch all unique ClusterTemplates needed for this page in one
+        # batch to avoid N separate ClusterTemplate.get_by_uuid() RPC calls
+        # (one per cluster).  Clusters in a project commonly share the same
+        # template, so this usually collapses to a single RPC regardless of
+        # page size.
+        template_cache = {}
+        for rpc_cluster in rpc_clusters:
+            tid = rpc_cluster.cluster_template_id
+            if tid and tid not in template_cache:
+                template_cache[tid] = objects.ClusterTemplate.get_by_uuid(
+                    pecan.request.context, tid)
+        # Inject the pre-fetched template so obj_load_attr is never triggered
+        # during Cluster.convert_with_links below.
+        for rpc_cluster in rpc_clusters:
+            tid = rpc_cluster.cluster_template_id
+            if tid and tid in template_cache:
+                rpc_cluster.cluster_template = template_cache[tid]
+
         collection.clusters = [Cluster.convert_with_links(p, expand)
                                for p in rpc_clusters]
         collection.next = collection.get_next(limit, url=url, **kwargs)
@@ -443,7 +461,9 @@ class ClustersController(base.Controller):
             context.all_tenants = True
 
         cluster = api_utils.get_resource('Cluster', cluster_ident)
-        policy.enforce(context, 'cluster:get', cluster.as_dict(),
+        # Compute as_dict() once and reuse it for policy enforcement.
+        cluster_dict = cluster.as_dict()
+        policy.enforce(context, 'cluster:get', cluster_dict,
                        action='cluster:get')
 
         api_cluster = Cluster.convert_with_links(cluster)
