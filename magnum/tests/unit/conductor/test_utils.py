@@ -75,46 +75,6 @@ class TestConductorUtils(base.TestCase):
         mock_uuid_like.return_value = True
         mock_cluster_get_by_name.assert_not_called()
 
-    def _get_heat_stacks_get_mock_obj(self, status):
-        mock_stack = mock.MagicMock()
-        mock_osc = mock.MagicMock()
-        mock_stack_obj = mock.MagicMock()
-        mock_stack_obj.stack_status = status
-        stack_get = mock.MagicMock()
-        stack_get.get.return_value = mock_stack_obj
-        mock_stack.stacks = stack_get
-        mock_osc.heat.return_value = mock_stack
-        return mock_osc
-
-    @patch('magnum.conductor.utils.retrieve_cluster')
-    @patch('magnum.conductor.utils.clients.OpenStackClients')
-    def test_object_has_stack_invalid_status(self, mock_oscs,
-                                             mock_retrieve_cluster):
-
-        mock_osc = self._get_heat_stacks_get_mock_obj("INVALID_STATUS")
-        mock_oscs.return_value = mock_osc
-        self.assertTrue(utils.object_has_stack('context', self.get_fake_id()))
-        mock_retrieve_cluster.assert_called_with('context', self.get_fake_id())
-
-    @patch('magnum.conductor.utils.retrieve_cluster')
-    @patch('magnum.conductor.utils.clients.OpenStackClients')
-    def test_object_has_stack_delete_in_progress(self, mock_oscs,
-                                                 mock_retrieve_cluster):
-
-        mock_osc = self._get_heat_stacks_get_mock_obj("DELETE_IN_PROGRESS")
-        mock_oscs.return_value = mock_osc
-        self.assertFalse(utils.object_has_stack('context', self.get_fake_id()))
-        mock_retrieve_cluster.assert_called_with('context', self.get_fake_id())
-
-    @patch('magnum.conductor.utils.retrieve_cluster')
-    @patch('magnum.conductor.utils.clients.OpenStackClients')
-    def test_object_has_stack_delete_complete_status(self, mock_oscs,
-                                                     mock_retrieve_cluster):
-        mock_osc = self._get_heat_stacks_get_mock_obj("DELETE_COMPLETE")
-        mock_oscs.return_value = mock_osc
-        self.assertFalse(utils.object_has_stack('context', self.get_fake_id()))
-        mock_retrieve_cluster.assert_called_with('context', self.get_fake_id())
-
     @patch('magnum.objects.Cluster.get_by_uuid')
     def test_retrieve_cluster_uuid(self, mock_get_by_uuid):
         mock_get_by_uuid.return_value = True

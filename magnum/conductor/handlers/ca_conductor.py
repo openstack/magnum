@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from heatclient import exc
 from oslo_log import log as logging
 from pycadf import cadftaxonomy as taxonomy
 
@@ -105,9 +104,6 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-                raise e
             raise
 
         cluster.save()

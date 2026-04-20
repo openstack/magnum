@@ -24,6 +24,7 @@ from magnum.api.controllers.v1 import cluster as api_cluster
 from magnum.common import exception
 from magnum.conductor import api as rpcapi
 import magnum.conf
+from magnum.drivers.common import driver
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
@@ -610,6 +611,10 @@ class TestPost(api_base.FunctionalTest):
             attr_validator, 'validate_flavor_root_volume_size')
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
+        p = mock.patch.object(driver.Driver, 'get_driver')
+        self.mock_driver_get = p.start()
+        self.mock_driver_get.return_value = mock.MagicMock()
+        self.addCleanup(p.stop)
 
     def _simulate_cluster_create(self, cluster, master_count, node_count,
                                  create_timeout):
@@ -760,26 +765,32 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(202, response.status_int)
 
     def test_create_cluster_with_even_master_count_oldmicroversion(self):
+        self.mock_driver_get.return_value.validate_master_size.side_effect = (
+            exception.MasterNGSizeInvalid(requested_size=2))
         bdict = apiutils.cluster_post_data()
         bdict['master_count'] = 2
         response = self.post_json(
             '/clusters',
             bdict,
             expect_errors=True,
-            headers={"Openstack-Api-Version": "container-infra 1.9"}
+            headers={"X-Roles": "member",
+                     "Openstack-Api-Version": "container-infra 1.9"}
         )
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
     def test_create_cluster_with_even_master_count(self):
+        self.mock_driver_get.return_value.validate_master_size.side_effect = (
+            exception.MasterNGSizeInvalid(requested_size=2))
         bdict = apiutils.cluster_post_data()
         bdict['master_count'] = 2
         response = self.post_json(
             '/clusters',
             bdict,
             expect_errors=True,
-            headers={"Openstack-Api-Version": "container-infra 1.10"}
+            headers={"X-Roles": "member",
+                     "Openstack-Api-Version": "container-infra 1.10"}
         )
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
@@ -1170,6 +1181,10 @@ class TestClusterPolicyEnforcement(api_base.FunctionalTest):
     def setUp(self):
         super(TestClusterPolicyEnforcement, self).setUp()
         obj_utils.create_test_cluster_template(self.context)
+        p = mock.patch.object(driver.Driver, 'get_driver')
+        self.mock_driver_get = p.start()
+        self.mock_driver_get.return_value = mock.MagicMock()
+        self.addCleanup(p.stop)
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})

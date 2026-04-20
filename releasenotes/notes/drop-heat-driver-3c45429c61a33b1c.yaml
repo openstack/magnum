@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    ``k8s_fedora_coreos_v1`` driver (also known as ``Heat-based`` driver) has
+    been dropped following earlier deprecation.

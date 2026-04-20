@@ -24,7 +24,6 @@ import tempfile
 import time
 
 import fixtures
-from heatclient import client as heatclient
 from keystoneauth1.identity import v3 as ksa_v3
 from keystoneauth1 import session as ksa_session
 from keystoneclient.v3 import client as ksclient
@@ -124,15 +123,6 @@ class BaseMagnumClient(base.BaseMagnumTest):
                                  api_version='latest')
 
         cls.keystone = ksclient.Client(session=_session)
-
-        # Get heat endpoint from session
-        auth_ref = _session.auth.get_auth_ref(_session)
-        heat_endpoint = auth_ref.service_catalog.url_for(
-            service_type='orchestration')
-
-        cls.heat = heatclient.Client('1', session=_session,
-                                     auth=_session.auth,
-                                     endpoint=heat_endpoint)
 
     @classmethod
     def _get_auth_session(cls, username, password, project_name,
@@ -336,9 +326,9 @@ extendedKeyUsage = clientAuth
             test_timeout = int(test_timeout)
         except ValueError:
             # If timeout value is invalid, set a default timeout.
-            test_timeout = CONF.cluster_heat.create_timeout
+            test_timeout = 60
         if test_timeout <= 0:
-            test_timeout = CONF.cluster_heat.create_timeout
+            test_timeout = 60
 
         self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
@@ -355,9 +345,6 @@ extendedKeyUsage = clientAuth
         nodes = self._get_nodes_from_cluster()
         if not [x for x in nodes if x]:
             self.LOG.info("the list of nodes from cluster is empty")
-            nodes = self._get_nodes_from_stack()
-            if not [x for x in nodes if x]:
-                self.LOG.info("the list of nodes from stack is empty")
         self.LOG.info("Nodes are: %s", nodes)
         return nodes
 
@@ -365,21 +352,6 @@ extendedKeyUsage = clientAuth
         nodes = []
         nodes.append(self.cs.clusters.get(self.cluster.uuid).master_addresses)
         nodes.append(self.cs.clusters.get(self.cluster.uuid).node_addresses)
-        return nodes
-
-    def _get_nodes_from_stack(self):
-        cluster = self.cs.clusters.get(self.cluster.uuid)
-        nodes = []
-        stack = self.heat.stacks.get(cluster.stack_id)
-        stack_outputs = stack.to_dict().get('outputs', [])
-        output_keys = []
-        if self.cluster_template.coe == "kubernetes":
-            output_keys = ["kube_masters", "kube_minions"]
-
-        for output in stack_outputs:
-            for key in output_keys:
-                if output['output_key'] == key:
-                    nodes.append(output['output_value'])
         return nodes
 
     @classmethod

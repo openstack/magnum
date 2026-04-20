@@ -20,7 +20,6 @@ from pycadf import eventfactory
 from pycadf import resource
 from wsme import types as wtypes
 
-from magnum.common import clients
 from magnum.common import rpc
 from magnum.objects import cluster
 from magnum.objects import cluster_template
@@ -57,18 +56,6 @@ def retrieve_ct_by_name_or_uuid(context, cluster_template_ident):
         return cluster_template.ClusterTemplate.get_by_uuid(
             context,
             cluster_template_ident)
-
-
-def object_has_stack(context, cluster_uuid):
-    osc = clients.OpenStackClients(context)
-    obj = retrieve_cluster(context, cluster_uuid)
-
-    stack = osc.heat().stacks.get(obj.stack_id)
-    if (stack.stack_status == 'DELETE_COMPLETE' or
-            stack.stack_status == 'DELETE_IN_PROGRESS'):
-        return False
-
-    return True
 
 
 def _get_request_audit_info(context):

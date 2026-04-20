@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from heatclient import exc
 from oslo_log import log as logging
 from pycadf import cadftaxonomy as taxonomy
 
@@ -44,7 +43,7 @@ class Handler(object):
 
     def cluster_create(self, context, cluster, master_count, node_count,
                        create_timeout):
-        LOG.debug('cluster_heat cluster_create')
+        LOG.debug('cluster_conductor cluster_create')
 
         osc = clients.OpenStackClients(context)
 
@@ -88,17 +87,13 @@ class Handler(object):
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
 
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-
-                raise e
             raise
 
         return cluster
 
     def cluster_update(self, context, cluster, node_count,
                        health_status, health_status_reason, rollback=False):
-        LOG.debug('cluster_heat cluster_update')
+        LOG.debug('cluster_conductor cluster_update')
 
         osc = clients.OpenStackClients(context)
         allow_update_status = (
@@ -168,9 +163,6 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-                raise e
             raise
 
         cluster.save()
@@ -178,7 +170,6 @@ class Handler(object):
 
     def cluster_delete(self, context, uuid):
         LOG.debug('cluster_conductor cluster_delete')
-        osc = clients.OpenStackClients(context)
         cluster = objects.Cluster.get_by_uuid(context, uuid)
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
@@ -192,29 +183,6 @@ class Handler(object):
             cluster_driver.delete_cluster(context, cluster)
             cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
             cluster.status_reason = None
-        except exc.HTTPNotFound:
-            LOG.info('The cluster %s was not found during cluster'
-                     ' deletion.', cluster.id)
-            try:
-                trust_manager.delete_trustee_and_trust(osc, context, cluster)
-                cert_manager.delete_certificates_from_cluster(cluster,
-                                                              context=context)
-                # delete all cluster's nodegroups
-                for ng in cluster.nodegroups:
-                    ng.destroy()
-                cluster.destroy()
-            except exception.ClusterNotFound:
-                LOG.info('The cluster %s has been deleted by others.',
-                         uuid)
-            conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS,
-                cluster)
-            return None
-        except exc.HTTPConflict:
-            conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
-                cluster)
-            raise exception.OperationInProgress(cluster_name=cluster.name)
         except Exception as unexp:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
@@ -295,9 +263,6 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-                raise e
             raise
 
         cluster.save()
@@ -360,9 +325,6 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-                raise e
             raise
 
         nodegroup.save()

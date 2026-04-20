@@ -15,7 +15,6 @@
 from barbicanclient import client as barbicanclient
 from cinderclient.v3 import client as cinder_client
 from glanceclient import client as glanceclient
-from heatclient import client as heatclient
 from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
@@ -36,7 +35,6 @@ class OpenStackClients(object):
     def __init__(self, context):
         self.context = context
         self._keystone = None
-        self._heat = None
         self._glance = None
         self._barbican = None
         self._nova = None
@@ -98,33 +96,6 @@ class OpenStackClients(object):
         return octavia.OctaviaAPI(session=session,
                                   service_type='load-balancer',
                                   endpoint=endpoint)
-
-    @exception.wrap_keystone_exception
-    def heat(self):
-        if self._heat:
-            return self._heat
-
-        endpoint_type = self._get_client_option('heat', 'endpoint_type')
-        region_name = self._get_client_option('heat', 'region_name')
-        heatclient_version = self._get_client_option('heat', 'api_version')
-        endpoint = self.url_for(service_type='orchestration',
-                                interface=endpoint_type,
-                                region_name=region_name)
-
-        args = {
-            'endpoint': endpoint,
-            'auth_url': self.auth_url,
-            'token': self.auth_token,
-            'username': None,
-            'password': None,
-            'ca_file': self._get_client_option('heat', 'ca_file'),
-            'cert_file': self._get_client_option('heat', 'cert_file'),
-            'key_file': self._get_client_option('heat', 'key_file'),
-            'insecure': self._get_client_option('heat', 'insecure')
-        }
-        self._heat = heatclient.Client(heatclient_version, **args)
-
-        return self._heat
 
     @exception.wrap_keystone_exception
     def glance(self):

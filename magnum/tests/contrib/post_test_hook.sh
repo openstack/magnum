@@ -27,7 +27,7 @@ function create_test_data {
     # First we test Magnum's command line to see if we can stand up
     # a cluster_template, cluster and a pod
 
-    local image_name="fedora-coreos"
+    local image_name="ubuntu"
     local container_format="bare"
 
     # if we have the MAGNUM_IMAGE_NAME setting, use it instead
