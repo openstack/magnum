@@ -14,6 +14,7 @@ if is_service_enabled magnum-api magnum-cond; then
         install_magnum
 
         MAGNUM_GUEST_IMAGE_URL=${MAGNUM_GUEST_IMAGE_URL:-"https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/35.20220116.3.0/x86_64/fedora-coreos-35.20220116.3.0-openstack.x86_64.qcow2.xz"}
+        MAGNUM_GUEST_IMAGE_EXTRA_PROPERTIES=${MAGNUM_GUEST_IMAGE_EXTRA_PROPERTIES:-""}
         IMAGE_URLS+=",${MAGNUM_GUEST_IMAGE_URL}"
 
         LIBS_FROM_GIT="${LIBS_FROM_GIT},python-magnumclient"
@@ -23,6 +24,10 @@ if is_service_enabled magnum-api magnum-cond; then
     elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
         echo_summary "Configuring magnum"
         configure_magnum
+
+        if is_service_enabled k8s-capi; then
+            copy_kubeconfig
+        fi
 
         # Hack a large timeout for now
         iniset /etc/keystone/keystone.conf token expiration 7200
