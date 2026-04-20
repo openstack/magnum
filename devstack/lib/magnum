@@ -309,7 +309,9 @@ function magnum_register_image {
         echo "Unknown image extension in $image_filename, supported extensions: tgz, img, qcow2, iso, vhd, vhdx, tar.gz, img.gz, img.bz2, vhd.gz, vhdx.gz, qcow2.xz"; false
     fi
 
+    magnum_image_property="$magnum_image_property $MAGNUM_GUEST_IMAGE_EXTRA_PROPERTIES"
     openstack image set $image_name $magnum_image_property
+    openstack image show $image_name
 }
 
 #magnum_configure_flavor - set hw_rng property for flavor to address the potential entropy issue
@@ -367,7 +369,7 @@ function configure_iptables_magnum {
         ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
         OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
         sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
-        # allow access to magnum, keystone etc (http and https) 
+        # allow access to magnum, keystone etc (http and https)
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 80 -j ACCEPT || true
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 443 -j ACCEPT || true
     fi
@@ -427,6 +429,11 @@ function stop_magnum {
     done
 }
 
+# copy_kubeconfig() - Copy kubeconfig from devstack-plugin-container k8s-capi cluster
+function copy_kubeconfig() {
+    echo "Calling copy_kubeconfig"
+    sudo cp /etc/kubernetes/admin.conf /etc/magnum/kubeconfig
+}
 
 # Restore xtrace
 $XTRACE
