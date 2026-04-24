@@ -27,6 +27,7 @@ from magnum.api import app as api_app
 from magnum.common import profiler
 from magnum.common import service
 import magnum.conf
+from magnum.drivers.common import driver as driver_module
 from magnum.i18n import _
 from magnum.objects import base
 from magnum import version
@@ -77,6 +78,9 @@ def main():
     LOG.info('Starting server in PID %s', os.getpid())
     LOG.debug("Configuration:")
     CONF.log_opt_values(LOG, logging.DEBUG)
+
+    drivers = [ep.name for ep, _ in driver_module.Driver.load_entry_points()]
+    LOG.debug('Loaded drivers: %s', drivers)
 
     LOG.info('Serving on %(proto)s://%(host)s:%(port)s',
              dict(proto="https" if use_ssl else "http", host=host, port=port))

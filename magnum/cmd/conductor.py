@@ -34,6 +34,7 @@ from magnum.conductor.handlers import federation_conductor
 from magnum.conductor.handlers import indirection_api
 from magnum.conductor.handlers import nodegroup_conductor
 import magnum.conf
+from magnum.drivers.common import driver as driver_module
 from magnum import version
 
 CONF = magnum.conf.CONF
@@ -49,6 +50,9 @@ def main():
     LOG.info('Starting server in PID %s', os.getpid())
     LOG.debug("Configuration:")
     CONF.log_opt_values(LOG, logging.DEBUG)
+
+    drivers = [ep.name for ep, _ in driver_module.Driver.load_entry_points()]
+    LOG.debug('Loaded drivers: %s', drivers)
 
     conductor_id = short_id.generate_id()
     endpoints = [

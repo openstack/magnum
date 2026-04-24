@@ -16,9 +16,22 @@
 
 import sys
 
+from oslo_log import log as logging
+
 from magnum.api import app as api_app
 from magnum.common import service
+import magnum.conf
+from magnum.drivers.common import driver as driver_module
+
+CONF = magnum.conf.CONF
+LOG = logging.getLogger(__name__)
 
 service.prepare_service(sys.argv)
+
+LOG.debug("Configuration:")
+CONF.log_opt_values(LOG, logging.DEBUG)
+
+drivers = [ep.name for ep, _ in driver_module.Driver.load_entry_points()]
+LOG.debug('Loaded drivers: %s', drivers)
 
 application = api_app.load_app()
