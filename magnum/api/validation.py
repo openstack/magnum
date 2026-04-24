@@ -17,6 +17,7 @@ import decorator
 
 import pecan
 
+from glanceclient import exc as glance_exception
 from keystoneauth1 import exceptions as ka_exception
 
 from magnum.api import utils as api_utils
@@ -78,6 +79,10 @@ def enforce_driver_supported():
                                                          'images')
                 cluster_distro = image.get('os_distro')
                 driver_name = image.get('magnum_driver')
+            except (glance_exception.NotFound, exception.ResourceNotFound):
+                raise exception.ImageNotFound(image_id=image_id)
+            except glance_exception.HTTPForbidden:
+                raise exception.ImageNotAuthorized(image_id=image_id)
             except Exception:
                 pass
         cluster_type = (cluster_template.server_type,
