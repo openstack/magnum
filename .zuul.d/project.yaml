@@ -1,0 +1,15 @@
+- project:
+    queue: magnum
+    templates:
+      - check-requirements
+      - magnum-cluster-api
+      - openstack-cover-jobs
+      - openstack-python3-jobs
+      - publish-openstack-docs-pti
+      - release-notes-jobs-python3
+    check:
+      jobs:
+        - magnum-tempest-plugin-tests-api
+    gate:
+      jobs:
+        - magnum-tempest-plugin-tests-api

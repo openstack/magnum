@@ -1,0 +1,93 @@
+- job:
+    name: magnum-cluster-api
+    parent: devstack
+    abstract: true
+    timeout: 7200
+    override-checkout: master
+    required-projects:
+      - name: github.com/vexxhost/magnum-cluster-api
+        override-checkout: main
+      - opendev.org/openstack/barbican
+      - opendev.org/openstack/magnum
+      - opendev.org/openstack/manila
+      - opendev.org/openstack/octavia
+      - opendev.org/openstack/ovn-octavia-provider
+      - opendev.org/openstack/python-magnumclient
+    vars:
+      devstack_plugins:
+        barbican: https://github.com/openstack/barbican
+        magnum: https://review.opendev.org/openstack/magnum
+        manila: https://github.com/openstack/manila
+        octavia: https://github.com/openstack/octavia
+        ovn-octavia-provider: https://github.com/openstack/ovn-octavia-provider
+        magnum-cluster-api: https://github.com/vexxhost/magnum-cluster-api
+      devstack_localrc:
+        DISABLE_AMP_IMAGE_BUILD: true
+        FIXED_RANGE: 10.1.0.0/20
+        GIT_BASE: https://github.com
+        MAGNUM_GUEST_IMAGE_URL: "{{ image_url }}"
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: snapshot_support=True create_share_from_snapshot_support=True
+        MANILA_ENABLED_BACKENDS: generic
+        MANILA_USE_SERVICE_INSTANCE_PASSWORD: true
+        OCTAVIA_NODE: api
+      devstack_local_conf:
+        post-config:
+          /etc/manila/manila.conf:
+            generic:
+              driver_handles_share_servers: true
+              connect_share_server_to_tenant_network: true
+          /etc/magnum/magnum.conf:
+            cluster_template:
+              kubernetes_allowed_network_drivers: calico,cilium
+              kubernetes_default_network_driver: calico
+            nova_client:
+              api_version: 2.15
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        octavia: true
+        o-api: true
+        o-hk: true
+        o-da: true
+      image_url: "https://github.com/vexxhost/capo-image-elements/releases/latest/download/ubuntu-22.04-{{ kube_tag }}.qcow2"
+    nodeset:
+      nodes:
+        - name: controller
+          label: ubuntu-noble-16GB
+      groups:
+        - name: tempest
+          nodes:
+            - controller
+
+- job:
+    name: magnum-cluster-api-v1.35.4
+    parent: magnum-cluster-api
+    vars:
+      kube_tag: v1.35.4
+
+- job:
+    name: magnum-cluster-api-v1.35.4-calico
+    parent: magnum-cluster-api-v1.35.4
+    vars:
+      network_driver: calico
+
+- job:
+    name: magnum-cluster-api-v1.35.4-cilium
+    parent: magnum-cluster-api-v1.35.4
+    vars:
+      network_driver: cilium
+
+- project-template:
+    name: magnum-cluster-api
+    description: |
+      magnum-cluster-api jobs
+    check:
+      jobs:
+        - magnum-cluster-api-v1.35.4-calico
+        - magnum-cluster-api-v1.35.4-cilium
+    gate:
+      jobs:
+        - magnum-cluster-api-v1.35.4-calico
+        - magnum-cluster-api-v1.35.4-cilium
