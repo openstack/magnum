@@ -16,27 +16,19 @@
 
 import os
 
-from oslo_db.sqlalchemy.migration_cli import manager
-
-import magnum.conf
-
-CONF = magnum.conf.CONF
-_MANAGER = None
+from alembic import command as alembic_command
+from alembic import config as alembic_config
+from alembic import migration as alembic_migration
+from oslo_db.sqlalchemy import enginefacade
 
 
-def get_manager():
-    global _MANAGER
-    if not _MANAGER:
-        alembic_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'alembic.ini'))
-        migrate_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'alembic'))
-        migration_config = {'alembic_ini_path': alembic_path,
-                            'alembic_repo_path': migrate_path,
-                            'db_url': CONF.database.connection}
-        _MANAGER = manager.MigrationManager(migration_config)
-
-    return _MANAGER
+def _get_alembic_config():
+    ini_path = os.path.join(os.path.dirname(__file__), 'alembic.ini')
+    cfg = alembic_config.Config(ini_path)
+    cfg.set_main_option(
+        'script_location',
+        os.path.join(os.path.dirname(__file__), 'alembic'))
+    return cfg
 
 
 def version():
@@ -45,7 +37,10 @@ def version():
     :returns: Database version
     :rtype: string
     """
-    return get_manager().version()
+    engine = enginefacade.writer.get_engine()
+    with engine.connect() as conn:
+        ctx = alembic_migration.MigrationContext.configure(conn)
+        return ctx.get_current_revision()
 
 
 def upgrade(version):
@@ -55,8 +50,7 @@ def upgrade(version):
     :type version: string
     """
     version = version or 'head'
-
-    get_manager().upgrade(version)
+    alembic_command.upgrade(_get_alembic_config(), version)
 
 
 def stamp(revision):
@@ -68,7 +62,7 @@ def stamp(revision):
                      database with most recent revision
     :type revision: string
     """
-    get_manager().stamp(revision)
+    alembic_command.stamp(_get_alembic_config(), revision)
 
 
 def revision(message=None, autogenerate=False):
@@ -80,4 +74,5 @@ def revision(message=None, autogenerate=False):
                          state
     :type autogenerate: bool
     """
-    return get_manager().revision(message=message, autogenerate=autogenerate)
+    return alembic_command.revision(
+        _get_alembic_config(), message=message, autogenerate=autogenerate)
