@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from barbicanclient import client as barbicanclient
 from cinderclient.v3 import client as cinder_client
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient
@@ -20,6 +19,7 @@ from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from octaviaclient.api.v2 import octavia
+from openstack import connection as sdk_connection
 from oslo_log import log as logging
 
 from magnum.common import exception
@@ -163,8 +163,11 @@ class OpenStackClients(object):
                                 interface=endpoint_type,
                                 region_name=region_name)
         session = self.keystone().session
-        self._barbican = barbicanclient.Client(session=session,
-                                               endpoint=endpoint)
+        conn = sdk_connection.Connection(
+            session=session,
+            **{'key_manager_endpoint_override': endpoint}
+        )
+        self._barbican = conn.key_manager
 
         return self._barbican
 
