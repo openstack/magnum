@@ -40,7 +40,7 @@ Install pip::
 
 Install common prerequisites::
 
-    sudo pip install virtualenv flake8 tox testrepository git-review
+    sudo pip install virtualenv flake8 tox git-review
 
 You may need to explicitly upgrade virtualenv if you've installed the one
 from your OS distribution and it is too old (tox will complain). You can
