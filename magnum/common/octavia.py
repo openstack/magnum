@@ -37,10 +37,9 @@ def wait_for_lb_deleted(octavia_client, deleted_lbs):
     start_time = time.time()
 
     while True:
-        lbs = octavia_client.load_balancer_list().get("loadbalancers", [])
+        lbs = octavia_client.load_balancers()
         lbIDs = set(
-            [lb["id"]
-             for lb in lbs if lb["provisioning_status"] != "DELETED"]
+            lb.id for lb in lbs if lb.provisioning_status != "DELETED"
         )
         if not (deleted_lbs & lbIDs):
             break
@@ -57,15 +56,15 @@ def _delete_loadbalancers(context, lbs, cluster, octavia_client,
     candidates = set()
 
     for lb in lbs:
-        status = lb["provisioning_status"]
+        status = lb.provisioning_status
         if status not in ["PENDING_DELETE", "DELETED"]:
             LOG.info("Deleting load balancer %s for cluster %s",
-                     lb["id"], cluster.uuid)
-            octavia_client.load_balancer_delete(lb["id"], cascade=cascade)
-            candidates.add(lb["id"])
+                     lb.id, cluster.uuid)
+            octavia_client.delete_load_balancer(lb.id, cascade=cascade)
+            candidates.add(lb.id)
 
             if remove_fip:
-                neutron.delete_floatingip(context, lb["vip_port_id"], cluster)
+                neutron.delete_floatingip(context, lb.vip_port_id, cluster)
 
     return candidates
 
@@ -87,8 +86,9 @@ def delete_loadbalancers(context, cluster):
         octavia_client_adm = adm_clients.octavia()
         octavia_client = user_clients.octavia()
 
-        lbs = octavia_client.load_balancer_list().get("loadbalancers", [])
-        lbs = [lb for lb in lbs if re.match(pattern, lb["description"])]
+        # Get load balancers created for service/ingress
+        lbs = [lb for lb in octavia_client.load_balancers()
+               if re.match(pattern, lb.description)]
         deleted = _delete_loadbalancers(context, lbs, cluster,
                                         octavia_client_adm, remove_fip=True)
         candidates.update(deleted)
