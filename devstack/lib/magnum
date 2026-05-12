@@ -345,6 +345,7 @@ function install_sonobuoy {
 # install_kubectl() - Download and extract kubectl
 function install_kubectl {
     MAGNUM_KUBECTL_TAG=${MAGNUM_KUBECTL_TAG:-$(wget -qO- https://dl.k8s.io/release/stable.txt)}
+    mkdir -p /opt/stack/bin
     sudo wget -t 2 -c -q -O /opt/stack/bin/kubectl https://dl.k8s.io/release/${MAGNUM_KUBECTL_TAG}/bin/linux/amd64/kubectl
     sudo chmod +x /opt/stack/bin/kubectl
 }
