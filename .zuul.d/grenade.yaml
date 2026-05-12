@@ -1,0 +1,84 @@
+---
+- project-template:
+    name: magnum-grenade-jobs
+    description: Magnum grenade (upgrade) jobs
+    check:
+      jobs:
+        - magnum-grenade
+    gate:
+      jobs:
+        - magnum-grenade
+
+- job:
+    name: magnum-grenade
+    parent: grenade
+    required-projects:
+      - openstack/barbican
+      - openstack/grenade
+      - openstack/magnum
+      - openstack/magnum-capi-helm
+      - openstack/magnum-tempest-plugin
+      - openstack/octavia
+      - openstack/python-barbicanclient
+      - openstack/python-magnumclient
+      - openstack/python-octaviaclient
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^api-ref/.*$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
+      - ^dockerfiles/.*$
+    vars:
+      kube_version: "v1.34.7"
+      kube_version_dir: "2026.04-5"
+      grenade_devstack_localrc:
+        shared:
+          CONTAINER_ENGINE: "crio"
+          CRIO_VERSION: "1.32.1"
+          ETCD_VERSION: "v3.6.11"
+          ETCD_SHA256: "8756f7a4eaf921668a83de0bf13c0f65cae9186a165696e3ae8396afe6f557ed"
+          FIXED_RANGE: 10.1.0.0/20
+          K8S_CAPI_VERSION: "v1.10.4"
+          K8S_CAPO_VERSION: "v0.11.3"
+          # CAPI mgmt cluster kubernetes version
+          K8S_VERSION: "1.34.7"
+          K8S_TOKEN: "0cvq6p.k454yiandj1tjxxv"
+          K8S_COPY_KUBECONFIG_PATH: "/etc/magnum/kubeconfig"
+          MAGNUM_GUEST_IMAGE_URL: "https://github.com/vexxhost/capo-image-elements/releases/download/{{ kube_version_dir }}/ubuntu-24.04-{{ kube_version }}.qcow2"
+          MAGNUM_GUEST_IMAGE_EXTRA_PROPERTIES: "--property kube_version={{ kube_version }}"
+          OCTAVIA_NODE: standalone
+          GLANCE_LIMIT_IMAGE_SIZE_TOTAL: 5000
+          SERVICE_TIMEOUT: 120
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            magnum:
+              image_id: "ubuntu-24.04-{{ kube_version }}"
+              labels:
+                octavia_provider: "ovn"
+                master_lb_floating_ip_enabled: "true"
+      devstack_plugins:
+        barbican: https://opendev.org/openstack/barbican
+        magnum: https://opendev.org/openstack/magnum
+        magnum-capi-helm: https://opendev.org/openstack/magnum-capi-helm
+        octavia: https://opendev.org/openstack/octavia
+      devstack_services:
+        # Disable swift and dependent c-bak service to support upload of .qcow2.xz image in the gate
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        c-bak: false
+        octavia: true
+        o-api: true
+        o-cw: true
+        o-da: true
+        o-hm: true
+        o-hk: true
+      tempest_plugins:
+        - magnum-tempest-plugin
+      tempest_test_regex: ^magnum_tempest_plugin.tests.api
+      tempest_exclude_regex: (test_create_list_sign_delete_clusters|test_create_cluster_with_zero_nodes)
+      tox_envlist: all

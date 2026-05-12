@@ -4,6 +4,7 @@
       - check-requirements
       - magnum-capi-helm-tests-cluster
       - magnum-cluster-api
+      - magnum-grenade-jobs
       - openstack-cover-jobs
       - openstack-python3-jobs
       - publish-openstack-docs-pti

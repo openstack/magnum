@@ -1,0 +1,2 @@
+register_project_for_upgrade magnum
+register_db_to_save magnum
