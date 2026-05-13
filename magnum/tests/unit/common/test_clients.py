@@ -10,10 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from barbicanclient import client as barbicanclient
 from glanceclient import client as glanceclient
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
+from openstack import connection as sdk_connection
 from unittest import mock
 
 from magnum.common import clients
@@ -115,10 +115,10 @@ class ClientsTest(base.BaseTestCase):
         self.assertEqual(glance, glance_cached)
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(barbicanclient, 'Client')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     def _test_clients_barbican(self, expected_region_name, mock_url,
-                               mock_call, mock_keystone):
+                               mock_conn, mock_keystone):
         con = mock.MagicMock()
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
@@ -128,9 +128,9 @@ class ClientsTest(base.BaseTestCase):
         obj = clients.OpenStackClients(con)
         obj._barbican = None
         obj.barbican()
-        mock_call.assert_called_once_with(
-            endpoint='url_from_keystone',
-            session=keystone.session)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'key_manager_endpoint_override': 'url_from_keystone'})
 
         mock_keystone.assert_called_once_with()
         mock_url.assert_called_once_with(service_type='key-manager',
@@ -159,9 +159,9 @@ class ClientsTest(base.BaseTestCase):
         self.assertRaises(exception.AuthorizationFailure, obj.barbican)
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(barbicanclient, 'Client')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    def test_clients_barbican_cached(self, mock_url, mock_call, mock_keystone):
+    def test_clients_barbican_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
@@ -173,9 +173,9 @@ class ClientsTest(base.BaseTestCase):
         barbican = obj.barbican()
         barbican_cached = obj.barbican()
         self.assertEqual(barbican, barbican_cached)
-        mock_call.assert_called_once_with(
-            endpoint='url_from_keystone',
-            session=keystone.session)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'key_manager_endpoint_override': 'url_from_keystone'})
 
     @mock.patch.object(novaclient, 'Client')
     @mock.patch.object(clients.OpenStackClients, 'keystone')

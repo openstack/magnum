@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from barbicanclient import exceptions as barbican_exc
-from barbicanclient.v1 import client as barbican_client
+import openstack.exceptions
+from openstack.key_manager.v1 import container as _container
 from oslo_log import log as logging
 from oslo_utils import excutils
 
@@ -28,32 +28,42 @@ LOG = logging.getLogger(__name__)
 
 class Cert(cert_manager.Cert):
     """Representation of a Cert based on the Barbican CertificateContainer."""
-    def __init__(self, cert_container):
-        if not isinstance(cert_container,
-                          barbican_client.containers.CertificateContainer):
+    def __init__(self, cert_container, connection=None):
+        if not isinstance(cert_container, _container.Container):
+            raise TypeError(_(
+                "Retrieved Barbican Container is not of the correct type "
+                "(certificate)."))
+        if cert_container.type != 'certificate':
             raise TypeError(_(
                 "Retrieved Barbican Container is not of the correct type "
                 "(certificate)."))
         self._cert_container = cert_container
+        self._connection = connection
+        self._secret_cache = {}
 
-    # Container secrets are accessed upon query and can return as None,
-    # don't return the payload if the secret is not available.
+    def _get_payload(self, name):
+        if name in self._secret_cache:
+            return self._secret_cache[name]
+        for sr in (self._cert_container.secret_refs or []):
+            if sr.get('name') == name:
+                secret_uuid = sr['secret_ref'].split('/')[-1]
+                secret = self._connection.get_secret(secret_uuid)
+                payload = secret.payload
+                self._secret_cache[name] = payload
+                return payload
+        return None
 
     def get_certificate(self):
-        if self._cert_container.certificate:
-            return self._cert_container.certificate.payload
+        return self._get_payload('certificate')
 
     def get_intermediates(self):
-        if self._cert_container.intermediates:
-            return self._cert_container.intermediates.payload
+        return self._get_payload('intermediates')
 
     def get_private_key(self):
-        if self._cert_container.private_key:
-            return self._cert_container.private_key.payload
+        return self._get_payload('private_key')
 
     def get_private_key_passphrase(self):
-        if self._cert_container.private_key_passphrase:
-            return self._cert_container.private_key_passphrase.payload
+        return self._get_payload('private_key_passphrase')
 
 
 _ADMIN_OSC = None
@@ -89,69 +99,74 @@ class CertManager(cert_manager.CertManager):
 
         LOG.info("Storing certificate container '%s' in Barbican.", name)
 
-        certificate_secret = None
-        private_key_secret = None
-        intermediates_secret = None
-        pkp_secret = None
-
+        created_secrets = []
         try:
-            certificate_secret = connection.secrets.create(
+            certificate_secret = connection.create_secret(
                 payload=certificate,
                 expiration=expiration,
                 name="Certificate"
             )
-            private_key_secret = connection.secrets.create(
+            created_secrets.append(certificate_secret)
+            private_key_secret = connection.create_secret(
                 payload=private_key,
                 expiration=expiration,
                 name="Private Key"
             )
-            certificate_container = connection.containers.create_certificate(
-                name=name,
-                certificate=certificate_secret,
-                private_key=private_key_secret
-            )
+            created_secrets.append(private_key_secret)
+
+            secret_refs = [
+                {"name": "certificate",
+                 "secret_ref": certificate_secret.secret_ref},
+                {"name": "private_key",
+                 "secret_ref": private_key_secret.secret_ref},
+            ]
+
             if intermediates:
-                intermediates_secret = connection.secrets.create(
+                intermediates_secret = connection.create_secret(
                     payload=intermediates,
                     expiration=expiration,
                     name="Intermediates"
                 )
-                certificate_container.intermediates = intermediates_secret
+                created_secrets.append(intermediates_secret)
+                secret_refs.append(
+                    {"name": "intermediates",
+                     "secret_ref": intermediates_secret.secret_ref})
+
             if private_key_passphrase:
-                pkp_secret = connection.secrets.create(
+                pkp_secret = connection.create_secret(
                     payload=private_key_passphrase,
                     expiration=expiration,
                     name="Private Key Passphrase"
                 )
-                certificate_container.private_key_passphrase = pkp_secret
+                created_secrets.append(pkp_secret)
+                secret_refs.append(
+                    {"name": "private_key_passphrase",
+                     "secret_ref": pkp_secret.secret_ref})
 
-            certificate_container.store()
+            certificate_container = connection.create_container(
+                name=name,
+                type="certificate",
+                secret_refs=secret_refs,
+            )
             return certificate_container.container_ref
-        #  Barbican (because of Keystone-middleware) sometimes masks
-        #  exceptions strangely -- this will catch anything that it raises and
-        #  reraise the original exception, while also providing useful
-        #  feedback in the logs for debugging
         except magnum_exc.CertificateStorageException:
-            for secret in [certificate_secret, private_key_secret,
-                           intermediates_secret, pkp_secret]:
-                if secret and secret.secret_ref:
-                    old_ref = secret.secret_ref
-                    try:
-                        secret.delete()
-                        LOG.info("Deleted secret %s (%s) during rollback.",
-                                 secret.name, old_ref)
-                    except Exception:
-                        LOG.warning(
-                            "Failed to delete %s (%s) during rollback. "
-                            "This is probably not a problem.",
-                            secret.name, old_ref)
+            for secret in created_secrets:
+                old_ref = secret.secret_ref
+                try:
+                    connection.delete_secret(old_ref.split('/')[-1])
+                    LOG.info("Deleted secret %s during rollback.", old_ref)
+                except Exception:
+                    LOG.warning(
+                        "Failed to delete %s during rollback. "
+                        "This is probably not a problem.",
+                        old_ref)
             with excutils.save_and_reraise_exception():
                 LOG.exception("Error storing certificate data")
 
     @staticmethod
     def get_cert(cert_ref, service_name='Magnum', resource_ref=None,
                  check_only=False, **kwargs):
-        """Retrieves the specified cert and registers as a consumer.
+        """Retrieves the specified cert.
 
         :param cert_ref: the UUID of the cert to retrieve
         :param service_name: Friendly name for the consuming service
@@ -166,18 +181,10 @@ class CertManager(cert_manager.CertManager):
 
         LOG.info("Loading certificate container %s from Barbican.", cert_ref)
         try:
-            if check_only:
-                cert_container = connection.containers.get(
-                    container_ref=cert_ref
-                )
-            else:
-                cert_container = connection.containers.register_consumer(
-                    container_ref=cert_ref,
-                    name=service_name,
-                    url=resource_ref
-                )
-            return Cert(cert_container)
-        except barbican_exc.HTTPClientError:
+            container_uuid = cert_ref.split('/')[-1]
+            cert_container = connection.get_container(container_uuid)
+            return Cert(cert_container, connection)
+        except openstack.exceptions.HttpException:
             with excutils.save_and_reraise_exception():
                 LOG.exception("Error getting %s", cert_ref)
 
@@ -195,15 +202,24 @@ class CertManager(cert_manager.CertManager):
             "Recursively deleting certificate container %s from Barbican.",
             cert_ref)
         try:
-            certificate_container = connection.containers.get(cert_ref)
-            certificate_container.certificate.delete()
-            if certificate_container.intermediates:
-                certificate_container.intermediates.delete()
-            if certificate_container.private_key_passphrase:
-                certificate_container.private_key_passphrase.delete()
-            certificate_container.private_key.delete()
-            certificate_container.delete()
-        except barbican_exc.HTTPClientError:
+            container_uuid = cert_ref.split('/')[-1]
+            certificate_container = connection.get_container(container_uuid)
+            secret_refs_by_name = {
+                sr['name']: sr['secret_ref']
+                for sr in (certificate_container.secret_refs or [])
+            }
+            connection.delete_secret(
+                secret_refs_by_name['certificate'].split('/')[-1])
+            if 'intermediates' in secret_refs_by_name:
+                connection.delete_secret(
+                    secret_refs_by_name['intermediates'].split('/')[-1])
+            if 'private_key_passphrase' in secret_refs_by_name:
+                pkp_ref = secret_refs_by_name['private_key_passphrase']
+                connection.delete_secret(pkp_ref.split('/')[-1])
+            connection.delete_secret(
+                secret_refs_by_name['private_key'].split('/')[-1])
+            connection.delete_container(container_uuid)
+        except openstack.exceptions.HttpException:
             with excutils.save_and_reraise_exception():
                 LOG.exception(
                     "Error recursively deleting certificate container %s",
