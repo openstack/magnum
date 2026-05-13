@@ -237,7 +237,7 @@ class TestQuota(api_base.FunctionalTest):
     def test_create_quota_project_id_not_found(self, mock_keystone):
         keystone = mock.MagicMock()
         exp = ka_exception.http.NotFound()
-        keystone.domain_admin_client.projects .get.side_effect = exp
+        keystone.client.projects.get.side_effect = exp
         mock_keystone.return_value = keystone
         quota_dict = apiutils.quota_post_data()
         response = self.post_json('/quotas', quota_dict, expect_errors=True)

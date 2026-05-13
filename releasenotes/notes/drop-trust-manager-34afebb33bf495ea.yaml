@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Keystone trust manager functionality has been dropped (Heat-based driver
+    was the only user - and it has been removed).

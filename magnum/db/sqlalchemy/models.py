@@ -118,12 +118,6 @@ class Cluster(Base):
     health_status_reason = Column(JSONEncodedDict)
     create_timeout = Column(Integer())
     discovery_url = Column(String(255))
-    # TODO(wanghua): encrypt trust_id in db
-    trust_id = Column(String(255))
-    trustee_username = Column(String(255))
-    trustee_user_id = Column(String(255))
-    # TODO(wanghua): encrypt trustee_password in db
-    trustee_password = Column(String(255))
     coe_version = Column(String(255))
     container_version = Column(String(255))
     # (yuanying) if we use barbican,

@@ -19,7 +19,6 @@ from magnum.common import clients
 from magnum.common import exception
 from magnum.common import profiler
 from magnum.conductor.handlers.common import cert_manager
-from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
 from magnum.conductor import utils as conductor_utils
 import magnum.conf
@@ -45,8 +44,6 @@ class Handler(object):
                        create_timeout):
         LOG.debug('cluster_conductor cluster_create')
 
-        osc = clients.OpenStackClients(context)
-
         cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         cluster.status_reason = None
         cluster.create()
@@ -61,8 +58,6 @@ class Handler(object):
         minion_ng.create()
 
         try:
-            # Create trustee/trust and set them to cluster
-            trust_manager.create_trustee_and_trust(osc, cluster)
             # Generate certificate and set the cert reference to cluster
             cert_manager.generate_certificates_to_cluster(cluster,
                                                           context=context)

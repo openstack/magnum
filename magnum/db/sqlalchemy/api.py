@@ -30,8 +30,6 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 
-from magnum.common import clients
-from magnum.common import context as request_context
 from magnum.common import exception
 import magnum.conf
 from magnum.db import api
@@ -113,39 +111,8 @@ class Connection(api.Connection):
         if context.is_admin and context.all_tenants:
             return query
 
-        # Read the trustee domain ID directly from configuration rather than
-        # authenticating to Keystone on every DB query.  The value is
-        # operator-configured (CONF.trust.trustee_domain_id) and is stable for
-        # the lifetime of the service.
-        trustee_domain_id = CONF.trust.trustee_domain_id
-
-        # Fall back to a live Keystone lookup when trustee_domain_id is not
-        # set in configuration so that deployments which rely on auto-discovery
-        # continue to work correctly.
-        if not trustee_domain_id:
-            admin_context = request_context.make_admin_context(
-                                all_tenants=True)
-            osc = clients.OpenStackClients(admin_context)
-            trustee_domain_id = osc.keystone().trustee_domain_id
-
-        # User in a regular project (not in the trustee domain)
-        if (
-            context.project_id
-            and context.user_domain_id != trustee_domain_id
-        ):
+        if context.project_id:
             query = query.filter_by(project_id=context.project_id)
-        # Match project ID component in trustee user's user name against
-        # cluster's project_id to associate per-cluster trustee users who have
-        # no project information with the project their clusters/cluster models
-        # reside in. This is equivalent to the project filtering above.
-        elif context.user_domain_id == trustee_domain_id:
-            admin_context = request_context.make_admin_context(
-                                all_tenants=True)
-            osc = clients.OpenStackClients(admin_context)
-            kst = osc.keystone()
-            user_name = kst.client.users.get(context.user_id).name
-            user_project = user_name.split('_', 2)[1]
-            query = query.filter_by(project_id=user_project)
         else:
             query = query.filter_by(user_id=context.user_id)
 

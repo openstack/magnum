@@ -115,11 +115,6 @@ def get_test_cluster(**kw):
             'master_count': kw.get('master_count', 3),
             'master_addresses': kw.get('master_addresses', ['172.17.2.18'])
         })
-    # Only add Keystone trusts related attributes on demand since they may
-    # break other tests.
-    for attr in ['trustee_username', 'trustee_password', 'trust_id']:
-        if attr in kw:
-            attrs[attr] = kw[attr]
     # Required only in PeriodicTestCase, may break other tests
     for attr in ['keypair', 'health_status', 'health_status_reason']:
         if attr in kw:

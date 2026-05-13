@@ -29,13 +29,5 @@ class ConfFixture(fixtures.Fixture):
         CONF.set_default('host', 'fake-mini')
         CONF.set_default('connection', "sqlite://", group='database')
         CONF.set_default('sqlite_synchronous', False, group='database')
-        # Set a fixed trustee_domain_id so that policy.add_policy_attributes()
-        # can read it directly from config without making any Keystone call.
-        # This matches the value used by the global trustee_domain_id mock in
-        # tests/base.py and avoids 'An auth plugin is required' errors in
-        # no-auth test configurations.
-        CONF.set_default('trustee_domain_id',
-                         '12345678-9012-3456-7890-123456789abc',
-                         group='trust')
         config.parse_args([], default_config_files=[])
         self.addCleanup(CONF.reset)

@@ -17,7 +17,6 @@ from unittest import mock
 from oslo_utils import uuidutils
 
 from magnum.common import context
-from magnum.common import exception
 from magnum.common.rpc_service import CONF
 from magnum.db.sqlalchemy import api as dbapi
 from magnum.drivers.common import driver
@@ -57,47 +56,32 @@ class PeriodicTestCase(base.TestCase):
 
         self.context = context.make_admin_context()
 
-        # Can be identical for all clusters.
-        trust_attrs = {
-            'trustee_username': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
-            'trustee_password': 'ain7einaebooVaig6d',
-            'trust_id': '39d920ca-67c6-4047-b57a-01e9e16bb96f',
-            }
-
         uuid = uuidutils.generate_uuid()
-        trust_attrs.update({'id': 1, 'stack_id': '11', 'uuid': uuid,
-                            'status': cluster_status.CREATE_IN_PROGRESS,
-                            'status_reason': 'no change',
-                            'keypair': 'keipair1', 'health_status': None})
-        cluster1 = utils.get_test_cluster(**trust_attrs)
+        cluster_attrs = {'id': 1, 'stack_id': '11', 'uuid': uuid,
+                         'status': cluster_status.CREATE_IN_PROGRESS,
+                         'status_reason': 'no change',
+                         'keypair': 'keipair1', 'health_status': None}
+        cluster1 = utils.get_test_cluster(**cluster_attrs)
         ngs1 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
-        trust_attrs.update({'id': 2, 'stack_id': '22', 'uuid': uuid,
-                            'status': cluster_status.DELETE_IN_PROGRESS,
-                            'status_reason': 'no change',
-                            'keypair': 'keipair1', 'health_status': None})
-        cluster2 = utils.get_test_cluster(**trust_attrs)
+        cluster_attrs.update({'id': 2, 'stack_id': '22', 'uuid': uuid,
+                              'status': cluster_status.DELETE_IN_PROGRESS})
+        cluster2 = utils.get_test_cluster(**cluster_attrs)
         ngs2 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
-        trust_attrs.update({'id': 3, 'stack_id': '33', 'uuid': uuid,
-                            'status': cluster_status.UPDATE_IN_PROGRESS,
-                            'status_reason': 'no change',
-                            'keypair': 'keipair1', 'health_status': None})
-        cluster3 = utils.get_test_cluster(**trust_attrs)
+        cluster_attrs.update({'id': 3, 'stack_id': '33', 'uuid': uuid,
+                              'status': cluster_status.UPDATE_IN_PROGRESS})
+        cluster3 = utils.get_test_cluster(**cluster_attrs)
         ngs3 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
-        trust_attrs.update({'id': 4, 'stack_id': '44', 'uuid': uuid,
-                            'status': cluster_status.DELETE_IN_PROGRESS,
-                            'status_reason': 'no change',
-                            'keypair': 'keipair1', 'health_status': None})
-        cluster4 = utils.get_test_cluster(**trust_attrs)
+        cluster_attrs.update({'id': 4, 'stack_id': '44', 'uuid': uuid,
+                              'status': cluster_status.DELETE_IN_PROGRESS})
+        cluster4 = utils.get_test_cluster(**cluster_attrs)
         ngs4 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
-        trust_attrs.update({'id': 5, 'stack_id': '55', 'uuid': uuid,
-                            'status': cluster_status.ROLLBACK_IN_PROGRESS,
-                            'status_reason': 'no change',
-                            'keypair': 'keipair1', 'health_status': None})
-        cluster5 = utils.get_test_cluster(**trust_attrs)
+        cluster_attrs.update({'id': 5, 'stack_id': '55', 'uuid': uuid,
+                              'status': cluster_status.ROLLBACK_IN_PROGRESS})
+        cluster5 = utils.get_test_cluster(**cluster_attrs)
         ngs5 = utils.get_nodegroups_for_cluster()
 
         self.nodegroups1 = [
@@ -186,32 +170,6 @@ class PeriodicTestCase(base.TestCase):
 
         self.mock_driver.update_cluster_status.side_effect = (
             _mock_update_status)
-
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
-    def test_update_status_non_trusts_error(self, mock_get_driver):
-        mock_get_driver.return_value = self.mock_driver
-        trust_ex = ("Unknown Keystone error")
-        self.mock_driver.update_cluster_status.side_effect = \
-            exception.AuthorizationFailure(client='keystone', message=trust_ex)
-        self.assertRaises(
-            exception.AuthorizationFailure,
-            periodic.ClusterUpdateJob(
-                self.context, self.cluster1).update_status
-        )
-        self.assertEqual(1, self.mock_driver.update_cluster_status.call_count)
-
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
-    def test_update_status_trusts_not_found(self, mock_get_driver):
-        mock_get_driver.return_value = self.mock_driver
-        trust_ex = ("Could not find trust: %s" % self.cluster1.trust_id)
-        self.mock_driver.update_cluster_status.side_effect = \
-            exception.AuthorizationFailure(client='keystone', message=trust_ex)
-        self.assertRaises(
-            exception.AuthorizationFailure,
-            periodic.ClusterUpdateJob(
-                self.context, self.cluster1).update_status
-        )
-        self.assertEqual(2, self.mock_driver.update_cluster_status.call_count)
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)

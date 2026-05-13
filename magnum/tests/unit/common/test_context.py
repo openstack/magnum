@@ -33,7 +33,6 @@ class ContextTestCase(base.TestCase):
             read_only=True,
             show_deleted=True,
             request_id='request_id1',
-            trust_id='trust_id1',
             auth_token_info='token_info1')
 
     def test_context(self):
@@ -52,7 +51,6 @@ class ContextTestCase(base.TestCase):
         self.assertTrue(ctx.read_only)
         self.assertTrue(ctx.show_deleted)
         self.assertEqual("request_id1", ctx.request_id)
-        self.assertEqual("trust_id1", ctx.trust_id)
         self.assertEqual("token_info1", ctx.auth_token_info)
 
     def test_context_with_roles(self):
@@ -72,7 +70,6 @@ class ContextTestCase(base.TestCase):
         self.assertTrue(ctx.read_only)
         self.assertTrue(ctx.show_deleted)
         self.assertEqual("request_id1", ctx.request_id)
-        self.assertEqual("trust_id1", ctx.trust_id)
         self.assertEqual("token_info1", ctx.auth_token_info)
 
     def test_to_dict_from_dict(self):
@@ -93,7 +90,6 @@ class ContextTestCase(base.TestCase):
         self.assertEqual(ctx.roles, ctx2.roles)
         self.assertEqual(ctx.show_deleted, ctx2.show_deleted)
         self.assertEqual(ctx.request_id, ctx2.request_id)
-        self.assertEqual(ctx.trust_id, ctx2.trust_id)
         self.assertEqual(ctx.auth_token_info, ctx2.auth_token_info)
 
     def test_request_context_sets_is_admin(self):

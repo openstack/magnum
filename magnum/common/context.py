@@ -16,10 +16,6 @@ from oslo_db.sqlalchemy import enginefacade
 
 from magnum.common import policy
 
-import magnum.conf
-
-CONF = magnum.conf.CONF
-
 
 @enginefacade.transaction_context_provider
 class RequestContext(context.RequestContext):
@@ -30,8 +26,8 @@ class RequestContext(context.RequestContext):
                  user_domain_name=None, user_domain_id=None,
                  project_name=None, project_id=None, roles=None,
                  is_admin=None, read_only=False, show_deleted=False,
-                 request_id=None, trust_id=None, auth_token_info=None,
-                 all_tenants=False, password=None, **kwargs):
+                 request_id=None, auth_token_info=None,
+                 all_tenants=False, **kwargs):
         """Stores several additional request parameters:
 
         :param domain_id: The ID of the domain.
@@ -59,9 +55,7 @@ class RequestContext(context.RequestContext):
         self.user_domain_name = user_domain_name
         self.auth_url = auth_url
         self.auth_token_info = auth_token_info
-        self.trust_id = trust_id
         self.all_tenants = all_tenants
-        self.password = password
         if is_admin is None:
             self.is_admin = policy.check_is_admin(self)
         else:
@@ -82,9 +76,7 @@ class RequestContext(context.RequestContext):
                       'roles': self.roles,
                       'show_deleted': self.show_deleted,
                       'request_id': self.request_id,
-                      'trust_id': self.trust_id,
                       'auth_token_info': self.auth_token_info,
-                      'password': self.password,
                       'all_tenants': self.all_tenants})
         return value
 
@@ -107,21 +99,6 @@ def make_admin_context(show_deleted=False, all_tenants=False):
                              is_admin=True,
                              show_deleted=show_deleted,
                              all_tenants=all_tenants)
-    return context
-
-
-def make_cluster_context(cluster, show_deleted=False):
-    """Create a user context based on a cluster's stored Keystone trust.
-
-    :param cluster: the cluster supplying the Keystone trust to use
-    :param show_deleted: if True, will show deleted items when query db
-    """
-    context = RequestContext(user_name=cluster.trustee_username,
-                             password=cluster.trustee_password,
-                             trust_id=cluster.trust_id,
-                             show_deleted=show_deleted,
-                             user_domain_id=CONF.trust.trustee_domain_id,
-                             user_domain_name=CONF.trust.trustee_domain_name)
     return context
 
 
