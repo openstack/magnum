@@ -21,6 +21,16 @@ from magnum.tests import base
 from magnum.tests.unit.db import utils
 
 
+def make_lb(id, description, name, provisioning_status, vip_port_id=None):
+    lb = mock.Mock()
+    lb.id = id
+    lb.description = description
+    lb.name = name
+    lb.provisioning_status = provisioning_status
+    lb.vip_port_id = vip_port_id
+    return lb
+
+
 class OctaviaTest(base.TestCase):
     def setUp(self):
         super(OctaviaTest, self).setUp()
@@ -36,31 +46,28 @@ class OctaviaTest(base.TestCase):
     @mock.patch("magnum.common.neutron.delete_floatingip")
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_delete_loadbalancers(self, mock_clients, mock_delete_fip):
-        mock_lbs = {
-            "loadbalancers": [
-                {
-                    "id": "fake_id_1",
-                    "description": "Kubernetes external service "
-                                   "ad3080723f1c211e88adbfa163ee1203 from "
-                                   "cluster %s" % self.cluster.uuid,
-                    "name": "fake_name_1",
-                    "provisioning_status": "ACTIVE",
-                    "vip_port_id": "b4ca07d1-a31e-43e2-891a-7d14f419f342"
-                },
-                {
-                    "id": "fake_id_2",
-                    "description": "Kubernetes Ingress test-octavia-ingress "
-                                   "in namespace default from cluster %s, "
-                                   "version: 32207" % self.cluster.uuid,
-                    "name": "fake_name_2",
-                    "provisioning_status": "ERROR",
-                    "vip_port_id": "c17c1a6e-1868-11e9-84cd-00224d6b7bc1"
-                },
-            ]
-        }
+        lb1 = make_lb(
+            id="fake_id_1",
+            description="Kubernetes external service "
+                        "ad3080723f1c211e88adbfa163ee1203 from "
+                        "cluster %s" % self.cluster.uuid,
+            name="fake_name_1",
+            provisioning_status="ACTIVE",
+            vip_port_id="b4ca07d1-a31e-43e2-891a-7d14f419f342"
+        )
+        lb2 = make_lb(
+            id="fake_id_2",
+            description="Kubernetes Ingress test-octavia-ingress "
+                        "in namespace default from cluster %s, "
+                        "version: 32207" % self.cluster.uuid,
+            name="fake_name_2",
+            provisioning_status="ERROR",
+            vip_port_id="c17c1a6e-1868-11e9-84cd-00224d6b7bc1"
+        )
         mock_octavia_client = mock.MagicMock()
-        mock_octavia_client.load_balancer_list.side_effect = [
-            mock_lbs, {"loadbalancers": []}
+        mock_octavia_client.load_balancers.side_effect = [
+            [lb1, lb2],   # first call in delete_loadbalancers (services)
+            []            # second call in wait_for_lb_deleted
         ]
 
         osc = mock.MagicMock()
@@ -73,15 +80,12 @@ class OctaviaTest(base.TestCase):
             mock.call("fake_id_1", cascade=True),
             mock.call("fake_id_2", cascade=True),
         ]
-        mock_octavia_client.load_balancer_delete.assert_has_calls(calls)
+        mock_octavia_client.delete_load_balancer.assert_has_calls(calls)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_delete_loadbalancers_no_candidate(self, mock_clients):
-        mock_lbs = {
-            "loadbalancers": []
-        }
         mock_octavia_client = mock.MagicMock()
-        mock_octavia_client.load_balancer_list.return_value = mock_lbs
+        mock_octavia_client.load_balancers.return_value = []
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -89,7 +93,7 @@ class OctaviaTest(base.TestCase):
 
         octavia.delete_loadbalancers(self.context, self.cluster)
 
-        self.assertFalse(mock_octavia_client.load_balancer_delete.called)
+        self.assertFalse(mock_octavia_client.delete_load_balancer.called)
 
     @mock.patch("magnum.common.neutron.delete_floatingip")
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -101,29 +105,25 @@ class OctaviaTest(base.TestCase):
         mock_octavia_client = mock.MagicMock()
         osc.octavia.return_value = mock_octavia_client
 
-        mock_lbs = {
-            "loadbalancers": [
-                {
-                    "id": "fake_id_1",
-                    "description": "Kubernetes external service "
-                                   "ad3080723f1c211e88adbfa163ee1203 from "
-                                   "cluster %s" % self.cluster.uuid,
-                    "name": "fake_name_1",
-                    "provisioning_status": "ACTIVE",
-                    "vip_port_id": "b4ca07d1-a31e-43e2-891a-7d14f419f342"
-                },
-                {
-                    "id": "fake_id_2",
-                    "description": "Kubernetes external service "
-                                   "a9f9ba08cf28811e89547fa163ea824f from "
-                                   "cluster %s" % self.cluster.uuid,
-                    "name": "fake_name_2",
-                    "provisioning_status": "ACTIVE",
-                    "vip_port_id": "c17c1a6e-1868-11e9-84cd-00224d6b7bc1"
-                },
-            ]
-        }
-        mock_octavia_client.load_balancer_list.return_value = mock_lbs
+        lb1 = make_lb(
+            id="fake_id_1",
+            description="Kubernetes external service "
+                        "ad3080723f1c211e88adbfa163ee1203 from "
+                        "cluster %s" % self.cluster.uuid,
+            name="fake_name_1",
+            provisioning_status="ACTIVE",
+            vip_port_id="b4ca07d1-a31e-43e2-891a-7d14f419f342"
+        )
+        lb2 = make_lb(
+            id="fake_id_2",
+            description="Kubernetes external service "
+                        "a9f9ba08cf28811e89547fa163ea824f from "
+                        "cluster %s" % self.cluster.uuid,
+            name="fake_name_2",
+            provisioning_status="ACTIVE",
+            vip_port_id="c17c1a6e-1868-11e9-84cd-00224d6b7bc1"
+        )
+        mock_octavia_client.load_balancers.return_value = [lb1, lb2]
 
         self.assertRaises(
             exception.PreDeletionFailed,

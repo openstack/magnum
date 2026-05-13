@@ -17,7 +17,6 @@ from glanceclient import client as glanceclient
 from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
-from octaviaclient.api.v2 import octavia
 from openstack import connection as sdk_connection
 from oslo_log import log as logging
 
@@ -93,9 +92,11 @@ class OpenStackClients(object):
                                 interface=endpoint_type,
                                 region_name=region_name)
         session = self.keystone().session
-        return octavia.OctaviaAPI(session=session,
-                                  service_type='load-balancer',
-                                  endpoint=endpoint)
+        conn = sdk_connection.Connection(
+            session=session,
+            **{'load_balancer_endpoint_override': endpoint}
+        )
+        return conn.load_balancer
 
     @exception.wrap_keystone_exception
     def glance(self):
