@@ -147,7 +147,7 @@ specified). If it fails, that means the credential you provided is invalid.
 
     from keystoneauth1.identity import v3 as ka_v3
     from keystoneauth1 import session as ka_session
-    from keystoneclient.v3 import client as kc_v3
+    import openstack
 
     auth = ka_v3.Password(
         auth_url=YOUR_AUTH_URI,
@@ -156,8 +156,8 @@ specified). If it fails, that means the credential you provided is invalid.
         password=YOUR_TRUSTEE_DOMAIN_ADMIN_PASSWORD)
 
     session = ka_session.Session(auth=auth)
-    domain_admin_client = kc_v3.Client(session=session)
-    user = domain_admin_client.users.create(
+    conn = openstack.connect(session=session)
+    user = conn.identity.create_user(
         name='anyname',
         password='anypass')
 

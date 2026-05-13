@@ -15,8 +15,8 @@ from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1.identity import access as ka_access_plugin
 from keystoneauth1.identity import v3 as ka_v3
 from keystoneauth1 import loading as ka_loading
-import keystoneclient.exceptions as kc_exception
-from keystoneclient.v3 import client as kc_v3
+from openstack import connection as sdk_connection
+from openstack import exceptions as sdk_exceptions
 from oslo_log import log as logging
 
 from magnum.common import exception
@@ -115,9 +115,9 @@ class KeystoneClientV3(object):
     def client(self):
         if self._client:
             return self._client
-        client = kc_v3.Client(session=self.session)
-        self._client = client
-        return client
+        conn = sdk_connection.Connection(session=self.session)
+        self._client = conn.identity
+        return self._client
 
     def get_validate_region_name(self, region_name):
         if region_name is None:
@@ -125,16 +125,15 @@ class KeystoneClientV3(object):
             raise exception.InvalidParameterValue(message)
         """matches the region of a public endpoint for the Keystone
         service."""
+        regions = []
         try:
-            regions = self.client.regions.list()
-        except kc_exception.NotFound:
+            regions = list(self.client.regions())
+        except sdk_exceptions.NotFoundException:
             pass
         except Exception:
             LOG.exception('Failed to list regions')
             raise exception.RegionsListFailed()
-        region_list = []
-        for region in regions:
-            region_list.append(region.id)
+        region_list = [r.id for r in regions]
         if region_name not in region_list:
             raise exception.InvalidParameterValue(_(
                 'region_name %(region_name)s is invalid, '
@@ -162,13 +161,13 @@ def is_octavia_enabled():
     keystone = KeystoneClientV3(admin_context)
 
     try:
-        octavia_svc = keystone.client.services.list(type='load-balancer')
+        octavia_svc = list(keystone.client.services(type='load-balancer'))
     except Exception:
         LOG.exception('Failed to list services')
         raise exception.ServicesListFailed()
 
     # Always assume there is only one load balancing service configured.
-    if octavia_svc and octavia_svc[0].enabled:
+    if octavia_svc and octavia_svc[0].is_enabled:
         return True
 
     return False
