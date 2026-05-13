@@ -10,7 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from glanceclient import client as glanceclient
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from openstack import connection as sdk_connection
@@ -57,25 +56,25 @@ class ClientsTest(base.BaseTestCase):
                                               service_type='container-infra',
                                               interface=fake_endpoint)
 
-    @mock.patch.object(glanceclient, 'Client')
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def _test_clients_glance(self, expected_region_name, mock_auth, mock_url,
-                             mock_call):
-        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
+    def _test_clients_glance(self, expected_region_name, mock_url,
+                             mock_conn, mock_keystone):
         con = mock.MagicMock()
-        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._glance = None
         obj.glance()
-        mock_call.assert_called_once_with(
-            CONF.glance_client.api_version,
-            endpoint='url_from_keystone', username=None,
-            token='3bcc3d3a03f44e3d8377f9247b0ad155',
-            auth_url='keystone_url',
-            password=None, cacert=None, cert=None, key=None, insecure=False)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'image_endpoint_override': 'url_from_keystone'})
+
+        mock_keystone.assert_called_once_with()
         mock_url.assert_called_once_with(service_type='image',
                                          interface='publicURL',
                                          region_name=expected_region_name)
@@ -100,19 +99,24 @@ class ClientsTest(base.BaseTestCase):
         obj._glance = None
         self.assertRaises(exception.AuthorizationFailure, obj.glance)
 
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def test_clients_glance_cached(self, mock_auth, mock_url):
-        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
+    def test_clients_glance_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
-        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._glance = None
         glance = obj.glance()
         glance_cached = obj.glance()
         self.assertEqual(glance, glance_cached)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'image_endpoint_override': 'url_from_keystone'})
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     @mock.patch.object(sdk_connection, 'Connection')

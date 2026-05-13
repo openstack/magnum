@@ -16,7 +16,7 @@
 import importlib
 from unittest import mock
 
-from glanceclient import exc as glance_exception
+from openstack import exceptions as sdk_exceptions
 
 from magnum.api import validation as v
 from magnum.common import exception
@@ -391,16 +391,16 @@ class TestValidation(base.BaseTestCase):
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_enforce_driver_supported_image_not_found(
-            self, mock_get_resource, mock_os_clients, mock_pecan_request):
+            self, mock_os_clients, mock_pecan_request):
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
             pass
 
-        mock_get_resource.side_effect = exception.ResourceNotFound(
-            name='image', id='test-image-id')
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .side_effect = exception.ResourceNotFound(
+                name='image', id='test-image-id')
         cluster_template = mock.MagicMock()
         cluster_template.cluster_distro = None
         cluster_template.driver = None
@@ -411,15 +411,15 @@ class TestValidation(base.BaseTestCase):
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_enforce_driver_supported_image_not_found_glance(
-            self, mock_get_resource, mock_os_clients, mock_pecan_request):
+    def test_enforce_driver_supported_image_not_found_sdk(
+            self, mock_os_clients, mock_pecan_request):
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
             pass
 
-        mock_get_resource.side_effect = glance_exception.NotFound()
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .side_effect = sdk_exceptions.NotFoundException()
         cluster_template = mock.MagicMock()
         cluster_template.cluster_distro = None
         cluster_template.driver = None
@@ -430,15 +430,15 @@ class TestValidation(base.BaseTestCase):
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_enforce_driver_supported_image_forbidden(
-            self, mock_get_resource, mock_os_clients, mock_pecan_request):
+            self, mock_os_clients, mock_pecan_request):
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
             pass
 
-        mock_get_resource.side_effect = glance_exception.HTTPForbidden()
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .side_effect = sdk_exceptions.ForbiddenException()
         cluster_template = mock.MagicMock()
         cluster_template.cluster_distro = None
         cluster_template.driver = None

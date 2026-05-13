@@ -12,8 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exception
+from openstack import exceptions as sdk_exceptions
 from oslo_utils import strutils
 
 from magnum.api import utils as api_utils
@@ -34,13 +34,16 @@ def validate_image(cli, image):
     """Validate image"""
 
     try:
-        image_found = api_utils.get_openstack_resource(cli.glance().images,
-                                                       image, 'images')
-    except (glance_exception.NotFound, exception.ResourceNotFound):
+        image_found = cli.glance().find_image(image, ignore_missing=False)
+    except (sdk_exceptions.NotFoundException, exception.ResourceNotFound):
         raise exception.ImageNotFound(image_id=image)
-    except glance_exception.HTTPForbidden:
+    except sdk_exceptions.DuplicateResource:
+        msg = _("Multiple images exist with same name '%s'. "
+                "Please use the image ID instead.") % image
+        raise exception.Conflict(msg)
+    except sdk_exceptions.ForbiddenException:
         raise exception.ImageNotAuthorized(image_id=image)
-    if not image_found.get('os_distro'):
+    if not image_found.os_distro:
         raise exception.OSDistroFieldNotFound(image_id=image)
     return image_found
 
