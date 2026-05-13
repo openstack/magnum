@@ -94,7 +94,7 @@ class ClusterTemplate(base.APIBase):
     """The size in GB of the docker volume"""
 
     cluster_distro = wtypes.StringType(min_length=1, max_length=255)
-    """The Cluster distro for the Cluster, e.g. coreos, fedora-coreos, etc."""
+    """The Cluster distro for the Cluster, e.g. ubuntu, etc."""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated ClusterTemplate links"""
@@ -209,7 +209,7 @@ class ClusterTemplate(base.APIBase):
             apiserver_port=8080,
             docker_volume_size=25,
             docker_storage_driver='devicemapper',
-            cluster_distro='fedora-coreos',
+            cluster_distro='ubuntu',
             coe=fields.ClusterType.KUBERNETES,
             http_proxy='http://proxy.com:123',
             https_proxy='https://proxy.com:123',
@@ -272,11 +272,6 @@ class ClusterTemplatesController(base.Controller):
         "and overlay storage drivers are recommended to migrate to a "
         "different storage driver, such as overlay2. overlay2 will be set "
         "as the default storage driver from Victoria cycle in Magnum.")
-
-    _heat_driver_deprecation_note = (
-        "The heat driver is deprecated in favor of the k8s_capi_helm or"
-        "k8s_cluster_api driver. Please migrate to one of the abovementioned."
-        "Heat driver will be removed in a future Magnum version.")
 
     def _generate_name_for_cluster_template(self, context):
         """Generate a random name like: zeta-22-model."""
@@ -455,12 +450,6 @@ class ClusterTemplatesController(base.Controller):
             warnings.warn(self._coreos_deprecation_note,
                           DeprecationWarning)
             LOG.warning(self._coreos_deprecation_note)
-
-        if (cluster_template_dict['coe'] == 'kubernetes' and
-                cluster_template_dict['cluster_distro'] == 'fedora-coreos'):
-            warnings.warn(self._heat_driver_deprecation_note,
-                          DeprecationWarning)
-            LOG.warning(self._heat_driver_deprecation_note)
 
         # NOTE(yuywz): We will generate a random human-readable name for
         # cluster_template if the name is not specified by user.

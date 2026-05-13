@@ -41,18 +41,15 @@ class ScaleManager(object):
         self.old_cluster = objects.Cluster.get_by_uuid(context, cluster.uuid)
         self.new_cluster = cluster
 
-    def get_removal_nodes(self, hosts_output):
+    def get_removal_nodes(self, hosts):
         if not self._is_scale_down():
             return list()
 
         cluster = self.new_cluster
-        stack = self.osclient.heat().stacks.get(cluster.stack_id)
-        hosts = hosts_output.get_output_value(stack, cluster)
         if hosts is None:
             raise exception.MagnumException(_(
-                "Output key '%(output_key)s' is missing from stack "
-                "%(stack_id)s") % {'output_key': hosts_output.heat_output,
-                                   'stack_id': stack.id})
+                "No hosts provided for scale-down of cluster "
+                "%(cluster_id)s") % {'cluster_id': cluster.stack_id})
 
         hosts_with_container = self._get_hosts_with_container(self.context,
                                                               cluster)

@@ -61,8 +61,6 @@ class DriverList(lister.Lister):
         for entry_point, cls in driver.Driver.load_entry_points():
             name = entry_point.name
             template_path = "n/a"
-            # NOTE(dalees): Only drivers subclassing Heat have template
-            #               definitions.
             if hasattr(cls, "get_template_definition"):
                 definition = cls().get_template_definition()
                 template_path = definition.template_path

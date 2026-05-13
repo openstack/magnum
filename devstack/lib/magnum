@@ -277,21 +277,9 @@ function init_magnum {
 function magnum_register_image {
     local magnum_image_property="--property os_distro="
 
-    local atomic="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io 'atomic' || true;)"
-    if [ ! -z "$atomic" ]; then
-        magnum_image_property=$magnum_image_property"fedora-atomic --property hw_rng_model=virtio"
-    fi
     local ubuntu="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "ubuntu" || true;)"
     if [ ! -z "$ubuntu" ]; then
         magnum_image_property=$magnum_image_property"ubuntu"
-    fi
-    local coreos="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "^coreos" || true;)"
-    if [ ! -z "$coreos" ]; then
-        magnum_image_property=$magnum_image_property"coreos"
-    fi
-    local fedora_coreos="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "fedora-coreos" || true;)"
-    if [ ! -z "$fedora_coreos" ]; then
-        magnum_image_property=$magnum_image_property"fedora-coreos"
     fi
 
     # get the image name

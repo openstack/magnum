@@ -16,9 +16,6 @@
 from unittest import mock
 from unittest.mock import patch
 
-from heatclient import exc
-
-from magnum.common import exception
 from magnum.conductor.handlers import nodegroup_conductor
 from magnum.objects import fields
 from magnum.tests.unit.db import base as db_base
@@ -71,27 +68,6 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual("Test failure", nodegroup.status_reason)
 
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_nodegroup_create_failed_bad_request(self, mock_get_driver):
-        mock_driver = mock.MagicMock()
-        mock_get_driver.return_value = mock_driver
-        side_effect = exc.HTTPBadRequest("Bad request")
-        mock_driver.create_nodegroup.side_effect = side_effect
-        nodegroup = mock.MagicMock()
-        self.assertRaises(exception.InvalidParameterValue,
-                          self.handler.nodegroup_create,
-                          self.context, self.cluster, nodegroup)
-        mock_driver.create_nodegroup.assert_called_once_with(self.context,
-                                                             self.cluster,
-                                                             nodegroup)
-        nodegroup.create.assert_called_once()
-        nodegroup.save.assert_called_once()
-        self.assertEqual(fields.ClusterStatus.UPDATE_FAILED,
-                         self.cluster.status)
-        self.assertEqual(fields.ClusterStatus.CREATE_FAILED,
-                         nodegroup.status)
-        self.assertEqual("ERROR: Bad request", nodegroup.status_reason)
-
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_nodegroup_udpate(self, mock_get_driver):
         mock_driver = mock.MagicMock()
         mock_get_driver.return_value = mock_driver
@@ -123,74 +99,11 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual("Update failed", self.nodegroup.status_reason)
 
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_nodegroup_update_failed_bad_request(self, mock_get_driver):
-        mock_driver = mock.MagicMock()
-        mock_get_driver.return_value = mock_driver
-        side_effect = exc.HTTPBadRequest("Bad request")
-        mock_driver.update_nodegroup.side_effect = side_effect
-        self.assertRaises(exception.InvalidParameterValue,
-                          self.handler.nodegroup_update,
-                          self.context, self.cluster, self.nodegroup)
-        mock_driver.update_nodegroup.assert_called_once_with(self.context,
-                                                             self.cluster,
-                                                             self.nodegroup)
-        self.assertEqual(fields.ClusterStatus.UPDATE_FAILED,
-                         self.cluster.status)
-        self.assertEqual(fields.ClusterStatus.UPDATE_FAILED,
-                         self.nodegroup.status)
-        self.assertEqual("ERROR: Bad request", self.nodegroup.status_reason)
-
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_nodegroup_delete(self, mock_get_driver):
         mock_driver = mock.MagicMock()
         mock_get_driver.return_value = mock_driver
         self.handler.nodegroup_delete(self.context, self.cluster,
                                       self.nodegroup)
-        mock_driver.delete_nodegroup.assert_called_once_with(self.context,
-                                                             self.cluster,
-                                                             self.nodegroup)
-        self.assertEqual(fields.ClusterStatus.UPDATE_IN_PROGRESS,
-                         self.cluster.status)
-        self.assertEqual(fields.ClusterStatus.DELETE_IN_PROGRESS,
-                         self.nodegroup.status)
-
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_nodegroup_delete_stack_not_found(self, mock_get_driver):
-        mock_driver = mock.MagicMock()
-        mock_get_driver.return_value = mock_driver
-        nodegroup = mock.MagicMock()
-        mock_driver.delete_nodegroup.side_effect = exc.HTTPNotFound()
-        self.handler.nodegroup_delete(self.context, self.cluster, nodegroup)
-        mock_driver.delete_nodegroup.assert_called_once_with(self.context,
-                                                             self.cluster,
-                                                             nodegroup)
-        self.assertEqual(fields.ClusterStatus.UPDATE_IN_PROGRESS,
-                         self.cluster.status)
-        nodegroup.destroy.assert_called_once()
-
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_nodegroup_delete_stack_and_ng_not_found(self, mock_get_driver):
-        mock_driver = mock.MagicMock()
-        mock_get_driver.return_value = mock_driver
-        nodegroup = mock.MagicMock()
-        mock_driver.delete_nodegroup.side_effect = exc.HTTPNotFound()
-        nodegroup.destroy.side_effect = exception.NodeGroupNotFound()
-        self.handler.nodegroup_delete(self.context, self.cluster, nodegroup)
-        mock_driver.delete_nodegroup.assert_called_once_with(self.context,
-                                                             self.cluster,
-                                                             nodegroup)
-        self.assertEqual(fields.ClusterStatus.UPDATE_IN_PROGRESS,
-                         self.cluster.status)
-        nodegroup.destroy.assert_called_once()
-
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_nodegroup_delete_stack_operation_ongoing(self, mock_get_driver):
-        mock_driver = mock.MagicMock()
-        mock_get_driver.return_value = mock_driver
-        mock_driver.delete_nodegroup.side_effect = exc.HTTPConflict()
-        self.assertRaises(exception.NgOperationInProgress,
-                          self.handler.nodegroup_delete,
-                          self.context, self.cluster, self.nodegroup)
         mock_driver.delete_nodegroup.assert_called_once_with(self.context,
                                                              self.cluster,
                                                              self.nodegroup)

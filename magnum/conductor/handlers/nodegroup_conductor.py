@@ -16,7 +16,6 @@
 
 import functools
 
-from heatclient import exc
 from oslo_log import log as logging
 
 from magnum.common import exception
@@ -89,9 +88,6 @@ class Handler(object):
             nodegroup.save()
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.save()
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-                raise e
             raise
         return nodegroup
 
@@ -113,9 +109,6 @@ class Handler(object):
             nodegroup.save()
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.save()
-            if isinstance(e, exc.HTTPBadRequest):
-                e = exception.InvalidParameterValue(message=str(e))
-                raise e
             raise
 
         return nodegroup
@@ -130,17 +123,6 @@ class Handler(object):
             cluster_driver = driver.Driver.get_driver_for_cluster(context,
                                                                   cluster)
             cluster_driver.delete_nodegroup(context, cluster, nodegroup)
-        except exc.HTTPNotFound:
-            LOG.info('The nodegroup %s was not found during nodegroup'
-                     ' deletion.', nodegroup.uuid)
-            try:
-                nodegroup.destroy()
-            except exception.NodeGroupNotFound:
-                LOG.info('The nodegroup %s has been deleted by others.',
-                         nodegroup.uuid)
-            return None
-        except exc.HTTPConflict:
-            raise exception.NgOperationInProgress(nodegroup=nodegroup.name)
         except Exception as e:
             nodegroup.status = fields.ClusterStatus.DELETE_FAILED
             nodegroup.status_reason = str(e)

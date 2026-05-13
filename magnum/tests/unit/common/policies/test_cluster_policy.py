@@ -10,8 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from unittest import mock
+
 from webtest.app import AppError
 
+from magnum.drivers.common import driver
 from magnum.tests.unit.api import utils as apiutils
 from magnum.tests.unit.common.policies import base
 from magnum.tests.unit.objects import utils as obj_utils
@@ -23,6 +26,10 @@ class TestClusterPolicy(base.PolicyFunctionalTest):
         self.cluster = obj_utils.create_test_cluster(
             self.context, name='cluster_example_A', node_count=3
         )
+        p = mock.patch.object(driver.Driver, 'get_driver')
+        self.mock_driver_get = p.start()
+        self.mock_driver_get.return_value = mock.MagicMock()
+        self.addCleanup(p.stop)
 
     def test_get_all_no_permission(self):
         exc = self.assertRaises(

@@ -55,14 +55,16 @@ class TestValidation(base.BaseTestCase):
         else:
             self.assertIsNone(test(self, cluster))
 
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.objects.ClusterTemplate.get')
     def test_enforce_cluster_type_supported(
             self, mock_cluster_template_get, mock_cluster_get_by_uuid,
-            mock_pecan_request):
+            mock_pecan_request, mock_get_driver):
 
-        cluster_type = ('vm', 'fedora-coreos', 'kubernetes')
+        mock_get_driver.return_value = mock.MagicMock()
+        cluster_type = ('vm', 'ubuntu', 'kubernetes')
         self._test_enforce_cluster_type_supported(
             mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type)

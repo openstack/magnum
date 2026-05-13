@@ -145,7 +145,6 @@ class PeriodicTestCase(base.TestCase):
         # as the actual calls go. It is up to the driver implementor
         # to ensure their implementation of update_cluster_status behaves
         # as expected regardless of how the periodic updater task works
-        self.mock_heat_client = mock.MagicMock()
         self.stack1 = fake_stack(
             id='11', stack_status=cluster_status.CREATE_COMPLETE,
             stack_status_reason='fake_reason_11')
@@ -158,8 +157,6 @@ class PeriodicTestCase(base.TestCase):
         self.stack5 = fake_stack(
             id='55', stack_status=cluster_status.ROLLBACK_COMPLETE,
             stack_status_reason='fake_reason_55')
-        self.mock_heat_client.stacks.list.return_value = [
-            self.stack1, self.stack2, self.stack3, self.stack5]
 
         self.get_stacks = {
             '11': self.stack1,
@@ -292,10 +289,10 @@ class PeriodicTestCase(base.TestCase):
     @mock.patch('magnum.objects.Cluster.list')
     @mock.patch.object(dbapi.Connection, 'destroy_cluster')
     @mock.patch.object(dbapi.Connection, 'destroy_nodegroup')
-    def test_sync_cluster_status_heat_not_found(self, mock_ng_destroy,
-                                                mock_db_destroy,
-                                                mock_cluster_list,
-                                                mock_get_driver):
+    def test_sync_cluster_status_stack_not_found(self, mock_ng_destroy,
+                                                 mock_db_destroy,
+                                                 mock_cluster_list,
+                                                 mock_get_driver):
         self.get_stacks.clear()
         mock_get_driver.return_value = self.mock_driver
         mock_cluster_list.return_value = [self.cluster1, self.cluster2,
