@@ -13,8 +13,8 @@
 # under the License.
 
 
-from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exc
+from openstack import exceptions as sdk_exceptions
 from unittest import mock
 
 from magnum.api import attr_validator
@@ -203,79 +203,73 @@ class TestAttrValidator(base.BaseTestCase):
         fake_labels = {}
         attr_validator.validate_labels(fake_labels)
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_valid_image_by_name(self, mock_os_res):
-        mock_image = {'name': 'ubuntu-24.04',
-                      'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': 'ubuntu'}
-        mock_os_res.return_value = mock_image
+    def test_validate_image_with_valid_image_by_name(self):
+        mock_image = mock.MagicMock()
+        mock_image.os_distro = 'ubuntu'
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.return_value = mock_image
         attr_validator.validate_image(mock_os_cli, 'ubuntu-24.04')
-        self.assertTrue(mock_os_res.called)
+        mock_os_cli.glance.return_value.find_image.assert_called_once_with(
+            'ubuntu-24.04', ignore_missing=False)
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_forbidden_image(self, mock_os_res):
-        def glance_side_effect(cli, image, name):
-            raise glance_exception.HTTPForbidden()
-
-        mock_os_res.side_effect = glance_side_effect
+    def test_validate_image_with_forbidden_image(self):
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.side_effect = (
+            sdk_exceptions.ForbiddenException())
         self.assertRaises(exception.ImageNotAuthorized,
                           attr_validator.validate_image, mock_os_cli,
                           'ubuntu-24.04')
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_valid_image_by_id(self, mock_os_res):
-        mock_image = {'name': 'ubuntu-24.04',
-                      'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': 'ubuntu'}
-        mock_os_res.return_value = mock_image
+    def test_validate_image_with_valid_image_by_id(self):
+        mock_image = mock.MagicMock()
+        mock_image.os_distro = 'ubuntu'
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.return_value = mock_image
         attr_validator.validate_image(mock_os_cli,
                                       'e33f0988-1730-405e-8401-30cbc8535302')
-        self.assertTrue(mock_os_res.called)
+        mock_os_cli.glance.return_value.find_image.assert_called_once_with(
+            'e33f0988-1730-405e-8401-30cbc8535302', ignore_missing=False)
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_nonexist_image_by_name(self, mock_os_res):
-        mock_os_res.side_effect = exception.ResourceNotFound
+    def test_validate_image_with_nonexist_image_by_name(self):
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.side_effect = (
+            sdk_exceptions.NotFoundException())
         self.assertRaises(exception.ImageNotFound,
                           attr_validator.validate_image,
                           mock_os_cli, 'ubuntu-24.04')
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_nonexist_image_by_id(self, mock_os_res):
-        mock_os_res.side_effect = glance_exception.NotFound
+    def test_validate_image_with_nonexist_image_by_id(self):
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.side_effect = (
+            exception.ResourceNotFound(name='image',
+                                       id=('e33f0988-1730-405e-',
+                                           '8401-30cbc8535302')))
         self.assertRaises(exception.ImageNotFound,
                           attr_validator.validate_image,
                           mock_os_cli, 'ubuntu-24.04')
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_multi_images_same_name(self, mock_os_res):
-        mock_os_res.side_effect = exception.Conflict
+    def test_validate_image_with_multi_images_same_name(self):
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.side_effect = (
+            sdk_exceptions.DuplicateResource())
         self.assertRaises(exception.Conflict,
                           attr_validator.validate_image,
                           mock_os_cli, 'ubuntu-24.04')
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_without_os_distro(self, mock_os_res):
-        mock_image = {'name': 'ubuntu-24.04',
-                      'id': 'e33f0988-1730-405e-8401-30cbc8535302'}
-        mock_os_res.return_value = mock_image
+    def test_validate_image_without_os_distro(self):
+        mock_image = mock.MagicMock()
+        mock_image.os_distro = None
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.return_value = mock_image
         self.assertRaises(exception.OSDistroFieldNotFound,
                           attr_validator.validate_image,
                           mock_os_cli, 'ubuntu-24.04')
 
-    @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_when_user_forbidden(self, mock_os_res):
-        mock_image = {'name': 'ubuntu-24.04',
-                      'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': ''}
-        mock_os_res.return_value = mock_image
+    def test_validate_image_when_user_forbidden(self):
+        mock_image = mock.MagicMock()
+        mock_image.os_distro = ''
         mock_os_cli = mock.MagicMock()
+        mock_os_cli.glance.return_value.find_image.return_value = mock_image
         self.assertRaises(exception.OSDistroFieldNotFound,
                           attr_validator.validate_image,
                           mock_os_cli, 'ubuntu-24.04')
@@ -355,12 +349,8 @@ class TestAttrValidator(base.BaseTestCase):
         }
         mock_keypair = mock.MagicMock()
         mock_keypair.id = 'test-keypair'
-        mock_image = {'name': 'ubuntu-24.04',
-                      'id': 'e33f0988-1730-405e-8401-30cbc8535302',
-                      'os_distro': 'ubuntu'}
         mock_nova = mock.MagicMock()
         mock_nova.keypairs.get.return_value = mock_keypair
-        mock_nova.images.get.return_value = mock_image
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         mock_context = mock.MagicMock()

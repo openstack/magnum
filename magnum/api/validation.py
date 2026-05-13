@@ -17,8 +17,8 @@ import decorator
 
 import pecan
 
-from glanceclient import exc as glance_exception
 from keystoneauth1 import exceptions as ka_exception
+from openstack import exceptions as sdk_exceptions
 
 from magnum.api import utils as api_utils
 from magnum.common import clients
@@ -74,14 +74,13 @@ def enforce_driver_supported():
             try:
                 cli = clients.OpenStackClients(pecan.request.context)
                 image_id = cluster_template.image_id
-                image = api_utils.get_openstack_resource(cli.glance().images,
-                                                         image_id,
-                                                         'images')
-                cluster_distro = image.get('os_distro')
-                driver_name = image.get('magnum_driver')
-            except (glance_exception.NotFound, exception.ResourceNotFound):
+                image = cli.glance().find_image(image_id, ignore_missing=False)
+                cluster_distro = image.os_distro
+                driver_name = (image.properties or {}).get('magnum_driver')
+            except (sdk_exceptions.NotFoundException,
+                    exception.ResourceNotFound):
                 raise exception.ImageNotFound(image_id=image_id)
-            except glance_exception.HTTPForbidden:
+            except sdk_exceptions.ForbiddenException:
                 raise exception.ImageNotAuthorized(image_id=image_id)
             except Exception:
                 pass

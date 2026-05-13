@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from glanceclient import client as glanceclient
 from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
@@ -104,23 +103,15 @@ class OpenStackClients(object):
 
         endpoint_type = self._get_client_option('glance', 'endpoint_type')
         region_name = self._get_client_option('glance', 'region_name')
-        glanceclient_version = self._get_client_option('glance', 'api_version')
         endpoint = self.url_for(service_type='image',
                                 interface=endpoint_type,
                                 region_name=region_name)
-        args = {
-            'endpoint': endpoint,
-            'auth_url': self.auth_url,
-            'token': self.auth_token,
-            'username': None,
-            'password': None,
-            'cacert': self._get_client_option('glance', 'ca_file'),
-            'cert': self._get_client_option('glance', 'cert_file'),
-            'key': self._get_client_option('glance', 'key_file'),
-            'insecure': self._get_client_option('glance', 'insecure')
-        }
-        self._glance = glanceclient.Client(glanceclient_version, **args)
-
+        session = self.keystone().session
+        conn = sdk_connection.Connection(
+            session=session,
+            **{'image_endpoint_override': endpoint}
+        )
+        self._glance = conn.image
         return self._glance
 
     @exception.wrap_keystone_exception
