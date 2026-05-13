@@ -26,10 +26,10 @@ import time
 import fixtures
 from keystoneauth1.identity import v3 as ksa_v3
 from keystoneauth1 import session as ksa_session
-from keystoneclient.v3 import client as ksclient
 from kubernetes import client as k8s_config
 from kubernetes.client import api_client
 from kubernetes.client.apis import core_v1_api
+from openstack import connection as sdk_connection
 
 from magnum.common.utils import rmtree_without_raise
 import magnum.conf
@@ -122,7 +122,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
                                  magnum_url=magnum_url,
                                  api_version='latest')
 
-        cls.keystone = ksclient.Client(session=_session)
+        cls.keystone = sdk_connection.Connection(session=_session).identity
 
     @classmethod
     def _get_auth_session(cls, username, password, project_name,

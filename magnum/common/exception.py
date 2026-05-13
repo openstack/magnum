@@ -21,7 +21,8 @@ Includes decorator for re-raising Magnum-type exceptions.
 import functools
 import sys
 
-from keystoneclient import exceptions as keystone_exceptions
+from keystoneauth1 import exceptions as keystone_exceptions
+from openstack import exceptions as sdk_exceptions
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -57,10 +58,11 @@ def wrap_keystone_exception(func):
         except keystone_exceptions.AuthorizationFailure:
             raise AuthorizationFailure(
                 client=func.__name__, message="reason: %s" % sys.exc_info()[1])
-        except keystone_exceptions.ClientException:
+        except (keystone_exceptions.ClientException,
+                sdk_exceptions.SDKException):
             raise AuthorizationFailure(
                 client=func.__name__,
-                message="unexpected keystone client error occurred: %s"
+                message="unexpected client error occurred: %s"
                         % sys.exc_info()[1])
     return wrapped
 

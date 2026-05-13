@@ -27,7 +27,7 @@ from magnum.tests import utils
 CONF = magnum.conf.CONF
 
 
-@mock.patch('keystoneclient.v3.client.Client')
+@mock.patch('magnum.common.keystone.sdk_connection.Connection')
 class KeystoneClientTest(base.TestCase):
 
     def setUp(self):
@@ -55,7 +55,7 @@ class KeystoneClientTest(base.TestCase):
                     admin_tenant_name='service',
                     group=ksconf.CFG_LEGACY_GROUP)
 
-    def test_client_with_password(self, mock_ks):
+    def test_client_with_password(self, mock_conn):
         self.ctx.is_admin = True
         self.ctx.auth_token_info = None
         self.ctx.auth_token = None
@@ -63,12 +63,15 @@ class KeystoneClientTest(base.TestCase):
         ks_client.client
         session = ks_client.session
         auth_plugin = session.auth
-        mock_ks.assert_called_once_with(session=session)
+        mock_conn.assert_called_once_with(session=session)
         self.assertIsInstance(auth_plugin, ka_identity.Password)
 
     @mock.patch('magnum.common.keystone.ka_loading')
     @mock.patch('magnum.common.keystone.ka_v3')
-    def test_client_with_password_legacy(self, mock_v3, mock_loading, mock_ks):
+    def test_client_with_password_legacy(self,
+                                         mock_v3,
+                                         mock_loading,
+                                         mock_conn):
         self.ctx.is_admin = True
         self.ctx.auth_token_info = None
         self.ctx.auth_token = None
@@ -83,10 +86,10 @@ class KeystoneClientTest(base.TestCase):
             auth_url='http://server.test:5000/v3', password='varybadpass',
             project_domain_id='default', project_name='service',
             user_domain_id='default', username='magnum')
-        mock_ks.assert_called_once_with(session=session)
+        mock_conn.assert_called_once_with(session=session)
 
     @mock.patch('magnum.common.keystone.ka_access')
-    def test_client_with_access_info(self, mock_access, mock_ks):
+    def test_client_with_access_info(self, mock_access, mock_conn):
         self.ctx.auth_token_info = mock.MagicMock()
         ks_client = keystone.KeystoneClientV3(self.ctx)
         ks_client.client
@@ -94,37 +97,37 @@ class KeystoneClientTest(base.TestCase):
         auth_plugin = session.auth
         mock_access.create.assert_called_once_with(body=mock.ANY,
                                                    auth_token='abcd1234')
-        mock_ks.assert_called_once_with(session=session)
+        mock_conn.assert_called_once_with(session=session)
         self.assertIsInstance(auth_plugin, ka_identity.access.AccessInfoPlugin)
 
     @mock.patch('magnum.common.keystone.ka_v3')
-    def test_client_with_token(self, mock_v3, mock_ks):
+    def test_client_with_token(self, mock_v3, mock_conn):
         ks_client = keystone.KeystoneClientV3(self.ctx)
         ks_client.client
         session = ks_client.session
         mock_v3.Token.assert_called_once_with(
             auth_url='http://server.test:5000/v3', token='abcd1234')
-        mock_ks.assert_called_once_with(session=session)
+        mock_conn.assert_called_once_with(session=session)
 
-    def test_client_with_no_credentials(self, mock_ks):
+    def test_client_with_no_credentials(self, mock_conn):
         self.ctx.auth_token = None
         ks_client = keystone.KeystoneClientV3(self.ctx)
         self.assertRaises(exception.AuthorizationFailure,
                           ks_client._get_auth)
-        mock_ks.assert_not_called()
+        mock_conn.assert_not_called()
 
-    def test_get_validate_region_name(self, mock_ks):
+    def test_get_validate_region_name(self, mock_conn):
         key = 'region_name'
         val = 'RegionOne'
         CONF.set_override(key, val, 'cinder_client')
         mock_region = mock.MagicMock()
         mock_region.id = 'RegionOne'
-        mock_ks.return_value.regions.list.return_value = [mock_region]
+        mock_conn.return_value.identity.regions.return_value = [mock_region]
         ks_client = keystone.KeystoneClientV3(self.ctx)
         region_name = ks_client.get_validate_region_name(val)
         self.assertEqual('RegionOne', region_name)
 
-    def test_get_validate_region_name_not_found(self, mock_ks):
+    def test_get_validate_region_name_not_found(self, mock_conn):
         key = 'region_name'
         val = 'region123'
         CONF.set_override(key, val, 'cinder_client')
@@ -132,7 +135,7 @@ class KeystoneClientTest(base.TestCase):
         self.assertRaises(exception.InvalidParameterValue,
                           ks_client.get_validate_region_name, val)
 
-    def test_get_validate_region_name_is_None(self, mock_ks):
+    def test_get_validate_region_name_is_None(self, mock_conn):
         key = 'region_name'
         val = None
         CONF.set_override(key, val, 'cinder_client')
