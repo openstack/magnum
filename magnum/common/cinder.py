@@ -39,7 +39,7 @@ def get_default_etcd_volume_type(context):
 
 def _get_random_volume_type(context):
     c_client = clients.OpenStackClients(context).cinder()
-    volume_types = c_client.volume_types.list()
+    volume_types = list(c_client.types())
     if volume_types:
         return volume_types[0].name
     else:

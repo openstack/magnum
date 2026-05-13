@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from cinderclient.v3 import client as cinder_client
 from glanceclient import client as glanceclient
 from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
@@ -191,17 +190,13 @@ class OpenStackClients(object):
             return self._cinder
         endpoint_type = self._get_client_option('cinder', 'endpoint_type')
         region_name = self._get_client_option('cinder', 'region_name')
-        cinderclient_version = self._get_client_option('cinder', 'api_version')
         endpoint = self.url_for(service_type='block-storage',
                                 interface=endpoint_type,
                                 region_name=region_name)
-        args = {
-            'cacert': self._get_client_option('cinder', 'ca_file'),
-            'insecure': self._get_client_option('cinder', 'insecure')
-        }
-
         session = self.keystone().session
-        self._cinder = cinder_client.Client(cinderclient_version,
-                                            session=session,
-                                            endpoint_override=endpoint, **args)
+        conn = sdk_connection.Connection(
+            session=session,
+            **{'block_storage_endpoint_override': endpoint}
+        )
+        self._cinder = conn.block_storage
         return self._cinder
