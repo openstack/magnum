@@ -37,19 +37,17 @@ def delete_floatingip(context, fix_port_id, cluster):
 
     try:
         n_client = clients.OpenStackClients(context).neutron()
-        fips = n_client.list_floatingips(port_id=fix_port_id)
-        if len(fips["floatingips"]) == 0:
+        fips = list(n_client.ips(port_id=fix_port_id))
+        if len(fips) == 0:
             return
 
-        # Liberty Neutron doesn't support description field, although Liberty
-        # is no longer supported, we write good code here.
-        desc = fips["floatingips"][0].get("description", "")
-        id = fips["floatingips"][0]["id"]
+        desc = fips[0].description or ""
+        fip_id = fips[0].id
 
         if re.match(pattern, desc):
-            LOG.info("Deleting floating ip %s for cluster %s", id,
+            LOG.info("Deleting floating ip %s for cluster %s", fip_id,
                      cluster.uuid)
-            n_client.delete_floatingip(id)
+            n_client.delete_ip(fip_id)
     except Exception as e:
         raise exception.PreDeletionFailed(cluster_uuid=cluster.uuid,
                                           msg=str(e))
@@ -58,11 +56,11 @@ def delete_floatingip(context, fix_port_id, cluster):
 def get_network(context, network, source, target, external):
     nets = []
     n_client = clients.OpenStackClients(context).neutron()
-    filters = {source: network, 'router:external': external}
-    networks = n_client.list_networks(**filters).get('networks')
+    filters = {source: network, 'is_router_external': external}
+    networks = list(n_client.networks(**filters))
 
     for net in networks:
-        if net.get(source) == network:
+        if getattr(net, source) == network:
             nets.append(net)
 
     if len(nets) == 0:
@@ -77,7 +75,7 @@ def get_network(context, network, source, target, external):
             "network ID instead." % network
         )
 
-    return nets[0][target]
+    return getattr(nets[0], target)
 
 
 def get_external_network_id(context, network):
@@ -100,10 +98,10 @@ def get_subnet(context, subnet, source, target):
     nets = []
     n_client = clients.OpenStackClients(context).neutron()
     filters = {source: subnet}
-    subnets = n_client.list_subnets(**filters).get('subnets', [])
+    subnets = list(n_client.subnets(**filters))
 
     for net in subnets:
-        if net.get(source) == subnet:
+        if getattr(net, source) == subnet:
             nets.append(net)
 
     if len(nets) == 0:
@@ -115,7 +113,7 @@ def get_subnet(context, subnet, source, target):
             "subnet ID instead." % subnet
         )
 
-    return nets[0][target]
+    return getattr(nets[0], target)
 
 
 def get_fixed_subnet_id(context, subnet):

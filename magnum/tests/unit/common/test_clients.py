@@ -10,7 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from openstack import connection as sdk_connection
 from unittest import mock
@@ -184,10 +183,8 @@ class ClientsTest(base.BaseTestCase):
     @mock.patch.object(novaclient, 'Client')
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def _test_clients_nova(self, expected_region_name, mock_auth, mock_url,
+    def _test_clients_nova(self, expected_region_name, mock_url,
                            mock_keystone, mock_call):
-        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
         keystone = mock.MagicMock()
         keystone.session = mock.MagicMock()
@@ -218,9 +215,6 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        auth_url = mock.PropertyMock(name="auth_url",
-                                     return_value="keystone_url")
-        type(con).auth_url = auth_url
         con.get_url_for = mock.Mock(name="get_url_for")
         con.get_url_for.return_value = "url_from_keystone"
         obj = clients.OpenStackClients(con)
@@ -228,9 +222,7 @@ class ClientsTest(base.BaseTestCase):
         self.assertRaises(exception.AuthorizationFailure, obj.nova)
 
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def test_clients_nova_cached(self, mock_auth, mock_url):
-        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
+    def test_clients_nova_cached(self, mock_url):
         con = mock.MagicMock()
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_token_info = "auth-token-info"
@@ -242,28 +234,28 @@ class ClientsTest(base.BaseTestCase):
         nova_cached = obj.nova()
         self.assertEqual(nova, nova_cached)
 
-    @mock.patch.object(neutronclient, 'Client')
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def _test_clients_neutron(self, expected_region_name, mock_auth, mock_url,
-                              mock_call):
+    def _test_clients_neutron(self, expected_region_name, mock_url,
+                              mock_conn, mock_keystone):
         fake_endpoint_type = 'fake_endpoint_type'
         CONF.set_override('endpoint_type', fake_endpoint_type,
                           group='neutron_client')
-        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
-        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._neutron = None
         obj.neutron()
-        mock_call.assert_called_once_with(
-            endpoint_url='url_from_keystone',
-            endpoint_type=fake_endpoint_type,
-            auth_url='keystone_url',
-            token='3bcc3d3a03f44e3d8377f9247b0ad155',
-            ca_cert=None, insecure=False)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'network_endpoint_override': 'url_from_keystone'})
+
+        mock_keystone.assert_called_once_with()
         mock_url.assert_called_once_with(service_type='network',
                                          interface=fake_endpoint_type,
                                          region_name=expected_region_name)
@@ -280,25 +272,27 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        auth_url = mock.PropertyMock(name="auth_url",
-                                     return_value="keystone_url")
-        type(con).auth_url = auth_url
         con.get_url_for = mock.Mock(name="get_url_for")
         con.get_url_for.return_value = "url_from_keystone"
         obj = clients.OpenStackClients(con)
         obj._neutron = None
         self.assertRaises(exception.AuthorizationFailure, obj.neutron)
 
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def test_clients_neutron_cached(self, mock_auth, mock_url):
-        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
+    def test_clients_neutron_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
-        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._neutron = None
         neutron = obj.neutron()
         neutron_cached = obj.neutron()
         self.assertEqual(neutron, neutron_cached)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'network_endpoint_override': 'url_from_keystone'})

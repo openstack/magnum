@@ -13,7 +13,6 @@
 # under the License.
 
 from keystoneauth1.exceptions import catalog
-from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from openstack import connection as sdk_connection
 from oslo_log import log as logging
@@ -60,14 +59,6 @@ class OpenStackClients(object):
     def cinder_region_name(self):
         cinder_region_name = self._get_client_option('cinder', 'region_name')
         return self.keystone().get_validate_region_name(cinder_region_name)
-
-    @property
-    def auth_url(self):
-        return self.keystone().auth_url
-
-    @property
-    def auth_token(self):
-        return self.context.auth_token or self.keystone().auth_token
 
     def keystone(self):
         if self._keystone:
@@ -163,16 +154,12 @@ class OpenStackClients(object):
         endpoint = self.url_for(service_type='network',
                                 interface=endpoint_type,
                                 region_name=region_name)
-
-        args = {
-            'auth_url': self.auth_url,
-            'token': self.auth_token,
-            'endpoint_url': endpoint,
-            'endpoint_type': endpoint_type,
-            'ca_cert': self._get_client_option('neutron', 'ca_file'),
-            'insecure': self._get_client_option('neutron', 'insecure')
-        }
-        self._neutron = neutronclient.Client(**args)
+        session = self.keystone().session
+        conn = sdk_connection.Connection(
+            session=session,
+            **{'network_endpoint_override': endpoint}
+        )
+        self._neutron = conn.network
         return self._neutron
 
     @exception.wrap_keystone_exception

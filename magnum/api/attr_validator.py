@@ -81,11 +81,9 @@ def validate_external_network(cli, external_network):
     """Validate external network"""
 
     count = 0
-    ext_filter = {'router:external': True}
-    networks = cli.neutron().list_networks(**ext_filter)
-    for net in networks.get('networks'):
-        if (net.get('name') == external_network or
-                net.get('id') == external_network):
+    networks = list(cli.neutron().networks(is_router_external=True))
+    for net in networks:
+        if (net.name == external_network or net.id == external_network):
             count = count + 1
 
     if count == 0:
@@ -104,11 +102,11 @@ def validate_fixed_network(cli, fixed_network):
 
     count = 0
     network_id = None
-    networks = cli.neutron().list_networks()
-    for net in networks.get('networks'):
-        if fixed_network in [net.get('name'), net.get('id')]:
+    networks = list(cli.neutron().networks())
+    for net in networks:
+        if fixed_network in [net.name, net.id]:
             count += 1
-            network_id = net.get('id')
+            network_id = net.id
 
     if count == 0:
         # Unable to find the configured fixed_network.
@@ -126,11 +124,11 @@ def validate_fixed_subnet(cli, fixed_subnet):
 
     count = 0
     subnet_id = None
-    subnets = cli.neutron().list_subnets()
-    for subnet in subnets.get('subnets'):
-        if fixed_subnet in [subnet.get('name'), subnet.get('id')]:
+    subnets = list(cli.neutron().subnets())
+    for subnet in subnets:
+        if fixed_subnet in [subnet.name, subnet.id]:
             count += 1
-            subnet_id = subnet.get('id')
+            subnet_id = subnet.id
 
     if count == 0:
         # Unable to find the configured fixed_subnet.

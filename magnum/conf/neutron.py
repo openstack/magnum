@@ -10,8 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import itertools
-
 from oslo_config import cfg
 
 from magnum.i18n import _
@@ -28,31 +26,13 @@ neutron_client_opts = [
                help=_('Type of endpoint in Identity service catalog to use '
                       'for communication with the OpenStack service.'))]
 
-common_security_opts = [
-    cfg.StrOpt('ca_file',
-               help=_('Optional CA cert file to use in SSL connections.')),
-    cfg.StrOpt('cert_file',
-               help=_('Optional PEM-formatted certificate chain file.')),
-    cfg.StrOpt('key_file',
-               help=_('Optional PEM-formatted file that contains the '
-                      'private key.')),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help=_("If set, then the server's certificate will not "
-                       "be verified."))]
-
-ALL_OPTS = list(itertools.chain(
-    neutron_client_opts,
-    common_security_opts
-))
-
 
 def register_opts(conf):
     conf.register_group(neutron_group)
-    conf.register_opts(ALL_OPTS, group=neutron_group)
+    conf.register_opts(neutron_client_opts, group=neutron_group)
 
 
 def list_opts():
     return {
-        neutron_group: ALL_OPTS
+        neutron_group: neutron_client_opts
     }

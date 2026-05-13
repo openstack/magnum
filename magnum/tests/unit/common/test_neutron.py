@@ -38,36 +38,12 @@ class NeutronTest(base.TestCase):
         mock_nclient = mock.MagicMock()
         fake_port_id = "b4518944-c2cf-4c69-a1e3-774041fd5d14"
         fake_fip_id = "0f8c6849-af85-424c-aa8e-745ade9a46a7"
-        mock_nclient.list_floatingips.return_value = {
-            'floatingips': [
-                {
-                    'router_id': '6ed4f7ef-b8c3-4711-93cf-d53cf0e8bdf5',
-                    'status': 'ACTIVE',
-                    'description': 'Floating IP for Kubernetes external '
-                                   'service ad3080723f1c211e88adbfa163ee1203 '
-                                   'from cluster %s' % self.cluster.uuid,
-                    'tags': [],
-                    'tenant_id': 'cd08a539b7c845ddb92c5d08752101d1',
-                    'floating_network_id': 'd0b9a8c5-33e5-4ce1-869a-1e2ec7c2f'
-                                           '74b',
-                    'port_details': {
-                        'status': 'ACTIVE',
-                        'name': 'test-k8s-master',
-                        'admin_state_up': True,
-                        'network_id': '7b9110b5-90a2-40bc-b892-07d641387760 ',
-                        'device_owner': 'compute:nova',
-                        'mac_address': 'fa:16:3e:6f:ad:6c',
-                        'device_id': 'a5c1689f-dd76-4164-8562-6990071701cd'
-                    },
-                    'fixed_ip_address': '10.0.0.4',
-                    'floating_ip_address': '172.24.4.74',
-                    'revision_number': 14,
-                    'project_id': 'cd08a539b7c845ddb92c5d08752101d1',
-                    'port_id': fake_port_id,
-                    'id': fake_fip_id
-                }
-            ]
-        }
+        mock_fip = mock.MagicMock()
+        mock_fip.description = ('Floating IP for Kubernetes external '
+                                'service ad3080723f1c211e88adbfa163ee1203 '
+                                'from cluster %s' % self.cluster.uuid)
+        mock_fip.id = fake_fip_id
+        mock_nclient.ips.return_value = [mock_fip]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -75,15 +51,14 @@ class NeutronTest(base.TestCase):
 
         neutron.delete_floatingip(self.context, fake_port_id, self.cluster)
 
-        mock_nclient.delete_floatingip.assert_called_once_with(fake_fip_id)
+        mock_nclient.ips.assert_called_once_with(port_id=fake_port_id)
+        mock_nclient.delete_ip.assert_called_once_with(fake_fip_id)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_delete_floatingip_empty(self, mock_clients):
         mock_nclient = mock.MagicMock()
         fake_port_id = "b4518944-c2cf-4c69-a1e3-774041fd5d14"
-        mock_nclient.list_floatingips.return_value = {
-            'floatingips': []
-        }
+        mock_nclient.ips.return_value = []
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -91,44 +66,20 @@ class NeutronTest(base.TestCase):
 
         neutron.delete_floatingip(self.context, fake_port_id, self.cluster)
 
-        self.assertFalse(mock_nclient.delete_floatingip.called)
+        self.assertFalse(mock_nclient.delete_ip.called)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_delete_floatingip_exception(self, mock_clients):
         mock_nclient = mock.MagicMock()
         fake_port_id = "b4518944-c2cf-4c69-a1e3-774041fd5d14"
         fake_fip_id = "0f8c6849-af85-424c-aa8e-745ade9a46a7"
-        mock_nclient.list_floatingips.return_value = {
-            'floatingips': [
-                {
-                    'router_id': '6ed4f7ef-b8c3-4711-93cf-d53cf0e8bdf5',
-                    'status': 'ACTIVE',
-                    'description': 'Floating IP for Kubernetes external '
-                                   'service ad3080723f1c211e88adbfa163ee1203 '
-                                   'from cluster %s' % self.cluster.uuid,
-                    'tags': [],
-                    'tenant_id': 'cd08a539b7c845ddb92c5d08752101d1',
-                    'floating_network_id': 'd0b9a8c5-33e5-4ce1-869a-1e2ec7c2f'
-                                           '74b',
-                    'port_details': {
-                        'status': 'ACTIVE',
-                        'name': 'test-k8s-master',
-                        'admin_state_up': True,
-                        'network_id': '7b9110b5-90a2-40bc-b892-07d641387760 ',
-                        'device_owner': 'compute:nova',
-                        'mac_address': 'fa:16:3e:6f:ad:6c',
-                        'device_id': 'a5c1689f-dd76-4164-8562-6990071701cd'
-                    },
-                    'fixed_ip_address': '10.0.0.4',
-                    'floating_ip_address': '172.24.4.74',
-                    'revision_number': 14,
-                    'project_id': 'cd08a539b7c845ddb92c5d08752101d1',
-                    'port_id': fake_port_id,
-                    'id': fake_fip_id
-                }
-            ]
-        }
-        mock_nclient.delete_floatingip.side_effect = Exception
+        mock_fip = mock.MagicMock()
+        mock_fip.description = ('Floating IP for Kubernetes external '
+                                'service ad3080723f1c211e88adbfa163ee1203 '
+                                'from cluster %s' % self.cluster.uuid)
+        mock_fip.id = fake_fip_id
+        mock_nclient.ips.return_value = [mock_fip]
+        mock_nclient.delete_ip.side_effect = Exception
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -147,15 +98,10 @@ class NeutronTest(base.TestCase):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_networks.return_value = {
-            'networks': [
-                {
-                    'id': fake_id,
-                    'name': fake_name,
-                    'router:external': True
-                }
-            ]
-        }
+        mock_net = mock.MagicMock()
+        mock_net.name = fake_name
+        mock_net.id = fake_id
+        mock_nclient.networks.return_value = [mock_net]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -170,15 +116,10 @@ class NeutronTest(base.TestCase):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_networks.return_value = {
-            'networks': [
-                {
-                    'id': fake_id,
-                    'name': fake_name,
-                    'router:external': True
-                }
-            ]
-        }
+        mock_net = mock.MagicMock()
+        mock_net.name = fake_name
+        mock_net.id = fake_id
+        mock_nclient.networks.return_value = [mock_net]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -197,20 +138,13 @@ class NeutronTest(base.TestCase):
         fake_id_1 = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         fake_id_2 = "93781f82-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_networks.return_value = {
-            'networks': [
-                {
-                    'id': fake_id_1,
-                    'name': fake_name,
-                    'router:external': True
-                },
-                {
-                    'id': fake_id_2,
-                    'name': fake_name,
-                    'router:external': True
-                }
-            ]
-        }
+        mock_net1 = mock.MagicMock()
+        mock_net1.name = fake_name
+        mock_net1.id = fake_id_1
+        mock_net2 = mock.MagicMock()
+        mock_net2.name = fake_name
+        mock_net2.id = fake_id_2
+        mock_nclient.networks.return_value = [mock_net1, mock_net2]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -228,15 +162,10 @@ class NeutronTest(base.TestCase):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_networks.return_value = {
-            'networks': [
-                {
-                    'id': fake_id,
-                    'name': fake_name,
-                    'router:external': False
-                }
-            ]
-        }
+        mock_net = mock.MagicMock()
+        mock_net.name = fake_name
+        mock_net.id = fake_id
+        mock_nclient.networks.return_value = [mock_net]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -252,15 +181,10 @@ class NeutronTest(base.TestCase):
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         another_fake_id = "34fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_networks.return_value = {
-            'networks': [
-                {
-                    'id': fake_id,
-                    'name': fake_name,
-                    'router:external': False
-                }
-            ]
-        }
+        mock_net = mock.MagicMock()
+        mock_net.name = fake_name
+        mock_net.id = fake_id
+        mock_nclient.networks.return_value = [mock_net]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -278,14 +202,10 @@ class NeutronTest(base.TestCase):
         fake_name = "fake_subnet"
         fake_id = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_subnets.return_value = {
-            'subnets': [
-                {
-                    'id': fake_id,
-                    'name': fake_name,
-                }
-            ]
-        }
+        mock_subnet = mock.MagicMock()
+        mock_subnet.name = fake_name
+        mock_subnet.id = fake_id
+        mock_nclient.subnets.return_value = [mock_subnet]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -300,14 +220,10 @@ class NeutronTest(base.TestCase):
         fake_name = "fake_subnet"
         fake_id = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_subnets.return_value = {
-            'subnets': [
-                {
-                    'id': fake_id,
-                    'name': fake_name,
-                }
-            ]
-        }
+        mock_subnet = mock.MagicMock()
+        mock_subnet.name = fake_name
+        mock_subnet.id = fake_id
+        mock_nclient.subnets.return_value = [mock_subnet]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
@@ -326,18 +242,13 @@ class NeutronTest(base.TestCase):
         fake_id_1 = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
         fake_id_2 = "93781f82-1ac0-11e9-84cd-00224d6b7bc1"
         mock_nclient = mock.MagicMock()
-        mock_nclient.list_subnets.return_value = {
-            'subnets': [
-                {
-                    'id': fake_id_1,
-                    'name': fake_name,
-                },
-                {
-                    'id': fake_id_2,
-                    'name': fake_name,
-                }
-            ]
-        }
+        mock_subnet1 = mock.MagicMock()
+        mock_subnet1.name = fake_name
+        mock_subnet1.id = fake_id_1
+        mock_subnet2 = mock.MagicMock()
+        mock_subnet2.name = fake_name
+        mock_subnet2.id = fake_id_2
+        mock_nclient.subnets.return_value = [mock_subnet1, mock_subnet2]
 
         osc = mock.MagicMock()
         mock_clients.return_value = osc
