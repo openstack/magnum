@@ -58,23 +58,7 @@ cinder_client_opts = [
                default='publicURL',
                help=_('Type of endpoint in Identity service catalog to use '
                       'for communication with the OpenStack service.')),
-    cfg.StrOpt('api_version',
-               default='3',
-               help=_('Version of Cinder API to use in cinderclient.'))
 ]
-
-common_security_opts = [
-    cfg.StrOpt('ca_file',
-               help=_('Optional CA cert file to use in SSL connections.')),
-    cfg.StrOpt('cert_file',
-               help=_('Optional PEM-formatted certificate chain file.')),
-    cfg.StrOpt('key_file',
-               help=_('Optional PEM-formatted file that contains the '
-                      'private key.')),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help=_("If set, then the server's certificate will not "
-                       "be verified."))]
 
 
 def register_opts(conf):
@@ -82,7 +66,6 @@ def register_opts(conf):
     conf.register_group(cinder_client_group)
     conf.register_opts(cinder_opts, group=cinder_group)
     conf.register_opts(cinder_client_opts, group=cinder_client_group)
-    conf.register_opts(common_security_opts, group=cinder_client_group)
 
 
 def list_opts():
