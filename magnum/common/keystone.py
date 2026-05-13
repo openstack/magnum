@@ -34,10 +34,6 @@ class KeystoneClientV3(object):
     def __init__(self, context):
         self.context = context
         self._client = None
-        self._domain_admin_auth = None
-        self._domain_admin_session = None
-        self._domain_admin_client = None
-        self._trustee_domain_id = None
         self._session = None
 
     @property
@@ -77,17 +73,6 @@ class KeystoneClientV3(object):
         elif self.context.auth_token:
             auth = ka_v3.Token(auth_url=self.auth_url,
                                token=self.context.auth_token)
-        elif self.context.trust_id:
-            auth_info = {
-                'auth_url': self.auth_url,
-                'username': self.context.user_name,
-                'password': self.context.password,
-                'user_domain_id': self.context.user_domain_id,
-                'user_domain_name': self.context.user_domain_name,
-                'trust_id': self.context.trust_id
-            }
-
-            auth = ka_v3.Password(**auth_info)
         elif self.context.is_admin:
             try:
                 auth = ka_loading.load_auth_from_conf_options(
@@ -95,8 +80,8 @@ class KeystoneClientV3(object):
             except ka_exception.MissingRequiredOptions:
                 auth = self._get_legacy_auth()
         else:
-            msg = ('Keystone API connection failed: no password, '
-                   'trust_id or token found.')
+            msg = ('Keystone API connection failed: no password or token '
+                   'found.')
             LOG.error(msg)
             raise exception.AuthorizationFailure(client='keystone',
                                                  message='reason %s' % msg)
@@ -130,149 +115,9 @@ class KeystoneClientV3(object):
     def client(self):
         if self._client:
             return self._client
-        client = kc_v3.Client(session=self.session,
-                              trust_id=self.context.trust_id)
+        client = kc_v3.Client(session=self.session)
         self._client = client
         return client
-
-    @property
-    def domain_admin_auth(self):
-        user_domain_id = (
-            CONF.trust.trustee_domain_admin_domain_id or
-            CONF.trust.trustee_domain_id
-        )
-        user_domain_name = (
-            CONF.trust.trustee_domain_admin_domain_name or
-            CONF.trust.trustee_domain_name
-        )
-        if not self._domain_admin_auth:
-            self._domain_admin_auth = ka_v3.Password(
-                auth_url=self.auth_url,
-                user_id=CONF.trust.trustee_domain_admin_id,
-                username=CONF.trust.trustee_domain_admin_name,
-                user_domain_id=user_domain_id,
-                user_domain_name=user_domain_name,
-                domain_id=CONF.trust.trustee_domain_id,
-                domain_name=CONF.trust.trustee_domain_name,
-                password=CONF.trust.trustee_domain_admin_password)
-        return self._domain_admin_auth
-
-    @property
-    def domain_admin_session(self):
-        if not self._domain_admin_session:
-            session = ka_loading.session.Session().load_from_options(
-                auth=self.domain_admin_auth,
-                insecure=CONF[ksconf.CFG_LEGACY_GROUP].insecure,
-                cacert=CONF[ksconf.CFG_LEGACY_GROUP].cafile,
-                key=CONF[ksconf.CFG_LEGACY_GROUP].keyfile,
-                cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile)
-            self._domain_admin_session = session
-        return self._domain_admin_session
-
-    @property
-    def domain_admin_client(self):
-        if not self._domain_admin_client:
-            self._domain_admin_client = kc_v3.Client(
-                session=self.domain_admin_session
-            )
-        return self._domain_admin_client
-
-    @property
-    def trustee_domain_id(self):
-        if not self._trustee_domain_id:
-            try:
-                access = self.domain_admin_auth.get_access(
-                    self.domain_admin_session
-                )
-            except kc_exception.Unauthorized:
-                msg = "Keystone client authentication failed"
-                LOG.error(msg)
-                raise exception.AuthorizationFailure(client='keystone',
-                                                     message='reason: %s' %
-                                                             msg)
-
-            self._trustee_domain_id = access.domain_id
-
-        return self._trustee_domain_id
-
-    def create_trust(self, trustee_user):
-        trustor_user_id = self.session.get_user_id()
-        trustor_project_id = self.session.get_project_id()
-
-        # inherit the role of the trustor, unless set CONF.trust.roles
-        if CONF.trust.roles:
-            roles = CONF.trust.roles
-        else:
-            roles = self.context.roles
-
-        try:
-            trust = self.client.trusts.create(
-                trustor_user=trustor_user_id,
-                project=trustor_project_id,
-                trustee_user=trustee_user,
-                impersonation=True,
-                allow_redelegation=False,
-                role_names=roles)
-        except Exception:
-            LOG.exception('Failed to create trust')
-            raise exception.TrustCreateFailed(
-                trustee_user_id=trustee_user)
-        return trust
-
-    def delete_trust(self, context, cluster):
-        if cluster.trust_id is None:
-            return
-
-        # Trust can only be deleted by the user who creates it. So when
-        # other users in the same project want to delete the cluster, we need
-        # use the trustee which can impersonate the trustor to delete the
-        # trust.
-        if context.user_id == cluster.user_id:
-            client = self.client
-        else:
-            auth = ka_v3.Password(auth_url=self.auth_url,
-                                  user_id=cluster.trustee_user_id,
-                                  password=cluster.trustee_password,
-                                  trust_id=cluster.trust_id)
-
-            sess = ka_loading.session.Session().load_from_options(
-                auth=auth,
-                insecure=CONF[ksconf.CFG_LEGACY_GROUP].insecure,
-                cacert=CONF[ksconf.CFG_LEGACY_GROUP].cafile,
-                key=CONF[ksconf.CFG_LEGACY_GROUP].keyfile,
-                cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile)
-            client = kc_v3.Client(session=sess)
-        try:
-            client.trusts.delete(cluster.trust_id)
-        except kc_exception.NotFound:
-            pass
-        except Exception:
-            LOG.exception('Failed to delete trust')
-            raise exception.TrustDeleteFailed(trust_id=cluster.trust_id)
-
-    def create_trustee(self, username, password):
-        domain_id = self.trustee_domain_id
-        try:
-            user = self.domain_admin_client.users.create(
-                name=username,
-                password=password,
-                domain=domain_id)
-        except Exception:
-            LOG.exception('Failed to create trustee')
-            raise exception.TrusteeCreateFailed(username=username,
-                                                domain_id=domain_id)
-        return user
-
-    def delete_trustee(self, trustee_user_id):
-        if trustee_user_id is None:
-            return
-        try:
-            self.domain_admin_client.users.delete(trustee_user_id)
-        except kc_exception.NotFound:
-            pass
-        except Exception:
-            LOG.exception('Failed to delete trustee')
-            raise exception.TrusteeDeleteFailed(trustee_id=trustee_user_id)
 
     def get_validate_region_name(self, region_name):
         if region_name is None:

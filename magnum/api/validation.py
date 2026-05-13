@@ -139,7 +139,7 @@ def _validate_project_id(project_id):
     try:
         context = pecan.request.context
         osc = clients.OpenStackClients(context)
-        osc.keystone().domain_admin_client.projects.get(project_id)
+        osc.keystone().client.projects.get(project_id)
     except ka_exception.http.NotFound:
         raise exception.ProjectNotFound(name='project_id',
                                         id=project_id)

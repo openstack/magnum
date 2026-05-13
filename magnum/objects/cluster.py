@@ -57,8 +57,10 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.21  Added fixed_network, fixed_subnet, floating_ip_enabled
     # Version 1.22  Added master_lb_enabled
     # Version 1.23  Added etcd_ca_cert_ref and front_proxy_ca_cert_ref
+    # Version 1.24  Removed trust_id, trustee_username, trustee_password,
+    #               trustee_user_id
 
-    VERSION = '1.23'
+    VERSION = '1.24'
 
     dbapi = dbapi.get_instance()
 
@@ -87,10 +89,6 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'etcd_ca_cert_ref': fields.StringField(nullable=True),
         'front_proxy_ca_cert_ref': fields.StringField(nullable=True),
         'cluster_template': fields.ObjectField('ClusterTemplate'),
-        'trust_id': fields.StringField(nullable=True),
-        'trustee_username': fields.StringField(nullable=True),
-        'trustee_password': fields.StringField(nullable=True),
-        'trustee_user_id': fields.StringField(nullable=True),
         'coe_version': fields.StringField(nullable=True),
         'container_version': fields.StringField(nullable=True),
         'fixed_network': fields.StringField(nullable=True),

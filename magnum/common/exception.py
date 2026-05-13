@@ -360,23 +360,6 @@ class ExternalNetworkNotFound(ResourceNotFound):
     code = 400
 
 
-class TrustCreateFailed(MagnumException):
-    message = _("Failed to create trust for trustee %(trustee_user_id)s.")
-
-
-class TrustDeleteFailed(MagnumException):
-    message = _("Failed to delete trust %(trust_id)s.")
-
-
-class TrusteeCreateFailed(MagnumException):
-    message = _("Failed to create trustee %(username)s "
-                "in domain %(domain_id)s")
-
-
-class TrusteeDeleteFailed(MagnumException):
-    message = _("Failed to delete trustee %(trustee_id)s")
-
-
 class QuotaAlreadyExists(Conflict):
     message = _("Quota for project %(project_id)s already exists "
                 "for resource %(resource)s.")
@@ -396,11 +379,6 @@ class RegionsListFailed(MagnumException):
 
 class ServicesListFailed(MagnumException):
     message = _("Failed to list services.")
-
-
-class TrusteeOrTrustToClusterFailed(MagnumException):
-    message = _("Failed to create trustee or trust for Cluster: "
-                "%(cluster_uuid)s")
 
 
 class CertificatesToClusterFailed(MagnumException):

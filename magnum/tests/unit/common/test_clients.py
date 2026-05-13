@@ -91,7 +91,6 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -150,7 +149,6 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -216,7 +214,6 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -279,7 +276,6 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
