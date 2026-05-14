@@ -110,14 +110,11 @@ class Cluster(base.APIBase):
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated cluster links"""
 
-    stack_id = wsme.wsattr(wtypes.text, readonly=True)
-    """Stack id of the heat stack"""
-
     status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
-    """Status of the cluster from the heat stack"""
+    """Status of the cluster"""
 
     status_reason = wtypes.text
-    """Status reason of the cluster from the heat stack"""
+    """Status reason of the cluster"""
 
     health_status = wtypes.Enum(wtypes.text, *fields.ClusterHealthStatus.ALL)
     """Health status of the cluster from the native COE API"""
@@ -210,7 +207,7 @@ class Cluster(base.APIBase):
                                          'labels', 'node_count', 'status',
                                          'master_flavor_id', 'flavor_id',
                                          'create_timeout', 'master_count',
-                                         'stack_id', 'health_status'])
+                                         'health_status'])
         else:
             overridden, added, skipped = api_utils.get_labels_diff(
                 parent_labels, cluster.labels)
@@ -246,7 +243,6 @@ class Cluster(base.APIBase):
                      master_flavor_id='m1.small',
                      flavor_id='m1.small',
                      create_timeout=15,
-                     stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
                      status_reason="CREATE completed successfully",
                      health_status=fields.ClusterHealthStatus.HEALTHY,
@@ -271,7 +267,7 @@ class ClusterPatchType(types.JsonPatchType):
     @staticmethod
     def internal_attrs():
         internal_attrs = ['/api_address', '/node_addresses',
-                          '/master_addresses', '/stack_id',
+                          '/master_addresses',
                           '/ca_cert_ref', '/magnum_cert_ref',
                           '/etcd_ca_cert_ref', '/front_proxy_ca_cert_ref']
         return types.JsonPatchType.internal_attrs() + internal_attrs

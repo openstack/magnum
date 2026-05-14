@@ -318,23 +318,6 @@ strongly recommend using a replication controller before reducing the
 node_count so any removed pods can be automatically recovered on your
 remaining nodes.
 
-Heat can be used to see detailed information on the status of a stack or
-specific cluster:
-
-To check the list of all cluster stacks::
-
-    openstack stack list
-
-To check an individual cluster's stack::
-
-    openstack stack show <stack-name or stack_id>
-
-Monitoring cluster status in detail (e.g., creating, updating)::
-
-    CLUSTER_HEAT_NAME=$(openstack stack list | \
-                        awk "/\sk8s-cluster-/{print \$4}")
-    echo ${CLUSTER_HEAT_NAME}
-    openstack stack resource list ${CLUSTER_HEAT_NAME}
 
 Building a Kubernetes Cluster - Based on Fedora Atomic [DEPRECATED]
 ===================================================================
@@ -525,8 +508,7 @@ which the redis-master is running::
     +--------------------+------------------------------------------------------------+
     | status             | CREATE_COMPLETE                                            |
     | uuid               | cff82cd0-189c-4ede-a9cb-2c0af6997709                       |
-    | stack_id           | 7947844a-8e18-4c79-b591-ecf0f6067641                       |
-    | status_reason      | Stack CREATE completed successfully                        |
+    | status_reason      | CREATE completed successfully                              |
     | created_at         | 2016-05-26T17:45:57+00:00                                  |
     | updated_at         | 2016-05-26T17:50:02+00:00                                  |
     | create_timeout     | 60                                                         |

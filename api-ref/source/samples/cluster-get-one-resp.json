@@ -11,7 +11,6 @@
          "rel":"bookmark"
       }
    ],
-   "stack_id":"9c6f1169-7300-4d08-a444-d2be38758719",
    "created_at":"2016-08-29T06:51:31+00:00",
    "api_address":"https://172.24.4.6:6443",
    "discovery_url":"https://discovery.etcd.io/cbeb580da58915809d59ee69348a84f3",
@@ -27,7 +26,7 @@
    "node_addresses":[
       "172.24.4.13"
    ],
-   "status_reason":"Stack CREATE completed successfully",
+   "status_reason":"CREATE completed successfully",
    "create_timeout":60,
    "name":"k8s"
 }

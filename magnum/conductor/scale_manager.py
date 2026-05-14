@@ -49,7 +49,7 @@ class ScaleManager(object):
         if hosts is None:
             raise exception.MagnumException(_(
                 "No hosts provided for scale-down of cluster "
-                "%(cluster_id)s") % {'cluster_id': cluster.stack_id})
+                "%(cluster_id)s") % {'cluster_id': cluster.uuid})
 
         hosts_with_container = self._get_hosts_with_container(self.context,
                                                               cluster)

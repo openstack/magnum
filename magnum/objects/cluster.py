@@ -59,8 +59,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.23  Added etcd_ca_cert_ref and front_proxy_ca_cert_ref
     # Version 1.24  Removed trust_id, trustee_username, trustee_password,
     #               trustee_user_id
+    # Version 1.25  Removed stack_id
 
-    VERSION = '1.24'
+    VERSION = '1.25'
 
     dbapi = dbapi.get_instance()
 
@@ -76,7 +77,6 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'labels': fields.DictOfStringsField(nullable=True),
         'master_flavor_id': fields.StringField(nullable=True),
         'flavor_id': fields.StringField(nullable=True),
-        'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
         'health_status': m_fields.ClusterHealthStatusField(nullable=True),
@@ -236,7 +236,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
 
         :param context: The security context
         :param filters: filter dict, can includes 'cluster_template_id',
-                        'name', 'node_count', 'stack_id', 'api_address',
+                        'name', 'node_count', 'api_address',
                         'node_addresses', 'project_id', 'user_id',
                         'status'(should be a status list), 'master_count'.
         :returns: Count of matching clusters.
@@ -266,7 +266,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
         :param filters: filter dict, can includes 'cluster_template_id',
-                        'name', 'node_count', 'stack_id', 'api_address',
+                        'name', 'node_count', 'api_address',
                         'node_addresses', 'project_id', 'user_id',
                         'status'(should be a status list), 'master_count'.
         :returns: a list of :class:`Cluster` object.

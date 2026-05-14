@@ -118,14 +118,11 @@ class NodeGroup(base.APIBase):
     is_default = types.BooleanType()
     """Specifies is a nodegroup was created by default or not"""
 
-    stack_id = wsme.wsattr(wtypes.text, readonly=True)
-    """Stack id of the heat stack"""
-
     status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
-    """Status of the nodegroup from the heat stack"""
+    """Status of the nodegroup"""
 
     status_reason = wtypes.text
-    """Status reason of the nodegroup from the heat stack"""
+    """Status reason of the nodegroup"""
 
     version = wtypes.text
     """Version of the nodegroup"""
@@ -170,8 +167,8 @@ class NodeGroup(base.APIBase):
         ng = NodeGroup(**nodegroup.as_dict())
         if not expand:
             ng.unset_fields_except(["uuid", "name", "flavor_id", "node_count",
-                                    "role", "is_default", "image_id", "status",
-                                    "stack_id"])
+                                    "role", "is_default", "image_id",
+                                    "status"])
         else:
             ng.links = [link.Link.make_link('self', url, cluster_path,
                                             nodegroup_path),
@@ -198,7 +195,7 @@ class NodeGroupPatchType(types.JsonPatchType):
         internal_attrs = ["/name", "/cluster_id", "/project_id",
                           "/docker_volume_size", "/labels", "/flavor_id",
                           "/image_id", "/node_addresses", "/node_count",
-                          "/role", "/is_default", "/stack_id", "/status",
+                          "/role", "/is_default", "/status",
                           "/status_reason", "/version"]
         return types.JsonPatchType.internal_attrs() + internal_attrs
 

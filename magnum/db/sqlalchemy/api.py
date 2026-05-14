@@ -122,7 +122,7 @@ class Connection(api.Connection):
         if filters is None:
             filters = {}
 
-        possible_filters = ["cluster_template_id", "name", "stack_id",
+        possible_filters = ["cluster_template_id", "name",
                             "api_address", "node_addresses", "project_id",
                             "user_id"]
 

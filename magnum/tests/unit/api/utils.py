@@ -80,7 +80,7 @@ def federation_post_data(**kw):
 def nodegroup_post_data(**kw):
     internal = ['/cluster_id', '/project_id', '/node_addresses', '/is_default',
                 '/created_at', '/updated_at', '/status', '/status_reason',
-                '/version', '/stack_id']
+                '/version']
     nodegroup = utils.get_test_nodegroup(**kw)
     nodegroup['merge_labels'] = kw.get('merge_labels', False)
     return remove_internal(nodegroup, internal)

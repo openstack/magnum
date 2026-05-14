@@ -89,7 +89,6 @@ def get_test_cluster(**kw):
         'user_id': kw.get('user_id', 'fake_user'),
         'cluster_template_id': kw.get('cluster_template_id',
                                       'e74c40e0-d825-11e2-a28f-0800200c9a66'),
-        'stack_id': kw.get('stack_id', '047c6319-7abd-4bd9-a033-8c6af0173cd0'),
         'status': kw.get('status', 'CREATE_IN_PROGRESS'),
         'status_reason': kw.get('status_reason', 'Completed successfully'),
         'create_timeout': kw.get('create_timeout', 60),
@@ -303,7 +302,6 @@ def get_test_nodegroup(**kw):
         'status': kw.get('status', 'CREATE_COMPLETE'),
         'status_reason': kw.get('status_reason', 'Completed successfully'),
         'version': kw.get('version', '1'),
-        'stack_id': kw.get('stack_id', '047c6319-7abd-fake-a033-8c6af0173cd0'),
     }
 
 
