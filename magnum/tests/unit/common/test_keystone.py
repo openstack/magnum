@@ -14,7 +14,6 @@ from unittest import mock
 
 from oslo_config import fixture
 
-from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1 import identity as ka_identity
 
 from magnum.common import exception
@@ -49,12 +48,6 @@ class KeystoneClientTest(base.TestCase):
                     project_name='fake_project',
                     group=ksconf.CFG_GROUP)
 
-        self.config(auth_uri=dummy_url,
-                    admin_user='magnum',
-                    admin_password='varybadpass',
-                    admin_tenant_name='service',
-                    group=ksconf.CFG_LEGACY_GROUP)
-
     def test_client_with_password(self, mock_conn):
         self.ctx.is_admin = True
         self.ctx.auth_token_info = None
@@ -65,28 +58,6 @@ class KeystoneClientTest(base.TestCase):
         auth_plugin = session.auth
         mock_conn.assert_called_once_with(session=session)
         self.assertIsInstance(auth_plugin, ka_identity.Password)
-
-    @mock.patch('magnum.common.keystone.ka_loading')
-    @mock.patch('magnum.common.keystone.ka_v3')
-    def test_client_with_password_legacy(self,
-                                         mock_v3,
-                                         mock_loading,
-                                         mock_conn):
-        self.ctx.is_admin = True
-        self.ctx.auth_token_info = None
-        self.ctx.auth_token = None
-        mock_loading.load_auth_from_conf_options.side_effect = \
-            ka_exception.MissingRequiredOptions(mock.MagicMock())
-        ks_client = keystone.KeystoneClientV3(self.ctx)
-        ks_client.client
-        session = ks_client.session
-        self.assertWarnsRegex(Warning,
-                              '[keystone_authtoken] section is deprecated')
-        mock_v3.Password.assert_called_once_with(
-            auth_url='http://server.test:5000/v3', password='varybadpass',
-            project_domain_id='default', project_name='service',
-            user_domain_id='default', username='magnum')
-        mock_conn.assert_called_once_with(session=session)
 
     @mock.patch('magnum.common.keystone.ka_access')
     def test_client_with_access_info(self, mock_access, mock_conn):

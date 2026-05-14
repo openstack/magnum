@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from keystoneauth1.access import access as ka_access
-from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1.identity import access as ka_access_plugin
 from keystoneauth1.identity import v3 as ka_v3
 from keystoneauth1 import loading as ka_loading
@@ -38,14 +37,11 @@ class KeystoneClientV3(object):
 
     @property
     def auth_url(self):
-        # FIXME(pauloewerton): auth_url should be retrieved from keystone_auth
-        # section by default
-        conf = CONF[ksconf.CFG_LEGACY_GROUP]
-        auth_uri = (getattr(conf, 'www_authenticate_uri', None) or
-                    getattr(conf, 'auth_uri', None))
-        if auth_uri:
-            auth_uri = auth_uri.replace('v2.0', 'v3')
-        return auth_uri
+        auth_url = getattr(CONF[ksconf.CFG_GROUP], 'auth_url', None)
+        if not auth_url:
+            auth_url = getattr(CONF[ksconf.CFG_LEGACY_GROUP],
+                               'www_authenticate_uri', None)
+        return auth_url
 
     @property
     def auth_token(self):
@@ -74,11 +70,8 @@ class KeystoneClientV3(object):
             auth = ka_v3.Token(auth_url=self.auth_url,
                                token=self.context.auth_token)
         elif self.context.is_admin:
-            try:
-                auth = ka_loading.load_auth_from_conf_options(
-                    CONF, ksconf.CFG_GROUP)
-            except ka_exception.MissingRequiredOptions:
-                auth = self._get_legacy_auth()
+            auth = ka_loading.load_auth_from_conf_options(
+                CONF, ksconf.CFG_GROUP)
         else:
             msg = ('Keystone API connection failed: no password or token '
                    'found.')
@@ -86,29 +79,6 @@ class KeystoneClientV3(object):
             raise exception.AuthorizationFailure(client='keystone',
                                                  message='reason %s' % msg)
 
-        return auth
-
-    def _get_legacy_auth(self):
-        LOG.warning('Auth plugin and its options for service user '
-                    'must be provided in [%(new)s] section. '
-                    'Using values from [%(old)s] section is '
-                    'deprecated.', {'new': ksconf.CFG_GROUP,
-                                    'old': ksconf.CFG_LEGACY_GROUP})
-
-        conf = getattr(CONF, ksconf.CFG_LEGACY_GROUP)
-
-        # FIXME(htruta, pauloewerton): Conductor layer does not have
-        # new v3 variables, such as project_name and project_domain_id.
-        # The use of admin_* variables is related to Identity API v2.0,
-        # which is now deprecated. We should also stop using hard-coded
-        # domain info, as well as variables that refer to `tenant`,
-        # as they are also v2 related.
-        auth = ka_v3.Password(auth_url=self.auth_url,
-                              username=conf.admin_user,
-                              password=conf.admin_password,
-                              project_name=conf.admin_tenant_name,
-                              project_domain_id='default',
-                              user_domain_id='default')
         return auth
 
     @property

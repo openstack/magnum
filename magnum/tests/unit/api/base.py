@@ -17,12 +17,9 @@
 # ceilometer/tests/api/__init__.py). This should be oslo'ified:
 # https://bugs.launchpad.net/ironic/+bug/1255115.
 
-# NOTE(deva): import auth_token so we can override a config option
 from unittest import mock
 from urllib import parse as urlparse
 
-from keystonemiddleware import auth_token  # noqa
-from oslo_config import cfg
 import pecan
 import pecan.testing
 
@@ -42,11 +39,6 @@ class FunctionalTest(base.DbTestCase):
 
     def setUp(self):
         super(FunctionalTest, self).setUp()
-        cfg.CONF.set_override("auth_version", "v2.0",
-                              group='keystone_authtoken')
-        cfg.CONF.set_override("admin_user", "admin",
-                              group='keystone_authtoken')
-
         # Determine where we are so we can set up paths in the config
         self.config = {
             'app': {

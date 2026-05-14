@@ -59,10 +59,7 @@ class ContextHook(hooks.PecanHook):
         auth_token_info = state.request.environ.get('keystone.token_info')
 
         conf = CONF[magnum.conf.keystone.CFG_LEGACY_GROUP]
-        auth_url = (getattr(conf, 'www_authenticate_uri', None) or
-                    getattr(conf, 'auth_uri', None))
-        if auth_url:
-            auth_url = auth_url.replace('v2.0', 'v3')
+        auth_url = getattr(conf, 'www_authenticate_uri', None)
 
         state.request.context = context.make_context(
             auth_token=auth_token,

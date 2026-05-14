@@ -26,9 +26,6 @@ class ClientsTest(base.BaseTestCase):
     def setUp(self):
         super(ClientsTest, self).setUp()
 
-        CONF.set_override('auth_uri', 'http://server.test:5000/v2.0',
-                          group='keystone_authtoken')
-
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):
         obj = clients.OpenStackClients(None)

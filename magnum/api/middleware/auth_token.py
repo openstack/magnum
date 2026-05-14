@@ -64,6 +64,9 @@ class AuthTokenMiddleware(auth_token.AuthProtocol):
         public_routes = local_conf.get('acl_public_routes', '')
         public_api_routes = [path.strip() for path in public_routes.split(',')]
 
+        conf = global_config.copy()
+        conf.update(local_conf)
+
         def _factory(app):
-            return cls(app, global_config, public_api_routes=public_api_routes)
+            return cls(app, conf, public_api_routes=public_api_routes)
         return _factory
