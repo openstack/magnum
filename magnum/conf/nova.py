@@ -10,8 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import itertools
-
 from oslo_config import cfg
 
 from magnum.i18n import _
@@ -26,36 +24,15 @@ nova_client_opts = [
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                help=_('Type of endpoint in Identity service catalog to use '
-                      'for communication with the OpenStack service.')),
-    cfg.StrOpt('api_version',
-               default='2',
-               help=_('Version of Nova API to use in novaclient.'))]
-
-common_security_opts = [
-    cfg.StrOpt('ca_file',
-               help=_('Optional CA cert file to use in SSL connections.')),
-    cfg.StrOpt('cert_file',
-               help=_('Optional PEM-formatted certificate chain file.')),
-    cfg.StrOpt('key_file',
-               help=_('Optional PEM-formatted file that contains the '
-                      'private key.')),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help=_("If set, then the server's certificate will not "
-                       "be verified."))]
-
-ALL_OPTS = list(itertools.chain(
-    nova_client_opts,
-    common_security_opts
-))
+                      'for communication with the OpenStack service.'))]
 
 
 def register_opts(conf):
     conf.register_group(nova_group)
-    conf.register_opts(ALL_OPTS, group=nova_group)
+    conf.register_opts(nova_client_opts, group=nova_group)
 
 
 def list_opts():
     return {
-        nova_group: ALL_OPTS
+        nova_group: nova_client_opts
     }

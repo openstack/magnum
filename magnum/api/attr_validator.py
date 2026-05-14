@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from novaclient import exceptions as nova_exception
 from openstack import exceptions as sdk_exceptions
 from oslo_utils import strutils
 
@@ -57,7 +56,7 @@ def validate_flavor(cli, flavor):
 
     if flavor is None:
         return
-    flavor_list = cli.nova().flavors.list()
+    flavor_list = list(cli.nova().flavors())
     for f in flavor_list:
         if f.name == flavor or f.id == flavor:
             return
@@ -72,8 +71,8 @@ def validate_keypair(cli, keypair):
     if keypair is None:
         return
     try:
-        cli.nova().keypairs.get(keypair)
-    except nova_exception.NotFound:
+        cli.nova().get_keypair(keypair)
+    except sdk_exceptions.ResourceNotFound:
         raise exception.KeyPairNotFound(keypair=keypair)
 
 
@@ -189,7 +188,7 @@ def validate_flavor_root_volume_size(cli, flavor, boot_volume_size):
         return
 
     flavor_obj = None
-    flavor_list = cli.nova().flavors.list()
+    flavor_list = list(cli.nova().flavors())
     for f in flavor_list:
         if f.name == flavor or f.id == flavor:
             flavor_obj = f

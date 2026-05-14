@@ -13,7 +13,6 @@
 # under the License.
 
 from keystoneauth1.exceptions import catalog
-from novaclient import client as novaclient
 from openstack import connection as sdk_connection
 from oslo_log import log as logging
 
@@ -130,19 +129,15 @@ class OpenStackClients(object):
             return self._nova
         endpoint_type = self._get_client_option('nova', 'endpoint_type')
         region_name = self._get_client_option('nova', 'region_name')
-        novaclient_version = self._get_client_option('nova', 'api_version')
         endpoint = self.url_for(service_type='compute',
                                 interface=endpoint_type,
                                 region_name=region_name)
-        args = {
-            'cacert': self._get_client_option('nova', 'ca_file'),
-            'insecure': self._get_client_option('nova', 'insecure')
-        }
-
         session = self.keystone().session
-        self._nova = novaclient.Client(novaclient_version,
-                                       session=session,
-                                       endpoint_override=endpoint, **args)
+        conn = sdk_connection.Connection(
+            session=session,
+            **{'compute_endpoint_override': endpoint}
+        )
+        self._nova = conn.compute
         return self._nova
 
     @exception.wrap_keystone_exception

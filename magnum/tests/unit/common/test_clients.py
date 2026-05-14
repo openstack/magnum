@@ -10,7 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from novaclient import client as novaclient
 from openstack import connection as sdk_connection
 from unittest import mock
 
@@ -180,26 +179,25 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'key_manager_endpoint_override': 'url_from_keystone'})
 
-    @mock.patch.object(novaclient, 'Client')
     @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     def _test_clients_nova(self, expected_region_name, mock_url,
-                           mock_keystone, mock_call):
+                           mock_conn, mock_keystone):
         con = mock.MagicMock()
+        con.auth_url = "keystone_url"
+        mock_url.return_value = "url_from_keystone"
         keystone = mock.MagicMock()
         keystone.session = mock.MagicMock()
         mock_keystone.return_value = keystone
-        con.auth_url = "keystone_url"
-        mock_url.return_value = "url_from_keystone"
         obj = clients.OpenStackClients(con)
         obj._nova = None
         obj.nova()
-        expected_kwargs = {'session': keystone.session,
-                           'endpoint_override': mock_url.return_value,
-                           'cacert': None,
-                           'insecure': False}
-        mock_call.assert_called_once_with(CONF.nova_client.api_version,
-                                          **expected_kwargs)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'compute_endpoint_override': 'url_from_keystone'})
+
+        mock_keystone.assert_called_once_with()
         mock_url.assert_called_once_with(service_type='compute',
                                          interface='publicURL',
                                          region_name=expected_region_name)
@@ -221,18 +219,24 @@ class ClientsTest(base.BaseTestCase):
         obj._nova = None
         self.assertRaises(exception.AuthorizationFailure, obj.nova)
 
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(sdk_connection, 'Connection')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
-    def test_clients_nova_cached(self, mock_url):
+    def test_clients_nova_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
-        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
-        con.auth_token_info = "auth-token-info"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._nova = None
         nova = obj.nova()
         nova_cached = obj.nova()
         self.assertEqual(nova, nova_cached)
+        mock_conn.assert_called_once_with(
+            session=keystone.session,
+            **{'compute_endpoint_override': 'url_from_keystone'})
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     @mock.patch.object(sdk_connection, 'Connection')

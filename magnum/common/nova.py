@@ -12,11 +12,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from openstack import exceptions as sdk_exceptions
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import clients
-from novaclient import exceptions as nova_exception
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -25,10 +25,10 @@ CONF = cfg.CONF
 def get_ssh_key(context, keypair_ident):
     try:
         n_client = clients.OpenStackClients(context).nova()
-        keypair = n_client.keypairs.get(keypair_ident)
+        keypair = n_client.get_keypair(keypair_ident)
         # no spaces or break lines at the end, single line string
         return keypair.public_key.strip()
-    except nova_exception.NotFound:
+    except sdk_exceptions.ResourceNotFound:
         # we don't have a way to tell if the keypair doesn't
         # exist or the cluster is already creted
         return ""

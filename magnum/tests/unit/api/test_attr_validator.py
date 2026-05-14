@@ -13,7 +13,6 @@
 # under the License.
 
 
-from novaclient import exceptions as nova_exc
 from openstack import exceptions as sdk_exceptions
 from unittest import mock
 
@@ -30,11 +29,11 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.id = 'test_flavor_id'
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_flavor(mock_os_cli, 'test_flavor')
-        self.assertTrue(mock_nova.flavors.list.called)
+        self.assertTrue(mock_nova.flavors.called)
 
     def test_validate_flavor_with_none_flavor(self):
         mock_flavor = mock.MagicMock()
@@ -42,11 +41,11 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.id = 'test_flavor_id'
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_flavor(mock_os_cli, None)
-        self.assertEqual(False, mock_nova.flavors.list.called)
+        self.assertEqual(False, mock_nova.flavors.called)
 
     def test_validate_flavor_with_invalid_flavor(self):
         mock_flavor = mock.MagicMock()
@@ -54,7 +53,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.id = 'test_flavor_id_not_equal'
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         self.assertRaises(exception.FlavorNotFound,
@@ -183,7 +182,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_keypair = mock.MagicMock()
         mock_keypair.id = None
         mock_nova = mock.MagicMock()
-        mock_nova.keypairs.get.return_value = mock_keypair
+        mock_nova.get_keypair.return_value = mock_keypair
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_keypair(mock_os_cli, None)
@@ -192,14 +191,14 @@ class TestAttrValidator(base.BaseTestCase):
         mock_keypair = mock.MagicMock()
         mock_keypair.id = 'test-keypair'
         mock_nova = mock.MagicMock()
-        mock_nova.keypairs.get.return_value = mock_keypair
+        mock_nova.get_keypair.return_value = mock_keypair
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_keypair(mock_os_cli, 'test-keypair')
 
     def test_validate_keypair_with_invalid_keypair(self):
         mock_nova = mock.MagicMock()
-        mock_nova.keypairs.get.side_effect = nova_exc.NotFound('test-keypair')
+        mock_nova.get_keypair.side_effect = sdk_exceptions.ResourceNotFound()
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         self.assertRaises(exception.KeyPairNotFound,
@@ -290,7 +289,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.id = 'test_flavor_id_not_equal'
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli.nova.return_value = mock_nova
         mock_context = mock.MagicMock()
         self.assertRaises(exception.FlavorNotFound,
@@ -359,7 +358,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_keypair = mock.MagicMock()
         mock_keypair.id = 'test-keypair'
         mock_nova = mock.MagicMock()
-        mock_nova.keypairs.get.return_value = mock_keypair
+        mock_nova.get_keypair.return_value = mock_keypair
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         mock_context = mock.MagicMock()
@@ -377,12 +376,12 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.disk = 0
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_flavor_root_volume_size(
             mock_os_cli, 'test_flavor', boot_volume_size)
-        self.assertFalse(mock_nova.flavors.list.called)
+        self.assertFalse(mock_nova.flavors.called)
 
     def test_validate_flavor_root_volume_size_with_valid_flavor(self):
         boot_volume_size = 0
@@ -392,12 +391,12 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.disk = 100
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_flavor_root_volume_size(
             mock_os_cli, 'test_flavor', boot_volume_size)
-        self.assertTrue(mock_nova.flavors.list.called)
+        self.assertTrue(mock_nova.flavors.called)
 
     def test_validate_flavor_root_volume_size_with_invalid_resources(self):
         boot_volume_size = 0
@@ -407,7 +406,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_flavor.disk = 0
         mock_flavors = [mock_flavor]
         mock_nova = mock.MagicMock()
-        mock_nova.flavors.list.return_value = mock_flavors
+        mock_nova.flavors.return_value = mock_flavors
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         self.assertRaises(exception.FlavorZeroRootVolumeNotSupported,
