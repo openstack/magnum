@@ -1,0 +1,25 @@
+---
+upgrade:
+  - |
+    Support for legacy admin service-user credentials in the
+    ``[keystone_authtoken]`` configuration section has been removed.
+    The deprecated ``admin_user``, ``admin_password``, and
+    ``admin_tenant_name`` options were dropped from keystonemiddleware in
+    the 2026.2 release. Operators must ensure that service-user credentials
+    are configured in the ``[keystone_auth]`` section using the
+    keystoneauth1 password auth plugin options (``auth_url``, ``username``,
+    ``password``, ``project_name``, etc.). Magnum will no longer fall back
+    to ``[keystone_authtoken]`` for admin authentication and will raise an
+    error if ``[keystone_auth]`` is not properly configured.
+  - |
+    The deprecated ``auth_uri`` option in ``[keystone_authtoken]`` is no
+    longer recognised by Magnum. This option was removed from
+    keystonemiddleware in the 2026.2 release. Operators should use
+    ``www_authenticate_uri`` in ``[keystone_authtoken]`` instead. Note that
+    ``auth_url`` in ``[keystone_auth]`` is now the primary source for the
+    Keystone endpoint used by Magnum's service-user session.
+  - |
+    TLS session options (``certfile``, ``keyfile``, ``cafile``, ``insecure``,
+    ``timeout``) are no longer accepted in the ``[keystone_authtoken]``
+    section as deprecated aliases for the ``[keystone_auth]`` equivalents.
+    These options must be set directly in ``[keystone_auth]`` if required.
