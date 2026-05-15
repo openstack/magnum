@@ -158,6 +158,33 @@ class Driver(object, metaclass=abc.ABCMeta):
                                     driver_info['entry_point_name']).driver()
 
     @classmethod
+    def get_default_driver(cls):
+        """Return the default driver name.
+
+        Returns CONF.drivers.default_driver if set (validated against
+        registered drivers), otherwise the name of the first alphabetically
+        sorted available driver. Returns None if no drivers are available.
+        """
+        if CONF.drivers.default_driver:
+            configured = CONF.drivers.default_driver
+            available = {ep.name for ep, _ in cls.load_entry_points()}
+            if configured not in available:
+                LOG.error(
+                    'Configured [drivers] default_driver %r is not a '
+                    'registered driver. Available drivers: %s',
+                    configured, sorted(available))
+                raise exception.ClusterDriverNotSupported(
+                    driver_name=configured)
+            return configured
+        entry_point_names = sorted(
+            ep.name for ep, _ in cls.load_entry_points())
+        if not entry_point_names:
+            LOG.warning('No Magnum drivers are available and '
+                        '[drivers] default_driver is not configured.')
+            return None
+        return entry_point_names[0]
+
+    @classmethod
     def get_driver_for_cluster(cls, context, cluster):
         ct = cluster_template.ClusterTemplate.get_by_uuid(
             context, cluster.cluster_template_id)

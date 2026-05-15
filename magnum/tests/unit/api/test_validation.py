@@ -447,6 +447,150 @@ class TestValidation(base.BaseTestCase):
         self.assertRaises(exception.ImageNotAuthorized,
                           test, self, cluster_template)
 
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_enforce_driver_supported_user_driver_skips_image(
+            self, mock_get_driver):
+        """When driver and cluster_distro are set, image is not fetched."""
+
+        @v.enforce_driver_supported()
+        def test(self, cluster_template):
+            pass
+
+        mock_get_driver.return_value = mock.MagicMock()
+        cluster_template = mock.MagicMock()
+        cluster_template.cluster_distro = 'ubuntu'
+        cluster_template.driver = 'user_driver'
+        cluster_template.server_type = 'vm'
+        cluster_template.coe = 'kubernetes'
+
+        test(self, cluster_template)
+
+        mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
+                                                'user_driver')
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_enforce_driver_supported_falls_back_to_default(
+            self, mock_os_clients, mock_pecan_request,
+            mock_get_default, mock_get_driver):
+        """get_default_driver() is used when no driver from image or user."""
+
+        @v.enforce_driver_supported()
+        def test(self, cluster_template):
+            pass
+
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .return_value = mock.MagicMock(
+                os_distro='ubuntu',
+                properties={})
+        mock_get_default.return_value = 'default_driver'
+        mock_get_driver.return_value = mock.MagicMock()
+        cluster_template = mock.MagicMock()
+        cluster_template.cluster_distro = None
+        cluster_template.driver = None
+        cluster_template.image_id = 'test-image-id'
+        cluster_template.server_type = 'vm'
+        cluster_template.coe = 'kubernetes'
+
+        test(self, cluster_template)
+
+        mock_get_default.assert_called_once()
+        mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
+                                                'default_driver')
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_enforce_driver_supported_image_driver_skips_default(
+            self, mock_os_clients, mock_pecan_request,
+            mock_get_default, mock_get_driver):
+        """get_default_driver() is not called when image provides a driver."""
+
+        @v.enforce_driver_supported()
+        def test(self, cluster_template):
+            pass
+
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .return_value = mock.MagicMock(
+                os_distro='ubuntu',
+                properties={'magnum_driver': 'image_driver'})
+        mock_get_driver.return_value = mock.MagicMock()
+        cluster_template = mock.MagicMock()
+        cluster_template.cluster_distro = None
+        cluster_template.driver = None
+        cluster_template.image_id = 'test-image-id'
+        cluster_template.server_type = 'vm'
+        cluster_template.coe = 'kubernetes'
+
+        test(self, cluster_template)
+
+        mock_get_default.assert_not_called()
+        mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
+                                                'image_driver')
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_enforce_driver_supported_user_driver_preserved_without_distro(
+            self, mock_os_clients, mock_pecan_request, mock_get_driver):
+        """User-supplied driver is not overwritten even when image has one."""
+
+        @v.enforce_driver_supported()
+        def test(self, cluster_template):
+            pass
+
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .return_value = mock.MagicMock(
+                os_distro='ubuntu',
+                properties={'magnum_driver': 'image_driver'})
+        mock_get_driver.return_value = mock.MagicMock()
+        cluster_template = mock.MagicMock()
+        cluster_template.cluster_distro = None
+        cluster_template.driver = 'user_driver'
+        cluster_template.image_id = 'test-image-id'
+        cluster_template.server_type = 'vm'
+        cluster_template.coe = 'kubernetes'
+
+        test(self, cluster_template)
+
+        # Image is fetched for cluster_distro but user driver is kept.
+        mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
+                                                'user_driver')
+        self.assertEqual('user_driver', cluster_template.driver)
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_enforce_driver_supported_writes_resolved_driver_back(
+            self, mock_os_clients, mock_pecan_request,
+            mock_get_default, mock_get_driver):
+        """Resolved driver is written back to cluster_template.driver."""
+
+        @v.enforce_driver_supported()
+        def test(self, cluster_template):
+            pass
+
+        mock_os_clients.return_value.glance.return_value.find_image\
+            .return_value = mock.MagicMock(
+                os_distro='ubuntu',
+                properties={})
+        mock_get_default.return_value = 'default_driver'
+        mock_get_driver.return_value = mock.MagicMock()
+        cluster_template = mock.MagicMock()
+        cluster_template.cluster_distro = None
+        cluster_template.driver = None
+        cluster_template.image_id = 'test-image-id'
+        cluster_template.server_type = 'vm'
+        cluster_template.coe = 'kubernetes'
+
+        test(self, cluster_template)
+
+        self.assertEqual('default_driver', cluster_template.driver)
+
     @mock.patch('pecan.request')
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_enforce_valid_project_id_on_create_success(

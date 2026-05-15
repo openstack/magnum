@@ -40,6 +40,13 @@ drivers_opts = [
                 help='List of beta drivers to enable. Beta drivers are not '
                      'intended for production.'
                 ),
+    cfg.StrOpt('default_driver',
+               default=None,
+               help='Default driver to use for cluster templates when no '
+                    'driver is specified by the user or image metadata. '
+                    'If not set, defaults to the first alphabetically '
+                    'sorted available driver.'
+               ),
 ]
 
 
