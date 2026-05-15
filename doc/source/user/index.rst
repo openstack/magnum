@@ -995,8 +995,7 @@ look for the attribute *coe_version* and *container_version*::
     +--------------------+------------------------------------------------------------+
     | status             | CREATE_COMPLETE                                            |
     | uuid               | 04952c60-a338-437f-a7e7-d016d1d00e65                       |
-    | stack_id           | b7bf72ce-b08e-4768-8201-e63a99346898                       |
-    | status_reason      | Stack CREATE completed successfully                        |
+    | status_reason      | CREATE completed successfully                              |
     | created_at         | 2016-07-25T23:14:06+00:00                                  |
     | updated_at         | 2016-07-25T23:14:10+00:00                                  |
     | create_timeout     | 60                                                         |
@@ -1874,7 +1873,6 @@ creation::
     +--------------------+------------------------------------------------------------+
     | status             | CREATE_IN_PROGRESS                                         |
     | uuid               | 3968ffd5-678d-4555-9737-35f191340fda                       |
-    | stack_id           | c96b66dd-2109-4ae2-b510-b3428f1e8761                       |
     | status_reason      | None                                                       |
     | created_at         | 2016-07-25T23:14:06+00:00                                  |
     | updated_at         | None                                                       |
@@ -1901,8 +1899,7 @@ the api_address is 'https'::
     +--------------------+------------------------------------------------------------+
     | status             | CREATE_COMPLETE                                            |
     | uuid               | 04952c60-a338-437f-a7e7-d016d1d00e65                       |
-    | stack_id           | b7bf72ce-b08e-4768-8201-e63a99346898                       |
-    | status_reason      | Stack CREATE completed successfully                        |
+    | status_reason      | CREATE completed successfully                              |
     | created_at         | 2016-07-25T23:14:06+00:00                                  |
     | updated_at         | 2016-07-25T23:14:10+00:00                                  |
     | create_timeout     | 60                                                         |

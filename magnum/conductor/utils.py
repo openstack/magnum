@@ -109,7 +109,6 @@ def _get_event_target(cluster_obj=None):
                 'labels': cluster_obj.labels,
                 'master_flavor_id': cluster_obj.master_flavor_id,
                 'flavor_id': cluster_obj.flavor_id,
-                'stack_id': cluster_obj.stack_id,
                 'health_status': cluster_obj.health_status,
                 'create_timeout': cluster_obj.create_timeout,
                 'api_address': cluster_obj.api_address,

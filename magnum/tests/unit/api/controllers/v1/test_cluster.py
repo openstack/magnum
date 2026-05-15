@@ -58,12 +58,12 @@ class TestClusterObject(base.TestCase):
 
 class TestListCluster(api_base.FunctionalTest):
     _cluster_attrs = ("name", "cluster_template_id", "node_count", "status",
-                      "master_count", "stack_id", "create_timeout")
+                      "master_count", "create_timeout")
 
     _expand_cluster_attrs = ("name", "cluster_template_id", "node_count",
                              "status", "api_address", "discovery_url",
                              "node_addresses", "master_count",
-                             "master_addresses", "stack_id",
+                             "master_addresses",
                              "create_timeout", "status_reason")
 
     def setUp(self):

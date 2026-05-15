@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    The ``stack_id`` field has been removed from the ``Cluster`` and
+    ``NodeGroup`` objects, API responses, and database schema. This field
+    previously held a reference to the OpenStack Heat stack backing the
+    cluster, which is no longer applicable after the Heat driver was removed.
+    A database migration (``a0f9c3a8e1b2``) drops the ``stack_id`` column
+    from both the ``cluster`` and ``nodegroup`` tables.

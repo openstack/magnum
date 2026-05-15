@@ -349,7 +349,7 @@ class TestObject(test_base.TestCase, _TestObject):
 # For more information on object version testing, read
 # https://docs.openstack.org/magnum/latest/contributor/objects.html
 object_data = {
-    'Cluster': '1.24-6bdcd5b0ff844347274717c51e01f942',
+    'Cluster': '1.25-70f3ba1c74c17de58478ab8d5f58b313',
     'ClusterTemplate': '1.21-2d23d472f415b5e7571603a8689898e3',
     'Certificate': '1.2-64f24db0e10ad4cbd72aea21d2075a80',
     'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',
@@ -358,7 +358,7 @@ object_data = {
     'Stats': '1.0-73a1cd6e3c0294c932a66547faba216c',
     'Quota': '1.0-94e100aebfa88f7d8428e007f2049c18',
     'Federation': '1.0-166da281432b083f0e4b851336e12e20',
-    'NodeGroup': '1.1-70211d19fcf53903a470607f1f4a784f'
+    'NodeGroup': '1.2-2a3ba7b700f7a0b5083c7b0c51aed10f'
 }
 
 

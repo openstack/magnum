@@ -494,12 +494,6 @@ server_type:
   in: body
   required: true
   type: string
-stack_id:
-  description: |
-    The reference UUID of orchestration stack from Heat orchestration service.
-  in: body
-  required: true
-  type: UUID
 state:
   description: |
     The current state of Magnum services.
