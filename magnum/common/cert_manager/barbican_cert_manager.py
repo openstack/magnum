@@ -15,6 +15,7 @@
 import openstack.exceptions
 from openstack.key_manager.v1 import container as _container
 from oslo_log import log as logging
+from oslo_utils import encodeutils
 from oslo_utils import excutils
 
 from magnum.common.cert_manager import cert_manager
@@ -77,6 +78,15 @@ def get_admin_clients():
     return _ADMIN_OSC
 
 
+def _create_secret(connection, payload, expiration, name):
+    return connection.create_secret(
+        payload=encodeutils.safe_decode(payload),
+        payload_content_type='text/plain',
+        expiration=expiration,
+        name=name,
+    )
+
+
 class CertManager(cert_manager.CertManager):
     """Certificate Manager that wraps the Barbican client API."""
     @staticmethod
@@ -101,17 +111,11 @@ class CertManager(cert_manager.CertManager):
 
         created_secrets = []
         try:
-            certificate_secret = connection.create_secret(
-                payload=certificate,
-                expiration=expiration,
-                name="Certificate"
-            )
+            certificate_secret = _create_secret(
+                connection, certificate, expiration, "Certificate")
             created_secrets.append(certificate_secret)
-            private_key_secret = connection.create_secret(
-                payload=private_key,
-                expiration=expiration,
-                name="Private Key"
-            )
+            private_key_secret = _create_secret(
+                connection, private_key, expiration, "Private Key")
             created_secrets.append(private_key_secret)
 
             secret_refs = [
@@ -122,22 +126,19 @@ class CertManager(cert_manager.CertManager):
             ]
 
             if intermediates:
-                intermediates_secret = connection.create_secret(
-                    payload=intermediates,
-                    expiration=expiration,
-                    name="Intermediates"
-                )
+                intermediates_secret = _create_secret(
+                    connection, intermediates, expiration, "Intermediates")
                 created_secrets.append(intermediates_secret)
                 secret_refs.append(
                     {"name": "intermediates",
                      "secret_ref": intermediates_secret.secret_ref})
 
             if private_key_passphrase:
-                pkp_secret = connection.create_secret(
-                    payload=private_key_passphrase,
-                    expiration=expiration,
-                    name="Private Key Passphrase"
-                )
+                pkp_secret = _create_secret(
+                    connection,
+                    private_key_passphrase,
+                    expiration,
+                    "Private Key Passphrase")
                 created_secrets.append(pkp_secret)
                 secret_refs.append(
                     {"name": "private_key_passphrase",

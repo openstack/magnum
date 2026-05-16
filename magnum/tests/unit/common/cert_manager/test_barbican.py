@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 from unittest import mock
 import uuid
 
@@ -139,12 +140,34 @@ class TestBarbicanManager(base.BaseTestCase):
 
         super(TestBarbicanManager, self).setUp()
 
+    def _expected_create_secret_calls(self):
+        return [
+            mock.call(payload=self.certificate.decode('utf-8'),
+                      payload_content_type='text/plain',
+                      expiration=None,
+                      name=mock.ANY),
+            mock.call(payload=self.private_key.decode('utf-8'),
+                      payload_content_type='text/plain',
+                      expiration=None,
+                      name=mock.ANY),
+            mock.call(payload=self.intermediates.decode('utf-8'),
+                      payload_content_type='text/plain',
+                      expiration=None,
+                      name=mock.ANY),
+            mock.call(payload=self.private_key_passphrase.decode('utf-8'),
+                      payload_content_type='text/plain',
+                      expiration=None,
+                      name=mock.ANY),
+        ]
+
     @patch('magnum.common.clients.OpenStackClients.barbican')
     def test_store_cert(self, mock_barbican):
         bc = mock.MagicMock()
         bc.create_container.return_value = self.container
 
         def create_secret_side_effect(**kwargs):
+            json.dumps(kwargs)
+            self.assertIsInstance(kwargs['payload'], str)
             return self.secrets_by_name[kwargs['name']]
 
         bc.create_secret.side_effect = create_secret_side_effect
@@ -158,17 +181,8 @@ class TestBarbicanManager(base.BaseTestCase):
             name=self.name
         )
 
-        calls = [
-            mock.call(payload=self.certificate, expiration=None,
-                      name=mock.ANY),
-            mock.call(payload=self.private_key, expiration=None,
-                      name=mock.ANY),
-            mock.call(payload=self.intermediates, expiration=None,
-                      name=mock.ANY),
-            mock.call(payload=self.private_key_passphrase, expiration=None,
-                      name=mock.ANY),
-        ]
-        bc.create_secret.assert_has_calls(calls, any_order=True)
+        bc.create_secret.assert_has_calls(
+            self._expected_create_secret_calls(), any_order=True)
         self.assertEqual(1, bc.create_container.call_count)
 
     @patch('magnum.common.clients.OpenStackClients.barbican')
@@ -202,6 +216,8 @@ class TestBarbicanManager(base.BaseTestCase):
         )
 
         self.assertEqual(1, bc.create_container.call_count)
+        bc.create_secret.assert_has_calls(
+            self._expected_create_secret_calls(), any_order=True)
         # All created secrets should have been deleted in rollback
         self.assertEqual(4, bc.delete_secret.call_count)
 
