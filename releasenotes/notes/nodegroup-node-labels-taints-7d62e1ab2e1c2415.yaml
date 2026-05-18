@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Added ``node_labels`` and ``node_taints`` fields to the NodeGroup
+    resource so users can apply Kubernetes node labels and taints to every
+    node in a worker nodegroup. ``node_labels`` is a dict of string
+    key/value pairs; ``node_taints`` is a list of ``{key, value, effect}``
+    objects where ``effect`` is one of ``NoSchedule``, ``PreferNoSchedule``
+    or ``NoExecute``. Both fields are optional and may be supplied on
+    create or updated via PATCH. They are surfaced from REST API
+    microversion 1.14. Magnum stores and validates these fields; applying
+    them to nodes is the responsibility of the driver, and drivers that do
+    not support them ignore the fields.

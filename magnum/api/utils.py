@@ -82,13 +82,15 @@ def apply_jsonpatch(doc, patch):
                         "'replace' operation instead.") % p['path']
                 raise wsme.exc.ClientSideError(msg)
 
-        if (p['op'] == 'replace' and (p['path'] == '/labels' or
-                                      p['path'] == '/health_status_reason')):
+        if (p['op'] == 'replace' and p['path'] in ('/labels',
+                                                   '/health_status_reason',
+                                                   '/node_labels',
+                                                   '/node_taints')):
             try:
                 val = p['value']
-                dict_val = (val if isinstance(val, dict)
-                            else ast.literal_eval(val))
-                p['value'] = dict_val
+                parsed_val = (val if isinstance(val, (dict, list))
+                              else ast.literal_eval(val))
+                p['value'] = parsed_val
             except (SyntaxError, ValueError, AssertionError) as e:
                 raise exception.PatchError(patch=patch, reason=e)
     return jsonpatch.apply_patch(doc, patch)

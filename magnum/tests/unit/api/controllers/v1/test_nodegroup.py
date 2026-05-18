@@ -348,6 +348,131 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual(202, response.status_int)
         self.assertEqual(labels, response.json['labels'])
 
+    def test_create_nodegroup_with_node_labels(self):
+        node_labels = {'workload': 'gpu'}
+        ng_dict = apiutils.nodegroup_post_data(node_labels=node_labels)
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(node_labels, response.json['node_labels'])
+
+    def test_create_nodegroup_with_node_taints(self):
+        taints = [
+            {'key': 'workload', 'value': 'gpu', 'effect': 'NoSchedule'},
+            {'key': 'dedicated', 'value': '', 'effect': 'NoExecute'},
+        ]
+        ng_dict = apiutils.nodegroup_post_data(node_taints=taints)
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(taints, response.json['node_taints'])
+
+    def test_create_nodegroup_taint_invalid_effect(self):
+        taints = [{'key': 'workload', 'value': 'gpu', 'effect': 'Bogus'}]
+        ng_dict = apiutils.nodegroup_post_data(node_taints=taints)
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_taint_missing_key(self):
+        taints = [{'value': 'gpu', 'effect': 'NoSchedule'}]
+        ng_dict = apiutils.nodegroup_post_data(node_taints=taints)
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_taint_unknown_field_rejected(self):
+        # A malformed entry (e.g. a typo'd field name) is rejected rather
+        # than silently ignored.
+        taints = [{'key': 'workload', 'vaule': 'gpu', 'effect': 'NoSchedule'}]
+        ng_dict = apiutils.nodegroup_post_data(node_taints=taints)
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_restricted_node_label_rejected(self):
+        ng_dict = apiutils.nodegroup_post_data(
+            node_labels={'kubernetes.io/role': 'worker'})
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_restricted_subdomain_label_rejected(self):
+        ng_dict = apiutils.nodegroup_post_data(
+            node_labels={'foo.k8s.io/bar': 'baz'})
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_allowed_kubernetes_label(self):
+        # A label in the kubernetes.io namespace that is on the kubelet
+        # allow-list is accepted.
+        node_labels = {'topology.kubernetes.io/zone': 'az-1'}
+        ng_dict = apiutils.nodegroup_post_data(node_labels=node_labels)
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(node_labels, response.json['node_labels'])
+
+    def test_create_nodegroup_allowed_node_namespace_label(self):
+        # node.kubernetes.io is an allowed prefix, so any label under it is
+        # accepted.
+        node_labels = {'node.kubernetes.io/foo': 'bar'}
+        ng_dict = apiutils.nodegroup_post_data(node_labels=node_labels)
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(node_labels, response.json['node_labels'])
+
+    def test_create_nodegroup_custom_namespace_label_allowed(self):
+        # Labels outside the kubernetes.io/k8s.io namespaces are unrestricted.
+        node_labels = {'nectar.org.au/project': 'foo', 'workload': 'gpu'}
+        ng_dict = apiutils.nodegroup_post_data(node_labels=node_labels)
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(node_labels, response.json['node_labels'])
+
+    def test_create_nodegroup_node_labels_master_rejected(self):
+        # node_labels are not allowed on master nodegroups.
+        ng_dict = apiutils.nodegroup_post_data(
+            role='master', node_labels={'workload': 'gpu'})
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_node_taints_master_rejected(self):
+        # node_taints are not allowed on master nodegroups.
+        taints = [{'key': 'workload', 'value': 'gpu', 'effect': 'NoSchedule'}]
+        ng_dict = apiutils.nodegroup_post_data(
+            role='master', node_taints=taints)
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    def test_create_nodegroup_node_labels_custom_role_allowed(self):
+        # Any role other than master is treated as a worker.
+        node_labels = {'workload': 'gpu'}
+        ng_dict = apiutils.nodegroup_post_data(
+            role='test-role', node_labels=node_labels)
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(node_labels, response.json['node_labels'])
+
     def test_create_nodegroup_with_image_id(self):
         ng_dict = apiutils.nodegroup_post_data(image_id='test_image')
 
@@ -613,6 +738,57 @@ class TestPatch(NodeGroupControllerTest):
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
+
+    def test_replace_node_labels_stringified(self):
+        # The client sends dict values as their string representation;
+        # the API deserializes them via apply_jsonpatch.
+        labels = {'workload': 'gpu'}
+        response = self.patch_json(self.url + self.nodegroup.uuid,
+                                   [{'path': '/node_labels',
+                                     'value': str(labels),
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json(self.url + self.nodegroup.uuid)
+        self.assertEqual(labels, response['node_labels'])
+
+    def test_replace_node_taints_stringified(self):
+        taints = [
+            {'key': 'workload', 'value': 'gpu', 'effect': 'NoSchedule'},
+        ]
+        response = self.patch_json(self.url + self.nodegroup.uuid,
+                                   [{'path': '/node_taints',
+                                     'value': str(taints),
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json(self.url + self.nodegroup.uuid)
+        self.assertEqual(taints, response['node_taints'])
+
+    def test_replace_node_labels_on_master_rejected(self):
+        # node_labels are worker-only; patching the control plane nodegroup
+        # is rejected.
+        master_uuid = self.cluster.default_ng_master.uuid
+        response = self.patch_json(self.url + master_uuid,
+                                   [{'path': '/node_labels',
+                                     'value': str({'workload': 'gpu'}),
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
+
+    def test_replace_node_taints_on_master_rejected(self):
+        master_uuid = self.cluster.default_ng_master.uuid
+        taints = [{'key': 'workload', 'value': 'gpu', 'effect': 'NoSchedule'}]
+        response = self.patch_json(self.url + master_uuid,
+                                   [{'path': '/node_taints',
+                                     'value': str(taints),
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
 
     def test_replace_node_count_failed(self):
         response = self.patch_json(self.url + self.nodegroup.name,
