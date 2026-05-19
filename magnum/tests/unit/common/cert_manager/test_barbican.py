@@ -140,25 +140,25 @@ class TestBarbicanManager(base.BaseTestCase):
 
         super(TestBarbicanManager, self).setUp()
 
-    def _expected_create_secret_calls(self):
-        return [
+    def _expected_create_secret_calls(self, expiration=None):
+        calls = [
             mock.call(payload=self.certificate.decode('utf-8'),
                       payload_content_type='text/plain',
-                      expiration=None,
                       name=mock.ANY),
             mock.call(payload=self.private_key.decode('utf-8'),
                       payload_content_type='text/plain',
-                      expiration=None,
                       name=mock.ANY),
             mock.call(payload=self.intermediates.decode('utf-8'),
                       payload_content_type='text/plain',
-                      expiration=None,
                       name=mock.ANY),
             mock.call(payload=self.private_key_passphrase.decode('utf-8'),
                       payload_content_type='text/plain',
-                      expiration=None,
                       name=mock.ANY),
         ]
+        if expiration is not None:
+            for call in calls:
+                call.kwargs['expiration'] = expiration
+        return calls
 
     @patch('magnum.common.clients.OpenStackClients.barbican')
     def test_store_cert(self, mock_barbican):
@@ -183,6 +183,33 @@ class TestBarbicanManager(base.BaseTestCase):
 
         bc.create_secret.assert_has_calls(
             self._expected_create_secret_calls(), any_order=True)
+        self.assertEqual(1, bc.create_container.call_count)
+
+    @patch('magnum.common.clients.OpenStackClients.barbican')
+    def test_store_cert_with_expiration(self, mock_barbican):
+        expiration = '2026-12-31T23:59:59'
+        bc = mock.MagicMock()
+        bc.create_container.return_value = self.container
+
+        def create_secret_side_effect(**kwargs):
+            json.dumps(kwargs)
+            self.assertIsInstance(kwargs['payload'], str)
+            return self.secrets_by_name[kwargs['name']]
+
+        bc.create_secret.side_effect = create_secret_side_effect
+        mock_barbican.return_value = bc
+
+        bcm.CertManager.store_cert(
+            certificate=self.certificate,
+            private_key=self.private_key,
+            intermediates=self.intermediates,
+            private_key_passphrase=self.private_key_passphrase,
+            expiration=expiration,
+            name=self.name
+        )
+
+        bc.create_secret.assert_has_calls(
+            self._expected_create_secret_calls(expiration), any_order=True)
         self.assertEqual(1, bc.create_container.call_count)
 
     @patch('magnum.common.clients.OpenStackClients.barbican')

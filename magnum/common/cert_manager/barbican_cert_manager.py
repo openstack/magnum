@@ -79,12 +79,14 @@ def get_admin_clients():
 
 
 def _create_secret(connection, payload, expiration, name):
-    return connection.create_secret(
-        payload=encodeutils.safe_decode(payload),
-        payload_content_type='text/plain',
-        expiration=expiration,
-        name=name,
-    )
+    secret_args = {
+        'payload': encodeutils.safe_decode(payload),
+        'payload_content_type': 'text/plain',
+        'name': name,
+    }
+    if expiration is not None:
+        secret_args['expiration'] = expiration
+    return connection.create_secret(**secret_args)
 
 
 class CertManager(cert_manager.CertManager):
