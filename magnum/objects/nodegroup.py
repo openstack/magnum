@@ -27,9 +27,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
                 base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: min_node_count defaults to 0
-    # Version 1.2: Removed stack_id
 
-    VERSION = '1.2'
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -49,6 +48,7 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         'max_node_count': fields.IntegerField(nullable=True),
         'min_node_count': fields.IntegerField(nullable=False, default=0),
         'is_default': fields.BooleanField(default=False),
+        'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
         'version': fields.StringField(nullable=True),
@@ -146,7 +146,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
         :param filters: filter dict, can includes 'name', 'node_count',
-                        'node_addresses', 'status'(should be a status list).
+                        'stack_id', 'node_addresses',
+                        'status'(should be a status list).
         :returns: a list of :class:`NodeGroup` objects.
 
         """

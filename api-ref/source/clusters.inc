@@ -100,6 +100,7 @@ Response
   - status: status
   - uuid: cluster_id
   - links: links
+  - stack_id: stack_id
   - keypair: keypair_id
   - master_count: master_count
   - cluster_template_id: clustertemplate_id
@@ -149,6 +150,7 @@ Response
   - status: status
   - uuid: cluster_id
   - links: links
+  - stack_id: stack_id
   - created_at: created_at
   - api_address: api_address
   - discovery_url: discovery_url
