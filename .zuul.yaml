@@ -32,11 +32,4 @@
       - check-requirements
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
-    check:
-      jobs:
-        - magnum-tempest-plugin-tests-api
-        - magnum-tempest-plugin-tests-api-jammy
-    gate:
-      jobs:
-        - magnum-tempest-plugin-tests-api
-        - magnum-tempest-plugin-tests-api-jammy
+      - magnum-tempest-plugin-jobs-2025-2
