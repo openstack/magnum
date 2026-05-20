@@ -111,7 +111,10 @@ class Cluster(base.APIBase):
     """A list containing a self link and associated cluster links"""
 
     stack_id = wsme.wsattr(wtypes.text, readonly=True)
-    """Stack id of the heat stack"""
+    """Stack id of the heat stack (deprecated in favour of cluster_id)"""
+
+    cluster_id = wsme.wsattr(wtypes.text, readonly=True)
+    """Cluster id (replaces stack_id from microversion 1.13)"""
 
     status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
     """Status of the cluster from the heat stack"""
@@ -203,20 +206,25 @@ class Cluster(base.APIBase):
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
     @staticmethod
-    def _convert_with_links(cluster, url, expand=True, parent_labels=None):
+    def _convert_with_links(cluster, url, expand=True, parent_labels=None,
+                            use_cluster_id=False):
+        if use_cluster_id:
+            cluster.cluster_id = cluster.stack_id
         if not expand:
-            cluster.unset_fields_except(['uuid', 'name', 'cluster_template_id',
-                                         'keypair', 'docker_volume_size',
-                                         'labels', 'node_count', 'status',
-                                         'master_flavor_id', 'flavor_id',
-                                         'create_timeout', 'master_count',
-                                         'stack_id', 'health_status'])
+            fields = ['uuid', 'name', 'cluster_template_id', 'keypair',
+                      'docker_volume_size', 'labels', 'node_count', 'status',
+                      'master_flavor_id', 'flavor_id', 'create_timeout',
+                      'master_count', 'health_status']
+            fields.append('cluster_id' if use_cluster_id else 'stack_id')
+            cluster.unset_fields_except(fields)
         else:
             overridden, added, skipped = api_utils.get_labels_diff(
                 parent_labels, cluster.labels)
             cluster.labels_overridden = overridden
             cluster.labels_added = added
             cluster.labels_skipped = skipped
+            if use_cluster_id:
+                cluster.stack_id = wsme.Unset
 
         cluster.links = [link.Link.make_link('self', url,
                                              'clusters', cluster.uuid),
@@ -229,8 +237,10 @@ class Cluster(base.APIBase):
     def convert_with_links(cls, rpc_cluster, expand=True):
         cluster = Cluster(**rpc_cluster.as_dict())
         parent_labels = rpc_cluster.cluster_template.labels
+        use_cluster_id = pecan.request.version.minor >= 13
         return cls._convert_with_links(
-            cluster, pecan.request.application_url, expand, parent_labels)
+            cluster, pecan.request.application_url, expand, parent_labels,
+            use_cluster_id=use_cluster_id)
 
     @classmethod
     def sample(cls, expand=True):
@@ -271,7 +281,7 @@ class ClusterPatchType(types.JsonPatchType):
     @staticmethod
     def internal_attrs():
         internal_attrs = ['/api_address', '/node_addresses',
-                          '/master_addresses', '/stack_id',
+                          '/master_addresses', '/stack_id', '/cluster_id',
                           '/ca_cert_ref', '/magnum_cert_ref',
                           '/etcd_ca_cert_ref', '/front_proxy_ca_cert_ref']
         return types.JsonPatchType.internal_attrs() + internal_attrs

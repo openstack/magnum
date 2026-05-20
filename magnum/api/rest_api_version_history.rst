@@ -118,3 +118,15 @@ user documentation.
   Add credential API
 
   Allow the cluster to have its associated credential rotated.
+
+
+1.13
+---
+
+  Add cluster_id field to cluster, deprecate stack_id
+
+  The ``cluster_id`` field is introduced as a replacement for ``stack_id``
+  in the cluster API response. Both fields map to the same underlying database
+  column. From microversion 1.13, responses include ``cluster_id`` and omit
+  the deprecated ``stack_id``. Clients using microversions prior to 1.13
+  continue to see ``stack_id`` and will not see ``cluster_id``.
