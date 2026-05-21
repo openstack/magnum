@@ -51,7 +51,7 @@
         o-api: true
         o-hk: true
         o-da: true
-      image_url: "https://github.com/vexxhost/capo-image-elements/releases/latest/download/ubuntu-22.04-{{ kube_tag }}.qcow2"
+      image_url: "https://github.com/vexxhost/capo-image-elements/releases/download/2026.05-4/ubuntu-22.04-{{ kube_tag }}.qcow2"
     nodeset:
       nodes:
         - name: controller
@@ -62,20 +62,20 @@
             - controller
 
 - job:
-    name: magnum-cluster-api-v1.35.4
+    name: magnum-cluster-api-v1.35
     parent: magnum-cluster-api
     vars:
-      kube_tag: v1.35.4
+      kube_tag: v1.35.5
 
 - job:
-    name: magnum-cluster-api-v1.35.4-calico
-    parent: magnum-cluster-api-v1.35.4
+    name: magnum-cluster-api-v1.35-calico
+    parent: magnum-cluster-api-v1.35
     vars:
       network_driver: calico
 
 - job:
-    name: magnum-cluster-api-v1.35.4-cilium
-    parent: magnum-cluster-api-v1.35.4
+    name: magnum-cluster-api-v1.35-cilium
+    parent: magnum-cluster-api-v1.35
     vars:
       network_driver: cilium
 
@@ -85,9 +85,9 @@
       magnum-cluster-api jobs
     check:
       jobs:
-        - magnum-cluster-api-v1.35.4-calico
-        - magnum-cluster-api-v1.35.4-cilium
+        - magnum-cluster-api-v1.35-calico
+        - magnum-cluster-api-v1.35-cilium
     gate:
       jobs:
-        - magnum-cluster-api-v1.35.4-calico
-        - magnum-cluster-api-v1.35.4-cilium
+        - magnum-cluster-api-v1.35-calico
+        - magnum-cluster-api-v1.35-cilium
