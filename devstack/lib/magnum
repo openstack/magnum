@@ -273,7 +273,7 @@ function init_magnum {
     create_magnum_cache_dir $MAGNUM_CERTIFICATE_CACHE_DIR
 }
 
-# magnum_register_image - Register heat image for magnum with property os_distro
+# magnum_register_image - Register image for Magnum with property os_distro
 function magnum_register_image {
     local magnum_image_property="--property os_distro="
 
