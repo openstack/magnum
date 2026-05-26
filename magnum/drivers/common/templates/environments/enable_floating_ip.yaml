@@ -1,8 +1,0 @@
-resource_registry:
-  "Magnum::FloatingIPAddressSwitcher": "../fragments/floating_ip_address_switcher_public.yaml"
-
-  # kubemaster.yaml
-  "Magnum::Optional::KubeMaster::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
-
-  # kubeminion.yaml
-  "Magnum::Optional::KubeMinion::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
