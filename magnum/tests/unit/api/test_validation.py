@@ -446,3 +446,41 @@ class TestValidation(base.BaseTestCase):
 
         self.assertRaises(exception.ImageNotAuthorized,
                           test, self, cluster_template)
+
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_enforce_valid_project_id_on_create_success(
+            self, mock_os_clients, mock_pecan_request):
+
+        @v.enforce_valid_project_id_on_create()
+        def test(self, quota):
+            pass
+
+        mock_os_clients.return_value.keystone.return_value\
+            .client.get_project.return_value = mock.MagicMock()
+
+        quota = mock.MagicMock()
+        quota.project_id = 'valid-project-id'
+
+        # Should not raise anything
+        test(self, quota)
+
+        mock_os_clients.return_value.keystone.return_value\
+            .client.get_project.assert_called_once_with('valid-project-id')
+
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_enforce_valid_project_id_on_create_project_not_found(
+            self, mock_os_clients, mock_pecan_request):
+
+        @v.enforce_valid_project_id_on_create()
+        def test(self, quota):
+            pass
+
+        mock_os_clients.return_value.keystone.return_value\
+            .client.get_project.side_effect = sdk_exceptions.ResourceNotFound()
+
+        quota = mock.MagicMock()
+        quota.project_id = 'nonexistent-project-id'
+
+        self.assertRaises(exception.ProjectNotFound, test, self, quota)

@@ -17,7 +17,6 @@ import decorator
 
 import pecan
 
-from keystoneauth1 import exceptions as ka_exception
 from openstack import exceptions as sdk_exceptions
 
 from magnum.api import utils as api_utils
@@ -138,8 +137,8 @@ def _validate_project_id(project_id):
     try:
         context = pecan.request.context
         osc = clients.OpenStackClients(context)
-        osc.keystone().client.projects.get(project_id)
-    except ka_exception.http.NotFound:
+        osc.keystone().client.get_project(project_id)
+    except sdk_exceptions.ResourceNotFound:
         raise exception.ProjectNotFound(name='project_id',
                                         id=project_id)
 

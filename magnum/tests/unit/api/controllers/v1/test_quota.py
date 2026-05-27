@@ -12,7 +12,7 @@
 
 from unittest import mock
 
-from keystoneauth1 import exceptions as ka_exception
+from openstack import exceptions as sdk_exception
 
 from magnum.api.controllers.v1 import quota as api_quota
 from magnum.common import clients
@@ -236,8 +236,8 @@ class TestQuota(api_base.FunctionalTest):
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_create_quota_project_id_not_found(self, mock_keystone):
         keystone = mock.MagicMock()
-        exp = ka_exception.http.NotFound()
-        keystone.client.projects.get.side_effect = exp
+        keystone.client.get_project\
+            .side_effect = sdk_exception.ResourceNotFound
         mock_keystone.return_value = keystone
         quota_dict = apiutils.quota_post_data()
         response = self.post_json('/quotas', quota_dict, expect_errors=True)
