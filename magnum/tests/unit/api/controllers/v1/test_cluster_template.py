@@ -129,6 +129,33 @@ class TestListClusterTemplate(api_base.FunctionalTest):
             '/clustertemplates/%s' % temp_uuid)
         self.assertEqual(temp_uuid, response['uuid'])
 
+    def test_get_one_hidden_non_admin_not_found(self):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster_template(
+            self.context, uuid=temp_uuid,
+            project_id='other_project', user_id='other_user',
+            public=True, hidden=True)
+        response = self.get_json(
+            '/clustertemplates/%s' % temp_uuid, expect_errors=True)
+        self.assertEqual(404, response.status_int)
+
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_get_one_hidden_admin_succeeds(self, mock_context, mock_policy):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster_template(
+            self.context, uuid=temp_uuid, hidden=True)
+        self.context.is_admin = True
+        response = self.get_json('/clustertemplates/%s' % temp_uuid)
+        self.assertEqual(temp_uuid, response['uuid'])
+
+    def test_get_one_hidden_owner_succeeds(self):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster_template(
+            self.context, uuid=temp_uuid, hidden=True)
+        response = self.get_json('/clustertemplates/%s' % temp_uuid)
+        self.assertEqual(temp_uuid, response['uuid'])
+
     def test_get_one_by_name_multiple_cluster_template(self):
         obj_utils.create_test_cluster_template(
             self.context, name='test_clustertemplate',

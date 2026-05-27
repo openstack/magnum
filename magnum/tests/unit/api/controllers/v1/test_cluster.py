@@ -629,6 +629,29 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(202, response.status_int)
         self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
 
+    def test_create_cluster_with_hidden_template_fails(self):
+        hidden_ct = obj_utils.create_test_cluster_template(
+            self.context, uuid=uuidutils.generate_uuid(), hidden=True)
+        bdict = apiutils.cluster_post_data(
+            cluster_template_id=hidden_ct.uuid)
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual(403, response.status_int)
+
+    def test_create_cluster_with_hidden_template_admin_succeeds(self):
+        hidden_ct = obj_utils.create_test_cluster_template(
+            self.context, uuid=uuidutils.generate_uuid(), hidden=True)
+        orig_side_effect = self.mock_make_context.side_effect
+
+        def make_admin_context(*args, **kwargs):
+            kwargs['is_admin'] = True
+            return orig_side_effect(*args, **kwargs)
+
+        self.mock_make_context.side_effect = make_admin_context
+        bdict = apiutils.cluster_post_data(
+            cluster_template_id=hidden_ct.uuid)
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual(202, response.status_int)
+
     def test_create_cluster_resource_limit_reached(self):
         # override max_cluster_per_project to 1
         CONF.set_override('max_clusters_per_project', 1, group='quotas')

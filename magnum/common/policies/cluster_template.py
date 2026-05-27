@@ -150,7 +150,8 @@ rules = [
     policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'publish',
         check_str=base.RULE_ADMIN_API,
-        description='Publish an existing cluster template.',
+        description='Publish or hide an existing cluster template '
+                    '(set public or hidden flags).',
         operations=[
             {
                 'path': '/v1/clustertemplates',

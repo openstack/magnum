@@ -385,6 +385,11 @@ class ClusterTemplatesController(base.Controller):
         cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
 
+        if (cluster_template.hidden and not context.is_admin
+                and cluster_template.project_id != context.project_id):
+            raise exception.ClusterTemplateNotFound(
+                clustertemplate=cluster_template_ident)
+
         if not cluster_template.public:
             policy.enforce(context, 'clustertemplate:get',
                            cluster_template.as_dict(),

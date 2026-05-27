@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Administrators can now hide a cluster template to prevent users from
+    creating new clusters with it. Hidden templates are invisible to
+    non-admin users — fetching one returns 404 and using it in a cluster
+    create request returns 403. This is particularly useful for retiring
+    a template that still has active clusters: instead of waiting for all
+    those clusters to be deleted (which would be required before the template
+    can be removed), administrators can simply hide it so no new clusters are
+    created while existing ones continue to operate normally.

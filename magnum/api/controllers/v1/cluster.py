@@ -521,6 +521,8 @@ class ClustersController(base.Controller):
 
         temp_id = cluster.cluster_template_id
         cluster_template = objects.ClusterTemplate.get(context, temp_id)
+        if cluster_template.hidden and not context.is_admin:
+            raise exception.NotAuthorized()
         # We are not sure if we got a uuid or name here. So just set
         # explicitly the uuid of the cluster template in the cluster.
         cluster.cluster_template_id = cluster_template.uuid
