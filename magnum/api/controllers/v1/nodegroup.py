@@ -346,12 +346,12 @@ class NodeGroupController(base.Controller):
         if nodegroup.flavor_id is None or nodegroup.flavor_id == wtypes.Unset:
             nodegroup.flavor_id = cluster.flavor_id
         if nodegroup.labels is None or nodegroup.labels == wtypes.Unset:
-            nodegroup.labels = cluster.labels
+            nodegroup.labels = cluster.labels.copy()
         else:
             # If labels are provided check if the user wishes to merge
             # them with the values from the cluster.
             if nodegroup.merge_labels:
-                labels = cluster.labels
+                labels = cluster.labels.copy()
                 labels.update(nodegroup.labels)
                 nodegroup.labels = labels
 

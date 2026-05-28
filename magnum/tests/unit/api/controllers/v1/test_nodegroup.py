@@ -431,7 +431,7 @@ class TestPost(NodeGroupControllerTest):
 
     def test_create_ng_with_labels(self):
         cluster_labels = {'label1': 'value1', 'label2': 'value2'}
-        self.cluster.labels = cluster_labels
+        self.cluster.labels = cluster_labels.copy()
         self.cluster.save()
         ng_labels = {'label3': 'value3'}
         ng_dict = apiutils.nodegroup_post_data(labels=ng_labels)
@@ -440,10 +440,11 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual(202, response.status_int)
         (cluster, ng), _ = self.mock_ng_create.call_args
         self.assertEqual(ng_labels, ng.labels)
+        self.assertEqual(cluster.labels, cluster_labels)
 
     def test_create_ng_with_merge_labels(self):
         cluster_labels = {'label1': 'value1', 'label2': 'value2'}
-        self.cluster.labels = cluster_labels
+        self.cluster.labels = cluster_labels.copy()
         self.cluster.save()
         ng_labels = {'label1': 'value3', 'label4': 'value4'}
         ng_dict = apiutils.nodegroup_post_data(labels=ng_labels,
@@ -452,13 +453,14 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         (cluster, ng), _ = self.mock_ng_create.call_args
-        expected_labels = cluster.labels
+        expected_labels = cluster.labels.copy()
         expected_labels.update(ng_labels)
         self.assertEqual(expected_labels, ng.labels)
+        self.assertEqual(cluster.labels, cluster_labels)
 
     def test_create_ng_with_merge_labels_no_labels(self):
         cluster_labels = {'label1': 'value1', 'label2': 'value2'}
-        self.cluster.labels = cluster_labels
+        self.cluster.labels = cluster_labels.copy()
         self.cluster.save()
         ng_dict = apiutils.nodegroup_post_data(merge_labels=True)
         ng_dict.pop('labels')
@@ -467,6 +469,7 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual(202, response.status_int)
         (cluster, ng), _ = self.mock_ng_create.call_args
         self.assertEqual(cluster.labels, ng.labels)
+        self.assertEqual(cluster.labels, cluster_labels)
 
 
 class TestDelete(NodeGroupControllerTest):
