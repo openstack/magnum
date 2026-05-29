@@ -2,6 +2,7 @@
     queue: magnum
     templates:
       - check-requirements
+      - magnum-capi-helm-tests-cluster
       - magnum-cluster-api
       - openstack-cover-jobs
       - openstack-python3-jobs
@@ -10,8 +11,6 @@
     check:
       jobs:
         - magnum-tempest-plugin-tests-api
-        - magnum-capi-helm-tests-cluster-v1_34
     gate:
       jobs:
         - magnum-tempest-plugin-tests-api
-        - magnum-capi-helm-tests-cluster-v1_34
