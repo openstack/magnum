@@ -317,8 +317,10 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_cert_failed(self, mock_openstack_client_class,
+                                     mock_driver,
                                      mock_cert_manager,
                                      mock_trust_manager,
                                      mock_cluster_create):
@@ -343,8 +345,10 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_trust_failed(self, mock_openstack_client_class,
+                                      mock_driver,
                                       mock_cert_manager,
                                       mock_trust_manager,
                                       mock_cluster_create):
@@ -366,6 +370,33 @@ class TestHandler(db_base.DbTestCase):
             'magnum.cluster.create', notifications[0].event_type)
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[0].payload['outcome'])
+
+    @patch('magnum.drivers.heat.driver.HeatPoller')
+    @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
+    @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_create_without_trust(self, mock_openstack_client_class,
+                                  mock_driver, mock_cm, mock_trust_manager,
+                                  mock_heat_poller_class):
+        timeout = 15
+        mock_poller = mock.MagicMock()
+        mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
+        mock_heat_poller_class.return_value = mock_poller
+        mock_dr = mock.MagicMock(needs_trust=False)
+        mock_driver.return_value = mock_dr
+        mock_openstack_client_class.return_value = mock.sentinel.osc
+
+        cluster_dict = utils.get_test_cluster(node_count=1)
+        del cluster_dict['id']
+        del cluster_dict['uuid']
+        cluster_obj = objects.Cluster(self.context, **cluster_dict)
+
+        self.handler.cluster_create(self.context, cluster_obj, 1, 1, timeout)
+
+        mock_trust_manager.create_trustee_and_trust.assert_not_called()
+        mock_dr.create_cluster.assert_called_once_with(
+            self.context, cluster_obj, timeout)
 
     @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')

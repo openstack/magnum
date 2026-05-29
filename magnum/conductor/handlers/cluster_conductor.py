@@ -62,17 +62,18 @@ class Handler(object):
         minion_ng.create()
 
         try:
-            # Create trustee/trust and set them to cluster
-            trust_manager.create_trustee_and_trust(osc, cluster)
+            # Get driver first so capability flags are available
+            cluster_driver = driver.Driver.get_driver_for_cluster(context,
+                                                                  cluster)
+            # Create trustee/trust only if the driver requires it
+            if cluster_driver.needs_trust:
+                trust_manager.create_trustee_and_trust(osc, cluster)
             # Generate certificate and set the cert reference to cluster
             cert_manager.generate_certificates_to_cluster(cluster,
                                                           context=context)
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING,
                 cluster)
-            # Get driver
-            cluster_driver = driver.Driver.get_driver_for_cluster(context,
-                                                                  cluster)
             # Create cluster
             cluster_driver.create_cluster(context, cluster, create_timeout)
             cluster.save()

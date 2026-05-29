@@ -31,6 +31,7 @@ class Driver(object, metaclass=abc.ABCMeta):
 
     definitions = None
     beta = False
+    needs_trust = True
 
     @classmethod
     def load_entry_points(cls):
