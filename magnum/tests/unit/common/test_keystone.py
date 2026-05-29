@@ -178,6 +178,85 @@ class KeystoneClientTest(base.TestCase):
             trustee_user='888888', role_names=['role3'],
             impersonation=True)
 
+    @mock.patch('keystoneauth1.session.Session')
+    def test_create_trust_forbidden_with_application_credential(
+            self, mock_session, mock_ks):
+        """Keystone CVE fix blocks app cred tokens; descriptive error."""
+        mock_session.return_value.get_user_id.return_value = '123456'
+        mock_session.return_value.get_project_id.return_value = '654321'
+        mock_ks.return_value.trusts.create.side_effect = (
+            kc_exception.Forbidden())
+
+        self.ctx.roles = ['role1']
+        self.ctx.auth_token_info = {
+            'token': {'methods': ['application_credential']}
+        }
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+
+        self.assertRaises(
+            exception.ApplicationCredentialTrustForbidden,
+            ks_client.create_trust,
+            trustee_user='888888')
+
+    @mock.patch('keystoneauth1.session.Session')
+    def test_create_trust_forbidden_with_application_credential_ka(
+            self, mock_session, mock_ks):
+        """Same as above but with keystoneauth1 Forbidden."""
+        mock_session.return_value.get_user_id.return_value = '123456'
+        mock_session.return_value.get_project_id.return_value = '654321'
+        mock_ks.return_value.trusts.create.side_effect = (
+            ka_exception.Forbidden())
+
+        self.ctx.roles = ['role1']
+        self.ctx.auth_token_info = {
+            'token': {'methods': ['application_credential']}
+        }
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+
+        self.assertRaises(
+            exception.ApplicationCredentialTrustForbidden,
+            ks_client.create_trust,
+            trustee_user='888888')
+
+    @mock.patch('keystoneauth1.session.Session')
+    def test_create_trust_forbidden_non_app_cred_raises_generic(
+            self, mock_session, mock_ks):
+        """Forbidden for other reasons keeps the generic TrustCreateFailed."""
+        mock_session.return_value.get_user_id.return_value = '123456'
+        mock_session.return_value.get_project_id.return_value = '654321'
+        mock_ks.return_value.trusts.create.side_effect = (
+            kc_exception.Forbidden())
+
+        self.ctx.roles = ['role1']
+        self.ctx.auth_token_info = {
+            'token': {'methods': ['password']}
+        }
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+
+        self.assertRaises(
+            exception.TrustCreateFailed,
+            ks_client.create_trust,
+            trustee_user='888888')
+
+    @mock.patch('keystoneauth1.session.Session')
+    def test_create_trust_unrestricted_app_cred_old_keystone(
+            self, mock_session, mock_ks):
+        """Pre-CVE keystone allows unrestricted app creds; trust is created."""
+        mock_session.return_value.get_user_id.return_value = '123456'
+        mock_session.return_value.get_project_id.return_value = '654321'
+        mock_trust = mock.MagicMock()
+        mock_ks.return_value.trusts.create.return_value = mock_trust
+
+        self.ctx.roles = ['role1']
+        self.ctx.auth_token_info = {
+            'token': {'methods': ['application_credential']}
+        }
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+
+        result = ks_client.create_trust(trustee_user='888888')
+
+        self.assertEqual(mock_trust, result)
+
     @mock.patch('magnum.common.keystone.KeystoneClientV3.trustee_domain_id')
     def test_create_trustee(self, mock_tdi, mock_ks):
         expected_username = '_username'

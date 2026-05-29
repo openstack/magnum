@@ -35,6 +35,8 @@ def create_trustee_and_trust(osc, cluster):
             cluster.trustee_user_id)
         cluster.trust_id = trust.id
 
+    except exception.ApplicationCredentialTrustForbidden:
+        raise
     except Exception:
         LOG.exception(
             'Failed to create trustee and trust for Cluster: %s',

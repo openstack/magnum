@@ -195,6 +195,13 @@ class KeystoneClientV3(object):
 
         return self._trustee_domain_id
 
+    def _is_application_credential_token(self):
+        token_info = getattr(self.context, 'auth_token_info', None)
+        if not token_info:
+            return False
+        methods = token_info.get('token', {}).get('methods', [])
+        return 'application_credential' in methods
+
     def create_trust(self, trustee_user):
         trustor_user_id = self.session.get_user_id()
         trustor_project_id = self.session.get_project_id()
@@ -213,6 +220,11 @@ class KeystoneClientV3(object):
                 impersonation=True,
                 allow_redelegation=False,
                 role_names=roles)
+        except (kc_exception.Forbidden, ka_exception.Forbidden):
+            if self._is_application_credential_token():
+                raise exception.ApplicationCredentialTrustForbidden()
+            LOG.exception('Failed to create trust')
+            raise exception.TrustCreateFailed(trustee_user_id=trustee_user)
         except Exception:
             LOG.exception('Failed to create trust')
             raise exception.TrustCreateFailed(

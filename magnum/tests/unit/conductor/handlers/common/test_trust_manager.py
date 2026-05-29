@@ -74,6 +74,34 @@ class TrustManagerTestCase(base.BaseTestCase):
                           self.osc,
                           mock_cluster)
 
+    @patch('magnum.common.utils.generate_password')
+    def test_create_trustee_and_trust_app_cred_forbidden_propagates(
+            self, mock_generate_password):
+        """ApplicationCredentialTrustForbidden must propagate with its message.
+
+        If it were caught and re-raised as TrusteeOrTrustToClusterFailed the
+        actionable error message would be lost and the API caller would get no
+        guidance on how to fix the issue.
+        """
+        mock_password = "password_mock"
+        mock_generate_password.return_value = mock_password
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = 'mock_cluster_uuid'
+        mock_cluster.project_id = 'mock_cluster_project_id'
+        mock_keystone = mock.MagicMock()
+        mock_trustee = mock.MagicMock()
+        mock_trustee.id = 'mock_trustee_id'
+        mock_trustee.name = 'mock_trustee_username'
+        self.osc.keystone.return_value = mock_keystone
+        mock_keystone.create_trustee.return_value = mock_trustee
+        mock_keystone.create_trust.side_effect = (
+            exception.ApplicationCredentialTrustForbidden())
+
+        self.assertRaises(exception.ApplicationCredentialTrustForbidden,
+                          trust_manager.create_trustee_and_trust,
+                          self.osc,
+                          mock_cluster)
+
     def test_delete_trustee_and_trust(self):
         mock_cluster = mock.MagicMock()
         mock_cluster.trust_id = 'trust_id'

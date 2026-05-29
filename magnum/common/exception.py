@@ -360,6 +360,12 @@ class ExternalNetworkNotFound(ResourceNotFound):
     code = 400
 
 
+class ApplicationCredentialTrustForbidden(NotAuthorized):
+    message = _("Application credential tokens cannot create trusts. "
+                "Re-authenticate using a password or federated token "
+                "(not an application credential) before creating a cluster.")
+
+
 class TrustCreateFailed(MagnumException):
     message = _("Failed to create trust for trustee %(trustee_user_id)s.")
 
