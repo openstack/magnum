@@ -333,8 +333,12 @@ class Connection(api.Connection):
             query = session.query(models.ClusterTemplate)
             query = self._add_tenant_filters(context, query)
             public_q = session.query(models.ClusterTemplate).filter_by(
-                public=True)
+                public=True, hidden=False)
             query = query.union(public_q)
+            if context.is_admin:
+                hidden_q = session.query(models.ClusterTemplate).filter_by(
+                    public=True, hidden=True)
+                query = query.union(hidden_q)
             query = query.filter(
                 models.ClusterTemplate.id == cluster_template_id)
             try:
@@ -348,8 +352,12 @@ class Connection(api.Connection):
             query = session.query(models.ClusterTemplate)
             query = self._add_tenant_filters(context, query)
             public_q = session.query(models.ClusterTemplate).filter_by(
-                public=True)
+                public=True, hidden=False)
             query = query.union(public_q)
+            if context.is_admin:
+                hidden_q = session.query(models.ClusterTemplate).filter_by(
+                    public=True, hidden=True)
+                query = query.union(hidden_q)
             query = query.filter(
                 models.ClusterTemplate.uuid == cluster_template_uuid)
             try:
@@ -363,8 +371,12 @@ class Connection(api.Connection):
             query = session.query(models.ClusterTemplate)
             query = self._add_tenant_filters(context, query)
             public_q = session.query(models.ClusterTemplate).filter_by(
-                public=True)
+                public=True, hidden=False)
             query = query.union(public_q)
+            if context.is_admin:
+                hidden_q = session.query(models.ClusterTemplate).filter_by(
+                    public=True, hidden=True)
+                query = query.union(hidden_q)
             query = query.filter(
                 models.ClusterTemplate.name == cluster_template_name)
             try:

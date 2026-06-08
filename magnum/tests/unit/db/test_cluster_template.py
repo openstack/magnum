@@ -93,7 +93,18 @@ class DbClusterTemplateTestCase(base.DbTestCase):
         self.assertEqual(ct['uuid'], cluster_template.uuid)
 
     def test_get_cluster_template_by_id_hidden(self):
-        ct = utils.create_test_cluster_template(user_id='not_me', hidden=True)
+        ct = utils.create_test_cluster_template(
+            user_id='not_me', project_id='not_my_project',
+            public=True, hidden=True)
+        self.assertRaises(exception.ClusterTemplateNotFound,
+                          self.dbapi.get_cluster_template_by_id,
+                          self.context, ct['id'])
+
+    def test_get_cluster_template_by_id_hidden_admin(self):
+        ct = utils.create_test_cluster_template(
+            user_id='not_me', project_id='not_my_project',
+            public=True, hidden=True)
+        self.context.is_admin = True
         cluster_template = self.dbapi.get_cluster_template_by_id(
             self.context, ct['id'])
         self.assertEqual(ct['uuid'], cluster_template.uuid)
@@ -111,7 +122,18 @@ class DbClusterTemplateTestCase(base.DbTestCase):
         self.assertEqual(ct['id'], cluster_template.id)
 
     def test_get_cluster_template_by_uuid_hidden(self):
-        ct = utils.create_test_cluster_template(user_id='not_me', hidden=True)
+        ct = utils.create_test_cluster_template(
+            user_id='not_me', project_id='not_my_project',
+            public=True, hidden=True)
+        self.assertRaises(exception.ClusterTemplateNotFound,
+                          self.dbapi.get_cluster_template_by_uuid,
+                          self.context, ct['uuid'])
+
+    def test_get_cluster_template_by_uuid_hidden_admin(self):
+        ct = utils.create_test_cluster_template(
+            user_id='not_me', project_id='not_my_project',
+            public=True, hidden=True)
+        self.context.is_admin = True
         cluster_template = self.dbapi.get_cluster_template_by_uuid(
             self.context, ct['uuid'])
         self.assertEqual(ct['id'], cluster_template.id)
@@ -134,7 +156,18 @@ class DbClusterTemplateTestCase(base.DbTestCase):
         self.assertEqual(ct['uuid'], res.uuid)
 
     def test_get_cluster_template_by_name_hidden(self):
-        ct = utils.create_test_cluster_template(user_id='not_me', hidden=True)
+        ct = utils.create_test_cluster_template(
+            user_id='not_me', project_id='not_my_project',
+            public=True, hidden=True)
+        self.assertRaises(exception.ClusterTemplateNotFound,
+                          self.dbapi.get_cluster_template_by_name,
+                          self.context, ct['name'])
+
+    def test_get_cluster_template_by_name_hidden_admin(self):
+        ct = utils.create_test_cluster_template(
+            user_id='not_me', project_id='not_my_project',
+            public=True, hidden=True)
+        self.context.is_admin = True
         res = self.dbapi.get_cluster_template_by_name(self.context, ct['name'])
         self.assertEqual(ct['id'], res.id)
         self.assertEqual(ct['uuid'], res.uuid)
