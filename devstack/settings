@@ -14,9 +14,15 @@
 # PHYSICAL_NETWORK=public
 # OVS_PHYSICAL_BRIDGE=br-ex
 
-# This option controls whether or not to enforce scope when evaluating policies. Learn more:
-# https://docs.openstack.org/oslo.policy/latest/configuration/index.html#oslo_policy.enforce_scope
+# This option controls whether or not to use the new defaults when evaluating policies. Learn more:
+# https://docs.openstack.org/oslo.policy/latest/configuration/index.html#oslo_policy.enforce_new_defaults
 MAGNUM_ENFORCE_SCOPE=$(trueorfalse False MAGNUM_ENFORCE_SCOPE)
+# MAGNUM_ENFORCE_SCOPE is a deprecated alias for MAGNUM_ENFORCE_NEW_DEFAULTS.
+MAGNUM_ENFORCE_NEW_DEFAULTS=$(trueorfalse False MAGNUM_ENFORCE_NEW_DEFAULTS)
+# Support the deprecated MAGNUM_ENFORCE_SCOPE variable as a fallback.
+if [[ -n "${MAGNUM_ENFORCE_SCOPE}" ]]; then
+    MAGNUM_ENFORCE_NEW_DEFAULTS=$(trueorfalse False MAGNUM_ENFORCE_SCOPE)
+fi
 
 # Enable Magnum services
 enable_service magnum-api
