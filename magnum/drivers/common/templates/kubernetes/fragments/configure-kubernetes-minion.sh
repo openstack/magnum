@@ -7,6 +7,21 @@ set -e
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
+is_true() {
+    [ "$(echo "${1:-false}" | tr '[:upper:]' '[:lower:]')" = "true" ]
+}
+
+# During a pure CA rotation the certificates have already been replaced
+# and services restarted by rotate-kubernetes-ca-certs-worker.sh.
+# Skip the full kubernetes minion reconfiguration to avoid unnecessary
+# CNI plugin downloads, service file rewrites, and potential failures
+# under the strict shell settings inherited from the rotation script.
+if [ -n "${CA_ROTATION_ID:-}" ] && \
+   ! is_true "${IS_UPGRADE:-false}" && \
+   ! is_true "${IS_RESIZE:-false}"; then
+    echo "Pure CA rotation detected – skipping kubernetes minion reconfiguration"
+else
+
 echo "configuring kubernetes (minion)"
 
 version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
@@ -25,13 +40,14 @@ if [ ! -z "$NO_PROXY" ]; then
 fi
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
-    $ssh_cmd mkdir -p /opt/cni/bin
+    cni_bin_dir="/opt/cni/bin"
+    $ssh_cmd mkdir -p "${cni_bin_dir}"
 
     cni_plugin_path="/srv/magnum/kubernetes/cni"
     $ssh_cmd mkdir -p ${cni_plugin_path}
     $ssh_cmd curl --retry 5 --retry-delay 10 -L https://github.com/containernetworking/plugins/releases/download/${FLANNEL_CNI_TAG}/cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz -o ${cni_plugin_path}/cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz
-    $ssh_cmd tar -C /opt/cni/bin -xzf ${cni_plugin_path}/cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz
-    $ssh_cmd chmod +x /opt/cni/bin/*
+    $ssh_cmd tar -C "${cni_bin_dir}" -xzf ${cni_plugin_path}/cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz
+    $ssh_cmd chmod +x "${cni_bin_dir}"/*
 fi
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
@@ -330,3 +346,4 @@ EOF
 cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=$KUBE_MASTER_URI
 EOF
+fi

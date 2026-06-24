@@ -99,7 +99,8 @@ class Handler(object):
         return cluster
 
     def cluster_update(self, context, cluster, node_count,
-                       health_status, health_status_reason, rollback=False):
+                       health_status, health_status_reason, rollback=False,
+                       labels_changed=False):
         LOG.debug('cluster_heat cluster_update')
 
         osc = clients.OpenStackClients(context)
@@ -111,61 +112,95 @@ class Handler(object):
             fields.ClusterStatus.ROLLBACK_COMPLETE,
             fields.ClusterStatus.SNAPSHOT_COMPLETE,
             fields.ClusterStatus.CHECK_COMPLETE,
-            fields.ClusterStatus.ADOPT_COMPLETE
+            fields.ClusterStatus.ADOPT_COMPLETE,
+            fields.ClusterStatus.UPDATE_FAILED,
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            operation = _('Updating a cluster when status is '
-                          '"%s"') % cluster.status
-            raise exception.NotSupported(operation=operation)
+            reason = _('Updating a cluster when status is '
+                       '"%s"') % cluster.status
+            failed_details = self._collect_heat_failed_resources(
+                context, cluster)
+            if failed_details:
+                reason = _('%(reason)s. Failed stack resources: '
+                           '%(details)s. Delete and recreate the cluster, '
+                           'or resolve the failed resources manually before '
+                           'retrying.') % {'reason': reason,
+                                           'details': failed_details}
+            raise exception.NotSupported(operation=reason)
 
         # Updates will be only reflected to the default worker
         # nodegroup.
         worker_ng = cluster.default_ng_worker
-        if (worker_ng.node_count == node_count and
-                cluster.health_status == health_status and
-                cluster.health_status_reason == health_status_reason):
+        node_count_changed = worker_ng.node_count != node_count
+        health_changed = (cluster.health_status != health_status or
+                          cluster.health_status_reason != health_status_reason)
+
+        if not node_count_changed and not health_changed and not labels_changed:
             return
 
         cluster.health_status = health_status
         cluster.health_status_reason = health_status_reason
 
-        # It's not necessary to trigger driver's cluster update if it's
-        # only health status update
-        if worker_ng.node_count == node_count:
+        # If only health status changed, save and return — no stack update.
+        if not node_count_changed and not labels_changed:
             cluster.save()
             return cluster
-
-        # Backup the old node count so that we can restore it
-        # in case of an exception.
-        old_node_count = worker_ng.node_count
-
-        manager = scale_manager.get_scale_manager(context, osc, cluster)
 
         # Get driver
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
-        # Update cluster
+
+        # Backup the old node count so that we can restore it
+        # in case of an exception.
+        old_node_count = worker_ng.node_count
+
         try:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING,
                 cluster)
-            worker_ng.node_count = node_count
-            worker_ng.save()
-            cluster_driver.update_cluster(context, cluster, manager, rollback)
+
+            if labels_changed and not node_count_changed:
+                # Labels-only update: re-extract template definition with
+                # new labels and push to all nodegroups. This triggers the
+                # reconciler on each node to converge to the new desired
+                # state (enable/disable addons, change chart versions, etc.)
+                LOG.info('Updating cluster %s labels (reconfigure)',
+                         cluster.uuid)
+
+                # Sync patched cluster labels to default nodegroups so
+                # that a later upgrade (which reads nodegroup.labels via
+                # get_new_labels) does not revert user changes.
+                for ng in [cluster.default_ng_master,
+                           cluster.default_ng_worker]:
+                    if ng is not None:
+                        ng.labels = cluster.labels.copy()
+                        ng.save()
+
+                cluster_driver.reconfigure_cluster(context, cluster)
+            else:
+                # Node count change (scaling) — original behavior.
+                manager = scale_manager.get_scale_manager(
+                    context, osc, cluster)
+                worker_ng.node_count = node_count
+                worker_ng.save()
+                cluster_driver.update_cluster(
+                    context, cluster, manager, rollback)
+
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None
         except Exception as e:
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)
             cluster.save()
-            # Restore the node_count
-            worker_ng.node_count = old_node_count
-            worker_ng.save()
+            if node_count_changed:
+                # Restore the node_count
+                worker_ng.node_count = old_node_count
+                worker_ng.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
@@ -211,16 +246,34 @@ class Handler(object):
                 cluster)
             return None
         except exc.HTTPConflict:
-            conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
-                cluster)
-            raise exception.OperationInProgress(cluster_name=cluster.name)
+            # If the cluster is already DELETE_FAILED, allow the retry —
+            # the user is explicitly asking to delete again.
+            if cluster.status == fields.ClusterStatus.DELETE_FAILED:
+                LOG.info('Retrying delete for DELETE_FAILED cluster %s',
+                         cluster.uuid)
+                cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+                cluster.status_reason = None
+                cluster.save()
+            else:
+                conductor_utils.notify_about_cluster_operation(
+                    context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
+                    cluster)
+                raise exception.OperationInProgress(
+                    cluster_name=cluster.name)
         except Exception as unexp:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
                 cluster)
             cluster.status = fields.ClusterStatus.DELETE_FAILED
-            cluster.status_reason = six.text_type(unexp)
+            reason = six.text_type(unexp)
+            # Append blocking Heat resource details so the user can see
+            # exactly what prevented deletion.
+            failed_details = self._collect_heat_failed_resources(
+                context, cluster)
+            if failed_details:
+                reason = '%s | Blocking resources: %s' % (
+                    reason, failed_details)
+            cluster.status_reason = reason
             cluster.save()
             raise
 
@@ -255,9 +308,17 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            operation = _('Resizing a cluster when status is '
-                          '"%s"') % cluster.status
-            raise exception.NotSupported(operation=operation)
+            reason = _('Resizing a cluster when status is '
+                       '"%s"') % cluster.status
+            failed_details = self._collect_heat_failed_resources(
+                context, cluster)
+            if failed_details:
+                reason = _('%(reason)s. Failed stack resources: '
+                           '%(details)s. Delete and recreate the cluster, '
+                           'or resolve the failed resources manually before '
+                           'retrying.') % {'reason': reason,
+                                           'details': failed_details}
+            raise exception.NotSupported(operation=reason)
 
         resize_manager = scale_manager.get_scale_manager(context, osc, cluster)
 
@@ -302,6 +363,38 @@ class Handler(object):
         cluster.save()
         return cluster
 
+    def _collect_heat_failed_resources(self, context, cluster):
+        """Query Heat for FAILED resources in the cluster stack.
+
+        Returns a human-readable summary string, or empty string if
+        no failed resources found or Heat is unreachable.
+        """
+        try:
+            osc = clients.OpenStackClients(context)
+            stack_id = cluster.stack_id
+            if not stack_id:
+                return ''
+            failed_resources = osc.heat().resources.list(
+                stack_id, nested_depth=2,
+                filters={'status': 'FAILED'})
+        except Exception as e:
+            LOG.warning("Failed to retrieve failed resources for "
+                        "cluster %(cluster)s from Heat stack %(stack)s: "
+                        "%(err)s",
+                        {'cluster': cluster.uuid,
+                         'stack': cluster.stack_id, 'err': e})
+            return ''
+
+        if not failed_resources:
+            return ''
+
+        parts = []
+        for res in failed_resources:
+            parts.append('%s (%s): %s' % (
+                res.resource_name, res.resource_type,
+                res.resource_status_reason))
+        return '; '.join(parts)
+
     def cluster_upgrade(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, rollback=False):
         LOG.debug('cluster_conductor cluster_upgrade')
@@ -322,9 +415,18 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
                 cluster)
-            operation = _('Upgrading a cluster when status is '
-                          '"%s"') % cluster.status
-            raise exception.NotSupported(operation=operation)
+            reason = _('Upgrading a cluster when status is '
+                       '"%s"') % cluster.status
+            # Collect failed Heat resources to give the user actionable info.
+            failed_details = self._collect_heat_failed_resources(
+                context, cluster)
+            if failed_details:
+                reason = _('%(reason)s. Failed stack resources: '
+                           '%(details)s. Delete and recreate the cluster, '
+                           'or resolve the failed resources manually before '
+                           'retrying.') % {'reason': reason,
+                                           'details': failed_details}
+            raise exception.NotSupported(operation=reason)
 
         # Get driver - use nodegroup's cluster_template_id if available for non-default nodegroups
         if (nodegroup and not nodegroup.is_default and 

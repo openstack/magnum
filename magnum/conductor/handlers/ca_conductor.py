@@ -65,11 +65,17 @@ class Handler(object):
     def rotate_ca_certificate(self, context, cluster):
         LOG.info('start rotate_ca_certificate for cluster: %s', cluster.uuid)
 
+        old_ca_cert_ref = cluster.ca_cert_ref
+        old_magnum_cert_ref = cluster.magnum_cert_ref
+        generated_new_certificates = False
+
         allow_update_status = (
             fields.ClusterStatus.CREATE_COMPLETE,
             fields.ClusterStatus.UPDATE_COMPLETE,
+            fields.ClusterStatus.UPDATE_FAILED,
             fields.ClusterStatus.RESUME_COMPLETE,
             fields.ClusterStatus.RESTORE_COMPLETE,
+            fields.ClusterStatus.ROLLBACK_FAILED,
             fields.ClusterStatus.ROLLBACK_COMPLETE,
             fields.ClusterStatus.SNAPSHOT_COMPLETE,
             fields.ClusterStatus.CHECK_COMPLETE,
@@ -87,12 +93,20 @@ class Handler(object):
             # re-generate the ca certs
             cert_manager.generate_certificates_to_cluster(cluster,
                                                           context=context)
+            generated_new_certificates = True
+            cert_manager.delete_client_files(cluster, context=context)
             cluster_driver = driver.Driver.get_driver_for_cluster(context,
                                                                   cluster)
             cluster_driver.rotate_ca_certificate(context, cluster)
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None
         except Exception as e:
+            if generated_new_certificates:
+                cert_manager.delete_certificates_from_cluster(
+                    cluster, context=context)
+                cluster.ca_cert_ref = old_ca_cert_ref
+                cluster.magnum_cert_ref = old_magnum_cert_ref
+            cert_manager.delete_client_files(cluster, context=context)
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)
             cluster.save()

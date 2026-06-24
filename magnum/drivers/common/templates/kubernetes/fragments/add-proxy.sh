@@ -24,6 +24,20 @@ BASH_RC=~/.bashrc
 
 mkdir -p ${SERVICE_DIR}
 
+quote_shell_value() {
+    printf "%s" "$1" | sed "s/'/'\\\\''/g"
+}
+
+upsert_bash_export() {
+    var_name="$1"
+    var_value="$2"
+    bash_rc_path="$3"
+    escaped_value=$(quote_shell_value "$var_value")
+
+    sed -i "/^declare -x ${var_name}=/d;/^export ${var_name}=/d" "${bash_rc_path}"
+    printf "export %s='%s'\n" "${var_name}" "${escaped_value}" >> "${bash_rc_path}"
+}
+
 if [ -n "$HTTP_PROXY" ]; then
     cat <<EOF | sed "s/^ *//" > $HTTP_PROXY_CONF
     [Service]
@@ -33,7 +47,7 @@ EOF
     RUNTIME_RESTART=1
 
     if [ -f "$BASH_RC" ]; then
-        echo "declare -x http_proxy=$HTTP_PROXY" >> $BASH_RC
+        upsert_bash_export "http_proxy" "$HTTP_PROXY" "$BASH_RC"
     else
         echo "File $BASH_RC does not exist, not setting http_proxy"
     fi
@@ -48,7 +62,7 @@ EOF
     RUNTIME_RESTART=1
 
     if [ -f "$BASH_RC" ]; then
-        echo "declare -x https_proxy=$HTTPS_PROXY" >> $BASH_RC
+        upsert_bash_export "https_proxy" "$HTTPS_PROXY" "$BASH_RC"
     else
         echo "File $BASH_RC does not exist, not setting https_proxy"
     fi
@@ -63,7 +77,7 @@ EOF
     RUNTIME_RESTART=1
 
     if [ -f "$BASH_RC" ]; then
-        echo "declare -x no_proxy=$NO_PROXY" >> $BASH_RC
+        upsert_bash_export "no_proxy" "$NO_PROXY" "$BASH_RC"
     else
         echo "File $BASH_RC does not exist, not setting no_proxy"
     fi

@@ -7,9 +7,24 @@ set -x
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
 CERT_DIR=/etc/kubernetes/certs
+BASH_RC_FILE=/etc/bashrc
 
 # root kubeconfig
 ADMIN_KUBECONFIG=/etc/kubernetes/admin.conf
+
+upsert_bash_export() {
+    var_name="$1"
+    var_value="$2"
+    shell_file="$3"
+    escaped_value=$(printf "%s" "$var_value" | sed "s/'/'\\\\''/g")
+
+    if [ ! -f "${shell_file}" ]; then
+        touch "${shell_file}"
+    fi
+
+    sed -i "/^export ${var_name}=/d" "${shell_file}"
+    printf "export %s='%s'\n" "${var_name}" "${escaped_value}" >> "${shell_file}"
+}
 
 if [ "$(echo $NODEGROUP_ROLE | tr '[:upper:]' '[:lower:]')" == "master" ]; then
     # Prepare master kubeconfig content
@@ -88,10 +103,8 @@ else
     rm ${ADMIN_KUBECONFIG}.tmp
 fi
 
-# Add to bashrc if not already there
-if ! grep -q "export KUBECONFIG=${ADMIN_KUBECONFIG}" /etc/bashrc; then
-    echo "export KUBECONFIG=${ADMIN_KUBECONFIG}" >> /etc/bashrc
-fi
+# Keep a single canonical KUBECONFIG export for interactive root shells.
+upsert_bash_export "KUBECONFIG" "${ADMIN_KUBECONFIG}" "${BASH_RC_FILE}"
 
 export KUBECONFIG=${ADMIN_KUBECONFIG}
 $ssh_cmd mkdir -p $HOME/.kube

@@ -432,10 +432,13 @@ class Connection(api.Connection):
                     clustertemplate=cluster_template_id)
 
             if self._is_cluster_template_referenced(session, ref['uuid']):
-                # NOTE(flwang): We only allow to update ClusterTemplate to be
-                # public, hidden and rename
+                # Allow updating public, hidden, name, and labels on
+                # referenced templates.  Labels control addon versions
+                # and feature flags that operators need to update
+                # without recreating templates.
+                allowed_keys = {'public', 'hidden', 'name', 'labels'}
                 if (not self._is_publishing_cluster_template(values) and
-                        list(six.viewkeys(values)) != ["name"]):
+                        not set(values.keys()).issubset(allowed_keys)):
                     raise exception.ClusterTemplateReferenced(
                         clustertemplate=cluster_template_id)
 

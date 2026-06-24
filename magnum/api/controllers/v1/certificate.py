@@ -27,6 +27,15 @@ from magnum.common import policy
 from magnum import objects
 
 
+def _get_cluster_resource(cluster_ident, admin_action):
+    context = pecan.request.context
+    if context.is_admin:
+        policy.enforce(context, admin_action, action=admin_action)
+        context.all_tenants = True
+
+    return api_utils.get_resource('Cluster', cluster_ident)
+
+
 class ClusterID(wtypes.Base):
     """API representation of a cluster ID
 
@@ -61,7 +70,8 @@ class Certificate(base.APIBase):
     def _set_cluster_uuid(self, value):
         if value and self._cluster_uuid != value:
             try:
-                self._cluster = api_utils.get_resource('Cluster', value)
+                self._cluster = _get_cluster_resource(
+                    value, 'cluster:get_one_all_projects')
                 self._cluster_uuid = self._cluster.uuid
             except exception.ClusterNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -105,8 +115,8 @@ class Certificate(base.APIBase):
 
     def get_cluster(self):
         if not self._cluster:
-            self._cluster = api_utils.get_resource('Cluster',
-                                                   self.cluster_uuid)
+            self._cluster = _get_cluster_resource(
+                self.cluster_uuid, 'cluster:get_one_all_projects')
         return self._cluster
 
     @staticmethod
@@ -157,7 +167,8 @@ class CertificateController(base.Controller):
         logical name of the cluster.
         """
         context = pecan.request.context
-        cluster = api_utils.get_resource('Cluster', cluster_ident)
+        cluster = _get_cluster_resource(cluster_ident,
+                                        'cluster:get_one_all_projects')
         policy.enforce(context, 'certificate:get', cluster.as_dict(),
                        action='certificate:get')
         certificate = pecan.request.rpcapi.get_ca_certificate(cluster)
@@ -185,7 +196,8 @@ class CertificateController(base.Controller):
     @expose.expose(ClusterID, types.uuid_or_name, status_code=202)
     def patch(self, cluster_ident):
         context = pecan.request.context
-        cluster = api_utils.get_resource('Cluster', cluster_ident)
+        cluster = _get_cluster_resource(cluster_ident,
+                                        'cluster:update_all_projects')
         policy.enforce(context, 'certificate:rotate_ca', cluster.as_dict(),
                        action='certificate:rotate_ca')
         if cluster.cluster_template.tls_disabled:

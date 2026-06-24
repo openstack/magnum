@@ -41,7 +41,6 @@ class K8sUbuntuTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
-        extra_params['username'] = context.user_name
         osc = self.get_osc(context)
         extra_params['region_name'] = osc.cinder_region_name()
 
@@ -67,62 +66,22 @@ class K8sUbuntuTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             raise exception.InvalidParameterValue(_(
                 '"cluster_user_trust" must be set to True in magnum.conf when '
                 '"cloud_provider_enabled" label is set to true.'))
-        if (cluster_template.volume_driver == 'cinder'
-                and cloud_provider_enabled.lower() == 'false'):
-            raise exception.InvalidParameterValue(_(
-                '"cinder" volume driver needs "cloud_provider_enabled" label '
-                'to be true or unset.'))
         extra_params['cloud_provider_enabled'] = cloud_provider_enabled
 
-        label_list = ['coredns_tag',
-                      'kube_tag', 'container_infra_prefix',
-                      'availability_zone',
-                      'cgroup_driver',
-                      'container_runtime',
-                      'containerd_version',
-                      'containerd_tarball_url',
-                      'containerd_tarball_sha256',
-                      'calico_tag',
-                      'calico_kube_controllers_tag', 'calico_ipv4pool',
-                      'calico_ipv4pool_ipip',
-                      'manila_csi_plugin_enabled',
-                      'cinder_csi_plugin_enabled',
-                      'cinder_csi_enabled', 'cinder_csi_plugin_tag',
-                      'csi_attacher_tag', 'csi_provisioner_tag',
-                      'csi_snapshotter_tag', 'csi_resizer_tag',
-                      'csi_node_driver_registrar_tag',
-                      'etcd_tag', 'flannel_tag', 'flannel_cni_tag',
-                      'cloud_provider_tag',
-                      'prometheus_tag', 'grafana_tag',
+        label_list = ['kube_tag', 'container_infra_prefix',
                       'heat_container_agent_tag',
-                      'keystone_auth_enabled', 'k8s_keystone_auth_tag',
-                      'heapster_enabled',
+                      'availability_zone',
+                      'container_runtime',
+                      'manila_csi_enabled',
+                      'cinder_csi_enabled',
+                      'gpu_operator_enabled',
+                      'keystone_auth_enabled',
                       'metrics_server_enabled',
-                      'metrics_server_chart_tag',
-                      'monitoring_enabled',
-                      'prometheus_operator_chart_tag',
-                      'prometheus_adapter_enabled',
-                      'prometheus_adapter_chart_tag',
-                      'prometheus_adapter_configmap',
                       'selinux_mode',
-                      'tiller_enabled',
-                      'tiller_tag',
-                      'tiller_namespace',
-                      'helm_client_url', 'helm_client_sha256',
-                      'helm_client_tag',
-                      'traefik_ingress_controller_tag',
-                      'node_problem_detector_tag',
-                      'nginx_ingress_controller_tag',
-                      'nginx_ingress_controller_chart_tag',
                       'auto_healing_enabled', 'auto_scaling_enabled',
-                      'auto_healing_controller', 'magnum_auto_healer_tag',
-                      'draino_tag', 'autoscaler_tag',
-                      'min_node_count', 'max_node_count', 'npd_enabled',
-                      'ostree_remote', 'ostree_commit',
-                      'use_podman', 'kube_image_digest',
-                      'metrics_scraper_tag',
-                      'kubernetes_tarball_sha512',
-                      'kubernetes_tarball_url']
+                      'auto_healing_controller',
+                      'min_node_count', 'max_node_count',
+                      'use_podman', 'kube_image_digest']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 
@@ -131,12 +90,7 @@ class K8sUbuntuTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             if label_value:
                 extra_params[label] = label_value
 
-        csr_keys = x509.generate_csr_and_key(u"Kubernetes Service Account")
-
-        extra_params['kube_service_account_key'] = \
-            csr_keys["public_key"].replace("\n", "\\n")
-        extra_params['kube_service_account_private_key'] = \
-            csr_keys["private_key"].replace("\n", "\\n")
+        self._set_service_account_params(context, cluster, extra_params)
 
         extra_params['project_id'] = cluster.project_id
         extra_params['post_install_manifest_url'] = \
@@ -148,6 +102,7 @@ class K8sUbuntuTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
         self._set_cert_manager_params(context, cluster, extra_params)
         self._get_keystone_auth_default_policy(extra_params)
+        extra_params.pop('project_id', None)
         self._set_volumes(context, cluster, extra_params)
 
         return super(K8sUbuntuTemplateDefinition,
@@ -171,6 +126,48 @@ class K8sUbuntuTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 extra_params['ca_key'] = x509.decrypt_key(
                     ca_cert.get_private_key(),
                     ca_cert.get_private_key_passphrase()).replace("\n", "\\n")
+
+    def _set_service_account_params(self, context, cluster, extra_params):
+        if cluster.stack_id:
+            try:
+                stack = self.get_osc(context).heat().stacks.get(
+                    cluster.stack_id)
+                stack_params = stack.parameters or {}
+                extra_params['ca_rotation_id'] = stack_params.get(
+                    'ca_rotation_id', '')
+                service_account_key = template_def.get_unmasked_heat_parameter(
+                    stack_params,
+                    'kube_service_account_key')
+                service_account_private_key = (
+                    template_def.get_unmasked_heat_parameter(
+                        stack_params,
+                    'kube_service_account_private_key')
+                )
+                if service_account_key and service_account_private_key:
+                    extra_params['kube_service_account_key'] = (
+                        service_account_key)
+                    extra_params['kube_service_account_private_key'] = (
+                        service_account_private_key)
+                    return
+                if (template_def.is_masked_heat_parameter(
+                        stack_params.get('kube_service_account_key')) or
+                        template_def.is_masked_heat_parameter(
+                            stack_params.get(
+                                'kube_service_account_private_key'))):
+                    LOG.debug('Service account keys for cluster %s are '
+                              'masked in Heat output; preserving existing '
+                              'stack values.', cluster.uuid)
+                    return
+            except Exception as exc:
+                LOG.debug('Falling back to newly generated service account '
+                          'keys for cluster %s: %s', cluster.uuid, exc)
+
+        extra_params.setdefault('ca_rotation_id', '')
+        csr_keys = x509.generate_csr_and_key(u"Kubernetes Service Account")
+        extra_params['kube_service_account_key'] = (
+            csr_keys["public_key"].replace("\n", "\\n"))
+        extra_params['kube_service_account_private_key'] = (
+            csr_keys["private_key"].replace("\n", "\\n"))
 
     def _get_keystone_auth_default_policy(self, extra_params):
         # NOTE(flwang): This purpose of this function is to make the default

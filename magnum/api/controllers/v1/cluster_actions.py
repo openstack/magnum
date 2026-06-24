@@ -10,6 +10,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import re
+
 import pecan
 import wsme
 from wsme import types as wtypes
@@ -21,6 +23,52 @@ from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
+
+
+def _get_cluster_resource(cluster_ident, admin_action=None):
+    context = pecan.request.context
+    if context.is_admin and admin_action:
+        policy.enforce(context, admin_action, action=admin_action)
+        context.all_tenants = True
+
+    return api_utils.get_resource('Cluster', cluster_ident)
+
+
+def _parse_kube_minor(tag):
+    if not tag:
+        return None
+    m = re.match(r'v?(\d+)\.(\d+)', tag)
+    if m:
+        return int(m.group(1)) * 1000 + int(m.group(2))
+    return None
+
+
+def _validate_upgrade_version_skew(cluster, new_cluster_template, nodegroup):
+    """Reject upgrades where the target kube_tag is >±1 minor from the cluster.
+
+    For default nodegroups the target becomes the new cluster version, so
+    only forward skew (+1) is meaningful.  For non-default nodegroups the
+    check compares against the current cluster control-plane version.
+    """
+    new_tag = (new_cluster_template.labels or {}).get('kube_tag')
+    cluster_tag = (cluster.labels or {}).get('kube_tag')
+    if not cluster_tag:
+        cluster_tag = (cluster.cluster_template.labels or {}).get('kube_tag')
+    if not new_tag or not cluster_tag:
+        return
+    # For default nodegroups the upgrade target IS the new cluster version,
+    # so skip the skew check — upstream version validation handles it.
+    if nodegroup.is_default:
+        return
+    new_minor = _parse_kube_minor(new_tag)
+    cluster_minor = _parse_kube_minor(cluster_tag)
+    if new_minor is None or cluster_minor is None:
+        return
+    if abs(new_minor - cluster_minor) > 1:
+        raise exception.InvalidParameterValue(
+            "Kubernetes version skew between the cluster control plane "
+            "(%s) and the upgrade target (%s) exceeds the supported "
+            "range of +/-1 minor version." % (cluster_tag, new_tag))
 
 
 class ClusterID(wtypes.Base):
@@ -61,8 +109,8 @@ class ClusterUpgradeRequest(base.APIBase):
     This class enforces type checking and value constraints.
     """
 
-    max_batch_size = wtypes.IntegerType(minimum=1)
-    """Max batch size of nodes to be upraded in parallel"""
+    max_batch_size = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    """Max batch size of nodes to be upgraded in parallel"""
 
     nodegroup = wtypes.StringType(min_length=1, max_length=255)
     """Group of nodes to be uprgaded (master or node)"""
@@ -90,7 +138,8 @@ class ActionsController(base.Controller):
         :param cluster_ident: UUID of a cluster or logical name of the cluster.
         """
         context = pecan.request.context
-        cluster = api_utils.get_resource('Cluster', cluster_ident)
+        cluster = _get_cluster_resource(cluster_ident,
+                                        'cluster:resize_all_projects')
         policy.enforce(context, 'cluster:resize', cluster,
                        action='cluster:resize')
 
@@ -159,12 +208,8 @@ class ActionsController(base.Controller):
         :param cluster_ident: UUID of a cluster or logical name of the cluster.
         """
         context = pecan.request.context
-        if context.is_admin:
-            policy.enforce(context, "cluster:upgrade_all_projects",
-                           action="cluster:upgrade_all_projects")
-            context.all_tenants = True
-
-        cluster = api_utils.get_resource('Cluster', cluster_ident)
+        cluster = _get_cluster_resource(cluster_ident,
+                                        'cluster:upgrade_all_projects')
         policy.enforce(context, 'cluster:upgrade', cluster,
                        action='cluster:upgrade')
 
@@ -181,6 +226,8 @@ class ActionsController(base.Controller):
                 context, cluster.uuid, cluster_upgrade_req.nodegroup)
             # Allow non-default nodegroups to upgrade to any template
             # The cluster_template_id label will be updated in the driver
+
+        _validate_upgrade_version_skew(cluster, new_cluster_template, nodegroup)
 
         pecan.request.rpcapi.cluster_upgrade(
             cluster,

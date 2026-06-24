@@ -37,7 +37,6 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
-        extra_params['username'] = context.user_name
         osc = self.get_osc(context)
         extra_params['region_name'] = osc.cinder_region_name()
 
@@ -57,13 +56,11 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             extra_params["pods_network_cidr"] = \
                 cluster.labels.get('calico_ipv4pool', '10.100.0.0/16')
 
-        label_list = ['coredns_tag',
-                      'kube_tag', 'container_infra_prefix',
+        label_list = ['kube_tag', 'container_infra_prefix',
                       'availability_zone',
                       'calico_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
-                      'calico_ipv4pool_ipip',
-                      'etcd_tag', 'flannel_tag']
+                      'calico_ipv4pool_ipip']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 

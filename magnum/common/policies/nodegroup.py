@@ -78,6 +78,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=NODEGROUP % 'create_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Create a new nodegroup across projects.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_id}/nodegroups/',
+                'method': 'POST'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=NODEGROUP % 'delete',
         check_str=base.RULE_ADMIN_OR_OWNER,
         description='Delete a nodegroup.',
@@ -89,9 +100,31 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=NODEGROUP % 'delete_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Delete a nodegroup across projects.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_id}/nodegroups/{nodegroup}',
+                'method': 'DELETE'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=NODEGROUP % 'update',
         check_str=base.RULE_ADMIN_OR_OWNER,
         description='Update an existing nodegroup.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_id}/nodegroups/{nodegroup}',
+                'method': 'PATCH'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=NODEGROUP % 'update_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Update an existing nodegroup across projects.',
         operations=[
             {
                 'path': '/v1/clusters/{cluster_id}/nodegroups/{nodegroup}',

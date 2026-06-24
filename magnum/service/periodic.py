@@ -72,15 +72,15 @@ class ClusterUpdateJob(object):
         try:
             cdriver.update_cluster_status(self.ctx, self.cluster)
         except exception.AuthorizationFailure as e:
-            trust_ex = ("Could not find trust: %s" % self.cluster.trust_id)
-            # Try to use admin context if trust not found.
-            # This will make sure even with trust got deleted out side of
-            # Magnum, we still be able to check cluster status
-            if trust_ex in str(e):
-                cdriver.update_cluster_status(
-                    self.ctx, self.cluster, use_admin_ctx=True)
-            else:
-                raise
+            # Fall back to admin context on any auth failure: expired
+            # trust, deleted trustor, revoked role, etc.  This ensures
+            # the poller can still transition the cluster out of
+            # *_IN_PROGRESS states instead of being stuck forever.
+            LOG.warning("Trust auth failed for cluster %s, falling "
+                        "back to admin context: %s",
+                        self.cluster.uuid, e)
+            cdriver.update_cluster_status(
+                self.ctx, self.cluster, use_admin_ctx=True)
 
         LOG.debug("Status for cluster %s updated to %s (%s)",
                   self.cluster.id, self.cluster.status,
@@ -131,6 +131,8 @@ class ClusterHealthUpdateJob(object):
             self.cluster.health_status = monitor.data.get('health_status')
             self.cluster.health_status_reason = monitor.data.get(
                 'health_status_reason')
+            if monitor.data.get('coe_version'):
+                self.cluster.coe_version = monitor.data.get('coe_version')
             self.cluster.save()
 
     def update_health_status(self):

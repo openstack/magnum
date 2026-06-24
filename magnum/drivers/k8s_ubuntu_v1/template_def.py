@@ -34,12 +34,25 @@ class UBUNTUK8sTemplateDefinition(kftd.K8sUbuntuTemplateDefinition):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             'templates/kubecluster.yaml')
 
+    def get_discovery_url(self, cluster):
+        # The etcd v2 discovery protocol (discovery.etcd.io) has been removed:
+        # the node reconciler bootstraps etcd via the etcd load balancer or a
+        # static initial cluster. The base class would otherwise fetch a
+        # discovery token at create time, which fails on a Magnum control plane
+        # without internet egress. Short-circuit it; the 'discovery_url' stack
+        # parameter has been dropped from the templates and get_params() strips
+        # any residual value.
+        return ''
+
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = super(UBUNTUK8sTemplateDefinition,
                              self).get_params(context,
                                               cluster_template,
                                               cluster,
                                               **kwargs)
+        # discovery_url is no longer a template parameter (etcd v2 discovery
+        # removed) — drop it so Heat does not reject an undefined parameter.
+        extra_params.pop('discovery_url', None)
         extra_params['openstack_ca'] = urlparse.quote(
             utils.get_openstack_ca())
         return extra_params

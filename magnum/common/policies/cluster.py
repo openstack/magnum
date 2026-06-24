@@ -163,6 +163,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER % 'resize_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Resize an existing cluster across all projects.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}/actions/resize',
+                'method': 'POST'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER % 'upgrade',
         check_str=base.RULE_DENY_CLUSTER_USER,
         description='Upgrade an existing cluster.',

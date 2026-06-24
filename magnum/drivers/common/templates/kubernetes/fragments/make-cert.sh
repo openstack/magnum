@@ -22,9 +22,7 @@ set -o nounset
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
-if [ "$TLS_DISABLED" == "True" ]; then
-    exit 0
-fi
+if [ "$TLS_DISABLED" != "True" ]; then
 
 if [ "$VERIFY_CA" == "True" ]; then
     VERIFY_CA=""
@@ -304,3 +302,4 @@ $ssh_cmd chmod 440 "${cert_dir}/scheduler.key"
 $ssh_cmd chmod 440 "${cert_dir}/kubelet.key"
 $ssh_cmd mkdir -p /etc/etcd/certs
 $ssh_cmd cp ${cert_dir}/* /etc/etcd/certs
+fi

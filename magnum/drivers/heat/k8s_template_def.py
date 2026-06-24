@@ -246,38 +246,21 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         extra_params.update(net_params)
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
-                      'flannel_network_subnetlen',
-                      'system_pods_initial_delay',
-                      'system_pods_timeout',
                       'admission_control_list',
-                      'prometheus_monitoring',
                       'grafana_admin_passwd',
                       'kube_dashboard_enabled',
                       'etcd_volume_size',
                       'cert_manager_api',
-                      'ingress_controller_role',
-                      'octavia_ingress_controller_tag',
                       'kubelet_options',
                       'kubeapi_options',
                       'kubeproxy_options',
                       'kubecontroller_options',
-                      'kubescheduler_options',
-                      'influx_grafana_dashboard_enabled',
                       'master_lb_allowed_cidrs']
 
         labels = self._get_relevant_labels(cluster, kwargs)
 
         for label in label_list:
             extra_params[label] = labels.get(label)
-
-        ingress_controller = cluster.labels.get('ingress_controller',
-                                                '').lower()
-        if (ingress_controller == 'octavia'
-                and not extra_params['octavia_enabled']):
-            raise exception.InvalidParameterValue(
-                'Octavia service needs to be deployed for octavia ingress '
-                'controller.')
-        extra_params["ingress_controller"] = ingress_controller
 
         cluser_ip_range = cluster.labels.get('service_cluster_ip_range')
         if cluser_ip_range:

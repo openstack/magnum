@@ -22,6 +22,12 @@ from magnum.tests.unit.objects import utils as obj_utils
 
 
 HEADERS = {'OpenStack-API-Version': 'container-infra latest'}
+ADMIN_HEADERS = {
+    'OpenStack-API-Version': 'container-infra latest',
+    'X-Project-Id': 'admin_project',
+    'X-Roles': 'admin',
+    'X-User-Id': 'admin_user'
+}
 
 
 class TestCertObject(base.TestCase):
@@ -81,6 +87,17 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         self.assertEqual(self.cluster.uuid, response['bay_uuid'])
         self.assertEqual(fake_cert['csr'], response['csr'])
         self.assertEqual(fake_cert['pem'], response['pem'])
+
+    def test_get_one_admin_all_projects(self):
+        fake_cert = api_utils.cert_post_data()
+        mock_cert = mock.MagicMock()
+        mock_cert.as_dict.return_value = fake_cert
+        self.conductor_api.get_ca_certificate.return_value = mock_cert
+
+        response = self.get_json('/certificates/%s' % self.cluster.uuid,
+                                 headers=ADMIN_HEADERS)
+
+        self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/certificates/not_found',
@@ -215,6 +232,12 @@ class TestRotateCaCertificate(api_base.FunctionalTest):
 
         response = self.patch_json('/certificates/%s' % self.cluster.uuid,
                                    params={}, headers=HEADERS)
+
+        self.assertEqual(202, response.status_code)
+
+    def test_rotate_ca_cert_admin_all_projects(self):
+        response = self.patch_json('/certificates/%s' % self.cluster.uuid,
+                                   params={}, headers=ADMIN_HEADERS)
 
         self.assertEqual(202, response.status_code)
 

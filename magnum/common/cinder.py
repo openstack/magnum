@@ -40,7 +40,10 @@ def get_default_etcd_volume_type(context):
 def _get_random_volume_type(context):
     c_client = clients.OpenStackClients(context).cinder()
     volume_types = c_client.volume_types.list()
-    if volume_types:
-        return volume_types[0].name
-    else:
+    if not volume_types:
         raise exception.VolumeTypeNotFound()
+    # Prefer RBD if available, otherwise fall back to first type
+    for vt in volume_types:
+        if vt.name == 'RBD':
+            return vt.name
+    return volume_types[0].name

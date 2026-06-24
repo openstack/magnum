@@ -57,12 +57,13 @@ class API(rpc_service.API):
 
     def cluster_update_async(self, cluster, node_count,
                              health_status, health_status_reason,
-                             rollback=False):
+                             rollback=False, labels_changed=False):
         self._cast('cluster_update', cluster=cluster,
                    node_count=node_count,
                    health_status=health_status,
                    health_status_reason=health_status_reason,
-                   rollback=rollback)
+                   rollback=rollback,
+                   labels_changed=labels_changed)
 
     def cluster_resize(self, cluster, node_count, nodes_to_remove,
                        nodegroup, rollback=False):

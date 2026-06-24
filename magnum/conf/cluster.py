@@ -43,9 +43,10 @@ cluster_def_opts = [
                help='Explicitly specify the temporary directory to hold '
                     'cached TLS certs.'),
     cfg.IntOpt('pre_delete_lb_timeout',
-               default=60,
+               default=1200,
+               max=1200,
                help=_('The timeout in seconds to wait for the load balancers '
-                      'to be deleted.')),
+                      'to be deleted. Maximum 1200 (20 minutes).')),
 ]
 
 

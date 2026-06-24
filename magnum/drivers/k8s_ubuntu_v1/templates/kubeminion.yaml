@@ -14,10 +14,35 @@ parameters:
     type: boolean
     default: false
 
+  is_resize:
+    type: boolean
+    description: Flag indicating if the stack is being resized
+    default: false
+
   timestamp_upgrade:
     type: string
     description: A timestamp value that changes on every stack upgrade
     default: ""
+
+  reconciler_version:
+    type: string
+    description: version tag of the node reconciler binary
+    default: ""
+
+  reconciler_binary_url:
+    type: string
+    description: download URL for the node reconciler binary
+    default: ""
+
+  reconciler_binary_url_sha256:
+    type: string
+    description: sha256 checksum for the node reconciler binary URL content
+    default: ""
+
+  reconciler_lock_timeout_seconds:
+    type: string
+    description: lock timeout for synchronous reconcile runs
+    default: "900"
 
   server_image:
     type: string
@@ -81,13 +106,6 @@ parameters:
     description: docker storage driver name
     default: "devicemapper"
 
-  cgroup_driver:
-    type: string
-    description: >
-      cgroup driver name that kubelet should use, ideally the same as
-      the docker cgroup driver.
-    default: "cgroupfs"
-
   tls_disabled:
     type: boolean
     description: whether or not to enable TLS
@@ -109,11 +127,6 @@ parameters:
   magnum_url:
     type: string
     description: endpoint to retrieve TLS certs from
-
-  prometheus_monitoring:
-    type: boolean
-    description: >
-      whether or not to have the node-exporter running on the node
 
   kube_master_ip:
     type: string
@@ -184,18 +197,6 @@ parameters:
     type: string
     description: A logically separate section of the cluster
 
-  username:
-    type: string
-    description: >
-      user account
-
-  password:
-    type: string
-    description: >
-      user password, not set in current implementation, only used to
-      fill in for Kubernetes config file
-    hidden: true
-
   http_proxy:
     type: string
     description: http proxy address for docker
@@ -211,12 +212,6 @@ parameters:
   kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
-
-  kubernetes_tarball_sha512:
-    type: string
-
-  kubernetes_tarball_url:
-    type: string
 
   kube_version:
     type: string
@@ -311,6 +306,7 @@ parameters:
   heat_container_agent_tag:
     type: string
     description: tag of the heat_container_agent system container
+    default: victoria-stable-1
 
   auto_healing_enabled:
     type: boolean
@@ -323,28 +319,10 @@ parameters:
       The service to be deployed for auto-healing.
     default: "draino"
 
-  npd_enabled:
-    type: boolean
-    description: >
-      true if the npd service should be launched
-    default: true
-
-  ostree_remote:
-    type: string
-    description: The ostree remote branch to upgrade
-
-  ostree_commit:
-    type: string
-    description: The ostree commit to deploy
-
   use_podman:
     type: boolean
     description: >
       If true, run system containers for kubernetes, etcd and heat-agent
-
-  flannel_cni_tag:
-    type: string
-    description: tag of the flannel cni container
 
   selinux_mode:
     type: string
@@ -355,17 +333,26 @@ parameters:
     type: string
     description: The container runtime to install
 
-  containerd_version:
-    type: string
-    description: The containerd version to download from https://storage.googleapis.com/cri-containerd-release/
 
-  containerd_tarball_url:
+  kube_service_account_key:
     type: string
-    description: Url location of the containerd tarball.
+    hidden: true
+    default: ""
+    description: >
+      The signed cert will be used to verify the k8s service account tokens
+      during authentication.
 
-  containerd_tarball_sha256:
+  kube_service_account_private_key:
     type: string
-    description: sha256 of the target containerd tarball.
+    hidden: true
+    default: ""
+    description: >
+      The private key will be used to sign the k8s service account tokens.
+
+  ca_rotation_id:
+    type: string
+    default: ""
+    description: Explicit token used to trigger CA rotation.
 
 conditions:
   image_based: { equals: [{ get_param: boot_volume_size }, 0] }
@@ -374,15 +361,6 @@ conditions:
       equals:
         - get_param: boot_volume_size
         - 0
-  create_minions:
-    equals:
-      - get_param: is_upgrade
-      - false
-  upgrade_minions:
-    equals:
-      - get_param: is_upgrade
-      - true
-
 resources:
   agent_config:
     type: OS::Heat::CloudConfig
@@ -618,91 +596,88 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: script
+      outputs:
+        - name: reconcile_status
+          description: Magnum bootstrap reconciler status
+        - name: reconcile_step
+          description: Magnum bootstrap reconciler step
+        - name: reconcile_summary
+          description: Magnum bootstrap reconciler summary
+        - name: reconcile_reason
+          description: Magnum bootstrap reconciler reason
+        - name: reconcile_error_code
+          description: Magnum bootstrap reconciler error code
+        - name: reconcile_failure
+          description: Magnum bootstrap reconciler failure reason
+          error_output: true
+      inputs:
+        - name: OS_STACK_ID
+        - name: INSTANCE_NAME
+        - name: IS_UPGRADE
+        - name: IS_RESIZE
+        - name: KUBE_ALLOW_PRIV
+        - name: KUBE_MASTER_IP
+        - name: KUBE_API_PORT
+        - name: KUBE_NODE_PUBLIC_IP
+        - name: KUBE_NODE_IP
+        - name: ETCD_SERVER_IP
+        - name: DOCKER_VOLUME
+        - name: DOCKER_VOLUME_SIZE
+        - name: DOCKER_STORAGE_DRIVER
+        - name: NETWORK_DRIVER
+        - name: REGISTRY_ENABLED
+        - name: REGISTRY_PORT
+        - name: SWIFT_REGION
+        - name: REGISTRY_CONTAINER
+        - name: REGISTRY_INSECURE
+        - name: REGISTRY_CHUNKSIZE
+        - name: TLS_DISABLED
+        - name: VERIFY_CA
+        - name: CLUSTER_UUID
+        - name: MAGNUM_URL
+        - name: VOLUME_DRIVER
+        - name: REGION_NAME
+        - name: HTTP_PROXY
+        - name: HTTPS_PROXY
+        - name: NO_PROXY
+        - name: KUBE_TAG
+        - name: FLANNEL_NETWORK_CIDR
+        - name: PODS_NETWORK_CIDR
+        - name: KUBE_VERSION
+        - name: TRUSTEE_USER_ID
+        - name: TRUSTEE_USERNAME
+        - name: TRUSTEE_PASSWORD
+        - name: TRUSTEE_DOMAIN_ID
+        - name: TRUST_ID
+        - name: AUTH_URL
+        - name: CLOUD_PROVIDER_ENABLED
+        - name: INSECURE_REGISTRY_URL
+        - name: CONTAINER_INFRA_PREFIX
+        - name: DNS_SERVICE_IP
+        - name: DNS_CLUSTER_DOMAIN
+        - name: KUBELET_OPTIONS
+        - name: KUBEPROXY_OPTIONS
+        - name: OCTAVIA_ENABLED
+        - name: KUBE_SERVICE_ACCOUNT_KEY
+        - name: KUBE_SERVICE_ACCOUNT_PRIVATE_KEY
+        - name: CA_ROTATION_ID
+        - name: AUTO_HEALING_ENABLED
+        - name: AUTO_HEALING_CONTROLLER
+        - name: NODEGROUP_ROLE
+        - name: NODEGROUP_NAME
+        - name: USE_PODMAN
+        - name: CONTAINER_RUNTIME
+        - name: RECONCILER_VERSION
+        - name: RECONCILER_BINARY_URL
+        - name: RECONCILER_BINARY_URL_SHA256
+        - name: RECONCILER_LOCK_TIMEOUT_SECONDS
       config:
         list_join:
           - "\n"
-          - - str_replace:
-                template:
-                  {
-                    get_file: ../../common/templates/kubernetes/fragments/write-heat-params.sh,
-                  }
-                params:
-                  $INSTANCE_NAME: { get_param: name }
-                  $PROMETHEUS_MONITORING: { get_param: prometheus_monitoring }
-                  $KUBE_ALLOW_PRIV: { get_param: kube_allow_priv }
-                  $KUBE_MASTER_IP: { get_param: kube_master_ip }
-                  $KUBE_API_PORT: { get_param: kubernetes_port }
-                  $KUBE_NODE_PUBLIC_IP:
-                    { get_attr: [kube_minion_floating, floating_ip_address] }
-                  $KUBE_NODE_IP:
-                    { get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address] }
-                  $ETCD_SERVER_IP: { get_param: etcd_server_ip }
-                  $DOCKER_VOLUME: { get_resource: docker_volume }
-                  $DOCKER_VOLUME_SIZE: { get_param: docker_volume_size }
-                  $DOCKER_STORAGE_DRIVER: { get_param: docker_storage_driver }
-                  $CGROUP_DRIVER: { get_param: cgroup_driver }
-                  $NETWORK_DRIVER: { get_param: network_driver }
-                  $REGISTRY_ENABLED: { get_param: registry_enabled }
-                  $REGISTRY_PORT: { get_param: registry_port }
-                  $SWIFT_REGION: { get_param: swift_region }
-                  $REGISTRY_CONTAINER: { get_param: registry_container }
-                  $REGISTRY_INSECURE: { get_param: registry_insecure }
-                  $REGISTRY_CHUNKSIZE: { get_param: registry_chunksize }
-                  $TLS_DISABLED: { get_param: tls_disabled }
-                  $VERIFY_CA: { get_param: verify_ca }
-                  $CLUSTER_UUID: { get_param: cluster_uuid }
-                  $MAGNUM_URL: { get_param: magnum_url }
-                  $USERNAME: { get_param: username }
-                  $PASSWORD: { get_param: password }
-                  $VOLUME_DRIVER: { get_param: volume_driver }
-                  $REGION_NAME: { get_param: region_name }
-                  $HTTP_PROXY: { get_param: http_proxy }
-                  $HTTPS_PROXY: { get_param: https_proxy }
-                  $NO_PROXY: { get_param: no_proxy }
-                  $KUBE_TAG: { get_param: kube_tag }
-                  $KUBERNETES_TARBALL_SHA512:
-                    { get_param: kubernetes_tarball_sha512 }
-                  $KUBERNETES_TARBALL_url: { get_param: kubernetes_tarball_url }
-                  $FLANNEL_NETWORK_CIDR: { get_param: flannel_network_cidr }
-                  $PODS_NETWORK_CIDR: { get_param: pods_network_cidr }
-                  $KUBE_VERSION: { get_param: kube_version }
-                  $TRUSTEE_USER_ID: { get_param: trustee_user_id }
-                  $TRUSTEE_PASSWORD: { get_param: trustee_password }
-                  $TRUST_ID: { get_param: trust_id }
-                  $AUTH_URL: { get_param: auth_url }
-                  $CLOUD_PROVIDER_ENABLED: { get_param: cloud_provider_enabled }
-                  $INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
-                  $CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
-                  $DNS_SERVICE_IP: { get_param: dns_service_ip }
-                  $DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
-                  $KUBELET_OPTIONS: { get_param: kubelet_options }
-                  $KUBEPROXY_OPTIONS: { get_param: kubeproxy_options }
-                  $OCTAVIA_ENABLED: { get_param: octavia_enabled }
-                  $HEAT_CONTAINER_AGENT_TAG:
-                    { get_param: heat_container_agent_tag }
-                  $AUTO_HEALING_ENABLED: { get_param: auto_healing_enabled }
-                  $AUTO_HEALING_CONTROLLER:
-                    { get_param: auto_healing_controller }
-                  $NPD_ENABLED: { get_param: npd_enabled }
-                  $NODEGROUP_ROLE: { get_param: nodegroup_role }
-                  $NODEGROUP_NAME: { get_param: nodegroup_name }
-                  $USE_PODMAN: { get_param: use_podman }
-                  $FLANNEL_CNI_TAG: { get_param: flannel_cni_tag }
-                  $CONTAINER_RUNTIME: { get_param: container_runtime }
-                  $CONTAINERD_VERSION: { get_param: containerd_version }
-                  $CONTAINERD_TARBALL_URL: { get_param: containerd_tarball_url }
-                  $CONTAINERD_TARBALL_SHA256:
-                    { get_param: containerd_tarball_sha256 }
-            - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
-            - get_file: ../../common/templates/kubernetes/fragments/install-clients.sh
-            - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
-            - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
-            - get_file: ../../common/templates/fragments/configure-docker-registry.sh
-            - get_file: ../../common/templates/kubernetes/fragments/write-admin-kubeconfig.sh
-            - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh
-            - get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh
-            - get_file: ../../common/templates/fragments/configure-docker-storage.sh
-            - get_file: ../../common/templates/kubernetes/fragments/enable-services-minion.sh
+          - - {get_file: ../../common/templates/kubernetes/bootstrap/write-heat-params.sh}
+            - get_file: ../../common/templates/kubernetes/bootstrap/install-reconciler-launcher.sh
+            - get_file: ../../common/templates/kubernetes/bootstrap/install-reconciler-systemd.sh
+            - get_file: ../../common/templates/kubernetes/bootstrap/run-reconciler-once.sh
 
   node_config_deployment:
     type: OS::Heat::SoftwareDeployment
@@ -710,8 +685,69 @@ resources:
       signal_transport: HEAT_SIGNAL
       config: { get_resource: node_config }
       server: { get_resource: kube-minion }
-      actions: ["CREATE"]
-
+      actions: ["CREATE", "UPDATE"]
+      input_values:
+        OS_STACK_ID: { get_param: "OS::stack_id" }
+        timestamp_upgrade: { get_param: timestamp_upgrade }
+        INSTANCE_NAME: { get_param: name }
+        IS_UPGRADE: { get_param: is_upgrade }
+        IS_RESIZE: { get_param: is_resize }
+        KUBE_ALLOW_PRIV: { get_param: kube_allow_priv }
+        KUBE_MASTER_IP: { get_param: kube_master_ip }
+        KUBE_API_PORT: { get_param: kubernetes_port }
+        KUBE_NODE_PUBLIC_IP: { get_attr: [kube_minion_floating, floating_ip_address] }
+        KUBE_NODE_IP: { get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address] }
+        ETCD_SERVER_IP: { get_param: etcd_server_ip }
+        DOCKER_VOLUME: { get_resource: docker_volume }
+        DOCKER_VOLUME_SIZE: { get_param: docker_volume_size }
+        DOCKER_STORAGE_DRIVER: { get_param: docker_storage_driver }
+        NETWORK_DRIVER: { get_param: network_driver }
+        REGISTRY_ENABLED: { get_param: registry_enabled }
+        REGISTRY_PORT: { get_param: registry_port }
+        SWIFT_REGION: { get_param: swift_region }
+        REGISTRY_CONTAINER: { get_param: registry_container }
+        REGISTRY_INSECURE: { get_param: registry_insecure }
+        REGISTRY_CHUNKSIZE: { get_param: registry_chunksize }
+        TLS_DISABLED: { get_param: tls_disabled }
+        VERIFY_CA: { get_param: verify_ca }
+        CLUSTER_UUID: { get_param: cluster_uuid }
+        MAGNUM_URL: { get_param: magnum_url }
+        VOLUME_DRIVER: { get_param: volume_driver }
+        REGION_NAME: { get_param: region_name }
+        HTTP_PROXY: { get_param: http_proxy }
+        HTTPS_PROXY: { get_param: https_proxy }
+        NO_PROXY: { get_param: no_proxy }
+        KUBE_TAG: { get_param: kube_tag }
+        FLANNEL_NETWORK_CIDR: { get_param: flannel_network_cidr }
+        PODS_NETWORK_CIDR: { get_param: pods_network_cidr }
+        KUBE_VERSION: { get_param: kube_version }
+        TRUSTEE_USER_ID: { get_param: trustee_user_id }
+        TRUSTEE_USERNAME: { get_param: trustee_username }
+        TRUSTEE_PASSWORD: { get_param: trustee_password }
+        TRUSTEE_DOMAIN_ID: { get_param: trustee_domain_id }
+        TRUST_ID: { get_param: trust_id }
+        AUTH_URL: { get_param: auth_url }
+        CLOUD_PROVIDER_ENABLED: { get_param: cloud_provider_enabled }
+        INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
+        CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
+        DNS_SERVICE_IP: { get_param: dns_service_ip }
+        DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
+        KUBELET_OPTIONS: { get_param: kubelet_options }
+        KUBEPROXY_OPTIONS: { get_param: kubeproxy_options }
+        OCTAVIA_ENABLED: { get_param: octavia_enabled }
+        KUBE_SERVICE_ACCOUNT_KEY: { get_param: kube_service_account_key }
+        KUBE_SERVICE_ACCOUNT_PRIVATE_KEY: { get_param: kube_service_account_private_key }
+        CA_ROTATION_ID: { get_param: ca_rotation_id }
+        AUTO_HEALING_ENABLED: { get_param: auto_healing_enabled }
+        AUTO_HEALING_CONTROLLER: { get_param: auto_healing_controller }
+        NODEGROUP_ROLE: { get_param: nodegroup_role }
+        NODEGROUP_NAME: { get_param: nodegroup_name }
+        USE_PODMAN: { get_param: use_podman }
+        CONTAINER_RUNTIME: { get_param: container_runtime }
+        RECONCILER_VERSION: { get_param: reconciler_version }
+        RECONCILER_BINARY_URL: { get_param: reconciler_binary_url }
+        RECONCILER_BINARY_URL_SHA256: { get_param: reconciler_binary_url_sha256 }
+        RECONCILER_LOCK_TIMEOUT_SECONDS: { get_param: reconciler_lock_timeout_seconds }
   ######################################################################
   #
   # a single kubernetes minion.
@@ -773,112 +809,6 @@ resources:
       instance_uuid: { get_resource: kube-minion }
       volume_id: { get_resource: docker_volume }
       mountpoint: /dev/vdb
-
-  upgrade_kubernetes_config:
-    condition: upgrade_minions
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      inputs:
-        - name: OS_STACK_ID
-      config:
-        list_join:
-          - "\n"
-          - - str_replace:
-                template:
-                  {
-                    get_file: ../../common/templates/kubernetes/fragments/write-heat-params.sh,
-                  }
-                params:
-                  $INSTANCE_NAME: { get_param: name }
-                  $IS_UPGRADE: { get_param: is_upgrade }
-                  $PROMETHEUS_MONITORING: { get_param: prometheus_monitoring }
-                  $KUBE_ALLOW_PRIV: { get_param: kube_allow_priv }
-                  $KUBE_MASTER_IP: { get_param: kube_master_ip }
-                  $KUBE_API_PORT: { get_param: kubernetes_port }
-                  $KUBE_NODE_PUBLIC_IP:
-                    { get_attr: [kube_minion_floating, floating_ip_address] }
-                  $KUBE_NODE_IP:
-                    { get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address] }
-                  $ETCD_SERVER_IP: { get_param: etcd_server_ip }
-                  $DOCKER_VOLUME: { get_resource: docker_volume }
-                  $DOCKER_VOLUME_SIZE: { get_param: docker_volume_size }
-                  $DOCKER_STORAGE_DRIVER: { get_param: docker_storage_driver }
-                  $CGROUP_DRIVER: { get_param: cgroup_driver }
-                  $NETWORK_DRIVER: { get_param: network_driver }
-                  $REGISTRY_ENABLED: { get_param: registry_enabled }
-                  $REGISTRY_PORT: { get_param: registry_port }
-                  $SWIFT_REGION: { get_param: swift_region }
-                  $REGISTRY_CONTAINER: { get_param: registry_container }
-                  $REGISTRY_INSECURE: { get_param: registry_insecure }
-                  $REGISTRY_CHUNKSIZE: { get_param: registry_chunksize }
-                  $TLS_DISABLED: { get_param: tls_disabled }
-                  $VERIFY_CA: { get_param: verify_ca }
-                  $CLUSTER_UUID: { get_param: cluster_uuid }
-                  $MAGNUM_URL: { get_param: magnum_url }
-                  $USERNAME: { get_param: username }
-                  $PASSWORD: { get_param: password }
-                  $VOLUME_DRIVER: { get_param: volume_driver }
-                  $REGION_NAME: { get_param: region_name }
-                  $HTTP_PROXY: { get_param: http_proxy }
-                  $HTTPS_PROXY: { get_param: https_proxy }
-                  $NO_PROXY: { get_param: no_proxy }
-                  $KUBE_TAG: { get_param: kube_tag }
-                  $KUBERNETES_TARBALL_SHA512:
-                    { get_param: kubernetes_tarball_sha512 }
-                  $KUBERNETES_TARBALL_url: { get_param: kubernetes_tarball_url }
-                  $FLANNEL_NETWORK_CIDR: { get_param: flannel_network_cidr }
-                  $PODS_NETWORK_CIDR: { get_param: pods_network_cidr }
-                  $KUBE_VERSION: { get_param: kube_version }
-                  $TRUSTEE_USER_ID: { get_param: trustee_user_id }
-                  $TRUSTEE_PASSWORD: { get_param: trustee_password }
-                  $TRUST_ID: { get_param: trust_id }
-                  $AUTH_URL: { get_param: auth_url }
-                  $CLOUD_PROVIDER_ENABLED: { get_param: cloud_provider_enabled }
-                  $INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
-                  $CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
-                  $DNS_SERVICE_IP: { get_param: dns_service_ip }
-                  $DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
-                  $KUBELET_OPTIONS: { get_param: kubelet_options }
-                  $KUBEPROXY_OPTIONS: { get_param: kubeproxy_options }
-                  $OCTAVIA_ENABLED: { get_param: octavia_enabled }
-                  $HEAT_CONTAINER_AGENT_TAG:
-                    { get_param: heat_container_agent_tag }
-                  $AUTO_HEALING_ENABLED: { get_param: auto_healing_enabled }
-                  $AUTO_HEALING_CONTROLLER:
-                    { get_param: auto_healing_controller }
-                  $NPD_ENABLED: { get_param: npd_enabled }
-                  $NODEGROUP_ROLE: { get_param: nodegroup_role }
-                  $NODEGROUP_NAME: { get_param: nodegroup_name }
-                  $USE_PODMAN: { get_param: use_podman }
-                  $FLANNEL_CNI_TAG: { get_param: flannel_cni_tag }
-                  $CONTAINER_RUNTIME: { get_param: container_runtime }
-                  $CONTAINERD_VERSION: { get_param: containerd_version }
-                  $CONTAINERD_TARBALL_URL: { get_param: containerd_tarball_url }
-                  $CONTAINERD_TARBALL_SHA256:
-                    { get_param: containerd_tarball_sha256 }
-            - str_replace:
-                template: |
-                  #!/bin/sh
-                  echo 'stack_id'
-                params:
-                  stack_id: { get_param: "OS::stack_id" }
-            - get_file: ../../common/templates/kubernetes/fragments/write-admin-kubeconfig.sh
-            - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes-stop.sh
-            - get_file: ../../common/templates/kubernetes/fragments/install-cri.sh
-            - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh
-            - get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes-start.sh
-
-  upgrade_kubernetes_deployment:
-    condition: upgrade_minions
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: { get_resource: upgrade_kubernetes_config }
-      server: { get_resource: kube-minion }
-      actions: ["CREATE", "UPDATE"]
-      input_values:
-        OS_STACK_ID: { get_param: "OS::stack_id" }
 
 outputs:
   kube_minion_ip:

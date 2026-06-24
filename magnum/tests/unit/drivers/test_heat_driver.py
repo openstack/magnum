@@ -762,3 +762,184 @@ class TestHeatPoller(base.TestCase):
 
         self.assertIn('worker_ng', cluster.status_reason)
         self.assertIn('master_ng', cluster.status_reason)
+
+
+class DummyKubernetesDriver(heat_driver.KubernetesDriver):
+
+    def __init__(self):
+        super(DummyKubernetesDriver, self).__init__()
+        self.definition = mock.MagicMock()
+
+    def get_template_definition(self):
+        return self.definition
+
+    def get_nodegroup_extra_params(self, cluster, osc):
+        return {}
+
+    def upgrade_cluster(self, context, cluster, cluster_template,
+                        max_batch_size, nodegroup, scale_manager=None,
+                        rollback=False):
+        raise NotImplementedError
+
+
+class TestHeatDriverResizeFlags(base.TestCase):
+
+    def test_get_merged_stack_parameters_omits_masked_values(self):
+        driver = DummyKubernetesDriver()
+        osc = mock.MagicMock()
+        osc.heat.return_value.stacks.get.return_value = mock.MagicMock(
+            parameters={
+                'number_of_masters': 1,
+                'password': '******',
+                'kube_service_account_private_key': '******',
+                'plain': 'value',
+            })
+
+        merged = driver._get_merged_stack_parameters(
+            osc, 'stack-id', {'number_of_masters': 2})
+
+        self.assertEqual(2, merged['number_of_masters'])
+        self.assertEqual('value', merged['plain'])
+        self.assertNotIn('password', merged)
+        self.assertNotIn('kube_service_account_private_key', merged)
+
+    def test_get_nested_ca_rotation_params_skips_masked_values(self):
+        driver = DummyKubernetesDriver()
+        nodegroup = mock.MagicMock(role='worker')
+
+        nested = driver._get_nested_ca_rotation_params(
+            nodegroup,
+            {
+                'ca_rotation_id': 'rotation-id',
+                'kube_service_account_key': 'public-key',
+                'kube_service_account_private_key': 'private-key',
+                'timestamp_upgrade': '2026-04-04T00:00:00',
+            },
+            {
+                'trustee_user_id': 'trustee-user',
+                'trustee_password': '******',
+                'auth_url': 'https://keystone.example/v3',
+                'kube_service_account_private_key': '******',
+            })
+
+        self.assertEqual('trustee-user', nested['trustee_user_id'])
+        self.assertEqual('https://keystone.example/v3', nested['auth_url'])
+        # CA rotation must NOT touch the service-account keypair: it is omitted
+        # from the per-node params so a params-only `existing=True` update makes
+        # Heat preserve each member's current value (keeping it in lockstep with
+        # the unchanged parent stack, so masters added later still match).
+        self.assertNotIn('kube_service_account_key', nested)
+        self.assertNotIn('kube_service_account_private_key', nested)
+        self.assertNotIn('trustee_password', nested)
+
+    def test_get_ca_rotation_params_does_not_rotate_sa_keys(self):
+        driver = DummyKubernetesDriver()
+        cluster = mock.MagicMock(uuid='cluster-uuid', labels={})
+
+        with mock.patch.object(driver, '_fetch_ca_key', return_value=None):
+            params = driver._get_ca_rotation_params(mock.sentinel.ctx, cluster)
+
+        self.assertIn('ca_rotation_id', params)
+        self.assertTrue(params['ca_rotation_id'])
+        self.assertNotIn('kube_service_account_key', params)
+        self.assertNotIn('kube_service_account_private_key', params)
+
+    @patch('magnum.drivers.heat.driver.x509.decrypt_key')
+    @patch('magnum.drivers.heat.driver.cert_manager.get_cluster_ca_certificate')
+    def test_fetch_ca_key_defaults_enabled(self, mock_get_ca, mock_decrypt):
+        # cert_manager_api absent => treated as enabled, so a node added later
+        # always renders the CURRENT CA key and never mismatches the live ca.crt.
+        driver = DummyKubernetesDriver()
+        ca_cert = mock.MagicMock()
+        ca_cert.get_private_key_passphrase.return_value = b'pw'
+        mock_get_ca.return_value = ca_cert
+        mock_decrypt.return_value = 'KEY\nLINE2'
+        cluster = mock.MagicMock(uuid='cluster-uuid', labels={})
+
+        ca_key = driver._fetch_ca_key(mock.sentinel.ctx, cluster)
+
+        self.assertEqual('KEY\\nLINE2', ca_key)
+        mock_get_ca.assert_called_once()
+
+    def test_fetch_ca_key_disabled_when_label_false(self):
+        driver = DummyKubernetesDriver()
+        cluster = mock.MagicMock(uuid='cluster-uuid',
+                                 labels={'cert_manager_api': 'false'})
+
+        self.assertIsNone(driver._fetch_ca_key(mock.sentinel.ctx, cluster))
+
+    @patch('magnum.drivers.heat.driver.clients.OpenStackClients')
+    def test_resize_stack_clears_stale_ca_rotation_id(self, mock_osc_cls):
+        driver = DummyKubernetesDriver()
+        driver.definition.get_scale_params.return_value = {
+            'number_of_minions': 2,
+        }
+        driver._get_stack_update_template_fields = mock.MagicMock(
+            return_value={})
+
+        osc = mock.MagicMock()
+        mock_osc_cls.return_value = osc
+        osc.heat.return_value.stacks.get.return_value = mock.MagicMock(
+            parameters={
+                'ca_rotation_id': 'stale-rotation-id',
+                'number_of_minions': 1,
+            })
+
+        cluster = mock.MagicMock(uuid='cluster-uuid')
+        nodegroup = mock.MagicMock(
+            stack_id='worker-stack-id',
+            role='worker',
+            node_count=2,
+            is_default=True)
+
+        driver._resize_stack(mock.sentinel.ctx, cluster, None, 2, None,
+                             nodegroup=nodegroup, rollback=False)
+
+        _, update_kwargs = osc.heat.return_value.stacks.update.call_args
+        self.assertEqual('', update_kwargs['parameters']['ca_rotation_id'])
+        self.assertFalse(update_kwargs['parameters']['is_upgrade'])
+        self.assertTrue(update_kwargs['parameters']['is_resize'])
+
+    @patch('magnum.drivers.heat.driver.clients.OpenStackClients')
+    def test_master_resize_cluster_update_clears_stale_ca_rotation_id(
+            self, mock_osc_cls):
+        driver = DummyKubernetesDriver()
+        driver._get_stack_update_template_fields = mock.MagicMock(
+            return_value={})
+
+        osc = mock.MagicMock()
+        mock_osc_cls.return_value = osc
+        osc.heat.return_value.stacks.get.return_value = mock.MagicMock(
+            parameters={
+                'ca_rotation_id': 'stale-rotation-id',
+                'number_of_masters': 1,
+                'password': '******',
+                'kube_service_account_private_key': '******',
+            })
+
+        default_master = mock.MagicMock(
+            uuid='default-master',
+            role='master',
+            node_count=1,
+            stack_id='cluster-stack-id')
+        resized_master = mock.MagicMock(
+            uuid='resized-master',
+            role='master',
+            node_count=2,
+            stack_id='nodegroup-stack-id')
+        cluster = mock.MagicMock(
+            uuid='cluster-uuid',
+            nodegroups=[default_master, resized_master],
+            default_ng_master=default_master)
+
+        driver._update_cluster_stack_for_master_resize(
+            mock.sentinel.ctx, cluster, resized_master, {})
+
+        _, update_kwargs = osc.heat.return_value.stacks.update.call_args
+        self.assertEqual('', update_kwargs['parameters']['ca_rotation_id'])
+        self.assertEqual(3, update_kwargs['parameters']['number_of_masters'])
+        self.assertFalse(update_kwargs['parameters']['is_upgrade'])
+        self.assertTrue(update_kwargs['parameters']['is_resize'])
+        self.assertNotIn('password', update_kwargs['parameters'])
+        self.assertNotIn('kube_service_account_private_key',
+                         update_kwargs['parameters'])

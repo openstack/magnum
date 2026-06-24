@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import re
+
 import pecan
 import six
 import uuid
@@ -31,6 +33,15 @@ from magnum import objects
 from magnum.objects import fields
 
 
+def _get_cluster_resource(cluster_id, admin_action=None):
+    context = pecan.request.context
+    if context.is_admin and admin_action:
+        policy.enforce(context, admin_action, action=admin_action)
+        context.all_tenants = True
+
+    return api_utils.get_resource('Cluster', cluster_id)
+
+
 def _validate_node_count(ng):
     if ng.max_node_count:
         if ng.max_node_count < ng.min_node_count:
@@ -47,12 +58,50 @@ def _validate_node_count(ng):
             raise exception.NodeGroupInvalidInput(attr='max_node_count',
                                                   nodegroup=ng.name,
                                                   expl=expl)
-    if ng.min_node_count > ng.node_count:
-        expl = ('min_node_count (%s) should be less or equal to '
-                'node_count (%s)' % (ng.min_node_count, ng.node_count))
-        raise exception.NodeGroupInvalidInput(attr='min_node_count',
-                                              nodegroup=ng.name,
-                                              expl=expl)
+    # min_node_count > node_count is allowed: the cluster autoscaler will
+    # scale the nodegroup up to meet the configured minimum.
+
+
+def _parse_kube_minor(tag):
+    """Extract the minor version number from a kube_tag like 'v1.29.14'."""
+    if not tag:
+        return None
+    m = re.match(r'v?(\d+)\.(\d+)', tag)
+    if m:
+        return int(m.group(1)) * 1000 + int(m.group(2))
+    return None
+
+
+def _validate_version_skew(cluster, nodegroup_labels):
+    """Reject nodegroups whose kube_tag is more than ±1 minor from the cluster."""
+    ng_labels = nodegroup_labels or {}
+    ng_tag = ng_labels.get('kube_tag')
+    # If the nodegroup uses a different cluster template, resolve its kube_tag
+    if not ng_tag and 'cluster_template_id' in ng_labels:
+        context = pecan.request.context
+        try:
+            ct = api_utils.get_resource('ClusterTemplate',
+                                        ng_labels['cluster_template_id'])
+            ng_tag = (ct.labels or {}).get('kube_tag')
+        except Exception:
+            pass
+    cluster_tag = (cluster.labels or {}).get('kube_tag')
+    if not cluster_tag:
+        cluster_tag = (cluster.cluster_template.labels or {}).get('kube_tag')
+    if not ng_tag or not cluster_tag:
+        return
+    ng_minor = _parse_kube_minor(ng_tag)
+    cluster_minor = _parse_kube_minor(cluster_tag)
+    if ng_minor is None or cluster_minor is None:
+        return
+    diff = abs(ng_minor - cluster_minor)
+    if diff > 1:
+        raise exception.NodeGroupInvalidInput(
+            attr='kube_tag',
+            nodegroup='-',
+            expl=("Kubernetes version skew between the cluster (%s) "
+                  "and the nodegroup (%s) exceeds the supported "
+                  "range of +/-1 minor version" % (cluster_tag, ng_tag)))
 
 
 class NodeGroup(base.APIBase):
@@ -267,13 +316,8 @@ class NodeGroupController(base.Controller):
         context = pecan.request.context
         policy.enforce(context, 'nodegroup:get_all',
                        action='nodegroup:get_all')
-
-        if context.is_admin:
-            policy.enforce(context, 'nodegroup:get_all_all_projects',
-                           action='nodegroup:get_all_all_projects')
-            context.all_tenants = True
-
-        cluster = api_utils.get_resource('Cluster', cluster_id)
+        cluster = _get_cluster_resource(cluster_id,
+                                        'nodegroup:get_all_all_projects')
 
         filters = {}
         if not context.is_admin:
@@ -299,11 +343,8 @@ class NodeGroupController(base.Controller):
         """
         context = pecan.request.context
         policy.enforce(context, 'nodegroup:get', action='nodegroup:get')
-        if context.is_admin:
-            policy.enforce(context, "nodegroup:get_one_all_projects",
-                           action="nodegroup:get_one_all_projects")
-            context.all_tenants = True
-        cluster = api_utils.get_resource('Cluster', cluster_id)
+        cluster = _get_cluster_resource(cluster_id,
+                                        'nodegroup:get_one_all_projects')
         nodegroup = objects.NodeGroup.get(context, cluster.uuid, nodegroup_id)
         return NodeGroup.convert(nodegroup)
 
@@ -318,8 +359,8 @@ class NodeGroupController(base.Controller):
 
         context = pecan.request.context
         policy.enforce(context, 'nodegroup:create', action='nodegroup:create')
-
-        cluster = api_utils.get_resource('Cluster', cluster_id)
+        cluster = _get_cluster_resource(cluster_id,
+                                        'nodegroup:create_all_projects')
         # Before we start, we need to check that the cluster has an
         # api_address. If not, just fail.
         if 'api_address' not in cluster or not cluster.api_address:
@@ -348,9 +389,11 @@ class NodeGroupController(base.Controller):
                 labels.update(nodegroup.labels)
                 nodegroup.labels = labels
 
+        _validate_version_skew(cluster, nodegroup.labels)
+
         nodegroup_dict = nodegroup.as_dict()
         nodegroup_dict['cluster_id'] = cluster.uuid
-        nodegroup_dict['project_id'] = context.project_id
+        nodegroup_dict['project_id'] = cluster.project_id
 
         new_obj = objects.NodeGroup(context, **nodegroup_dict)
         new_obj.uuid = uuid.uuid4()
@@ -367,9 +410,15 @@ class NodeGroupController(base.Controller):
         :param : resource name.
         :param values: a json document to update a nodegroup.
         """
-        cluster = api_utils.get_resource('Cluster', cluster_id)
-        nodegroup = self._patch(cluster.uuid, nodegroup_id, patch)
-        pecan.request.rpcapi.nodegroup_update_async(cluster, nodegroup)
+        cluster = _get_cluster_resource(cluster_id,
+                                        'nodegroup:update_all_projects')
+        nodegroup, needs_resize = self._patch(cluster.uuid, nodegroup_id,
+                                              patch)
+        if needs_resize:
+            pecan.request.rpcapi.cluster_resize_async(
+                cluster, nodegroup.node_count, None, nodegroup)
+        else:
+            pecan.request.rpcapi.nodegroup_update_async(cluster, nodegroup)
         return NodeGroup.convert(nodegroup)
 
     @base.Controller.api_version("1.9")
@@ -383,7 +432,8 @@ class NodeGroupController(base.Controller):
         """
         context = pecan.request.context
         policy.enforce(context, 'nodegroup:delete', action='nodegroup:delete')
-        cluster = api_utils.get_resource('Cluster', cluster_id)
+        cluster = _get_cluster_resource(cluster_id,
+                                        'nodegroup:delete_all_projects')
         nodegroup = objects.NodeGroup.get(context, cluster.uuid, nodegroup_id)
         if nodegroup.is_default:
             raise exception.DeletingDefaultNGNotSupported()
@@ -393,6 +443,7 @@ class NodeGroupController(base.Controller):
         context = pecan.request.context
         policy.enforce(context, 'nodegroup:update', action='nodegroup:update')
         nodegroup = objects.NodeGroup.get(context, cluster_uuid, nodegroup_id)
+        old_node_count = nodegroup.node_count
 
         try:
             ng_dict = nodegroup.as_dict()
@@ -412,6 +463,15 @@ class NodeGroupController(base.Controller):
                 patch_val = None
             if nodegroup[field] != patch_val:
                 nodegroup[field] = patch_val
+
+        # When min_node_count is raised above the current node_count,
+        # bump node_count to match so Magnum triggers an actual resize.
+        # Without this the autoscaler would only react to unschedulable
+        # pods, leaving the nodegroup at 0 indefinitely.
+        if nodegroup.min_node_count > nodegroup.node_count:
+            nodegroup.node_count = nodegroup.min_node_count
+
         _validate_node_count(nodegroup)
 
-        return nodegroup
+        needs_resize = nodegroup.node_count != old_node_count
+        return nodegroup, needs_resize

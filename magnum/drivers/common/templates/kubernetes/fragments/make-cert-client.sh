@@ -23,9 +23,7 @@ set -o nounset
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
-if [ "$TLS_DISABLED" == "True" ]; then
-    exit 0
-fi
+if [ "$TLS_DISABLED" != "True" ]; then
 
 if [ "$VERIFY_CA" == "True" ]; then
     VERIFY_CA=""
@@ -148,3 +146,4 @@ generate_certificates proxy ${cert_dir}/proxy.conf
 chmod 550 "${cert_dir}"
 chmod 440 "${cert_dir}/kubelet.key"
 chmod 440 "${cert_dir}/proxy.key"
+fi

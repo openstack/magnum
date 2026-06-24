@@ -366,6 +366,32 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
     def get_definition(self):
         return k8sa_dr.Driver().get_template_definition()
 
+    @mock.patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_set_service_account_params_skips_masked_stack_values(
+            self, mock_generate_csr_and_key):
+        definition = k8sa_tdef.AtomicK8sTemplateDefinition()
+        mock_context = mock.MagicMock()
+        mock_cluster = mock.MagicMock(
+            uuid='cluster-uuid',
+            stack_id='stack-id')
+        mock_osc = mock.MagicMock()
+        mock_osc.heat.return_value.stacks.get.return_value = mock.MagicMock(
+            parameters={
+                'ca_rotation_id': 'rotation-id',
+                'kube_service_account_key': '******',
+                'kube_service_account_private_key': '******',
+            })
+        definition.get_osc = mock.MagicMock(return_value=mock_osc)
+
+        extra_params = {}
+        definition._set_service_account_params(
+            mock_context, mock_cluster, extra_params)
+
+        self.assertEqual('rotation-id', extra_params['ca_rotation_id'])
+        self.assertNotIn('kube_service_account_key', extra_params)
+        self.assertNotIn('kube_service_account_private_key', extra_params)
+        mock_generate_csr_and_key.assert_not_called()
+
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')

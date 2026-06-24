@@ -46,6 +46,12 @@ class TestNodegroupObject(base.TestCase):
 
 class NodeGroupControllerTest(api_base.FunctionalTest):
     headers = {"Openstack-Api-Version": "container-infra latest"}
+    admin_headers = {
+        "Openstack-Api-Version": "container-infra latest",
+        "X-Project-Id": "admin_project",
+        "X-Roles": "admin",
+        "X-User-Id": "admin_user"
+    }
 
     def _add_headers(self, kwargs):
         if 'headers' not in kwargs:
@@ -459,6 +465,19 @@ class TestPost(NodeGroupControllerTest):
         (cluster, ng), _ = self.mock_ng_create.call_args
         self.assertEqual(cluster.labels, ng.labels)
 
+    def test_create_nodegroup_as_admin(self):
+        cluster_uuid = uuidutils.generate_uuid()
+        cluster = obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,
+                                                project_id='other-project')
+        url = "/clusters/%s/nodegroups" % cluster.uuid
+        ng_dict = apiutils.nodegroup_post_data(name='admin_ng')
+
+        response = self.post_json(url, ng_dict, headers=self.admin_headers)
+
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(cluster.project_id, response.json['project_id'])
+
 
 class TestDelete(NodeGroupControllerTest):
 
@@ -517,9 +536,7 @@ class TestDelete(NodeGroupControllerTest):
         self.assertEqual('application/json', response.content_type)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
-    def test_delete_nodegroup_as_admin(self, mock_context, mock_policy):
+    def test_delete_nodegroup_as_admin(self):
         cluster_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,
                                       project_id='fake', name='test-fake')
@@ -528,9 +545,8 @@ class TestDelete(NodeGroupControllerTest):
                                         cluster_id=cluster_uuid,
                                         is_default=False,
                                         project_id='fake', id=50)
-        self.context.is_admin = True
         url = '/clusters/%s/nodegroups/%s' % (cluster_uuid, ng_uuid)
-        response = self.delete(url)
+        response = self.delete(url, headers=self.admin_headers)
         self.assertEqual(204, response.status_int)
 
     def test_delete_wrong_microversion(self):
@@ -691,9 +707,7 @@ class TestPatch(NodeGroupControllerTest):
         self.assertEqual(400, response.status_code)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
-    def test_update_nodegroup_as_admin(self, mock_context, mock_policy):
+    def test_update_nodegroup_as_admin(self):
         cluster_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,
                                       project_id='fake', name='test-fake')
@@ -702,12 +716,12 @@ class TestPatch(NodeGroupControllerTest):
                                         cluster_id=cluster_uuid,
                                         is_default=False,
                                         project_id='fake', id=50)
-        self.context.is_admin = True
         url = '/clusters/%s/nodegroups/%s' % (cluster_uuid, ng_uuid)
         response = self.patch_json(url,
                                    [{'path': '/max_node_count',
                                      'value': 4,
-                                     'op': 'replace'}])
+                                     'op': 'replace'}],
+                                   headers=self.admin_headers)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_code)
 

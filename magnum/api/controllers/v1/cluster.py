@@ -108,7 +108,7 @@ class Cluster(base.APIBase):
     node_count = wsme.wsattr(wtypes.IntegerType(minimum=0), default=1)
     """The node count for this cluster. Default to 1 if not set"""
 
-    master_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    master_count = wsme.wsattr(wtypes.IntegerType(minimum=0), default=1)
     """The number of master nodes for this cluster. Default to 1 if not set"""
 
     docker_volume_size = wtypes.IntegerType(minimum=1)
@@ -230,7 +230,8 @@ class Cluster(base.APIBase):
                                          'labels', 'node_count', 'status',
                                          'master_flavor_id', 'flavor_id',
                                          'create_timeout', 'master_count',
-                                         'stack_id', 'health_status'])
+                                         'stack_id', 'health_status',
+                                         'coe_version'])
         else:
             overridden, added, skipped = api_utils.get_labels_diff(
                 parent_labels, cluster.labels)
@@ -436,11 +437,30 @@ class ClustersController(base.Controller):
 
         and store them into cluster.faults.
         """
-        # Gather fault info from the cluster nodegroups.
-        return {
+        from magnum.common import clients
+
+        faults = {
             ng.name: ng.status_reason for ng in cluster.nodegroups
             if ng.status.endswith('FAILED')
         }
+
+        # Also query Heat for the specific failed resources so the user
+        # can see exactly what is blocking (e.g. stuck load balancers,
+        # ports, security groups).
+        if cluster.stack_id:
+            try:
+                osc = clients.OpenStackClients(context)
+                failed_resources = osc.heat().resources.list(
+                    cluster.stack_id, nested_depth=2,
+                    filters={'status': 'FAILED'})
+                for res in failed_resources:
+                    key = '%s/%s' % (res.resource_name, res.resource_type)
+                    faults[key] = res.resource_status_reason
+            except Exception as e:
+                LOG.warning("Failed to retrieve Heat resources for "
+                            "cluster %s: %s", cluster.uuid, e)
+
+        return faults
 
     @expose.expose(Cluster, types.uuid_or_name)
     def get_one(self, cluster_ident):
@@ -603,11 +623,13 @@ class ClustersController(base.Controller):
         """
         (cluster, node_count,
          health_status,
-         health_status_reason) = self._patch(cluster_ident, patch)
+         health_status_reason,
+         labels_changed) = self._patch(cluster_ident, patch)
         pecan.request.rpcapi.cluster_update_async(cluster, node_count,
                                                   health_status,
                                                   health_status_reason,
-                                                  rollback)
+                                                  rollback,
+                                                  labels_changed)
         return ClusterID(cluster.uuid)
 
     def _patch(self, cluster_ident, patch):
@@ -649,8 +671,13 @@ class ClustersController(base.Controller):
             if p['path'] == '/node_count':
                 node_count = p.get('value') or new_cluster.node_count
 
+        labels_changed = 'labels' in delta
+        if labels_changed:
+            cluster.labels = new_cluster.labels
+
         return (cluster, node_count,
-                new_cluster.health_status, new_cluster.health_status_reason)
+                new_cluster.health_status, new_cluster.health_status_reason,
+                labels_changed)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, cluster_ident):

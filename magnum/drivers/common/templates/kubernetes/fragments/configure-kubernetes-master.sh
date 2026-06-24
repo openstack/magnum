@@ -7,6 +7,21 @@ set +x
 . /etc/sysconfig/heat-params
 set -x
 
+is_true() {
+    [ "$(echo "${1:-false}" | tr '[:upper:]' '[:lower:]')" = "true" ]
+}
+
+# During a pure CA rotation the certificates have already been replaced
+# and services restarted by rotate-kubernetes-ca-certs-master.sh.
+# Skip the full kubernetes master reconfiguration to avoid unnecessary
+# downloads, service file rewrites, and potential failures under the
+# strict shell settings inherited from the rotation script.
+if [ -n "${CA_ROTATION_ID:-}" ] && \
+   ! is_true "${IS_UPGRADE:-false}" && \
+   ! is_true "${IS_RESIZE:-false}"; then
+    echo "Pure CA rotation detected – skipping kubernetes master reconfiguration"
+else
+
 echo "configuring kubernetes (master)"
 
 ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
@@ -23,13 +38,15 @@ done
 
 # Setup network driver
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
-    $ssh_cmd mkdir -p /opt/cni/bin
+    cni_bin_dir="/opt/cni/bin"
+    $ssh_cmd mkdir -p "${cni_bin_dir}"
     cni_plugin_path="/srv/magnum/kubernetes/cni"
     $ssh_cmd mkdir -p ${cni_plugin_path}
     
     # Download and install CNI plugins if not present or if checksum differs
     cni_tgz="${cni_plugin_path}/cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz"
-    if [ ! -f "${cni_tgz}" ] || ! $ssh_cmd sha256sum -c "${cni_tgz}.sha256" &>/dev/null; then
+    if ! $ssh_cmd "test -f '${cni_tgz}'" || \
+       ! $ssh_cmd "cd '${cni_plugin_path}' && sha256sum -c 'cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz.sha256' >/dev/null 2>&1"; then
         $ssh_cmd curl --retry 5 --retry-delay 10 -L \
             https://github.com/containernetworking/plugins/releases/download/${FLANNEL_CNI_TAG}/cni-plugins-linux-amd64-${FLANNEL_CNI_TAG}.tgz \
             -o "${cni_tgz}.tmp"
@@ -40,8 +57,8 @@ if [ "$NETWORK_DRIVER" = "flannel" ]; then
     fi
     
     # Extract CNI plugins
-    $ssh_cmd tar -C /opt/cni/bin -xzf ${cni_tgz}
-    $ssh_cmd chmod +x /opt/cni/bin/*
+    $ssh_cmd tar -C "${cni_bin_dir}" -xzf ${cni_tgz}
+    $ssh_cmd chmod +x "${cni_bin_dir}"/*
 fi
 
 # Configure network settings
@@ -738,3 +755,4 @@ KUBELET_ADDRESS="--node-ip=${KUBE_NODE_IP}"
 KUBELET_HOSTNAME="--hostname-override=${INSTANCE_NAME}"
 KUBELET_ARGS="${KUBELET_ARGS}"
 EOF
+fi

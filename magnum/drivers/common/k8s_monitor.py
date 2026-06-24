@@ -11,13 +11,17 @@
 #    limitations under the License.
 
 import ast
+import json
 
+from oslo_log import log as logging
 from oslo_utils import strutils
 
 from magnum.common import utils
 from magnum.conductor import k8s_api as k8s
 from magnum.conductor import monitors
 from magnum.objects import fields as m_fields
+
+LOG = logging.getLogger(__name__)
 
 
 class K8sMonitor(monitors.MonitorBase):
@@ -237,6 +241,8 @@ class K8sMonitor(monitors.MonitorBase):
             api_status, _, _ = k8s_api.api_client.call_api(
                 '/healthz', 'GET', response_type=object)
 
+            self._poll_version(k8s_api)
+
             for node in k8s_api.list_node().items:
                 node_key = node.metadata.name + ".Ready"
                 ready = False
@@ -260,3 +266,19 @@ class K8sMonitor(monitors.MonitorBase):
                     health_status_reason['api'] = api_status
 
         return health_status, health_status_reason
+
+    def _poll_version(self, k8s_api):
+        try:
+            version_raw, _, _ = k8s_api.api_client.call_api(
+                '/version', 'GET', response_type=object)
+            if isinstance(version_raw, str):
+                version_info = json.loads(version_raw)
+            else:
+                version_info = version_raw
+            git_version = version_info.get('gitVersion')
+            if git_version and git_version != self.cluster.coe_version:
+                self.data['coe_version'] = git_version
+        except Exception as e:
+            LOG.warning(
+                "Failed to get version from cluster %(cluster)s: %(e)s",
+                {'e': e, 'cluster': self.cluster.uuid})

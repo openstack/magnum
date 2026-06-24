@@ -35,6 +35,28 @@ COMMON_TEMPLATES_PATH = "../../common/templates/"
 COMMON_ENV_PATH = COMMON_TEMPLATES_PATH + "environments/"
 
 CONF = magnum.conf.CONF
+MASKED_HEAT_PARAM_VALUE = '******'
+
+
+def is_masked_heat_parameter(value):
+    return (isinstance(value, six.string_types) and
+            value == MASKED_HEAT_PARAM_VALUE)
+
+
+def get_unmasked_heat_parameter(parameters, key, default=None):
+    value = parameters.get(key, default)
+    if is_masked_heat_parameter(value):
+        return default
+    return value
+
+
+def omit_masked_heat_parameters(parameters):
+    if not parameters:
+        return {}
+    return {
+        key: value for key, value in parameters.items()
+        if not is_masked_heat_parameter(value)
+    }
 
 
 class ParameterMapping(object):

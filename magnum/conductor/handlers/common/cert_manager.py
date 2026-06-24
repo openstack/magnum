@@ -17,6 +17,7 @@ from oslo_utils import encodeutils
 import six
 
 from magnum.common import cert_manager
+from magnum.common import context as mag_ctx
 from magnum.common import exception
 from magnum.common import short_id
 from magnum.common.x509 import operations as x509
@@ -30,6 +31,42 @@ CONDUCTOR_CLIENT_NAME = six.u('Magnum-Conductor')
 
 LOG = logging.getLogger(__name__)
 CONF = magnum.conf.CONF
+
+
+def _get_cluster_cert_context(cluster, context=None):
+    if context is None:
+        return None
+
+    cluster_project_id = getattr(cluster, 'project_id', None)
+    cluster_user_id = getattr(cluster, 'user_id', None)
+
+    if not cluster_project_id and not cluster_user_id:
+        return context
+
+    if (context.project_id == cluster_project_id and
+            context.user_id == cluster_user_id and
+            not context.is_admin and
+            not getattr(context, 'all_tenants', False)):
+        return context
+
+    return mag_ctx.RequestContext(
+        auth_token=context.auth_token,
+        auth_url=context.auth_url,
+        domain_id=context.domain_id,
+        domain_name=context.domain_name,
+        user_id=cluster_user_id or context.user_id,
+        user_domain_id=context.user_domain_id,
+        user_domain_name=context.user_domain_name,
+        project_id=cluster_project_id or context.project_id,
+        roles=context.roles,
+        is_admin=False,
+        read_only=context.read_only,
+        show_deleted=context.show_deleted,
+        request_id=context.request_id,
+        trust_id=context.trust_id,
+        auth_token_info=context.auth_token_info,
+        all_tenants=False,
+        password=context.password)
 
 
 def _generate_ca_cert(issuer_name, context=None):
@@ -104,6 +141,7 @@ def generate_certificates_to_cluster(cluster, context=None):
     :returns: CA cert uuid and magnum client cert uuid
     """
     try:
+        context = _get_cluster_cert_context(cluster, context)
         issuer_name = _get_issuer_name(cluster)
 
         LOG.debug('Start to generate certificates: %s', issuer_name)
@@ -124,6 +162,7 @@ def generate_certificates_to_cluster(cluster, context=None):
 
 
 def get_cluster_ca_certificate(cluster, context=None):
+    context = _get_cluster_cert_context(cluster, context)
     ca_cert = cert_manager.get_backend().CertManager.get_cert(
         cluster.ca_cert_ref,
         resource_ref=cluster.uuid,
@@ -134,6 +173,7 @@ def get_cluster_ca_certificate(cluster, context=None):
 
 
 def get_cluster_magnum_cert(cluster, context=None):
+    context = _get_cluster_cert_context(cluster, context)
     magnum_cert = cert_manager.get_backend().CertManager.get_cert(
         cluster.magnum_cert_ref,
         resource_ref=cluster.uuid,
@@ -203,6 +243,7 @@ def create_client_files(cluster, context=None):
 
 
 def sign_node_certificate(cluster, csr, context=None):
+    context = _get_cluster_cert_context(cluster, context)
     ca_cert = cert_manager.get_backend().CertManager.get_cert(
         cluster.ca_cert_ref,
         resource_ref=cluster.uuid,
@@ -221,6 +262,7 @@ def delete_certificates_from_cluster(cluster, context=None):
 
     :param cluster: The cluster which has certs
     """
+    context = _get_cluster_cert_context(cluster, context)
     for cert_ref in ['ca_cert_ref', 'magnum_cert_ref']:
         try:
             cert_ref = getattr(cluster, cert_ref, None)
