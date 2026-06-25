@@ -716,6 +716,12 @@ resources:
       user_data_format: SOFTWARE_CONFIG
       software_config_transport: POLL_SERVER_HEAT
       user_data: { get_resource: agent_config }
+      # user_data is first-boot-only and now only bootstraps the reconciler.
+      # Node convergence is owned by the reconciler (master_config
+      # SoftwareDeployment + periodic timer), so user_data drift must NOT
+      # rebuild a running node. Heat's default REPLACE collides on the
+      # retained kube_master_eth0 port ("Port not usable for instance").
+      user_data_update_policy: IGNORE
       networks:
         - port: { get_resource: kube_master_eth0 }
       scheduler_hints: { group: { get_param: nodes_server_group_id } }
