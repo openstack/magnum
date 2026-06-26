@@ -461,6 +461,7 @@ resources:
         - name: CLOUD_PROVIDER_ENABLED
         - name: INSECURE_REGISTRY_URL
         - name: CONTAINER_INFRA_PREFIX
+        - name: HEAT_CONTAINER_AGENT_TAG
         - name: DNS_SERVICE_IP
         - name: DNS_CLUSTER_DOMAIN
         - name: KUBELET_OPTIONS
@@ -539,6 +540,7 @@ resources:
         CLOUD_PROVIDER_ENABLED: { get_param: cloud_provider_enabled }
         INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
         CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
+        HEAT_CONTAINER_AGENT_TAG: { get_param: heat_container_agent_tag }
         DNS_SERVICE_IP: { get_param: dns_service_ip }
         DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
         KUBELET_OPTIONS: { get_param: kubelet_options }

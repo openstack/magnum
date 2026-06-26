@@ -569,6 +569,7 @@ resources:
         - name: TRUST_ID
         - name: INSECURE_REGISTRY_URL
         - name: CONTAINER_INFRA_PREFIX
+        - name: HEAT_CONTAINER_AGENT_TAG
         - name: ETCD_LB_VIP
         - name: DNS_SERVICE_IP
         - name: DNS_CLUSTER_DOMAIN
@@ -664,6 +665,7 @@ resources:
         TRUST_ID: { get_param: trust_id }
         INSECURE_REGISTRY_URL: { get_param: insecure_registry_url }
         CONTAINER_INFRA_PREFIX: { get_param: container_infra_prefix }
+        HEAT_CONTAINER_AGENT_TAG: { get_param: heat_container_agent_tag }
         ETCD_LB_VIP: { get_param: etcd_lb_vip }
         DNS_SERVICE_IP: { get_param: dns_service_ip }
         DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }

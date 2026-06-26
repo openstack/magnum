@@ -56,6 +56,27 @@ NodeGroupStatus = collections.namedtuple(
 )
 
 
+def _heat_param_type_for_value(value):
+    """Infer the Heat parameter ``type`` for a live stack value.
+
+    Used when re-declaring a dropped parameter during rolling migration so
+    the injected declaration accepts the value Heat already stored.  Heat
+    ``stack.parameters`` values are usually strings, so this mostly yields
+    ``string``; the other branches just harden the rare non-string case so
+    we never inject a ``type: string`` that rejects a bool/number/list value.
+    """
+    # bool is a subclass of int, so check it first.
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float)):
+        return "number"
+    if isinstance(value, (list, tuple)):
+        return "comma_delimited_list"
+    if isinstance(value, dict):
+        return "json"
+    return "string"
+
+
 @six.add_metaclass(abc.ABCMeta)
 class HeatDriver(driver.Driver):
     """Base Driver class for using Heat
@@ -1195,6 +1216,76 @@ class KubernetesDriver(HeatDriver):
                 LOG.debug("Dropping obsolete stack parameter: %s", k)
         return filtered
 
+    @staticmethod
+    def _inject_deprecated_parameters(template, stack_parameters):
+        """Re-declare in the new template every live parameter it dropped.
+
+        A rolling ``existing: True`` ResourceGroup update keeps the old
+        member definitions for nodes outside the current batch.  Those defs
+        still reference removed parameters via ``{get_param: X}``, which
+        resolve against the PARENT stack.  When a new release deletes the
+        parameter declaration the parent no longer has it and Heat fails the
+        update with ``Property X not assigned`` (e.g. ``flannel_cni_tag`` on an
+        ussuri cluster migrating to a template that dropped it).
+
+        This is the parameter-side counterpart to the alias/pin step
+        (``_alias_resource_group_child_templates_for_rolling_migration`` /
+        ``_pin_existing_child_templates_from_members``): alias/pin keep each
+        retained member validating against the CHILD schema it was created
+        with (so its removed properties are still accepted), and this keeps
+        the corresponding PARENT-level parameters declared so the member's
+        ``get_param`` resolves.  Together they let templates add and remove
+        parameters freely from release to release and still migrate any
+        existing cluster, with no hardcoded deprecation list.
+
+        The injected declaration's ``type`` is inferred from the live value so
+        a non-string parameter (bool/number/list) is not rejected.  The live
+        value is preserved by the caller (the augmented template makes
+        ``_filter_params_for_template`` keep it), so no default is needed; one
+        is added anyway as a harmless fallback.  New batch members use the new
+        resource_def, which does not reference these parameters, so the extra
+        declarations are inert for them.
+
+        ``stack_parameters`` is the RAW stack parameter map (NOT
+        masked-omitted): a ``hidden: true`` parameter such as ``password``
+        comes back masked (``******``), so we must see its NAME here to
+        re-declare it, but we deliberately do NOT pass that masked value back
+        (the caller filters it out).  For a masked dropped parameter we emit a
+        declaration only — Heat's ``existing: True`` update then PRESERVES the
+        real stored value for it, so the retained member's ``get_param``
+        resolves without the secret ever entering this code path.
+        """
+        if isinstance(template, dict):
+            parsed = template
+            return_dict = True
+        else:
+            parsed = yaml.safe_load(template) or {}
+            return_dict = False
+
+        params = parsed.setdefault("parameters", {})
+        injected = False
+        for name, value in stack_parameters.items():
+            if name in params or name.startswith("OS::"):
+                continue
+            if heat_tdef.is_masked_heat_parameter(value):
+                # Declaration only; real value preserved by existing: True.
+                params[name] = {"type": "string", "default": ""}
+            else:
+                params[name] = {
+                    "type": _heat_param_type_for_value(value),
+                    "default": value,
+                }
+            injected = True
+            LOG.info(
+                "Injected deprecated parameter %s for rolling migration", name
+            )
+
+        if not injected:
+            return template
+        if return_dict:
+            return parsed
+        return yaml.safe_dump(parsed, default_flow_style=False)
+
     def _get_merged_stack_parameters(
         self, osc, stack_id, updated_params, template=None
     ):
@@ -1533,6 +1624,21 @@ class FedoraKubernetesDriver(KubernetesDriver):
             osc, stack_id, aliased, tpl_files
         )
 
+        # Fetch the current stack parameters, then re-declare in the new
+        # template any the new template dropped.  A rolling ``existing: True``
+        # update keeps retained (non-batch) members referencing those removed
+        # parameters via ``{get_param: X}``; re-declaring keeps the references
+        # resolvable instead of failing ``Property X not assigned`` (the
+        # parameter-side counterpart to the alias/pin child-schema step).
+        # Handles removed, renamed, or deprecated parameters automatically —
+        # no hardcoded deprecation list.
+        raw_parameters = osc.heat().stacks.get(stack_id).parameters.copy()
+        current_parameters = heat_tdef.omit_masked_heat_parameters(raw_parameters)
+        # Pass RAW params (masked included) so masked-but-dropped parameters
+        # like `password` are still re-declared; their masked value is never
+        # passed back — existing: True preserves the real one.
+        template = self._inject_deprecated_parameters(template, raw_parameters)
+
         self._set_non_rotation_stack_flags(heat_params, is_upgrade=True)
         heat_params["update_max_batch_size"] = max_batch_size or 1
         heat_params["timestamp_upgrade"] = self._get_reconcile_timestamp()
@@ -1546,13 +1652,9 @@ class FedoraKubernetesDriver(KubernetesDriver):
             "timeout_mins": self._get_update_timeout(),
         }
 
-        # Fetch the current stack parameters and drop any that are not
-        # declared in the new template.  This handles removed, renamed,
-        # or deprecated parameters automatically — old clusters are
-        # migrated cleanly without a hardcoded deprecation list.
-        current_parameters = heat_tdef.omit_masked_heat_parameters(
-            osc.heat().stacks.get(stack_id).parameters.copy()
-        )
+        # Drop live params not declared in the (now augmented) template; the
+        # injected deprecated params survive and their values flow back to the
+        # retained members.
         current_parameters = self._filter_params_for_template(
             current_parameters, template
         )
@@ -1776,6 +1878,21 @@ class UbuntuKubernetesDriver(KubernetesDriver):
             osc, stack_id, aliased, tpl_files
         )
 
+        # Fetch the current stack parameters, then re-declare in the new
+        # template any the new template dropped.  A rolling ``existing: True``
+        # update keeps retained (non-batch) members referencing those removed
+        # parameters via ``{get_param: X}``; re-declaring keeps the references
+        # resolvable instead of failing ``Property X not assigned`` (the
+        # parameter-side counterpart to the alias/pin child-schema step).
+        # Handles removed, renamed, or deprecated parameters automatically —
+        # no hardcoded deprecation list.
+        raw_parameters = osc.heat().stacks.get(stack_id).parameters.copy()
+        current_parameters = heat_tdef.omit_masked_heat_parameters(raw_parameters)
+        # Pass RAW params (masked included) so masked-but-dropped parameters
+        # like `password` are still re-declared; their masked value is never
+        # passed back — existing: True preserves the real one.
+        template = self._inject_deprecated_parameters(template, raw_parameters)
+
         self._set_non_rotation_stack_flags(heat_params, is_upgrade=True)
         heat_params["update_max_batch_size"] = max_batch_size or 1
         heat_params["timestamp_upgrade"] = self._get_reconcile_timestamp()
@@ -1789,13 +1906,9 @@ class UbuntuKubernetesDriver(KubernetesDriver):
             "timeout_mins": self._get_update_timeout(),
         }
 
-        # Fetch the current stack parameters and drop any that are not
-        # declared in the new template.  This handles removed, renamed,
-        # or deprecated parameters automatically — old clusters are
-        # migrated cleanly without a hardcoded deprecation list.
-        current_parameters = heat_tdef.omit_masked_heat_parameters(
-            osc.heat().stacks.get(stack_id).parameters.copy()
-        )
+        # Drop live params not declared in the (now augmented) template; the
+        # injected deprecated params survive and their values flow back to the
+        # retained members.
         current_parameters = self._filter_params_for_template(
             current_parameters, template
         )

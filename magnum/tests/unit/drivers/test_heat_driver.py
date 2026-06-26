@@ -18,6 +18,7 @@ from oslo_utils import uuidutils
 
 import magnum.conf
 from magnum.drivers.heat import driver as heat_driver
+from magnum.drivers.heat import template_def as heat_tdef
 from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_atomic_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
@@ -943,3 +944,114 @@ class TestHeatDriverResizeFlags(base.TestCase):
         self.assertNotIn('password', update_kwargs['parameters'])
         self.assertNotIn('kube_service_account_private_key',
                          update_kwargs['parameters'])
+
+
+class TestHeatParamTypeForValue(base.TestCase):
+
+    def test_infers_heat_type_from_value(self):
+        # bool must win over int (bool is a subclass of int).
+        self.assertEqual(
+            'boolean', heat_driver._heat_param_type_for_value(True))
+        self.assertEqual(
+            'number', heat_driver._heat_param_type_for_value(5))
+        self.assertEqual(
+            'number', heat_driver._heat_param_type_for_value(1.5))
+        self.assertEqual(
+            'comma_delimited_list',
+            heat_driver._heat_param_type_for_value(['a', 'b']))
+        self.assertEqual(
+            'json', heat_driver._heat_param_type_for_value({'k': 'v'}))
+        self.assertEqual(
+            'string', heat_driver._heat_param_type_for_value('v1.27.3'))
+        self.assertEqual(
+            'string', heat_driver._heat_param_type_for_value(''))
+
+
+class TestDeprecatedParameterInjection(base.TestCase):
+    """Cover the parameter-side half of rolling template migration.
+
+    A new release that drops a parameter must still update an existing
+    cluster whose retained ResourceGroup members reference it via
+    ``{get_param: X}``; the parameter is re-declared in the new template so
+    the reference resolves instead of failing ``Property X not assigned``.
+    """
+
+    def setUp(self):
+        super(TestDeprecatedParameterInjection, self).setUp()
+        self.driver = DummyKubernetesDriver()
+        # A minimal "new" template that no longer declares flannel_cni_tag.
+        self.new_template = {
+            'parameters': {
+                'kube_tag': {'type': 'string'},
+                'number_of_minions': {'type': 'number'},
+            },
+            'resources': {},
+        }
+        # What the live (ussuri-created) stack still carries.  RAW form:
+        # a hidden parameter (`password`) comes back masked from Heat.
+        self.live_params = {
+            'kube_tag': 'v1.27.3',
+            'number_of_minions': '1',
+            'flannel_cni_tag': 'v1.1.2',        # dropped + required downstream
+            'prometheus_monitoring': True,
+            'password': heat_tdef.MASKED_HEAT_PARAM_VALUE,   # hidden + dropped
+            'OS::stack_id': 'abc',              # must be skipped
+        }
+
+    def test_injects_only_dropped_params(self):
+        out = self.driver._inject_deprecated_parameters(
+            self.new_template, self.live_params)
+        params = out['parameters']
+        # Re-declared because the new template dropped it.
+        self.assertIn('flannel_cni_tag', params)
+        self.assertEqual('string', params['flannel_cni_tag']['type'])
+        self.assertEqual('v1.1.2', params['flannel_cni_tag']['default'])
+        # Type inferred from the live value (bool -> boolean).
+        self.assertEqual('boolean', params['prometheus_monitoring']['type'])
+        # Already declared -> untouched (no clobber).
+        self.assertEqual({'type': 'string'}, params['kube_tag'])
+        # OS::* pseudo-parameters are never injected.
+        self.assertNotIn('OS::stack_id', params)
+
+    def test_masked_param_declared_without_value(self):
+        # A masked (hidden) dropped param must be re-declared by NAME so its
+        # get_param resolves, but its masked value must never become a default
+        # (the real value is preserved by Heat's existing: True update).
+        out = self.driver._inject_deprecated_parameters(
+            self.new_template, self.live_params)
+        self.assertIn('password', out['parameters'])
+        self.assertEqual('string', out['parameters']['password']['type'])
+        self.assertEqual('', out['parameters']['password']['default'])
+        self.assertNotEqual(
+            heat_tdef.MASKED_HEAT_PARAM_VALUE,
+            out['parameters']['password']['default'])
+
+    def test_injected_param_survives_filter(self):
+        # End to end mirroring upgrade_cluster: inject sees RAW params, the
+        # filter receives the masked-omitted set.  The re-declared non-masked
+        # param keeps its value; the masked one is NOT passed (preserved by
+        # existing: True), so it must not appear in the filtered values.
+        augmented = self.driver._inject_deprecated_parameters(
+            self.new_template, self.live_params)
+        omitted = heat_tdef.omit_masked_heat_parameters(self.live_params)
+        filtered = self.driver._filter_params_for_template(omitted, augmented)
+        self.assertEqual('v1.1.2', filtered['flannel_cni_tag'])
+        self.assertEqual(True, filtered['prometheus_monitoring'])
+        self.assertNotIn('password', filtered)
+
+    def test_noop_when_nothing_dropped(self):
+        template = {'parameters': {'kube_tag': {'type': 'string'}}}
+        out = self.driver._inject_deprecated_parameters(
+            template, {'kube_tag': 'v1.27.3'})
+        # Same object returned unchanged when there is nothing to inject.
+        self.assertIs(template, out)
+
+    def test_accepts_yaml_string_template(self):
+        import yaml
+        tmpl = yaml.safe_dump({'parameters': {'kube_tag': {'type': 'string'}}})
+        out = self.driver._inject_deprecated_parameters(
+            tmpl, {'kube_tag': 'v1', 'flannel_cni_tag': 'v1.1.2'})
+        parsed = yaml.safe_load(out)
+        self.assertIn('flannel_cni_tag', parsed['parameters'])
+        self.assertEqual(
+            'v1.1.2', parsed['parameters']['flannel_cni_tag']['default'])
