@@ -303,6 +303,9 @@ class Handler(object):
             fields.ClusterStatus.ADOPT_COMPLETE,
             fields.ClusterStatus.UPDATE_FAILED,
             fields.ClusterStatus.UPDATE_IN_PROGRESS,
+            # Allow recovery from a failed rollback (e.g. a migration update
+            # that aborted then could not roll back) by retrying the resize.
+            fields.ClusterStatus.ROLLBACK_FAILED,
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
@@ -410,6 +413,9 @@ class Handler(object):
             fields.ClusterStatus.CHECK_COMPLETE,
             fields.ClusterStatus.ADOPT_COMPLETE,
             fields.ClusterStatus.UPDATE_FAILED,
+            # Allow recovery from a failed rollback (e.g. a migration update
+            # that aborted then could not roll back) by retrying the upgrade.
+            fields.ClusterStatus.ROLLBACK_FAILED,
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
