@@ -47,7 +47,21 @@ cluster_heat_opts = [
                      'protocol coordinated across all nodes, so this must '
                      'comfortably exceed the time for the slowest node to '
                      'complete all phases (control-plane restarts plus '
-                     'cluster-wide barriers).'))
+                     'cluster-wide barriers).')),
+    cfg.IntOpt('update_timeout_per_node',
+               default=30,
+               help=('Extra Heat stack-update budget, in minutes, granted per '
+                     'node beyond the first during upgrade, reconfigure and CA '
+                     'rotation. Batch-1 rolling updates converge nodes '
+                     'serially, so the whole-stack timeout must cover the '
+                     'slowest serial chain rather than a single node. The '
+                     'effective timeout is update_timeout + '
+                     'update_timeout_per_node * (master_count + node_count - '
+                     '1). It is a ceiling, not a wait: healthy updates still '
+                     'finish early. Set to 0 to restore the flat '
+                     'update_timeout behaviour. Raise it for slow first '
+                     'old->new migrations or low-RAM nodes where a single '
+                     'node reconcile can take 20-30 minutes.'))
 ]
 
 

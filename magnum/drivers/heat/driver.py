@@ -241,14 +241,90 @@ class HeatDriver(driver.Driver):
             except Exception as exc:
                 LOG.warning("Could not mark %s unhealthy: %s", res.resource_name, exc)
 
+    def _clear_orphaned_software_deployments(self, osc, stack_id):
+        """Drive orphaned SoftwareDeployments to a terminal state pre-update.
+
+        When a batch-1 migration hits the whole-stack Heat timeout, Heat
+        cancels the update and abandons the tail node's SoftwareDeployment
+        ``*_IN_PROGRESS`` even though the node's reconcile finished and signalled
+        success (the signal is dropped because the update is already cancelled).
+        A resource stuck IN_PROGRESS cannot be marked unhealthy, so the next
+        update just waits on it, times out and cancels again -- a permanent
+        wedge that previously required a manual Heat-DB status reset.
+
+        This runs at the start of every template update, before mark-unhealthy.
+        Magnum serialises operations per cluster, so no update is in flight for
+        this stack here and any SoftwareDeployment still ``*_IN_PROGRESS`` is
+        genuinely orphaned. We push each to FAILED through the same
+        software-deployment signal API the node agent uses -- a resource-level
+        signal, independent of stack convergence -- which clears both the
+        deployment object and its bound resource. mark-unhealthy then recreates
+        it cleanly on the update that follows, and the node re-signals into a
+        live window. Best-effort: any failure is logged (with the deployment id
+        for the manual runbook) and never blocks the upgrade.
+        """
+        try:
+            resources = osc.heat().resources.list(stack_id, nested_depth=2)
+        except Exception as e:
+            LOG.warning(
+                "Could not list nested resources of %s to clear orphaned "
+                "deployments: %s",
+                stack_id,
+                e,
+            )
+            return
+
+        for res in resources:
+            if getattr(res, "resource_type", "") != "OS::Heat::SoftwareDeployment":
+                continue
+            status = getattr(res, "resource_status", "") or ""
+            if not status.endswith("_IN_PROGRESS"):
+                continue
+            deployment_id = getattr(res, "physical_resource_id", None)
+            if not deployment_id:
+                continue
+            # 'CREATE_IN_PROGRESS' -> 'CREATE', 'UPDATE_IN_PROGRESS' -> 'UPDATE'.
+            action = status.split("_", 1)[0] or "CREATE"
+            try:
+                osc.heat().software_deployments.update(
+                    deployment_id,
+                    action=action,
+                    status="FAILED",
+                    status_reason=(
+                        "magnum: cleared orphaned deployment stranded "
+                        "IN_PROGRESS by a prior timed-out update"
+                    ),
+                    output_values={},
+                )
+                LOG.warning(
+                    "Cleared orphaned SoftwareDeployment %s (id=%s, was %s) "
+                    "before template update of stack %s",
+                    res.resource_name,
+                    deployment_id,
+                    status,
+                    stack_id,
+                )
+            except Exception as exc:
+                LOG.warning(
+                    "Could not clear orphaned SoftwareDeployment %s (id=%s): "
+                    "%s; a manual Heat reset of this deployment may be required",
+                    res.resource_name,
+                    deployment_id,
+                    exc,
+                )
+
     def _prepare_stack_for_template_update(self, osc, stack_id):
         """Mark problematic resources unhealthy before a template update.
 
-        Handles two cases:
+        Handles three cases:
+        0. SoftwareDeployments stranded ``*_IN_PROGRESS`` by a prior timed-out
+           update -- cleared first, because an IN_PROGRESS resource cannot be
+           marked unhealthy and would otherwise re-wedge this update too.
         1. SoftwareConfig resources that reference deleted configs
         2. CREATE_FAILED nested resources (LB listeners, pools) that
            crash Octavia's Heat plugin on datetime comparison
         """
+        self._clear_orphaned_software_deployments(osc, stack_id)
         for group_name, config_name in (
             ("kube_masters", "master_config"),
             ("kube_minions", "node_config"),
@@ -258,8 +334,35 @@ class HeatDriver(driver.Driver):
             )
         self._mark_failed_nested_resources_unhealthy(osc, stack_id)
 
-    def _get_update_timeout(self):
-        return cfg.CONF.cluster_heat.update_timeout
+    def _get_update_timeout(self, cluster=None):
+        """Heat stack-update timeout in minutes.
+
+        The configured value is a flat per-update budget. A batch-1 rolling
+        migration, though, converges nodes *serially*: the whole-stack Heat
+        timeout has to cover the slowest serial chain, not a single node. A
+        first old->new migration reconcile (CA/etcd/container-runtime swap +
+        image pulls, worse on low-RAM nodes) can run ~30 min, so when several
+        masters/workers migrate back-to-back the last one is guillotined the
+        instant the flat timeout expires. That abandons its SoftwareDeployment
+        orphaned ``*_IN_PROGRESS``, which then permanently wedges every later
+        update -- mark-unhealthy cannot recreate an IN_PROGRESS resource, so the
+        next update just waits on it, times out, and cancels again. Scale the
+        budget by node count so the tail node still fits inside one window.
+        """
+        base = cfg.CONF.cluster_heat.update_timeout
+        if cluster is None:
+            return base
+        try:
+            total_nodes = int(cluster.master_count or 1) + int(cluster.node_count or 0)
+        except Exception:
+            return base
+        # Minutes of extra budget per node beyond the first (tunable per cloud
+        # via [cluster_heat] update_timeout_per_node; 0 restores the flat
+        # behaviour). The timeout is a ceiling, not a wait -- a healthy update
+        # still finishes early; this only buys the slow serial tail enough room
+        # to converge before Heat cancels.
+        per_extra_node = cfg.CONF.cluster_heat.update_timeout_per_node
+        return base + max(0, total_nodes - 1) * per_extra_node
 
     def _get_reconcile_timestamp(self):
         return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
@@ -585,7 +688,7 @@ class HeatDriver(driver.Driver):
                 **stack_fields,
                 "existing": True,
                 "parameters": merged_params,
-                "timeout_mins": self._get_update_timeout(),
+                "timeout_mins": self._get_update_timeout(cluster),
                 "disable_rollback": True,
             }
             LOG.info("Reconfiguring cluster %s master stack %s", cluster.uuid, stack_id)
@@ -1304,6 +1407,15 @@ class KubernetesDriver(HeatDriver):
     def rotate_ca_certificate(self, context, cluster):
         osc = clients.OpenStackClients(context)
 
+        # A prior upgrade or rotation that hit the Heat timeout can leave a
+        # node's SoftwareDeployment stranded *_IN_PROGRESS. Rotation re-fires
+        # that same deployment, so an orphan would make this rotation wait on it
+        # and time out too. Clear it first (covers the default master/worker
+        # member stacks under the cluster stack -- where the wedge occurs).
+        # Safe: Magnum serialises operations per cluster, so nothing is in
+        # flight here.
+        self._clear_orphaned_software_deployments(osc, cluster.stack_id)
+
         heat_params = self._get_ca_rotation_params(context, cluster)
         cluster_stack_params = heat_tdef.omit_masked_heat_parameters(
             osc.heat().stacks.get(cluster.stack_id).parameters.copy()
@@ -1369,7 +1481,7 @@ class KubernetesDriver(HeatDriver):
                     stack_id,
                     existing=True,
                     parameters=merged,
-                    timeout_mins=self._get_update_timeout(),
+                    timeout_mins=self._get_update_timeout(cluster),
                     disable_rollback=True,
                 )
 
@@ -1649,7 +1761,7 @@ class FedoraKubernetesDriver(KubernetesDriver):
             "files": tpl_files,
             "existing": True,
             "parameters": heat_params,
-            "timeout_mins": self._get_update_timeout(),
+            "timeout_mins": self._get_update_timeout(cluster),
         }
 
         # Drop live params not declared in the (now augmented) template; the
@@ -1903,7 +2015,7 @@ class UbuntuKubernetesDriver(KubernetesDriver):
             "files": tpl_files,
             "existing": True,
             "parameters": heat_params,
-            "timeout_mins": self._get_update_timeout(),
+            "timeout_mins": self._get_update_timeout(cluster),
         }
 
         # Drop live params not declared in the (now augmented) template; the
