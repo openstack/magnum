@@ -458,6 +458,21 @@ class Handler(object):
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
+
+        # Heal a broken/missing Keystone trust before the Heat update. A trust
+        # whose trustor (e.g. a disabled/deleted OIDC user) was removed is gone
+        # for good; recreate it with the current operator as trustor so the new
+        # trust_id flows through heat-params into the node cloud.conf and the
+        # in-cluster OCCM / CSI / auto-healer stop getting 403s. Best-effort:
+        # never block the upgrade on the heal itself.
+        try:
+            trust_manager.ensure_trust(
+                clients.OpenStackClients(context), context, cluster)
+        except Exception:
+            LOG.exception(
+                'Pre-upgrade trust heal failed for cluster %s; continuing',
+                cluster.uuid)
+
         # Upgrade cluster
 
         try:
