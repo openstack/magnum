@@ -134,9 +134,28 @@ class HeatDriver(driver.Driver):
     def _mark_config_unhealthy_in_child_stacks(
         self, osc, parent_stack_id, group_name, config_name
     ):
-        """Mark SoftwareConfig and its deployment unhealthy in all child
-        stacks of a ResourceGroup so Heat recreates them instead of
-        reading the (possibly deleted) old config."""
+        """Mark the SoftwareConfig (ONLY) unhealthy in every child stack of a
+        ResourceGroup so Heat recreates it cleanly during a template migration,
+        sidestepping stale SoftwareConfig-reference failures.
+
+        Deliberately does NOT mark the matching SoftwareDeployment. Marking a
+        SoftwareDeployment unhealthy forces Heat to REPLACE it, minting a new
+        deployment id every update. The node's heat-container-agent polls server
+        metadata asynchronously and can fetch + run an *intermediate* generation,
+        signalling THAT id, while Heat has already replaced it again and waits on
+        a newer one -- the signal lands on a dead/superseded deployment and the
+        stack hangs in ``*_IN_PROGRESS`` forever even though the node converged
+        and reported success. That is the "master-N ran the reconcile + signalled
+        but Heat never completed" wedge.
+
+        The deployment does not need marking to re-fire: it carries
+        ``actions: [CREATE, UPDATE]`` and a ``TIMESTAMP_UPGRADE`` input bumped to
+        ``now()`` on every upgrade / CA rotation (see _get_reconcile_timestamp),
+        so its inputs change each run and the node re-executes it IN PLACE under
+        the SAME deployment id -- the signal always matches. Recreating the
+        SoftwareConfig it points at is an in-place deployment update (new
+        config_id), not a replace, so the id stays stable.
+        """
         try:
             group = osc.heat().resources.get(parent_stack_id, group_name)
         except Exception:
@@ -145,29 +164,25 @@ class HeatDriver(driver.Driver):
             members = osc.heat().resources.list(group.physical_resource_id)
         except Exception:
             return
-        deploy_name = config_name + "_deployment"
         for member in members:
             child_stack_id = member.physical_resource_id
             if not child_stack_id:
                 continue
-            for resource_name in (config_name, deploy_name):
-                try:
-                    osc.heat().resources.mark_unhealthy(
-                        child_stack_id,
-                        resource_name,
-                        True,
-                        "pre-template-migration: avoid stale SoftwareConfig reference",
-                    )
-                    LOG.debug(
-                        "Marked %s in %s as unhealthy", resource_name, child_stack_id
-                    )
-                except Exception as exc:
-                    LOG.debug(
-                        "Could not mark %s unhealthy in %s: %s",
-                        resource_name,
-                        child_stack_id,
-                        exc,
-                    )
+            try:
+                osc.heat().resources.mark_unhealthy(
+                    child_stack_id,
+                    config_name,
+                    True,
+                    "pre-template-migration: recreate stale SoftwareConfig",
+                )
+                LOG.debug("Marked %s in %s as unhealthy", config_name, child_stack_id)
+            except Exception as exc:
+                LOG.debug(
+                    "Could not mark %s unhealthy in %s: %s",
+                    config_name,
+                    child_stack_id,
+                    exc,
+                )
 
     def _mark_failed_nested_resources_unhealthy(self, osc, stack_id):
         """Mark Octavia resources that crash Heat's datetime comparison.
