@@ -56,7 +56,19 @@ trust_opts = [
                help=_('Auth interface used by instances/trustee')),
     cfg.StrOpt('trustee_keystone_region_name',
                help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.'))
+                      'communication with the OpenStack service.')),
+    cfg.BoolOpt('heal_trustor_roles',
+                default=True,
+                help=_('On cluster upgrade, if the cluster trust still exists '
+                       'but its trustor no longer holds the delegated roles on '
+                       'the cluster project, re-grant those roles so the trust '
+                       'can be redeemed again. This heals clusters whose '
+                       'creator was disabled and lost their role assignments '
+                       '(every trust-scoped token -- conductor, Heat, OCCM, '
+                       'CSI, auto-healer -- otherwise fails with 401/403). '
+                       'Requires magnum to have rights to grant roles on the '
+                       'project. Set to False to disable the automatic '
+                       're-grant.'))
 ]
 
 

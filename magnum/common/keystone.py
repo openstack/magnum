@@ -219,6 +219,38 @@ class KeystoneClientV3(object):
                 trustee_user_id=trustee_user)
         return trust
 
+    def get_trust_as_trustee(self, trustee_user_id, trustee_password,
+                             trust_id):
+        """Read a trust authenticating as its trustee.
+
+        The trustee is a party to the trust, so it can read the trust even
+        when the trustor has lost the delegated roles -- which makes a
+        trust-scoped token unobtainable -- and when the caller is neither
+        trustor, trustee, nor a system-scoped admin (project-scoped admins
+        cannot read other users' trusts). The session is deliberately
+        unscoped for that reason.
+        """
+        auth = ka_v3.Password(auth_url=self.auth_url,
+                              user_id=trustee_user_id,
+                              password=trustee_password)
+        sess = ka_loading.session.Session().load_from_options(
+            auth=auth,
+            insecure=CONF[ksconf.CFG_LEGACY_GROUP].insecure,
+            cacert=CONF[ksconf.CFG_LEGACY_GROUP].cafile,
+            key=CONF[ksconf.CFG_LEGACY_GROUP].keyfile,
+            cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile)
+        client = kc_v3.Client(session=sess)
+        return client.trusts.get(trust_id)
+
+    def grant_role(self, role_id, user_id, project_id):
+        """Grant a project-scoped role to a user (idempotent).
+
+        Uses this client's identity (an admin context when called for trust
+        healing). Keystone treats the grant as a PUT, so re-granting an
+        assignment that already exists is a harmless no-op.
+        """
+        self.client.roles.grant(role_id, user=user_id, project=project_id)
+
     def delete_trust(self, context, cluster):
         if cluster.trust_id is None:
             return
