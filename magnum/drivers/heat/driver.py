@@ -257,32 +257,49 @@ class HeatDriver(driver.Driver):
                 LOG.warning("Could not mark %s unhealthy: %s", res.resource_name, exc)
 
     def _clear_orphaned_software_deployments(self, osc, stack_id):
-        """Drive orphaned SoftwareDeployments to a terminal state pre-update.
+        """Settle stuck per-node config SoftwareDeployments to COMPLETE pre-update.
 
-        When a batch-1 migration hits the whole-stack Heat timeout, Heat
-        cancels the update and abandons the tail node's SoftwareDeployment
-        ``*_IN_PROGRESS`` even though the node's reconcile finished and signalled
-        success (the signal is dropped because the update is already cancelled).
-        A resource stuck IN_PROGRESS cannot be marked unhealthy, so the next
-        update just waits on it, times out and cancels again -- a permanent
-        wedge that previously required a manual Heat-DB status reset.
+        The per-node ``*_config_deployment`` resources (master_config_deployment,
+        node_config_deployment) are re-fired in place on every upgrade: they carry
+        ``actions: [CREATE, UPDATE]`` and a ``TIMESTAMP_UPGRADE`` input bumped to
+        now(), so the node's reconciler re-runs and re-signals the SAME deployment
+        id each time. That only holds while the deployment is ``*_COMPLETE`` --
+        the convergence engine UPDATES a COMPLETE resource in place but REPLACES
+        one left ``*_FAILED`` or ``*_IN_PROGRESS`` (minting a brand-new CREATE
+        deployment id). A replacement is fatal here: the node's heat-container-
+        agent polls metadata asynchronously, so it runs and signals an earlier
+        generation while Heat has already replaced to a newer one -- the signal
+        lands on a dead id, the new id never completes, the deployment is left
+        FAILED, and the NEXT update replaces it again. A single transient node
+        failure (or a timed-out / cancelled update that stranded the deployment
+        IN_PROGRESS) therefore turns into a permanent self-perpetuating replace
+        loop that hangs the rolling update on that one node forever -- previously
+        only escapable via a manual Heat-DB reset.
 
-        This runs at the start of every template update, before mark-unhealthy.
-        Magnum serialises operations per cluster, so no update is in flight for
-        this stack here and any SoftwareDeployment still ``*_IN_PROGRESS`` is
-        genuinely orphaned. We push each to FAILED through the same
-        software-deployment signal API the node agent uses -- a resource-level
-        signal, independent of stack convergence -- which clears both the
-        deployment object and its bound resource. mark-unhealthy then recreates
-        it cleanly on the update that follows, and the node re-signals into a
-        live window. Best-effort: any failure is logged (with the deployment id
-        for the manual runbook) and never blocks the upgrade.
+        Fix: before the update, drive every stuck ``*_config_deployment`` (FAILED
+        or IN_PROGRESS) to COMPLETE via the same resource-level software-deployment
+        signal API the node agent uses (independent of stack convergence; settles
+        both the deployment object and its bound resource). COMPLETE keeps the id
+        stable, so the imminent update touches it in place -- the agent always
+        signals the current generation, no replace, no race. This does NOT hide a
+        real failure: the update immediately re-fires the deployment (timestamp
+        bump) and the node's true result is recorded in place; if the node still
+        can't converge it goes UPDATE_FAILED again and the cluster surfaces
+        UPDATE_FAILED -- just without churning the id. Restricted to
+        ``*_config_deployment`` resources precisely because only those re-fire on
+        the next update; other deployment types are left untouched.
+
+        Runs at the start of every template update, before mark-unhealthy. Magnum
+        serialises operations per cluster, so no update is in flight for this
+        stack and any stuck deployment seen here is safe to settle. Best-effort:
+        any failure is logged (with the deployment id for the manual runbook) and
+        never blocks the upgrade.
         """
         try:
             resources = osc.heat().resources.list(stack_id, nested_depth=2)
         except Exception as e:
             LOG.warning(
-                "Could not list nested resources of %s to clear orphaned "
+                "Could not list nested resources of %s to settle stuck "
                 "deployments: %s",
                 stack_id,
                 e,
@@ -295,19 +312,19 @@ class HeatDriver(driver.Driver):
         # heat.db.sqlalchemy.api.software_deployment_get). The operator running
         # the upgrade is typically none of those, so
         # ``osc.heat().software_deployments.update()`` raises a 404
-        # ("Deployment <id> not found") even though the row exists -- the clear
-        # then silently skips and the orphaned ``*_IN_PROGRESS`` deployment
-        # re-wedges every later update (the resource list above succeeds
-        # because stack/resource listing is scoped more loosely than the
-        # deployment API). Use an admin-scoped heat client, which bypasses the
-        # tenant filter, to actually drive the stranded deployment terminal.
-        # Fall back to the request client if the admin client can't be built.
+        # ("Deployment <id> not found") even though the row exists -- the settle
+        # then silently skips and the stuck deployment re-wedges every later
+        # update (the resource list above succeeds because stack/resource listing
+        # is scoped more loosely than the deployment API). Use an admin-scoped
+        # heat client, which bypasses the tenant filter, to actually drive the
+        # stranded deployment terminal. Fall back to the request client if the
+        # admin client can't be built.
         try:
             heat_admin = clients.OpenStackClients(
                 mag_ctx.make_admin_context()).heat()
         except Exception as e:
             LOG.warning(
-                "Could not build admin heat client to clear orphaned "
+                "Could not build admin heat client to settle stuck "
                 "deployments (%s); falling back to request-scoped client",
                 e,
             )
@@ -316,38 +333,46 @@ class HeatDriver(driver.Driver):
         for res in resources:
             if getattr(res, "resource_type", "") != "OS::Heat::SoftwareDeployment":
                 continue
+            # Only the per-node config deployments are re-fired in place on the
+            # next update (TIMESTAMP_UPGRADE + actions [CREATE, UPDATE]); only
+            # those are safe to pre-settle to COMPLETE.
+            res_name = getattr(res, "resource_name", "") or ""
+            if not res_name.endswith("_config_deployment"):
+                continue
             status = getattr(res, "resource_status", "") or ""
-            if not status.endswith("_IN_PROGRESS"):
+            if not (status.endswith("_IN_PROGRESS") or status.endswith("_FAILED")):
                 continue
             deployment_id = getattr(res, "physical_resource_id", None)
             if not deployment_id:
                 continue
-            # 'CREATE_IN_PROGRESS' -> 'CREATE', 'UPDATE_IN_PROGRESS' -> 'UPDATE'.
+            # 'CREATE_FAILED' -> 'CREATE', 'UPDATE_IN_PROGRESS' -> 'UPDATE', etc.
             action = status.split("_", 1)[0] or "CREATE"
             try:
                 heat_admin.software_deployments.update(
                     deployment_id,
                     action=action,
-                    status="FAILED",
+                    status="COMPLETE",
                     status_reason=(
-                        "magnum: cleared orphaned deployment stranded "
-                        "IN_PROGRESS by a prior timed-out update"
+                        "magnum: settled stuck config deployment to COMPLETE "
+                        "pre-update to keep its id stable (avoids the "
+                        "FAILED->replace async-signal loop); the node re-runs "
+                        "and re-signals it in place on this update"
                     ),
                     output_values={},
                 )
                 LOG.warning(
-                    "Cleared orphaned SoftwareDeployment %s (id=%s, was %s) "
-                    "before template update of stack %s",
-                    res.resource_name,
+                    "Settled stuck SoftwareDeployment %s (id=%s, was %s) to "
+                    "COMPLETE before template update of stack %s",
+                    res_name,
                     deployment_id,
                     status,
                     stack_id,
                 )
             except Exception as exc:
                 LOG.warning(
-                    "Could not clear orphaned SoftwareDeployment %s (id=%s): "
+                    "Could not settle stuck SoftwareDeployment %s (id=%s): "
                     "%s; a manual Heat reset of this deployment may be required",
-                    res.resource_name,
+                    res_name,
                     deployment_id,
                     exc,
                 )
@@ -356,9 +381,13 @@ class HeatDriver(driver.Driver):
         """Mark problematic resources unhealthy before a template update.
 
         Handles three cases:
-        0. SoftwareDeployments stranded ``*_IN_PROGRESS`` by a prior timed-out
-           update -- cleared first, because an IN_PROGRESS resource cannot be
-           marked unhealthy and would otherwise re-wedge this update too.
+        0. Per-node ``*_config_deployment`` SoftwareDeployments left
+           ``*_FAILED`` or ``*_IN_PROGRESS`` by a prior failed/timed-out update
+           -- settled to COMPLETE first so the convergence engine UPDATES them in
+           place on this update instead of REPLACING them. A replacement mints a
+           new deployment id that the async heat-container-agent can't signal in
+           time, which otherwise self-perpetuates into a permanent rolling-update
+           wedge on that node.
         1. SoftwareConfig resources that reference deleted configs
         2. CREATE_FAILED nested resources (LB listeners, pools) that
            crash Octavia's Heat plugin on datetime comparison
