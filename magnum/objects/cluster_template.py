@@ -100,7 +100,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         return [ClusterTemplate._from_db_object(cls(context), obj) for obj in
                 db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get(cls, context, cluster_template_id):
         """Find and return ClusterTemplate object based on its id or uuid.
 
@@ -115,7 +116,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         else:
             return cls.get_by_name(context, cluster_template_id)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_id(cls, context, cluster_template_id):
         """Find and return ClusterTemplate object based on its integer id.
 
@@ -129,7 +131,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
                                                            db_cluster_template)
         return cluster_template
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_uuid(cls, context, uuid):
         """Find and return ClusterTemplate object based on uuid.
 
@@ -143,7 +146,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
                                                            db_cluster_template)
         return cluster_template
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_name(cls, context, name):
         """Find and return ClusterTemplate object based on name.
 
@@ -157,7 +161,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
                                                            db_cluster_template)
         return cluster_template
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None):
         """Return a list of ClusterTemplate objects.

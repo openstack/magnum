@@ -49,7 +49,8 @@ class MagnumService(base.MagnumPersistentObject, base.MagnumObject):
         return [MagnumService._from_db_object(cls(context), obj)
                 for obj in db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_host_and_binary(cls, context, host, binary):
         """Find a magnum_service based on its hostname and binary.
 
@@ -66,7 +67,8 @@ class MagnumService(base.MagnumPersistentObject, base.MagnumObject):
             cls(context), db_magnum_service)
         return magnum_service
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None):
         """Return a list of MagnumService objects.

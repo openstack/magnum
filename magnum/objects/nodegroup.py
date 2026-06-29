@@ -69,7 +69,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         return [NodeGroup._from_db_object(cls(context), obj)
                 for obj in db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get(cls, context, cluster_id, nodegroup_id):
         """Find a nodegroup based on its id or uuid and return a NodeGroup.
 
@@ -85,7 +86,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         else:
             return cls.get_by_name(context, cluster_id, nodegroup_id)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_id(cls, context, cluster, id_):
         """Find a nodegroup based on its integer id and return a NodeGroup.
 
@@ -98,7 +100,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         nodegroup = NodeGroup._from_db_object(cls(context), db_nodegroup)
         return nodegroup
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_uuid(cls, context, cluster, uuid):
         """Find a nodegroup based on uuid and return a :class:`NodeGroup`.
 
@@ -111,7 +114,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         nodegroup = NodeGroup._from_db_object(cls(context), db_nodegroup)
         return nodegroup
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_name(cls, context, cluster, name):
         """Find a nodegroup based on name and return a NodeGroup object.
 
@@ -124,7 +128,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         nodegroup = NodeGroup._from_db_object(cls(context), db_nodegroup)
         return nodegroup
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_count_all(cls, context, cluster_id):
         """Get count of nodegroups in cluster.
 
@@ -134,7 +139,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         """
         return cls.dbapi.get_cluster_nodegroup_count(context, cluster_id)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, cluster_id, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of NodeGroup objects.
@@ -206,7 +212,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
             if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def update_nodegroup(cls, context, cluster_id, nodegroup_id, values):
         """Updates a NodeGroup.
 

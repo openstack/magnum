@@ -39,7 +39,8 @@ class MyObj(base.MagnumPersistentObject, base.MagnumObject):
     def obj_load_attr(self, attrname):
         setattr(self, attrname, 'loaded!')
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def query(cls, context):
         obj = cls(context)
         obj.foo = 1
@@ -80,7 +81,8 @@ class MyObj2(object):
     def obj_name(cls):
         return 'MyObj'
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get(cls, *args, **kwargs):
         pass
 

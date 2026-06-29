@@ -31,7 +31,8 @@ class Quota(base.MagnumPersistentObject, base.MagnumObject,
         'hard_limit': fields.IntegerField(nullable=False),
     }
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_quota_by_project_id_resource(cls, context, project_id, resource):
         """Find a quota based on its integer id and return a Quota object.
 
@@ -60,7 +61,8 @@ class Quota(base.MagnumPersistentObject, base.MagnumObject,
         return [Quota._from_db_object(cls(context), obj)
                 for obj in db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_id(cls, context, quota_id):
         """Find a quota based on its integer id and return a Quota object.
 
@@ -72,7 +74,8 @@ class Quota(base.MagnumPersistentObject, base.MagnumObject,
         quota = Quota._from_db_object(cls(context), db_quota)
         return quota
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of Quota objects.
@@ -95,7 +98,8 @@ class Quota(base.MagnumPersistentObject, base.MagnumObject,
                                              filters=filters)
         return Quota._from_db_object_list(db_quotas, cls, context)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def quota_get_all_by_project_id(cls, context, project_id):
         """Find a quota based on project id.
 
@@ -131,7 +135,8 @@ class Quota(base.MagnumPersistentObject, base.MagnumObject,
         self.dbapi.delete_quota(self.project_id, self.resource)
         self.obj_reset_changes()
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def update_quota(cls, context, project_id, quota):
         """Save a quota based on project id.
 

@@ -33,7 +33,8 @@ class Stats(base.MagnumObject, base.MagnumObjectDictCompat):
         'nodes': fields.IntegerField(nullable=True)
     }
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_cluster_stats(cls, context, project_id=None):
         """Return cluster stats for the given project.
 

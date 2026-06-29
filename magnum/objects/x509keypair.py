@@ -55,7 +55,8 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject):
         return [X509KeyPair._from_db_object(cls(context), obj)
                 for obj in db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get(cls, context, x509keypair_id):
         """Find a X509KeyPair based on its id or uuid.
 
@@ -72,7 +73,8 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject):
         else:
             raise exception.InvalidIdentity(identity=x509keypair_id)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_id(cls, context, x509keypair_id):
         """Find a X509KeyPair based on its integer id.
 
@@ -87,7 +89,8 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject):
         x509keypair = X509KeyPair._from_db_object(cls(context), db_x509keypair)
         return x509keypair
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_uuid(cls, context, uuid):
         """Find a x509keypair based on uuid and return a :class:`X509KeyPair` object.
 
@@ -99,7 +102,8 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject):
         x509keypair = X509KeyPair._from_db_object(cls(context), db_x509keypair)
         return x509keypair
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of X509KeyPair objects.

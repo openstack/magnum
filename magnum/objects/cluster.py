@@ -191,7 +191,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         return [Cluster._from_db_object(cls(context), obj)
                 for obj in db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get(cls, context, cluster_id):
         """Find a cluster based on its id or uuid and return a Cluster object.
 
@@ -206,7 +207,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         else:
             raise exception.InvalidIdentity(identity=cluster_id)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_id(cls, context, cluster_id):
         """Find a cluster based on its integer id and return a Cluster object.
 
@@ -218,7 +220,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         cluster = Cluster._from_db_object(cls(context), db_cluster)
         return cluster
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_uuid(cls, context, uuid):
         """Find a cluster based on uuid and return a :class:`Cluster` object.
 
@@ -230,7 +233,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         cluster = Cluster._from_db_object(cls(context), db_cluster)
         return cluster
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_count_all(cls, context, filters=None):
         """Get count of matching clusters.
 
@@ -243,7 +247,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         """
         return cls.dbapi.get_cluster_count_all(context, filters=filters)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_name(cls, context, name):
         """Find a cluster based on name and return a Cluster object.
 
@@ -255,7 +260,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         cluster = Cluster._from_db_object(cls(context), db_cluster)
         return cluster
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of Cluster objects.
@@ -279,7 +285,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
                                                  filters=filters)
         return Cluster._from_db_object_list(db_clusters, cls, context)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_stats(cls, context, project_id=None):
         """Return a list of Cluster objects.
 
