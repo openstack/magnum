@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import eventlet
 from heatclient import exc
 from oslo_log import log as logging
 from pycadf import cadftaxonomy as taxonomy
@@ -463,15 +464,29 @@ class Handler(object):
         # whose trustor (e.g. a disabled/deleted OIDC user) was removed is gone
         # for good; recreate it with the current operator as trustor so the new
         # trust_id flows through heat-params into the node cloud.conf and the
-        # in-cluster OCCM / CSI / auto-healer stop getting 403s. Best-effort:
-        # never block the upgrade on the heal itself.
-        try:
-            trust_manager.ensure_trust(
-                clients.OpenStackClients(context), context, cluster)
-        except Exception:
-            LOG.exception(
-                'Pre-upgrade trust heal failed for cluster %s; continuing',
-                cluster.uuid)
+        # in-cluster OCCM / CSI / auto-healer stop getting 403s.
+        #
+        # This is strictly best-effort and MUST NOT block the upgrade. The heal
+        # makes synchronous Keystone calls (read the trust as trustee, re-grant
+        # roles); if Keystone is slow or a call stalls, a plain try/except would
+        # not help because a hung request never raises -- it just blocks this
+        # greenthread forever, so driver.upgrade_cluster never runs and the
+        # nodes never get triggered. Bound the whole heal with a hard timeout so
+        # the upgrade always proceeds.
+        heal_timeout = CONF.trust.heal_timeout
+        if heal_timeout > 0:
+            try:
+                with eventlet.Timeout(heal_timeout):
+                    trust_manager.ensure_trust(
+                        clients.OpenStackClients(context), context, cluster)
+            except eventlet.Timeout:
+                LOG.warning(
+                    'Pre-upgrade trust heal exceeded %ss for cluster %s; '
+                    'continuing with the upgrade', heal_timeout, cluster.uuid)
+            except Exception:
+                LOG.exception(
+                    'Pre-upgrade trust heal failed for cluster %s; continuing',
+                    cluster.uuid)
 
         # Upgrade cluster
 

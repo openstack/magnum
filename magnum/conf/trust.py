@@ -68,7 +68,15 @@ trust_opts = [
                        'CSI, auto-healer -- otherwise fails with 401/403). '
                        'Requires magnum to have rights to grant roles on the '
                        'project. Set to False to disable the automatic '
-                       're-grant.'))
+                       're-grant.')),
+    cfg.IntOpt('heal_timeout',
+               default=30,
+               help=_('Hard upper bound, in seconds, on the pre-upgrade trust '
+                      'heal. The heal makes synchronous Keystone calls; if any '
+                      'stalls it must never block the upgrade, so the whole '
+                      'heal is wrapped in a timeout and the upgrade proceeds '
+                      'regardless. Also used as the per-request timeout for the '
+                      'trustee read. Set to 0 to disable the heal entirely.'))
 ]
 
 

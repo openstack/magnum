@@ -238,7 +238,9 @@ class KeystoneClientV3(object):
             insecure=CONF[ksconf.CFG_LEGACY_GROUP].insecure,
             cacert=CONF[ksconf.CFG_LEGACY_GROUP].cafile,
             key=CONF[ksconf.CFG_LEGACY_GROUP].keyfile,
-            cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile)
+            cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile,
+            # Never let a slow/stalled Keystone block the upgrade heal.
+            timeout=CONF.trust.heal_timeout or None)
         client = kc_v3.Client(session=sess)
         return client.trusts.get(trust_id)
 
