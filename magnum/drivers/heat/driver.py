@@ -289,6 +289,30 @@ class HeatDriver(driver.Driver):
             )
             return
 
+        # The SoftwareDeployment API is project-scoped. Heat only returns a
+        # deployment to a caller that is admin, or whose token is scoped to the
+        # deployment's own ``tenant`` or ``stack_user_project_id`` (see
+        # heat.db.sqlalchemy.api.software_deployment_get). The operator running
+        # the upgrade is typically none of those, so
+        # ``osc.heat().software_deployments.update()`` raises a 404
+        # ("Deployment <id> not found") even though the row exists -- the clear
+        # then silently skips and the orphaned ``*_IN_PROGRESS`` deployment
+        # re-wedges every later update (the resource list above succeeds
+        # because stack/resource listing is scoped more loosely than the
+        # deployment API). Use an admin-scoped heat client, which bypasses the
+        # tenant filter, to actually drive the stranded deployment terminal.
+        # Fall back to the request client if the admin client can't be built.
+        try:
+            heat_admin = clients.OpenStackClients(
+                mag_ctx.make_admin_context()).heat()
+        except Exception as e:
+            LOG.warning(
+                "Could not build admin heat client to clear orphaned "
+                "deployments (%s); falling back to request-scoped client",
+                e,
+            )
+            heat_admin = osc.heat()
+
         for res in resources:
             if getattr(res, "resource_type", "") != "OS::Heat::SoftwareDeployment":
                 continue
@@ -301,7 +325,7 @@ class HeatDriver(driver.Driver):
             # 'CREATE_IN_PROGRESS' -> 'CREATE', 'UPDATE_IN_PROGRESS' -> 'UPDATE'.
             action = status.split("_", 1)[0] or "CREATE"
             try:
-                osc.heat().software_deployments.update(
+                heat_admin.software_deployments.update(
                     deployment_id,
                     action=action,
                     status="FAILED",
