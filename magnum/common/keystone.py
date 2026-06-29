@@ -281,8 +281,25 @@ class KeystoneClientV3(object):
         except kc_exception.NotFound:
             pass
         except Exception:
-            LOG.exception('Failed to delete trust')
-            raise exception.TrustDeleteFailed(trust_id=cluster.trust_id)
+            # The normal delete authenticates by redeeming the trust (trustee
+            # path) or with the request token. When the trust is no longer
+            # redeemable -- e.g. the trustor was disabled or lost the delegated
+            # roles -- this 401s and the trust is left orphaned in Keystone. An
+            # admin can delete a trust by id without redeeming it, so fall back
+            # to that before giving up.
+            LOG.warning('Failed to delete trust %s via the normal path; '
+                        'retrying with an admin client', cluster.trust_id)
+            # Local import to avoid a circular import at module load time.
+            from magnum.common import context as magnum_context
+            try:
+                admin_client = KeystoneClientV3(
+                    magnum_context.make_admin_context()).client
+                admin_client.trusts.delete(cluster.trust_id)
+            except kc_exception.NotFound:
+                pass
+            except Exception:
+                LOG.exception('Failed to delete trust')
+                raise exception.TrustDeleteFailed(trust_id=cluster.trust_id)
 
     def create_trustee(self, username, password):
         domain_id = self.trustee_domain_id
