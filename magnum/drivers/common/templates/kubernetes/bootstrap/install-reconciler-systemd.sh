@@ -85,6 +85,11 @@ Description=Run Magnum Reconcile Periodically
 [Timer]
 OnActiveSec=5min
 OnCalendar=*-*-* 00:00:00
+# De-synchronize the fleet: without jitter every node reconciles at midnight
+# sharp, and a change that triggers service restarts (cert heal, containerd
+# config) restarts etcd/apiserver on all masters simultaneously — brief
+# quorum/API loss. Per-node random delay keeps restarts staggered.
+RandomizedDelaySec=45min
 Unit=magnum-reconcile-periodic.service
 Persistent=true
 

@@ -413,11 +413,74 @@ class HeatDriver(driver.Driver):
             if not res_name.endswith("_config_deployment"):
                 continue
             status = getattr(res, "resource_status", "") or ""
-            if not (status.endswith("_IN_PROGRESS") or status.endswith("_FAILED")):
-                continue
             deployment_id = getattr(res, "physical_resource_id", None)
             if not deployment_id:
                 continue
+
+            # The deployment object's output_values must NEVER be left empty
+            # or missing the keys the node templates read via get_attr
+            # (reconcile_*, deploy_*). Heat's SoftwareDeployment.get_attribute
+            # falls through to ``show_software_config(<STORED config id>)``
+            # for any key absent from output_values -- and on a cluster whose
+            # earlier attempts churned config generations, that stored id is
+            # a DELETED row, so every output resolution aborts the member
+            # stack with "Software config with id X not found". (An earlier
+            # version of this settle wrote ``output_values={}`` and thereby
+            # CAUSED exactly that wedge on retried migrations.) Merge: real
+            # values reported by the node always win; placeholders only fill
+            # the gaps.
+            existing_ov = {}
+            try:
+                sd = heat_admin.software_deployments.get(deployment_id)
+                existing_ov = getattr(sd, "output_values", None) or {}
+            except Exception as exc:
+                LOG.debug(
+                    "Could not fetch deployment %s to merge output_values: %s",
+                    deployment_id,
+                    exc,
+                )
+            placeholder_ov = {
+                "deploy_stdout": "",
+                "deploy_stderr": "",
+                "deploy_status_code": 0,
+                "reconcile_status": "settled",
+                "reconcile_step": "",
+                "reconcile_summary": "settled by magnum pre-update",
+                "reconcile_reason": "",
+                "reconcile_error_code": "",
+            }
+            merged_ov = dict(placeholder_ov)
+            merged_ov.update(existing_ov)
+
+            stuck = status.endswith("_IN_PROGRESS") or status.endswith("_FAILED")
+            if not stuck:
+                # Healthy resource row, but heal a deployment object whose
+                # output_values are missing referenced keys (poisoned by the
+                # earlier empty-outputs settle, or an agent that never
+                # signalled) -- otherwise the NEXT output resolution
+                # re-triggers the NotFound fetch.
+                if merged_ov != existing_ov:
+                    try:
+                        heat_admin.software_deployments.update(
+                            deployment_id, output_values=merged_ov
+                        )
+                        LOG.warning(
+                            "Backfilled missing output_values on deployment "
+                            "%s (id=%s) of stack %s pre-update",
+                            res_name,
+                            deployment_id,
+                            stack_id,
+                        )
+                    except Exception as exc:
+                        LOG.warning(
+                            "Could not backfill output_values on deployment "
+                            "%s (id=%s): %s",
+                            res_name,
+                            deployment_id,
+                            exc,
+                        )
+                continue
+
             # 'CREATE_FAILED' -> 'CREATE', 'UPDATE_IN_PROGRESS' -> 'UPDATE', etc.
             action = status.split("_", 1)[0] or "CREATE"
             try:
@@ -431,7 +494,7 @@ class HeatDriver(driver.Driver):
                         "FAILED->replace async-signal loop); the node re-runs "
                         "and re-signals it in place on this update"
                     ),
-                    output_values={},
+                    output_values=merged_ov,
                 )
                 LOG.warning(
                     "Settled stuck SoftwareDeployment %s (id=%s, was %s) to "
@@ -599,6 +662,104 @@ class HeatDriver(driver.Driver):
                     engine.dispose()
                 except Exception:
                     pass
+
+    def _recover_dropped_group_param_values(self, osc, stack_id, raw_parameters):
+        """Recover values for params that retained RG members still reference.
+
+        ``_inject_deprecated_parameters`` re-declares dropped parameters using
+        the parent stack's CURRENT stored value. But once a prior (failed)
+        migration attempt has stored the NEW template, Heat drops the old
+        parameter values from the parent stack entirely -- the retained
+        (non-batch) ResourceGroup member definitions still say
+        ``{get_param: flannel_cni_tag}``, yet there is no longer any value to
+        re-declare from, and every retry fails ``Property X not assigned``
+        forever.
+
+        The authoritative values survive in the MEMBER stacks (each per-node
+        nested stack stores its full parameter set). This walks each group's
+        stored template for ``get_param`` references, and for any name absent
+        from both the new template's declarations and the parent's stored
+        parameters, pulls the value from the first member stack that has it.
+        The result is merged into ``raw_parameters`` so the normal injection
+        step re-declares it. Best-effort; masked values are skipped (their
+        declaration-only handling needs the parent to still hold the real
+        value, which is gone in this scenario -- those surface loudly rather
+        than silently injecting an empty secret).
+        """
+        recovered = {}
+        for group_name in ("kube_masters", "kube_minions"):
+            try:
+                group = osc.heat().resources.get(stack_id, group_name)
+                group_stack_id = group.physical_resource_id
+                if not group_stack_id:
+                    continue
+                group_tmpl = osc.heat().stacks.template(group_stack_id)
+            except Exception:
+                continue
+
+            refs = set()
+
+            def _walk(node):
+                if isinstance(node, dict):
+                    for key, value in node.items():
+                        if key == "get_param":
+                            if isinstance(value, six.string_types):
+                                refs.add(value)
+                            elif (
+                                isinstance(value, list)
+                                and value
+                                and isinstance(value[0], six.string_types)
+                            ):
+                                refs.add(value[0])
+                        else:
+                            _walk(value)
+                elif isinstance(node, list):
+                    for item in node:
+                        _walk(item)
+
+            _walk(group_tmpl.get("resources") or {})
+            missing = [
+                name
+                for name in refs
+                if name not in raw_parameters and not name.startswith("OS::")
+            ]
+            if not missing:
+                continue
+
+            member_params = None
+            try:
+                for res in osc.heat().resources.list(group_stack_id):
+                    member_stack_id = getattr(res, "physical_resource_id", None)
+                    if not member_stack_id:
+                        continue
+                    member_params = heat_tdef.omit_masked_heat_parameters(
+                        osc.heat().stacks.get(member_stack_id).parameters.copy()
+                    )
+                    break
+            except Exception as e:
+                LOG.warning(
+                    "Could not read member stack parameters of group %s "
+                    "to recover dropped params: %s",
+                    group_name,
+                    e,
+                )
+            if not member_params:
+                continue
+            for name in missing:
+                if name in member_params:
+                    recovered[name] = member_params[name]
+                    LOG.warning(
+                        "Recovered dropped parameter %s for retained %s "
+                        "members from a member stack (parent stack no "
+                        "longer stores it)",
+                        name,
+                        group_name,
+                    )
+        if recovered:
+            merged = dict(recovered)
+            merged.update(raw_parameters)
+            return merged
+        return raw_parameters
 
     def _prepare_stack_for_template_update(self, osc, stack_id):
         """Mark problematic resources unhealthy before a template update.
@@ -948,7 +1109,12 @@ class HeatDriver(driver.Driver):
         reconcile run — no drain/uncordon, no service restarts unless configs
         actually changed.
         """
-        osc = clients.OpenStackClients(context)
+        # Mutating stack op: MUST run in the cluster's own project (trust
+        # context), never the caller's. An admin triggering this from the
+        # service project would otherwise mint Heat resources under the
+        # wrong tenant and wedge later reads with "Software config not
+        # found" (see _get_cluster_osc).
+        osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
 
         # Re-extract full template definition with updated labels.
         # This picks up all label changes (addon flags, chart versions, etc.)
@@ -1048,13 +1214,29 @@ class HeatDriver(driver.Driver):
     ):
         raise NotImplementedError("Must implement 'upgrade_cluster'")
 
-    def _get_cluster_osc(self, context, cluster):
+    def _get_cluster_osc(self, context, cluster, allow_admin_fallback=True):
         """Get OpenStack clients for cluster operations.
 
         Tries the cluster's trust context first.  If that fails (expired
         trust, deleted trustor, etc.), falls back to admin context so
         that delete and other lifecycle operations are not blocked by
         broken trusts.
+
+        ``allow_admin_fallback`` MUST be False for operations that MUTATE the
+        Heat stack (upgrade, scale). The admin context is scoped to the
+        SERVICE project, not the cluster's project, so a stack update run
+        under it mints every new resource (SoftwareConfig rows above all)
+        with the wrong ``tenant``. Heat's project-scoped getters
+        (``software_config_get`` etc.) then filter those rows out of any
+        read made in the cluster's own project and report them as NotFound
+        -- the live wedge signature is a retried upgrade failing every
+        member with ``Software config with id X not found`` while the row
+        exists in the DB under the service project. Failing fast with an
+        actionable trust error is strictly better than silently poisoning
+        the stack's tenancy. (DB repair for already-poisoned stacks:
+        ``UPDATE software_config SET tenant='<stack tenant>' WHERE
+        tenant='<service project>' AND name LIKE '<stack name>%';`` plus
+        the same for ``software_deployment`` rows.)
         """
         try:
             cluster_ctx = mag_ctx.make_cluster_context(cluster)
@@ -1063,6 +1245,17 @@ class HeatDriver(driver.Driver):
             osc.heat()
             return osc
         except Exception as e:
+            if not allow_admin_fallback:
+                LOG.error(
+                    "Cluster trust auth failed for %s and this operation "
+                    "cannot safely run under the admin context (it would "
+                    "create Heat resources in the wrong tenant and wedge "
+                    "the stack with 'Software config not found'). Repair "
+                    "the cluster trust (trustor roles) and retry: %s",
+                    cluster.uuid,
+                    e,
+                )
+                raise
             LOG.warning(
                 "Cluster trust auth failed for %s, falling back to admin context: %s",
                 cluster.uuid,
@@ -1213,8 +1406,9 @@ class HeatDriver(driver.Driver):
             context, cluster, nodegroup.node_count, scale_manager, nodes_to_remove=None
         )
 
-        # Get existing stack parameters if available
-        osc = self._get_cluster_osc(context, cluster)
+        # Get existing stack parameters if available. Mutating stack op
+        # below: cluster project scope only (see _get_cluster_osc).
+        osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
         try:
             stack = osc.heat().stacks.get(nodegroup.stack_id)
             existing_params = stack.parameters
@@ -1263,7 +1457,7 @@ class HeatDriver(driver.Driver):
     ):
         # Get current node count from Heat stack to detect scale-down operations
         try:
-            osc = clients.OpenStackClients(context)
+            osc = self._get_cluster_osc(context, cluster)
             stack = osc.heat().stacks.get(nodegroup.stack_id)
             current_node_count = int(
                 stack.parameters.get(
@@ -1337,7 +1531,10 @@ class HeatDriver(driver.Driver):
             nodegroup.stack_id,
             scale_params,
         )
-        osc = clients.OpenStackClients(context)
+        # Mutating stack op: cluster project scope only (trust context) --
+        # an admin-context resize re-fires deployments and can mint derived
+        # configs under the service tenant (see _get_cluster_osc).
+        osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
         # A cluster carrying leftovers from an earlier failed/timed-out
         # update (a *_config_deployment stuck FAILED/IN_PROGRESS, a
         # NULL-updated_at row, a never-updated Octavia member) cannot even
@@ -1394,7 +1591,7 @@ class HeatDriver(driver.Driver):
                 )
                 return
 
-            osc = clients.OpenStackClients(context)
+            osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
 
             # Get the cluster stack ID (shared by default nodegroups)
             cluster_stack_id = default_master_ng.stack_id
@@ -1749,7 +1946,11 @@ class KubernetesDriver(HeatDriver):
         return current_parameters
 
     def rotate_ca_certificate(self, context, cluster):
-        osc = clients.OpenStackClients(context)
+        # Mutating stack op: cluster project scope only (trust context) --
+        # rotation re-fires every node's deployment, and running that under
+        # an admin/service-project context mints the derived configs in the
+        # wrong tenant (see _get_cluster_osc).
+        osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
 
         # A prior upgrade or rotation that hit the Heat timeout can leave a
         # node's SoftwareDeployment stranded *_IN_PROGRESS. Rotation re-fires
@@ -1984,7 +2185,10 @@ class FedoraKubernetesDriver(KubernetesDriver):
         scale_manager=None,
         rollback=False,
     ):
-        osc = self._get_cluster_osc(context, cluster)
+        # Mutating stack op (full template push): cluster project scope
+        # only -- admin-context upgrades mint SoftwareConfig rows under the
+        # service tenant and wedge every retry (see _get_cluster_osc).
+        osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
 
         # Use this just to check that we are not downgrading.
         heat_params = {
@@ -2094,6 +2298,13 @@ class FedoraKubernetesDriver(KubernetesDriver):
         # Handles removed, renamed, or deprecated parameters automatically —
         # no hardcoded deprecation list.
         raw_parameters = osc.heat().stacks.get(stack_id).parameters.copy()
+        # Recover values for params the retained RG members still reference
+        # but a prior stored (failed) migration already dropped from the
+        # parent -- without this, injection has no value source and every
+        # retry fails "Property X not assigned".
+        raw_parameters = self._recover_dropped_group_param_values(
+            osc, stack_id, raw_parameters
+        )
         current_parameters = heat_tdef.omit_masked_heat_parameters(raw_parameters)
         # Pass RAW params (masked included) so masked-but-dropped parameters
         # like `password` are still re-declared; their masked value is never
@@ -2239,7 +2450,10 @@ class UbuntuKubernetesDriver(KubernetesDriver):
         scale_manager=None,
         rollback=False,
     ):
-        osc = self._get_cluster_osc(context, cluster)
+        # Mutating stack op (full template push): cluster project scope
+        # only -- admin-context upgrades mint SoftwareConfig rows under the
+        # service tenant and wedge every retry (see _get_cluster_osc).
+        osc = self._get_cluster_osc(context, cluster, allow_admin_fallback=False)
 
         # Use this just to check that we are not downgrading.
         heat_params = {
@@ -2348,6 +2562,13 @@ class UbuntuKubernetesDriver(KubernetesDriver):
         # Handles removed, renamed, or deprecated parameters automatically —
         # no hardcoded deprecation list.
         raw_parameters = osc.heat().stacks.get(stack_id).parameters.copy()
+        # Recover values for params the retained RG members still reference
+        # but a prior stored (failed) migration already dropped from the
+        # parent -- without this, injection has no value source and every
+        # retry fails "Property X not assigned".
+        raw_parameters = self._recover_dropped_group_param_values(
+            osc, stack_id, raw_parameters
+        )
         current_parameters = heat_tdef.omit_masked_heat_parameters(raw_parameters)
         # Pass RAW params (masked included) so masked-but-dropped parameters
         # like `password` are still re-declared; their masked value is never
