@@ -377,21 +377,175 @@ class HeatDriver(driver.Driver):
                     exc,
                 )
 
+            # Settling the deployment OBJECT above is necessary but NOT
+            # sufficient: the stack RESOURCE row keeps its ``*_FAILED`` /
+            # ``*_IN_PROGRESS`` state, and Heat's update path REPLACES any
+            # failed resource row regardless of the deployment object's
+            # status (Resource._needs_update raises UpdateReplace when
+            # ``status == FAILED`` because SoftwareDeployment does not
+            # override needs_replace_failed). The replacement mints a new
+            # deployment id and the node's async heat-container-agent keeps
+            # signalling the superseded one -- the exact wedge this settle
+            # exists to prevent. The resource API cannot set a row's state
+            # directly, but the mark-unhealthy API can be toggled to do it:
+            # True forces (CHECK, FAILED) from ANY non-DELETE state, False
+            # then flips (CHECK, FAILED) into (CHECK, COMPLETE). A
+            # (CHECK, COMPLETE) row is updated IN PLACE on the next stack
+            # update, so the deployment id stays stable and the agent's
+            # signal always lands on the live generation.
+            res_stack_id = None
+            try:
+                stack_link = [
+                    link
+                    for link in getattr(res, "links", []) or []
+                    if link.get("rel") == "stack"
+                ]
+                if stack_link:
+                    res_stack_id = stack_link[0]["href"].split("/")[-1]
+            except Exception:
+                res_stack_id = None
+            if not res_stack_id:
+                LOG.warning(
+                    "Could not resolve owning stack of stuck "
+                    "SoftwareDeployment %s (id=%s); its FAILED resource row "
+                    "will be replaced on the next update",
+                    res_name,
+                    deployment_id,
+                )
+                continue
+            try:
+                reason = (
+                    "magnum: settling stuck config deployment resource row "
+                    "to CHECK_COMPLETE pre-update so Heat updates it in "
+                    "place (stable deployment id) instead of replacing it"
+                )
+                osc.heat().resources.mark_unhealthy(
+                    res_stack_id, res_name, True, reason
+                )
+                osc.heat().resources.mark_unhealthy(
+                    res_stack_id, res_name, False, reason
+                )
+                LOG.warning(
+                    "Settled stuck SoftwareDeployment resource row %s "
+                    "(stack %s, was %s) to CHECK_COMPLETE before update",
+                    res_name,
+                    res_stack_id,
+                    status,
+                )
+            except Exception as exc:
+                LOG.warning(
+                    "Could not settle resource row of stuck "
+                    "SoftwareDeployment %s in stack %s: %s; Heat will "
+                    "replace it on the next update and the node agent may "
+                    "signal a dead deployment id",
+                    res_name,
+                    res_stack_id,
+                    exc,
+                )
+
+    def _backfill_null_resource_timestamps(self, osc, stack_id):
+        """Backfill NULL resource.updated_at rows for a stack tree (DB write).
+
+        Whenever Heat REPLACES a resource (failed deployment, marked-unhealthy
+        config, ...) the replacement row is inserted with ``updated_at`` NULL
+        and stays NULL until its first in-place update. A later stack update
+        that compares or sorts on that timestamp then aborts the WHOLE update
+        with ``'<' not supported between instances of 'datetime.datetime' and
+        'NoneType'`` (surfaced as ``resources.kube_masters: resources[N]:
+        ...``), wedging upgrade AND resize until an operator runs the backfill
+        SQL by hand.
+
+        Magnum cannot repair this through the Heat API: resource listings
+        substitute ``created_at`` when ``updated_at`` is NULL, so the broken
+        rows are not even visible, and no API call sets the raw column. When
+        the deployer provides ``[cluster_heat] heat_db_connection`` this
+        method automates the exact runbook statement, scoped to the target
+        stack's name prefix (the root stack and every nested stack share it):
+
+            UPDATE resource r JOIN stack s ON r.stack_id = s.id
+            SET r.updated_at = r.created_at
+            WHERE s.name LIKE '<stack_name>%' AND s.deleted_at IS NULL
+              AND r.updated_at IS NULL AND r.created_at IS NOT NULL;
+
+        Best-effort: any failure is logged and never blocks the operation --
+        without the option set this is a no-op and the manual runbook still
+        applies.
+        """
+        conn_url = cfg.CONF.cluster_heat.heat_db_connection
+        if not conn_url:
+            return
+        try:
+            stack_name = osc.heat().stacks.get(stack_id).stack_name
+        except Exception as e:
+            LOG.warning(
+                "Could not resolve stack name of %s for updated_at "
+                "backfill: %s",
+                stack_id,
+                e,
+            )
+            return
+        engine = None
+        try:
+            import sqlalchemy
+
+            engine = sqlalchemy.create_engine(conn_url)
+            with engine.begin() as conn:
+                result = conn.execute(
+                    sqlalchemy.text(
+                        "UPDATE resource r JOIN stack s ON r.stack_id = s.id "
+                        "SET r.updated_at = r.created_at "
+                        "WHERE s.name LIKE :prefix "
+                        "AND s.deleted_at IS NULL "
+                        "AND r.updated_at IS NULL "
+                        "AND r.created_at IS NOT NULL"
+                    ),
+                    {"prefix": stack_name + "%"},
+                )
+                if result.rowcount:
+                    LOG.warning(
+                        "Backfilled updated_at on %s NULL resource rows of "
+                        "stack tree %s (%s) pre-update; such rows abort "
+                        "stack updates with a datetime/None comparison "
+                        "error",
+                        result.rowcount,
+                        stack_name,
+                        stack_id,
+                    )
+        except Exception as e:
+            LOG.warning(
+                "updated_at backfill for stack %s failed: %s; if this "
+                "update aborts with \"'<' not supported between instances "
+                "of 'datetime.datetime' and 'NoneType'\" run the manual "
+                "backfill SQL against the heat DB",
+                stack_id,
+                e,
+            )
+        finally:
+            if engine is not None:
+                try:
+                    engine.dispose()
+                except Exception:
+                    pass
+
     def _prepare_stack_for_template_update(self, osc, stack_id):
         """Mark problematic resources unhealthy before a template update.
 
-        Handles three cases:
-        0. Per-node ``*_config_deployment`` SoftwareDeployments left
+        Handles four cases:
+        0. NULL resource.updated_at rows backfilled directly in the Heat DB
+           (only when [cluster_heat] heat_db_connection is configured) --
+           they abort the whole update with a datetime/None comparison error.
+        1. Per-node ``*_config_deployment`` SoftwareDeployments left
            ``*_FAILED`` or ``*_IN_PROGRESS`` by a prior failed/timed-out update
            -- settled to COMPLETE first so the convergence engine UPDATES them in
            place on this update instead of REPLACING them. A replacement mints a
            new deployment id that the async heat-container-agent can't signal in
            time, which otherwise self-perpetuates into a permanent rolling-update
            wedge on that node.
-        1. SoftwareConfig resources that reference deleted configs
-        2. CREATE_FAILED nested resources (LB listeners, pools) that
+        2. SoftwareConfig resources that reference deleted configs
+        3. CREATE_FAILED nested resources (LB listeners, pools) that
            crash Octavia's Heat plugin on datetime comparison
         """
+        self._backfill_null_resource_timestamps(osc, stack_id)
         self._clear_orphaned_software_deployments(osc, stack_id)
         for group_name, config_name in (
             ("kube_masters", "master_config"),
@@ -400,6 +554,24 @@ class HeatDriver(driver.Driver):
             self._mark_config_unhealthy_in_child_stacks(
                 osc, stack_id, group_name, config_name
             )
+        self._mark_failed_nested_resources_unhealthy(osc, stack_id)
+
+    def _prepare_stack_for_params_update(self, osc, stack_id):
+        """Pre-update preparation for params-only updates (resize, scale).
+
+        Same recovery as _prepare_stack_for_template_update EXCEPT the
+        SoftwareConfig unhealthy-mark: params-only updates must not recreate
+        the config resources -- a recreated config changes the deployment's
+        ``config`` reference, re-fires every node's reconciler during a mere
+        resize, and (on templates where the update aborts early) strands
+        configs in CHECK_FAILED. Resize previously ran with NO preparation at
+        all, so a cluster carrying a stuck deployment or a NULL-timestamp
+        row from an earlier failed upgrade could not even be resized (the
+        exact ``resize to 0`` wedge: the datetime/None comparison aborts the
+        ResourceGroup update).
+        """
+        self._backfill_null_resource_timestamps(osc, stack_id)
+        self._clear_orphaned_software_deployments(osc, stack_id)
         self._mark_failed_nested_resources_unhealthy(osc, stack_id)
 
     def _get_update_timeout(self, cluster=None):
@@ -739,14 +911,27 @@ class HeatDriver(driver.Driver):
 
         stack_fields = self._get_nested_stack_update_template_fields(context, master_ng)
 
+        # A deployment stranded FAILED/IN_PROGRESS by an earlier op would be
+        # REPLACED by this update (new deployment id -> async agent signals
+        # the dead one). Settle first, exactly like upgrade/rotation.
+        self._clear_orphaned_software_deployments(osc, cluster.stack_id)
+
         for stack_id in stack_ids:
-            for rn in ("master_config", "master_config_deployment"):
-                try:
-                    osc.heat().resources.mark_unhealthy(
-                        stack_id, rn, True, "pre-reconfigure"
-                    )
-                except Exception:
-                    pass
+            # Mark ONLY the SoftwareConfig unhealthy (recreated cleanly under
+            # the pushed template). The deployment must NOT be marked: that
+            # forces Heat to REPLACE it, minting a new deployment id that the
+            # node's async heat-container-agent races against (it can run and
+            # signal a superseded generation, leaving the new id waiting
+            # forever -- the exact wedge _mark_config_unhealthy_in_child_stacks
+            # documents). The deployment re-fires IN PLACE anyway because its
+            # TIMESTAMP_UPGRADE input is bumped above and its config reference
+            # changes with the recreated SoftwareConfig.
+            try:
+                osc.heat().resources.mark_unhealthy(
+                    stack_id, "master_config", True, "pre-reconfigure"
+                )
+            except Exception:
+                pass
 
             merged_params = self._get_merged_stack_parameters(
                 osc, stack_id, heat_params, template=stack_fields["template"]
@@ -985,6 +1170,10 @@ class HeatDriver(driver.Driver):
             nodegroup.stack_id,
             json.dumps(scale_params),
         )
+        # Full-template update path (bumps timestamp_upgrade, re-fires every
+        # node): needs the same pre-update recovery as upgrade_cluster or a
+        # cluster wedged by a prior failed update can never be scaled.
+        self._prepare_stack_for_template_update(osc, nodegroup.stack_id)
         osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
     def _resize_stack(
@@ -1074,6 +1263,15 @@ class HeatDriver(driver.Driver):
             scale_params,
         )
         osc = clients.OpenStackClients(context)
+        # A cluster carrying leftovers from an earlier failed/timed-out
+        # update (a *_config_deployment stuck FAILED/IN_PROGRESS, a
+        # NULL-updated_at row, a never-updated Octavia member) cannot even
+        # be RESIZED: the ResourceGroup update replays every member and
+        # aborts on the same wedge that killed the upgrade (e.g. "resize to
+        # 0" failing on the datetime/None comparison). Run the params-safe
+        # subset of the pre-update preparation (no SoftwareConfig mark -- a
+        # resize must not re-fire converged nodes' reconcilers).
+        self._prepare_stack_for_params_update(osc, nodegroup.stack_id)
         osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
         # Special handling for master resize: ensure cluster stack gets updated with total master count
@@ -1158,6 +1356,9 @@ class HeatDriver(driver.Driver):
                 cluster_stack_id,
                 total_master_count,
             )
+            # Params-only update of the cluster stack replays its resource
+            # graph too -- same wedge exposure as _resize_stack.
+            self._prepare_stack_for_params_update(osc, cluster_stack_id)
             osc.heat().stacks.update(cluster_stack_id, **fields)
 
         except Exception as e:
@@ -1483,6 +1684,11 @@ class KubernetesDriver(HeatDriver):
         # Safe: Magnum serialises operations per cluster, so nothing is in
         # flight here.
         self._clear_orphaned_software_deployments(osc, cluster.stack_id)
+        # Non-default nodegroups have their own root stacks; their stuck
+        # deployments would wedge the rotation exactly the same way.
+        for ng in cluster.nodegroups:
+            if not ng.is_default and ng.stack_id:
+                self._clear_orphaned_software_deployments(osc, ng.stack_id)
 
         heat_params = self._get_ca_rotation_params(context, cluster)
         cluster_stack_params = heat_tdef.omit_masked_heat_parameters(

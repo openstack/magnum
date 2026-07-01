@@ -61,7 +61,28 @@ cluster_heat_opts = [
                      'finish early. Set to 0 to restore the flat '
                      'update_timeout behaviour. Raise it for slow first '
                      'old->new migrations or low-RAM nodes where a single '
-                     'node reconcile can take 20-30 minutes.'))
+                     'node reconcile can take 20-30 minutes.')),
+    cfg.StrOpt('heat_db_connection',
+               default='',
+               secret=True,
+               help=('Optional SQLAlchemy connection URL for the HEAT '
+                     'database (e.g. mysql+pymysql://heat:pass@host/heat). '
+                     'When set, Magnum backfills NULL resource.updated_at '
+                     'rows (updated_at = created_at) for a cluster\'s stack '
+                     'tree before pushing a stack update. Such rows are '
+                     'minted whenever Heat replaces a resource that is then '
+                     'never updated (e.g. a SoftwareDeployment replaced '
+                     'after a failed run), and a later update that compares '
+                     'or sorts on the timestamp aborts with "\'<\' not '
+                     'supported between instances of \'datetime.datetime\' '
+                     'and \'NoneType\'", wedging upgrade and resize until an '
+                     'operator runs the backfill SQL by hand. The Heat API '
+                     'exposes no way to read or set the raw updated_at '
+                     '(resource listings fall back to created_at), so a '
+                     'direct DB write is the only automated remedy that does '
+                     'not modify Heat itself. Leave empty to disable; the '
+                     'manual runbook SQL then remains necessary on affected '
+                     'clusters.'))
 ]
 
 
