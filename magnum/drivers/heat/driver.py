@@ -155,6 +155,21 @@ class HeatDriver(driver.Driver):
         the SAME deployment id -- the signal always matches. Recreating the
         SoftwareConfig it points at is an in-place deployment update (new
         config_id), not a replace, so the id stays stable.
+
+        CONDITIONAL: the config is marked only when its backing
+        ``software_config`` row is actually GONE. Marking unconditionally on
+        every attempt is what manufactured the "Software config with id X not
+        found" wedge on retried migrations: each mark forces a config
+        replace, the replace's cleanup DELETES the previous config row, and
+        an attempt that aborts anywhere between that cleanup and the
+        deployment's own update strands a live resource pointing at a
+        deleted row -- every later attempt (and even a plain resize) then
+        dies on NotFound. When the backing row exists there is nothing to
+        recover: content changes are handled by Heat itself (SoftwareConfig
+        is immutable, so a changed script list auto-replaces it), and an
+        unchanged config needs no churn. When the row is missing, marking is
+        the ONLY way forward -- Heat would otherwise try to read the deleted
+        row and fail the same way.
         """
         try:
             group = osc.heat().resources.get(parent_stack_id, group_name)
@@ -168,6 +183,15 @@ class HeatDriver(driver.Driver):
             child_stack_id = member.physical_resource_id
             if not child_stack_id:
                 continue
+            if not self._config_backing_row_missing(
+                osc, child_stack_id, config_name
+            ):
+                LOG.debug(
+                    "SoftwareConfig %s in %s is intact; not marking",
+                    config_name,
+                    child_stack_id,
+                )
+                continue
             try:
                 osc.heat().resources.mark_unhealthy(
                     child_stack_id,
@@ -175,7 +199,13 @@ class HeatDriver(driver.Driver):
                     True,
                     "pre-template-migration: recreate stale SoftwareConfig",
                 )
-                LOG.debug("Marked %s in %s as unhealthy", config_name, child_stack_id)
+                LOG.warning(
+                    "Marked dangling SoftwareConfig %s in %s unhealthy "
+                    "(backing software_config row is gone); Heat will "
+                    "recreate it without reading the deleted row",
+                    config_name,
+                    child_stack_id,
+                )
             except Exception as exc:
                 LOG.debug(
                     "Could not mark %s unhealthy in %s: %s",
@@ -183,6 +213,49 @@ class HeatDriver(driver.Driver):
                     child_stack_id,
                     exc,
                 )
+
+    def _config_backing_row_missing(self, osc, child_stack_id, config_name):
+        """Whether a SoftwareConfig resource's backing row was deleted.
+
+        Returns True (mark needed) when the resource exists but its
+        ``software_config`` row cannot be fetched -- the dangling state a
+        prior aborted replace leaves behind. Returns False when the config is
+        intact, and also when the resource itself is absent (nothing to
+        mark). A probe that fails for any other reason returns True: wrongly
+        marking an intact config costs one benign recreate, while wrongly
+        skipping a dangling one wedges the update on NotFound.
+        """
+        try:
+            res = osc.heat().resources.get(child_stack_id, config_name)
+        except Exception:
+            # No such resource in this child stack -- nothing to mark.
+            return False
+        config_id = getattr(res, "physical_resource_id", None)
+        if not config_id:
+            # Config resource never materialised; recreate it.
+            return True
+        try:
+            osc.heat().software_configs.get(config_id)
+            return False
+        except heatexc.HTTPNotFound:
+            LOG.warning(
+                "SoftwareConfig %s in %s references deleted "
+                "software_config row %s",
+                config_name,
+                child_stack_id,
+                config_id,
+            )
+            return True
+        except Exception as exc:
+            LOG.warning(
+                "Could not probe software_config %s of %s in %s (%s); "
+                "marking for recreate as a precaution",
+                config_id,
+                config_name,
+                child_stack_id,
+                exc,
+            )
+            return True
 
     def _mark_failed_nested_resources_unhealthy(self, osc, stack_id):
         """Mark Octavia resources that crash Heat's datetime comparison.
@@ -917,21 +990,23 @@ class HeatDriver(driver.Driver):
         self._clear_orphaned_software_deployments(osc, cluster.stack_id)
 
         for stack_id in stack_ids:
-            # Mark ONLY the SoftwareConfig unhealthy (recreated cleanly under
-            # the pushed template). The deployment must NOT be marked: that
-            # forces Heat to REPLACE it, minting a new deployment id that the
-            # node's async heat-container-agent races against (it can run and
-            # signal a superseded generation, leaving the new id waiting
-            # forever -- the exact wedge _mark_config_unhealthy_in_child_stacks
-            # documents). The deployment re-fires IN PLACE anyway because its
-            # TIMESTAMP_UPGRADE input is bumped above and its config reference
-            # changes with the recreated SoftwareConfig.
-            try:
-                osc.heat().resources.mark_unhealthy(
-                    stack_id, "master_config", True, "pre-reconfigure"
-                )
-            except Exception:
-                pass
+            # Mark ONLY the SoftwareConfig unhealthy, and only when its
+            # backing software_config row is gone (see
+            # _mark_config_unhealthy_in_child_stacks: unconditional marking
+            # churns config generations and manufactures dangling NotFound
+            # references on aborted attempts). The deployment must NOT be
+            # marked: that forces Heat to REPLACE it, minting a new
+            # deployment id that the node's async heat-container-agent races
+            # against. The deployment re-fires IN PLACE anyway because its
+            # TIMESTAMP_UPGRADE input is bumped above (and its config
+            # reference changes if Heat recreates/auto-replaces the config).
+            if self._config_backing_row_missing(osc, stack_id, "master_config"):
+                try:
+                    osc.heat().resources.mark_unhealthy(
+                        stack_id, "master_config", True, "pre-reconfigure"
+                    )
+                except Exception:
+                    pass
 
             merged_params = self._get_merged_stack_parameters(
                 osc, stack_id, heat_params, template=stack_fields["template"]
