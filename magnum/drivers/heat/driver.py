@@ -603,6 +603,15 @@ class HeatDriver(driver.Driver):
             WHERE s.name LIKE '<stack_name>%' AND s.deleted_at IS NULL
               AND r.updated_at IS NULL AND r.created_at IS NOT NULL;
 
+        It ALSO repairs wrong-tenant rows: a mutating op that ever ran outside
+        the cluster's project (old conductors' admin-context fallback, raw
+        admin caller context) minted ``software_config`` /
+        ``software_deployment`` rows with ``tenant=<service project>``; heat's
+        project-scoped getters then filter them out of reads in the cluster
+        project and every retry fails ``Software config with id X not found``
+        though the row exists. The repair sets those rows' tenant back to the
+        stack's own tenant, scoped to this stack tree.
+
         Best-effort: any failure is logged and never blocks the operation --
         without the option set this is a no-op and the manual runbook still
         applies.
@@ -610,22 +619,28 @@ class HeatDriver(driver.Driver):
         conn_url = cfg.CONF.cluster_heat.heat_db_connection
         if not conn_url:
             return
-        try:
-            stack_name = osc.heat().stacks.get(stack_id).stack_name
-        except Exception as e:
-            LOG.warning(
-                "Could not resolve stack name of %s for updated_at "
-                "backfill: %s",
-                stack_id,
-                e,
-            )
-            return
         engine = None
         try:
             import sqlalchemy
 
             engine = sqlalchemy.create_engine(conn_url)
             with engine.begin() as conn:
+                row = conn.execute(
+                    sqlalchemy.text(
+                        "SELECT name, tenant FROM stack "
+                        "WHERE id = :sid AND deleted_at IS NULL"
+                    ),
+                    {"sid": stack_id},
+                ).fetchone()
+                if not row:
+                    LOG.warning(
+                        "Stack %s not found in heat DB; skipping pre-update "
+                        "DB repairs",
+                        stack_id,
+                    )
+                    return
+                stack_name, stack_tenant = row[0], row[1]
+
                 result = conn.execute(
                     sqlalchemy.text(
                         "UPDATE resource r JOIN stack s ON r.stack_id = s.id "
@@ -647,12 +662,51 @@ class HeatDriver(driver.Driver):
                         stack_name,
                         stack_id,
                     )
+
+                result = conn.execute(
+                    sqlalchemy.text(
+                        "UPDATE software_config SET tenant = :tenant "
+                        "WHERE tenant <> :tenant AND name LIKE :prefix"
+                    ),
+                    {"tenant": stack_tenant, "prefix": stack_name + "-%"},
+                )
+                if result.rowcount:
+                    LOG.warning(
+                        "Repaired tenant on %s software_config rows of "
+                        "stack tree %s minted outside project %s (admin-"
+                        "context poisoning); they were invisible to reads "
+                        "in the cluster project ('Software config not "
+                        "found')",
+                        result.rowcount,
+                        stack_name,
+                        stack_tenant,
+                    )
+
+                result = conn.execute(
+                    sqlalchemy.text(
+                        "UPDATE software_deployment SET tenant = :tenant "
+                        "WHERE tenant <> :tenant "
+                        "AND stack_user_project_id IN "
+                        "(SELECT DISTINCT stack_user_project_id FROM stack "
+                        " WHERE deleted_at IS NULL AND name LIKE :prefix "
+                        " AND stack_user_project_id IS NOT NULL)"
+                    ),
+                    {"tenant": stack_tenant, "prefix": stack_name + "%"},
+                )
+                if result.rowcount:
+                    LOG.warning(
+                        "Repaired tenant on %s software_deployment rows of "
+                        "stack tree %s minted outside project %s",
+                        result.rowcount,
+                        stack_name,
+                        stack_tenant,
+                    )
         except Exception as e:
             LOG.warning(
-                "updated_at backfill for stack %s failed: %s; if this "
-                "update aborts with \"'<' not supported between instances "
-                "of 'datetime.datetime' and 'NoneType'\" run the manual "
-                "backfill SQL against the heat DB",
+                "Heat DB pre-update repairs for stack %s failed: %s; if "
+                "this update aborts with a datetime/None comparison error "
+                "or 'Software config with id X not found', run the manual "
+                "runbook SQL against the heat DB",
                 stack_id,
                 e,
             )

@@ -59,6 +59,23 @@ def _recreate_trust(osc, context, cluster):
     update so it propagates through heat-params into the node cloud.conf.
     """
     old_trust_id = cluster.trust_id
+    # create_trust scopes the new trust to the CALLER's project. Recreating
+    # from a token scoped elsewhere (e.g. an admin on the service project)
+    # would delegate the WRONG project to the cluster's trustee -- the
+    # in-cluster cloud controllers would then create LBs/volumes in that
+    # project. Refuse with an actionable message instead.
+    if context.project_id != cluster.project_id:
+        LOG.error(
+            'Cluster %s trust must be recreated, but the request is scoped '
+            'to project %s while the cluster belongs to project %s. Re-run '
+            'this operation with a token scoped to the cluster project '
+            '(e.g. --os-project-id %s) by a user holding the roles to '
+            'delegate (%s).',
+            cluster.uuid, context.project_id, cluster.project_id,
+            cluster.project_id,
+            CONF.trust.roles or 'the caller\'s roles on that project')
+        raise exception.TrusteeOrTrustToClusterFailed(
+            cluster_uuid=cluster.uuid)
     try:
         trust = osc.keystone().create_trust(cluster.trustee_user_id)
     except Exception:
