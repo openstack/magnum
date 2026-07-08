@@ -273,6 +273,10 @@ class KeystoneClientTest(base.TestCase):
             name=expected_username,
             password=expected_password,
             domain=expected_domain,
+            options={
+                'ignore_change_password_upon_first_use': True,
+                'ignore_password_expiry': True,
+            },
         )
 
     @mock.patch('magnum.common.keystone.KeystoneClientV3.domain_admin_auth')

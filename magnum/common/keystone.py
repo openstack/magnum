@@ -268,7 +268,11 @@ class KeystoneClientV3(object):
             user = self.domain_admin_client.users.create(
                 name=username,
                 password=password,
-                domain=domain_id)
+                domain=domain_id,
+                options={
+                    'ignore_change_password_upon_first_use': True,
+                    'ignore_password_expiry': True,
+                })
         except Exception:
             LOG.exception('Failed to create trustee')
             raise exception.TrusteeCreateFailed(username=username,
