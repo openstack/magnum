@@ -21,7 +21,6 @@ CONF = cfg.CONF
 class PolicyFunctionalTest(api_base.FunctionalTest):
     def setUp(self):
         super(PolicyFunctionalTest, self).setUp()
-        CONF.set_override('enforce_scope', True, group='oslo_policy')
         CONF.set_override('enforce_new_defaults', True, group='oslo_policy')
         self.reader_headers = {
             "X-Roles": "reader",
