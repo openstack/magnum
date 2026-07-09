@@ -291,6 +291,7 @@ systemd:
         ExecStartPre=mkdir -p /opt/stack/os-config-refresh
         ExecStartPre=-mv /var/lib/os-collect-config/local-data /var/lib/cloud/data/cfn-init-data
         ExecStartPre=mkdir -p /srv/magnum
+        ExecStartPre=/bin/sh -c 'test -e /etc/pki/tls/certs/ca-bundle.crt || { mkdir -p /etc/pki/tls/certs && ln -sf /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt; }'
         ExecStartPre=-/bin/podman kill heat-container-agent
         ExecStartPre=-/bin/podman rm heat-container-agent
         ExecStartPre=-/bin/podman pull __CONTAINER_INFRA_PREFIX__heat-container-agent:__HEAT_CONTAINER_AGENT_TAG__
