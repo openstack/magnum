@@ -68,14 +68,15 @@ def enforce_driver_supported():
     def wrapper(func, *args, **kwargs):
         cluster_template = args[1]
         cluster_distro = cluster_template.cluster_distro
-        driver_name = cluster_template.driver
+        driver_name = cluster_template.driver or None
         if not cluster_distro or not driver_name:
             try:
                 cli = clients.OpenStackClients(pecan.request.context)
                 image_id = cluster_template.image_id
                 image = cli.glance().find_image(image_id, ignore_missing=False)
                 cluster_distro = image.os_distro
-                driver_name = (image.properties or {}).get('magnum_driver')
+                if not driver_name:
+                    driver_name = (image.properties or {}).get('magnum_driver')
             except (sdk_exceptions.NotFoundException,
                     exception.ResourceNotFound):
                 raise exception.ImageNotFound(image_id=image_id)
@@ -83,6 +84,12 @@ def enforce_driver_supported():
                 raise exception.ImageNotAuthorized(image_id=image_id)
             except Exception:
                 pass
+        if not driver_name:
+            driver_name = driver.Driver.get_default_driver()
+        # Write the resolved driver back so the controller body stores the
+        # same driver that was validated here, without re-resolving.
+        if driver_name is not None:
+            cluster_template.driver = driver_name
         cluster_type = (cluster_template.server_type,
                         cluster_distro,
                         cluster_template.coe,

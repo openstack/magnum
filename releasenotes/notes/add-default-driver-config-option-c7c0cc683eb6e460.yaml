@@ -1,0 +1,21 @@
+---
+features:
+  - |
+    A ``driver`` field has been added to cluster templates, allowing an
+    explicit driver to be selected at cluster template creation time. The
+    driver is resolved using the following priority order:
+
+    #. Driver explicitly provided by the user in the API request.
+    #. ``magnum_driver`` property of the image referenced by the cluster
+       template.
+    #. ``[drivers] default_driver`` configuration option in ``magnum.conf``.
+    #. First alphabetically sorted driver among all available drivers.
+
+    Administrators can now set a deployment-wide default driver by adding
+    the following to ``magnum.conf``::
+
+      [drivers]
+      default_driver = <driver-name>
+
+    If ``default_driver`` is not set, Magnum falls back to the first
+    alphabetically sorted driver available on the deployment.

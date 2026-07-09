@@ -1285,6 +1285,43 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(resp.json['driver'],
                          mock_image.get('magnum_driver'))
 
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_driver_from_user(self, mock_image_data):
+        """User-provided driver takes precedence over image magnum_driver."""
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'ubuntu',
+                                        'magnum_driver': 'image_driver'}
+        bdict = apiutils.cluster_template_post_data(driver='user_driver')
+        resp = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, resp.status_int)
+        self.assertEqual('user_driver', resp.json['driver'])
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_driver_from_config(
+            self, mock_image_data, mock_get_default):
+        """Config default_driver used when no user or image driver."""
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'ubuntu'}
+        mock_get_default.return_value = 'conf_driver'
+        bdict = apiutils.cluster_template_post_data()
+        resp = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, resp.status_int)
+        self.assertEqual('conf_driver', resp.json['driver'])
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_driver_none_when_no_drivers(
+            self, mock_image_data, mock_get_default):
+        """Driver is None when no user, image, or available drivers."""
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'ubuntu'}
+        mock_get_default.return_value = None
+        bdict = apiutils.cluster_template_post_data()
+        resp = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, resp.status_int)
+        self.assertIsNone(resp.json['driver'])
+
 
 class TestDelete(api_base.FunctionalTest):
 

@@ -31,6 +31,7 @@ from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
 from magnum.common import policy
+from magnum.drivers.common import driver as driver_module
 from magnum import objects
 from magnum.objects import fields
 
@@ -162,7 +163,7 @@ class ClusterTemplate(base.APIBase):
     tags = wtypes.StringType(min_length=0, max_length=255)
     """A comma separated list of tags."""
 
-    driver = wtypes.StringType(min_length=0, max_length=255)
+    driver = wtypes.StringType(min_length=1, max_length=255)
     """Driver name set explicitly"""
 
     def __init__(self, **kwargs):
@@ -420,9 +421,15 @@ class ClusterTemplatesController(base.Controller):
         cluster_template_dict['cluster_distro'] = image_data['os_distro']
         cluster_template_dict['project_id'] = context.project_id
         cluster_template_dict['user_id'] = context.user_id
-        # NOTE(jake): read driver from image for now, update client to provide
-        # this as param in the future
-        cluster_template_dict['driver'] = image_data.get('magnum_driver')
+        # enforce_driver_supported() has already resolved and validated the
+        # driver and written it back to cluster_template.driver. This block
+        # is a safety net for the case where the decorator's image fetch
+        # failed silently but attr_validator.validate_image() succeeded.
+        if cluster_template_dict.get('driver') is None:
+            cluster_template_dict['driver'] = (
+                image_data.get('magnum_driver') or
+                driver_module.Driver.get_default_driver()
+            )
         # check permissions for making cluster_template public or hidden
         if cluster_template_dict['public'] or cluster_template_dict['hidden']:
             if not policy.enforce(context, "clustertemplate:publish", None,
