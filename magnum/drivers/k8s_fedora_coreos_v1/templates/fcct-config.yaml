@@ -308,7 +308,7 @@ systemd:
                 --volume /var/log:/var/log \
                 --volume /tmp:/tmp \
                 --volume /dev:/dev \
-                --env REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt \
+                --env REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem \
                 __CONTAINER_INFRA_PREFIX__heat-container-agent:__HEAT_CONTAINER_AGENT_TAG__ \
                 /usr/bin/start-heat-container-agent
         TimeoutStartSec=10min
