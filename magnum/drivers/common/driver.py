@@ -13,8 +13,8 @@
 # under the License.
 
 import abc
+from importlib import metadata
 
-import importlib_metadata as metadata
 from oslo_config import cfg
 from oslo_log import log as logging
 from stevedore import driver
