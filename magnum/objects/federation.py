@@ -59,7 +59,8 @@ class Federation(base.MagnumPersistentObject, base.MagnumObject,
         return [Federation._from_db_object(cls(context), obj)
                 for obj in db_objects]
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get(cls, context, federation_id):
         """Find a federation based on its id or uuid and return it.
 
@@ -74,7 +75,8 @@ class Federation(base.MagnumPersistentObject, base.MagnumObject,
         else:
             raise exception.InvalidIdentity(identity=federation_id)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_id(cls, context, federation_id):
         """Find a federation based on its integer id and return it.
 
@@ -86,7 +88,8 @@ class Federation(base.MagnumPersistentObject, base.MagnumObject,
         federation = Federation._from_db_object(cls(context), db_federation)
         return federation
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_uuid(cls, context, uuid):
         """Find a federation based on uuid and return it.
 
@@ -98,7 +101,8 @@ class Federation(base.MagnumPersistentObject, base.MagnumObject,
         federation = Federation._from_db_object(cls(context), db_federation)
         return federation
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_count_all(cls, context, filters=None):
         """Get count of matching federation.
 
@@ -110,7 +114,8 @@ class Federation(base.MagnumPersistentObject, base.MagnumObject,
         """
         return cls.dbapi.get_federation_count_all(context, filters=filters)
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def get_by_name(cls, context, name):
         """Find a federation based on name and return a Federation object.
 
@@ -122,7 +127,8 @@ class Federation(base.MagnumPersistentObject, base.MagnumObject,
         federation = Federation._from_db_object(cls(context), db_federation)
         return federation
 
-    @base.remotable_classmethod
+    @classmethod
+    @base.remotable
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of Federation objects.
