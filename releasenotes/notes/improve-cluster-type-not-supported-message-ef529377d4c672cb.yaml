@@ -1,0 +1,10 @@
+---
+other:
+  - |
+    The error raised when a cluster's (server_type, os, coe) combination
+    does not match any loaded cluster driver now lists the combinations
+    that are actually supported by the loaded drivers, making it easier
+    to diagnose why a driver could not be matched. A separate, more
+    specific error is now raised when a matching driver exists but is a
+    beta driver that has not been enabled via
+    ``[drivers]/enabled_beta_drivers``.

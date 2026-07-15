@@ -263,8 +263,17 @@ class NotSupported(MagnumException):
 
 
 class ClusterTypeNotSupported(NotSupported):
-    message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s)"
-                " not supported.")
+    message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s) is not "
+                "supported by any loaded cluster driver. Loaded drivers "
+                "support: %(supported_cluster_types)s.")
+
+
+class ClusterTypeBetaNotEnabled(NotSupported):
+    message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s) is "
+                "provided by the '%(driver_name)s' driver, which is a beta "
+                "driver and is not enabled. Add '%(driver_name)s' to the "
+                "[drivers]/enabled_beta_drivers configuration option to "
+                "use it.")
 
 
 class ClusterDriverNotSupported(NotSupported):
