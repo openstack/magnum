@@ -135,10 +135,14 @@ class Driver(object, metaclass=abc.ABCMeta):
                     driver_name=driver_name)
 
         if cluster_type not in definition_map:
+            supported = ', '.join(
+                '(%s, %s, %s)' % ct for ct in sorted(definition_map)
+            ) or 'none (no cluster drivers are loaded)'
             raise exception.ClusterTypeNotSupported(
                 server_type=server_type,
                 os=os,
-                coe=coe)
+                coe=coe,
+                supported_cluster_types=supported)
         driver_info = definition_map[cluster_type]
         driver_name = driver_info['entry_point_name']
         beta = driver_info['class'].beta
@@ -147,10 +151,11 @@ class Driver(object, metaclass=abc.ABCMeta):
             LOG.info(f"Driver {driver_name} is beta "
                      "and needs to be explicitly enabled with "
                      "[drivers]/enabled_beta_drivers.")
-            raise exception.ClusterTypeNotSupported(
+            raise exception.ClusterTypeBetaNotEnabled(
                 server_type=server_type,
                 os=os,
-                coe=coe)
+                coe=coe,
+                driver_name=driver_name)
         # TODO(muralia): once --drivername is supported as an input during
         # cluster create, change the following line to use driver name for
         # loading.

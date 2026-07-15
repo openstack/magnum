@@ -76,8 +76,8 @@ class TestValidation(base.BaseTestCase):
         exc = self._test_enforce_cluster_type_supported(
             mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type, assert_raised=True)
-        self.assertEqual('Cluster type (vm, foo, kubernetes) not supported.',
-                         exc.message)
+        self.assertIn('Cluster type (vm, foo, kubernetes) is not supported',
+                      exc.message)
 
     def _test_enforce_network_driver_types_create(
         self,
