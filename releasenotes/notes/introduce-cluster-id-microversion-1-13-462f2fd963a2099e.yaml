@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    API microversion 1.13 introduces the ``cluster_id`` field in cluster
+    responses. This field maps to the same underlying database column as
+    ``stack_id`` and provides a driver-agnostic name for the identifier.
+    Clients requesting microversion 1.13 or later will receive ``cluster_id``
+    in place of ``stack_id``.
+deprecations:
+  - |
+    The ``stack_id`` field in cluster API responses is deprecated as of
+    microversion 1.13. Clients should migrate to using ``cluster_id``, which
+    carries the same value and is available from microversion 1.13 onwards.
+    The ``stack_id`` field remains available for clients using microversions
+    prior to 1.13.

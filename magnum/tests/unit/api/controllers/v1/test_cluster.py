@@ -277,6 +277,60 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertIn(next_marker, response['next'])
 
 
+class TestClusterMicroversion1_13(api_base.FunctionalTest):
+    """Test cluster_id field introduced in microversion 1.13."""
+
+    _headers_pre = {'OpenStack-API-Version': 'container-infra 1.12',
+                    'X-Roles': 'reader'}
+    _headers_new = {'OpenStack-API-Version': 'container-infra 1.13',
+                    'X-Roles': 'reader'}
+
+    def setUp(self):
+        super(TestClusterMicroversion1_13, self).setUp()
+        obj_utils.create_test_cluster_template(self.context)
+
+    def test_get_one_pre_1_13_shows_stack_id(self):
+        cluster = obj_utils.create_test_cluster(self.context)
+        response = self.get_json('/clusters/%s' % cluster.uuid,
+                                 headers=self._headers_pre)
+        self.assertIn('stack_id', response)
+        self.assertNotIn('cluster_id', response)
+
+    def test_get_one_v1_13_shows_cluster_id(self):
+        cluster = obj_utils.create_test_cluster(self.context)
+        response = self.get_json('/clusters/%s' % cluster.uuid,
+                                 headers=self._headers_new)
+        self.assertIn('cluster_id', response)
+        self.assertNotIn('stack_id', response)
+        self.assertEqual(cluster.stack_id, response['cluster_id'])
+
+    def test_list_pre_1_13_shows_stack_id(self):
+        obj_utils.create_test_cluster(self.context)
+        response = self.get_json('/clusters', headers=self._headers_pre)
+        self.assertIn('stack_id', response['clusters'][0])
+        self.assertNotIn('cluster_id', response['clusters'][0])
+
+    def test_list_v1_13_shows_cluster_id(self):
+        obj_utils.create_test_cluster(self.context)
+        response = self.get_json('/clusters', headers=self._headers_new)
+        self.assertIn('cluster_id', response['clusters'][0])
+        self.assertNotIn('stack_id', response['clusters'][0])
+
+    def test_detail_pre_1_13_shows_stack_id(self):
+        obj_utils.create_test_cluster(self.context)
+        response = self.get_json('/clusters/detail',
+                                 headers=self._headers_pre)
+        self.assertIn('stack_id', response['clusters'][0])
+        self.assertNotIn('cluster_id', response['clusters'][0])
+
+    def test_detail_v1_13_shows_cluster_id(self):
+        obj_utils.create_test_cluster(self.context)
+        response = self.get_json('/clusters/detail',
+                                 headers=self._headers_new)
+        self.assertIn('cluster_id', response['clusters'][0])
+        self.assertNotIn('stack_id', response['clusters'][0])
+
+
 class TestPatch(api_base.FunctionalTest):
     def setUp(self):
         super(TestPatch, self).setUp()
@@ -401,7 +455,7 @@ class TestPatch(api_base.FunctionalTest):
         uuid = uuidutils.generate_uuid()
 
         response = self.patch_json('/clusters/%s' % uuid,
-                                   [{'path': '/cluster_id', 'value': uuid,
+                                   [{'path': '/name', 'value': 'new-name',
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
