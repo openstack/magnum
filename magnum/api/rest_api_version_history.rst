@@ -130,3 +130,15 @@ user documentation.
   column. From microversion 1.13, responses include ``cluster_id`` and omit
   the deprecated ``stack_id``. Clients using microversions prior to 1.13
   continue to see ``stack_id`` and will not see ``cluster_id``.
+
+
+1.14
+---
+
+  Add node_labels and node_taints to nodegroup
+
+  Allow users to set Kubernetes node labels and taints on the nodes that
+  belong to a worker nodegroup. node_labels is a dict of string-to-string;
+  node_taints is a list of {key, value, effect} objects where effect is one
+  of NoSchedule, PreferNoSchedule or NoExecute. Both fields are nullable
+  and may be supplied on create or updated via PATCH.

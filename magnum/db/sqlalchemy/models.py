@@ -282,3 +282,5 @@ class NodeGroup(Base):
     status = Column(String(20))
     status_reason = Column(Text)
     version = Column(String(20))
+    node_labels = Column(JSONEncodedDict, nullable=True)
+    node_taints = Column(JSONEncodedList, nullable=True)

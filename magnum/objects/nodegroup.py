@@ -27,8 +27,9 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
                 base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: min_node_count defaults to 0
+    # Version 1.2: Added node_labels and node_taints
 
-    VERSION = '1.1'
+    VERSION = '1.2'
 
     dbapi = dbapi.get_instance()
 
@@ -52,6 +53,8 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
         'version': fields.StringField(nullable=True),
+        'node_labels': fields.DictOfStringsField(nullable=True),
+        'node_taints': m_fields.ListOfDictsField(nullable=True),
     }
 
     @staticmethod

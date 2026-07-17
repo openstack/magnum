@@ -304,6 +304,8 @@ def get_test_nodegroup(**kw):
         'status_reason': kw.get('status_reason', 'Completed successfully'),
         'version': kw.get('version', '1'),
         'stack_id': kw.get('stack_id', '047c6319-7abd-fake-a033-8c6af0173cd0'),
+        'node_labels': kw.get('node_labels'),
+        'node_taints': kw.get('node_taints'),
     }
 
 

@@ -34,6 +34,125 @@ from magnum.objects import fields
 
 CONF = magnum.conf.CONF
 
+_VALID_TAINT_EFFECTS = ('NoSchedule', 'PreferNoSchedule', 'NoExecute')
+
+_VALID_TAINT_FIELDS = ('key', 'value', 'effect')
+
+# kubelet refuses to start if it is asked to self-apply node labels in the
+# kubernetes.io/ or k8s.io/ namespaces, unless the label's prefix is one of
+# these explicitly allowed namespaces or the full key is in the allowed set
+# below. Mirror that rule here so a cluster is not left unschedulable. See
+# https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction
+_KUBELET_ALLOWED_LABEL_NAMESPACES = (
+    'kubelet.kubernetes.io',
+    'node.kubernetes.io',
+)
+_KUBELET_ALLOWED_LABELS = (
+    'beta.kubernetes.io/arch',
+    'beta.kubernetes.io/instance-type',
+    'beta.kubernetes.io/os',
+    'failure-domain.beta.kubernetes.io/region',
+    'failure-domain.beta.kubernetes.io/zone',
+    'kubernetes.io/arch',
+    'kubernetes.io/hostname',
+    'kubernetes.io/os',
+    'node.kubernetes.io/instance-type',
+    'node.kubernetes.io/windows-build',
+    'topology.kubernetes.io/region',
+    'topology.kubernetes.io/zone',
+)
+
+
+def _is_restricted_kubernetes_label(key):
+    """Return True if key lives in the kubernetes.io/k8s.io namespace."""
+    prefix, sep, _name = key.partition('/')
+    if not sep:
+        # No prefix means the label is in the default namespace, which the
+        # kubelet is free to set.
+        return False
+    return (prefix in ('kubernetes.io', 'k8s.io') or
+            prefix.endswith('.kubernetes.io') or
+            prefix.endswith('.k8s.io'))
+
+
+def _validate_node_labels(ng):
+    labels = ng.node_labels
+    if labels is None or labels == wtypes.Unset:
+        return
+    for key in labels:
+        if not _is_restricted_kubernetes_label(key):
+            continue
+        prefix = key.split('/', 1)[0]
+        if prefix in _KUBELET_ALLOWED_LABEL_NAMESPACES:
+            continue
+        if key in _KUBELET_ALLOWED_LABELS:
+            continue
+        expl = ("node label '%(key)s' is in a restricted Kubernetes "
+                "namespace; the kubelet will refuse to start. Labels in the "
+                "kubernetes.io/ and k8s.io/ namespaces must use one of the "
+                "allowed prefixes (%(prefixes)s) or be one of the allowed "
+                "labels (%(labels)s)." %
+                {'key': key,
+                 'prefixes': ', '.join(_KUBELET_ALLOWED_LABEL_NAMESPACES),
+                 'labels': ', '.join(_KUBELET_ALLOWED_LABELS)})
+        raise exception.NodeGroupInvalidInput(attr='node_labels',
+                                              nodegroup=ng.name,
+                                              expl=expl)
+
+
+def _validate_node_taints(ng):
+    taints = ng.node_taints
+    if taints is None or taints == wtypes.Unset:
+        return
+    for index, taint in enumerate(taints):
+        if not isinstance(taint, dict):
+            expl = ("node_taints[%d] must be an object with key, "
+                    "effect and optional value" % index)
+            raise exception.NodeGroupInvalidInput(attr='node_taints',
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+        unknown = sorted(set(taint) - set(_VALID_TAINT_FIELDS))
+        if unknown:
+            expl = ("node_taints[%d] contains unrecognised field(s) %s; "
+                    "allowed fields are %s" %
+                    (index, ', '.join(unknown),
+                     ', '.join(_VALID_TAINT_FIELDS)))
+            raise exception.NodeGroupInvalidInput(attr='node_taints',
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+        key = taint.get('key')
+        effect = taint.get('effect')
+        if not key:
+            expl = "node_taints[%d].key is required" % index
+            raise exception.NodeGroupInvalidInput(attr='node_taints',
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+        if effect not in _VALID_TAINT_EFFECTS:
+            expl = ("node_taints[%d].effect must be one of %s" %
+                    (index, ', '.join(_VALID_TAINT_EFFECTS)))
+            raise exception.NodeGroupInvalidInput(attr='node_taints',
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+
+
+def _validate_node_attrs_role(ng):
+    """node_labels and node_taints are not allowed on master nodegroups.
+
+    Control plane nodes have their own kubeadm-managed taints and allowing
+    arbitrary user labels/taints there risks breaking cluster bootstrap, so
+    reject them on master nodegroups. Any other role is treated as a
+    worker, consistent with the rest of the codebase.
+    """
+    if getattr(ng, 'role', None) != 'master':
+        return
+    for attr in ('node_labels', 'node_taints'):
+        val = getattr(ng, attr, None)
+        if val and val != wtypes.Unset:
+            expl = "%s may not be set on master nodegroups" % attr
+            raise exception.NodeGroupInvalidInput(attr=attr,
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+
 
 def _validate_node_count(ng):
     if ng.max_node_count:
@@ -151,6 +270,17 @@ class NodeGroup(base.APIBase):
     )
     """Contains labels that exist in the parent but were not inherited."""
 
+    node_labels = wtypes.DictType(wtypes.text, wtypes.text)
+    """Kubernetes node labels to apply to every node in this nodegroup."""
+
+    node_taints = wsme.wsattr([{wtypes.text: wtypes.text}])
+    """Kubernetes node taints to apply to every node in this nodegroup.
+
+    Each entry is an object with a required ``key``, a required ``effect``
+    (one of NoSchedule, PreferNoSchedule, NoExecute), and an optional
+    ``value``.
+    """
+
     def __init__(self, **kwargs):
         super(NodeGroup, self).__init__()
         self.fields = []
@@ -194,7 +324,7 @@ class NodeGroupPatchType(types.JsonPatchType):
 
     @staticmethod
     def internal_attrs():
-        # Allow updating only min/max_node_count
+        # Allow updating only min/max_node_count, node_labels and node_taints
         internal_attrs = ["/name", "/cluster_id", "/project_id",
                           "/docker_volume_size", "/labels", "/flavor_id",
                           "/image_id", "/node_addresses", "/node_count",
@@ -336,6 +466,9 @@ class NodeGroupController(base.Controller):
             raise exception.NodeGroupAlreadyExists(name=nodegroup.name,
                                                    cluster_id=cluster.name)
         _validate_node_count(nodegroup)
+        _validate_node_attrs_role(nodegroup)
+        _validate_node_labels(nodegroup)
+        _validate_node_taints(nodegroup)
 
         if nodegroup.role == "master":
             # Currently we don't support adding master nodegroups.
@@ -436,5 +569,8 @@ class NodeGroupController(base.Controller):
             cli, nodegroup.flavor_id, boot_volume_size)
 
         _validate_node_count(nodegroup)
+        _validate_node_attrs_role(nodegroup)
+        _validate_node_labels(nodegroup)
+        _validate_node_taints(nodegroup)
 
         return nodegroup
