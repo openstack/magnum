@@ -32,7 +32,6 @@ user documentation.
   With this change cluster-create/bay-create, cluster-update/bay-update and
   cluster-delete/bay-delete calls will be asynchronous.
 
-
 1.3
 ---
 
@@ -44,7 +43,6 @@ user documentation.
   For example:-
   - http://XXX/v1/clusters/XXX/?rollback=True or
   - http://XXX/v1/bays/XXX/?rollback=True
-
 
 1.4
 ---
@@ -58,7 +56,6 @@ user documentation.
   - http://XXX/v1/stats?project_id=<project-id> or
   - http://XXX/v1/stats?project_id=<project-id>&type=<stats-type>
 
-
 1.5
 ---
 
@@ -66,7 +63,6 @@ user documentation.
 
   This gives admins a way to revoke access to an existing cluster once
   a user has been granted access.
-
 
 1.6
 ---
@@ -76,18 +72,15 @@ user documentation.
   An admin user can set/update/delete/list quotas for the given tenant.
   A non-admin user can get self quota information.
 
-
 1.7
 ---
 
   Add resize API
 
-
 1.8
 ---
 
   Add upgrade API
-
 
 1.9
 ---
@@ -96,32 +89,28 @@ user documentation.
 
   Allow create/update/delete/list of default-worker and additional nodegroups.
 
-
 1.10
----
+----
 
   Allow nodegroups with 0 nodes
 
   Allow the cluster to be created with node_count = 0 as well as to update
   existing nodegroups to have 0 nodes.
 
-
 1.11
----
+----
 
   Drop bay and baymodels objects from magnum source code
 
-
 1.12
----
+----
 
   Add credential API
 
   Allow the cluster to have its associated credential rotated.
 
-
 1.13
----
+----
 
   Add cluster_id field to cluster, deprecate stack_id
 
@@ -131,9 +120,8 @@ user documentation.
   the deprecated ``stack_id``. Clients using microversions prior to 1.13
   continue to see ``stack_id`` and will not see ``cluster_id``.
 
-
 1.14
----
+----
 
   Add node_labels and node_taints to nodegroup
 
