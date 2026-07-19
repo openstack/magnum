@@ -42,6 +42,83 @@ def _get_cluster_resource(cluster_id, admin_action=None):
     return api_utils.get_resource('Cluster', cluster_id)
 
 
+# Per-nodegroup Kubernetes node metadata, transported as the well-known
+# labels ``node_labels`` ("k1=v1;k2=v2") and ``node_taints``
+# ("key=value:Effect;..."). Validated server-side so a bad entry fails the
+# API call instead of surfacing as a node-side reconciler warning.
+NODE_TAINT_EFFECTS = ("NoSchedule", "PreferNoSchedule", "NoExecute")
+_LABEL_NAME_RE = re.compile(r'^[A-Za-z0-9]([A-Za-z0-9._-]{0,61}[A-Za-z0-9])?$')
+_LABEL_PREFIX_RE = re.compile(
+    r'^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?'
+    r'(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$')
+_RESERVED_TAINT_PREFIXES = ("node-role.kubernetes.io/", "node.kubernetes.io/")
+_RESERVED_LABEL_KEYS = ("magnum.openstack.org/role",
+                        "magnum.openstack.org/nodegroup")
+
+
+def _valid_metadata_key(key):
+    if '/' in key:
+        prefix, _, name = key.partition('/')
+        if (not prefix or len(prefix) > 253
+                or not _LABEL_PREFIX_RE.match(prefix)):
+            return False
+    else:
+        name = key
+    return bool(name) and bool(_LABEL_NAME_RE.match(name))
+
+
+def _validate_node_metadata(ng_name, labels):
+    if not labels:
+        return
+    node_labels = labels.get('node_labels')
+    if node_labels:
+        for item in str(node_labels).split(';'):
+            item = item.strip()
+            if not item:
+                continue
+            key, _, value = item.partition('=')
+            key = key.strip()
+            value = value.strip()
+            if not _valid_metadata_key(key):
+                _raise_node_metadata('node_labels', ng_name,
+                                     'invalid label key %r' % key)
+            if key in _RESERVED_LABEL_KEYS:
+                _raise_node_metadata('node_labels', ng_name,
+                                     'label key %r is reserved' % key)
+            if value and not _LABEL_NAME_RE.match(value):
+                _raise_node_metadata('node_labels', ng_name,
+                                     'invalid label value %r' % value)
+    node_taints = labels.get('node_taints')
+    if node_taints:
+        for item in str(node_taints).split(';'):
+            item = item.strip()
+            if not item:
+                continue
+            body, sep, effect = item.rpartition(':')
+            if not sep or effect not in NODE_TAINT_EFFECTS:
+                _raise_node_metadata(
+                    'node_taints', ng_name,
+                    'taint %r must end with :NoSchedule, :PreferNoSchedule '
+                    'or :NoExecute' % item)
+            key, _, value = body.partition('=')
+            key = key.strip()
+            value = value.strip()
+            if not _valid_metadata_key(key):
+                _raise_node_metadata('node_taints', ng_name,
+                                     'invalid taint key %r' % key)
+            if any(key.startswith(p) for p in _RESERVED_TAINT_PREFIXES):
+                _raise_node_metadata('node_taints', ng_name,
+                                     'taint key %r is reserved' % key)
+            if value and not _LABEL_NAME_RE.match(value):
+                _raise_node_metadata('node_taints', ng_name,
+                                     'invalid taint value %r' % value)
+
+
+def _raise_node_metadata(attr, ng_name, expl):
+    raise exception.NodeGroupInvalidInput(attr=attr, nodegroup=ng_name,
+                                          expl=expl)
+
+
 def _validate_node_count(ng):
     if ng.max_node_count:
         if ng.max_node_count < ng.min_node_count:
@@ -236,9 +313,11 @@ class NodeGroupPatchType(types.JsonPatchType):
 
     @staticmethod
     def internal_attrs():
-        # Allow updating only min/max_node_count
+        # Allow updating min/max_node_count and labels (labels carry the
+        # per-nodegroup node_labels/node_taints node metadata; the heat
+        # driver pushes changed metadata to the nodegroup stack).
         internal_attrs = ["/name", "/cluster_id", "/project_id",
-                          "/docker_volume_size", "/labels", "/flavor_id",
+                          "/docker_volume_size", "/flavor_id",
                           "/image_id", "/node_addresses", "/node_count",
                           "/role", "/is_default", "/stack_id", "/status",
                           "/status_reason", "/version"]
@@ -371,9 +450,13 @@ class NodeGroupController(base.Controller):
                                                    cluster_id=cluster.name)
         _validate_node_count(nodegroup)
 
-        if nodegroup.role == "master":
-            # Currently we don't support adding master nodegroups.
-            # Keep this until we start supporting it.
+        role = (nodegroup.role or "").strip().lower()
+        if role in ("master", "control-plane", "controlplane"):
+            # Currently we don't support adding master nodegroups. Reject the
+            # control-plane spellings too: the node-side reconciler detects
+            # its role from NODEGROUP_ROLE and would bootstrap such a node
+            # down the master path (etcd join, apiserver) inside a worker
+            # nodegroup.
             raise exception.CreateMasterNodeGroup()
         if nodegroup.image_id is None or nodegroup.image_id == wtypes.Unset:
             nodegroup.image_id = cluster.cluster_template.image_id
@@ -390,6 +473,7 @@ class NodeGroupController(base.Controller):
                 nodegroup.labels = labels
 
         _validate_version_skew(cluster, nodegroup.labels)
+        _validate_node_metadata(nodegroup.name, nodegroup.labels)
 
         nodegroup_dict = nodegroup.as_dict()
         nodegroup_dict['cluster_id'] = cluster.uuid
@@ -412,8 +496,15 @@ class NodeGroupController(base.Controller):
         """
         cluster = _get_cluster_resource(cluster_id,
                                         'nodegroup:update_all_projects')
-        nodegroup, needs_resize = self._patch(cluster.uuid, nodegroup_id,
-                                              patch)
+        nodegroup, needs_resize, labels_changed = self._patch(
+            cluster, nodegroup_id, patch)
+        if needs_resize and labels_changed:
+            # A labels change rides a params-only stack update while a resize
+            # changes the group size; combining them in one heat update would
+            # entangle two failure domains. Trivial to do as two PATCHes.
+            raise exception.InvalidParameterValue(
+                "labels cannot be updated together with a node count "
+                "change; update labels and counts in separate requests")
         if needs_resize:
             pecan.request.rpcapi.cluster_resize_async(
                 cluster, nodegroup.node_count, None, nodegroup)
@@ -439,11 +530,12 @@ class NodeGroupController(base.Controller):
             raise exception.DeletingDefaultNGNotSupported()
         pecan.request.rpcapi.nodegroup_delete_async(cluster, nodegroup)
 
-    def _patch(self, cluster_uuid, nodegroup_id, patch):
+    def _patch(self, cluster, nodegroup_id, patch):
         context = pecan.request.context
         policy.enforce(context, 'nodegroup:update', action='nodegroup:update')
-        nodegroup = objects.NodeGroup.get(context, cluster_uuid, nodegroup_id)
+        nodegroup = objects.NodeGroup.get(context, cluster.uuid, nodegroup_id)
         old_node_count = nodegroup.node_count
+        old_labels = dict(nodegroup.labels or {})
 
         try:
             ng_dict = nodegroup.as_dict()
@@ -473,5 +565,11 @@ class NodeGroupController(base.Controller):
 
         _validate_node_count(nodegroup)
 
+        labels_changed = dict(nodegroup.labels or {}) != old_labels
+        if labels_changed:
+            # kube_tag can ride a labels patch — keep the version-skew guard.
+            _validate_version_skew(cluster, nodegroup.labels)
+            _validate_node_metadata(nodegroup.name, nodegroup.labels)
+
         needs_resize = nodegroup.node_count != old_node_count
-        return nodegroup, needs_resize
+        return nodegroup, needs_resize, labels_changed

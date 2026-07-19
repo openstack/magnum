@@ -255,6 +255,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'kubeapi_options',
                       'kubeproxy_options',
                       'kubecontroller_options',
+                      'node_labels',
+                      'node_taints',
                       'master_lb_allowed_cidrs']
 
         labels = self._get_relevant_labels(cluster, kwargs)

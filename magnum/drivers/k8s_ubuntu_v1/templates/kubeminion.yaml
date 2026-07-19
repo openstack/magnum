@@ -288,6 +288,18 @@ parameters:
     description: >
       additional options to be passed to the kubelet
 
+  node_labels:
+    type: string
+    description: >
+      per-nodegroup Kubernetes node labels applied by the reconciler
+    default: ""
+
+  node_taints:
+    type: string
+    description: >
+      per-nodegroup Kubernetes node taints applied by the reconciler
+    default: ""
+
   kubeproxy_options:
     type: string
     description: >
@@ -656,6 +668,8 @@ resources:
         - name: DNS_SERVICE_IP
         - name: DNS_CLUSTER_DOMAIN
         - name: KUBELET_OPTIONS
+        - name: NODE_LABELS
+        - name: NODE_TAINTS
         - name: KUBEPROXY_OPTIONS
         - name: OCTAVIA_ENABLED
         - name: KUBE_SERVICE_ACCOUNT_KEY
@@ -733,6 +747,8 @@ resources:
         DNS_SERVICE_IP: { get_param: dns_service_ip }
         DNS_CLUSTER_DOMAIN: { get_param: dns_cluster_domain }
         KUBELET_OPTIONS: { get_param: kubelet_options }
+        NODE_LABELS: { get_param: node_labels }
+        NODE_TAINTS: { get_param: node_taints }
         KUBEPROXY_OPTIONS: { get_param: kubeproxy_options }
         OCTAVIA_ENABLED: { get_param: octavia_enabled }
         KUBE_SERVICE_ACCOUNT_KEY: { get_param: kube_service_account_key }

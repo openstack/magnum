@@ -1111,10 +1111,69 @@ class HeatDriver(driver.Driver):
         return NotImplementedError("Must implement 'delete_federation'")
 
     def update_nodegroup(self, context, cluster, nodegroup):
-        # we just need to save the nodegroup here. This is because,
-        # at the moment, this method is used to update min and max node
-        # counts.
+        # min/max node count changes only need the DB save. The labels may
+        # additionally carry per-nodegroup node metadata
+        # (node_labels/node_taints), which must reach the nodegroup's
+        # heat-params so the node-side reconciler converges it.
         nodegroup.save()
+        if nodegroup.stack_id:
+            self._sync_node_metadata_params(context, cluster, nodegroup)
+
+    def _sync_node_metadata_params(self, context, cluster, nodegroup):
+        """Converge the stack's node_labels/node_taints params to the labels.
+
+        Deliberately state-driven (desired labels vs live stack parameters)
+        instead of relying on OVO changed-field tracking across the RPC
+        boundary — a missed change signal would silently strand the metadata
+        in the DB. The stack read also makes this idempotent and
+        drift-healing; a min/max-only patch reads the stack and returns
+        without an update.
+
+        The update itself mirrors _resize_stack: parameters-only with
+        ``existing: True`` so every unrelated parameter is preserved and only
+        the deployments whose input actually changed re-fire. For the default
+        worker nodegroup this targets the cluster stack (kubemaster ignores
+        these params, so masters are untouched); for extra nodegroups it
+        targets their own stack.
+
+        Pre-metadata stacks (template without the node_labels param) are
+        fine as long as no metadata is requested — a min/max-only patch on an
+        old cluster must keep working. Only when metadata IS requested on
+        such a stack do we reject with an actionable message instead of a
+        heat 400 — the cluster must first be updated to a template that
+        carries the parameters (any cluster upgrade does this).
+        """
+        labels = nodegroup.labels or {}
+        desired = {
+            'node_labels': str(labels.get('node_labels') or ''),
+            'node_taints': str(labels.get('node_taints') or ''),
+        }
+        osc = self._get_cluster_osc(context, cluster)
+        stack = osc.heat().stacks.get(nodegroup.stack_id)
+        stack_params = stack.parameters or {}
+        missing = [p for p in desired if p not in stack_params]
+        if missing:
+            if not any(desired.values()):
+                # Old stack, no metadata wanted — nothing to converge.
+                return
+            raise exception.InvalidParameterValue(
+                "the heat stack of nodegroup %s predates node metadata "
+                "support (missing parameters: %s); update/upgrade the "
+                "cluster to refresh its template before patching "
+                "node_labels/node_taints" % (nodegroup.name,
+                                             ", ".join(sorted(missing))))
+        current = {p: str(stack_params.get(p) or '') for p in desired}
+        if current == desired:
+            return
+        fields = {
+            "parameters": desired,
+            "existing": True,
+            "disable_rollback": True,
+        }
+        LOG.info(
+            "Updating node metadata params on nodegroup %s stack %s: %s",
+            nodegroup.uuid, nodegroup.stack_id, desired)
+        osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
     def delete_nodegroup(self, context, cluster, nodegroup):
         # Default nodegroups share stack_id so it will be deleted
