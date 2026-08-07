@@ -80,6 +80,8 @@ def enforce_driver_supported():
                 driver_name = image.get('magnum_driver')
             except Exception:
                 pass
+            if not cluster_distro:
+                raise exception.OSDistroFieldNotFound(image_id=image_id)
         cluster_type = (cluster_template.server_type,
                         cluster_distro,
                         cluster_template.coe,

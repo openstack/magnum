@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    Creating or updating a cluster template with an image that does not
+    have the ``os_distro`` property set previously failed with a
+    confusing "cluster type not supported" error listing unrelated
+    driver combinations. This case is now detected explicitly and
+    raises a clear error stating that the image's ``os_distro`` is
+    unset and therefore not supported.
