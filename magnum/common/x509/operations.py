@@ -34,12 +34,12 @@ def generate_ca_certificate(subject_name, encryption_password=None):
     """Generate CA Certificate
 
     :param subject_name: subject name of CA
-    :param encryption_password: encryption passsword for private key
+    :param encryption_password: encryption password for private key
     :returns: generated private key and certificate pair
     """
     return _generate_self_signed_certificate(
         subject_name,
-        _build_ca_extentions(),
+        _build_ca_extensions(),
         encryption_password=encryption_password
     )
 
@@ -54,18 +54,18 @@ def generate_client_certificate(issuer_name, subject_name,
     :param subject_name: subject name of client
     :param organization_name: Organization name of client
     :param ca_key: private key of CA
-    :param encryption_password: encryption passsword for private key
+    :param encryption_password: encryption password for private key
     :param ca_key_password: private key password for given ca key
     :returns: generated private key and certificate pair
     """
     return _generate_certificate(issuer_name, subject_name,
-                                 _build_client_extentions(),
+                                 _build_client_extensions(),
                                  organization_name, ca_key=ca_key,
                                  encryption_password=encryption_password,
                                  ca_key_password=ca_key_password)
 
 
-def _build_client_extentions():
+def _build_client_extensions():
     # Digital Signature and Key Encipherment are enabled
     key_usage = x509.KeyUsage(True, False, True, False, False, False, False,
                               False, False)
@@ -80,7 +80,7 @@ def _build_client_extentions():
     return [key_usage, extended_key_usage, basic_constraints]
 
 
-def _build_ca_extentions():
+def _build_ca_extensions():
     # Certificate Sign is enabled
     key_usage = x509.KeyUsage(False, False, False, False, False, True, False,
                               False, False)
@@ -121,8 +121,8 @@ def _generate_certificate(issuer_name, subject_name, extensions,
                                                   organization_name))
     csr = csr.subject_name(x509.Name(name_attributes))
 
-    for extention in extensions:
-        csr = csr.add_extension(extention.value, critical=extention.critical)
+    for extension in extensions:
+        csr = csr.add_extension(extension.value, critical=extension.critical)
 
     # if ca_key is not provided, it means self signed
     if not ca_key:
@@ -219,9 +219,9 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
     else:
         extensions = validator.filter_extensions(csr.extensions)
 
-    for extention in extensions:
-        builder = builder.add_extension(extention.value,
-                                        critical=extention.critical)
+    for extension in extensions:
+        builder = builder.add_extension(extension.value,
+                                        critical=extension.critical)
 
     subject_key_identifier = x509.SubjectKeyIdentifier.from_public_key(
         csr.public_key())

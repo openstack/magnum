@@ -26,7 +26,7 @@ from magnum.i18n import _
 
 
 class DNSListType(wtypes.UserType):
-    """A comman delimited dns nameserver list"""
+    """A comma-delimited dns nameserver list"""
 
     basetype = str
     name = "dnslist"

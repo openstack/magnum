@@ -53,7 +53,7 @@ class ClusterResizeRequest(base.APIBase):
     """Instance ID list for nodes to be removed."""
 
     nodegroup = wtypes.StringType(min_length=1, max_length=255)
-    """Group of nodes to be uprgaded (master or node)"""
+    """Group of nodes to be upgraded (master or node)"""
 
 
 class ClusterUpgradeRequest(base.APIBase):
@@ -63,10 +63,10 @@ class ClusterUpgradeRequest(base.APIBase):
     """
 
     max_batch_size = wtypes.IntegerType(minimum=1)
-    """Max batch size of nodes to be upraded in parallel"""
+    """Max batch size of nodes to be upgraded in parallel"""
 
     nodegroup = wtypes.StringType(min_length=1, max_length=255)
-    """Group of nodes to be uprgaded (master or node)"""
+    """Group of nodes to be upgraded (master or node)"""
 
     cluster_template = wtypes.StringType(min_length=1, max_length=255)
     """The cluster_template UUID"""

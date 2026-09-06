@@ -3,7 +3,7 @@ ABAC, Webhook, etc. Though RBAC is the best way for most of the cases, Webhook
 provides a good approach for Kubernetes to query an outside REST service when
 determining user privileges. In other words, we can use a Webhook to integrate
 other IAM service into Kubernetes. In our case, under the OpenStack context,
-we're introducing the intergration with Keystone auth for Kubernetes.
+we're introducing the integration with Keystone auth for Kubernetes.
 
 Since Rocky release, we introduced a new label named `keystone_auth_enabled`,
 by default it's True, which means user can get this very nice feature out of

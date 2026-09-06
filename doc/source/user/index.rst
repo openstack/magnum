@@ -1471,12 +1471,12 @@ _`node_problem_detector_tag`
   version.
 
 _`min_node_count`
-  The minmium node count of the cluster when doing auto scaling or auto
+  The minimum node count of the cluster when doing auto scaling or auto
   healing.
   Default: 1
 
 _`max_node_count`
-  The maxmium node count of the cluster when doing auto scaling or auto
+  The maximum node count of the cluster when doing auto scaling or auto
   healing.
 
 _`use_podman`
