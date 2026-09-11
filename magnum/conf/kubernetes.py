@@ -25,7 +25,7 @@ kubernetes_opts = [
     cfg.StrOpt('post_install_manifest_url',
                default="",
                help='An URL of the manifest file will be installed after '
-                    'the Kubernetes cluster created. For exmaple, this '
+                    'the Kubernetes cluster created. For example, this '
                     'could be a file including the vendor specific '
                     'storage class.'),
     cfg.IntOpt('health_polling_interval',

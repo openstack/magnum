@@ -151,7 +151,7 @@ class TestX509(base.BaseTestCase):
 
         self.assertHasIssuerName(cert, self.issuer_name)
 
-    def test_generate_ca_certificate_set_extentions_as_ca(self):
+    def test_generate_ca_certificate_set_extensions_as_ca(self):
         cert, _ = self._generate_ca_certificate(self.issuer_name)
 
         key_usage = c_x509.KeyUsage(False, False, False, False, False, True,
@@ -182,7 +182,7 @@ class TestX509(base.BaseTestCase):
 
         self.assertHasIssuerName(cert, self.issuer_name)
 
-    def test_generate_client_certificate_set_extentions_as_client(self):
+    def test_generate_client_certificate_set_extensions_as_client(self):
         cert, key = self._generate_client_certificate(
             self.issuer_name, self.subject_name)
 

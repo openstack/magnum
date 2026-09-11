@@ -111,7 +111,7 @@ other core reviewers has issued a +2 vote. See: `Merge Criteria`_.
 Reviewers who use the -2 vote shall:
 
 1. Explain what scenarios can/will lift the -2 or downgrade it to a -1
-   (non-sticky), or explain "this is unmergable for reason <X>".
+   (non-sticky), or explain "this is unmergeable for reason <X>".
    Non-negotiable reasons such as breaks API contract, or introduces
    fundamental security issues are acceptable.
 2. Recognize that a -2 needs more justification than a -1 does. Both

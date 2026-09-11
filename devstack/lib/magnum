@@ -228,7 +228,7 @@ function create_magnum_conf {
         iniset $MAGNUM_CONF docker_registry swift_registry_container $MAGNUM_SWIFT_REGISTRY_CONTAINER
     fi
 
-    # Get the default volume type from cinder.conf and set the coresponding
+    # Get the default volume type from cinder.conf and set the corresponding
     # default in magnum.conf
     default_volume_type=$(iniget /etc/cinder/cinder.conf DEFAULT default_volume_type)
     iniset $MAGNUM_CONF cinder default_docker_volume_type $default_volume_type

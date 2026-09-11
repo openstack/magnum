@@ -108,7 +108,7 @@ in your project, create one.
 Upload the images required for your clusters to the Image service
 -----------------------------------------------------------------
 
-The Kubernetes driver require a Fedora CoreOS image. Plese refer to 'Supported
+The Kubernetes driver require a Fedora CoreOS image. Please refer to 'Supported
 versions' for each Magnum release.
 
 #. Download the image:

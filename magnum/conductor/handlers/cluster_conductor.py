@@ -198,7 +198,7 @@ class Handler(object):
         # NOTE(flwang): One of important user cases of /resize API is
         # supporting the auto scaling action triggered by Kubernetes Cluster
         # Autoscaler, so there are 2 cases may happen:
-        # 1. API could be triggered very offen
+        # 1. API could be triggered very often
         # 2. Scale up or down may fail and we would like to offer the ability
         #    that recover the cluster to allow it being resized when last
         #    update failed.

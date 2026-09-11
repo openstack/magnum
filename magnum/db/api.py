@@ -339,7 +339,7 @@ class Connection(object, metaclass=abc.ABCMeta):
         Return a list of the specified columns for all magnum_services
         those match the specified filters.
 
-        :param disabled: Filters disbaled services. Defaults to None.
+        :param disabled: Filters disabled services. Defaults to None.
         :param limit: Maximum number of magnum_services to return.
         :param marker: the last item of the previous page; we return the next
                        result set.

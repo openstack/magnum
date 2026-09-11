@@ -30,5 +30,5 @@ def get_ssh_key(context, keypair_ident):
         return keypair.public_key.strip()
     except sdk_exceptions.ResourceNotFound:
         # we don't have a way to tell if the keypair doesn't
-        # exist or the cluster is already creted
+        # exist or the cluster is already created
         return ""
