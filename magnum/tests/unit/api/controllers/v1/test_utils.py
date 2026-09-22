@@ -17,6 +17,7 @@ import jsonpatch
 from unittest import mock
 
 from oslo_utils import uuidutils
+import pecan
 import wsme
 
 from magnum.api import utils
@@ -53,14 +54,15 @@ class TestApiUtils(base.FunctionalTest):
                           utils.validate_sort_dir,
                           'fake-sort')
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Cluster.get_by_name')
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.objects.Cluster.get_by_name', autospec=True)
+    @mock.patch('magnum.objects.Cluster.get_by_uuid', autospec=True)
     def test_get_resource_with_uuid(
             self,
             mock_get_by_uuid,
             mock_get_by_name,
             mock_request):
+        mock_request.context = mock.Mock()
         mock_cluster = mock.MagicMock
         mock_get_by_uuid.return_value = mock_cluster
         uuid = uuidutils.generate_uuid()
@@ -71,14 +73,15 @@ class TestApiUtils(base.FunctionalTest):
         self.assertFalse(mock_get_by_name.called)
         self.assertEqual(mock_cluster, returned_cluster)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Cluster.get_by_name')
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.objects.Cluster.get_by_name', autospec=True)
+    @mock.patch('magnum.objects.Cluster.get_by_uuid', autospec=True)
     def test_get_resource_with_name(
             self,
             mock_get_by_uuid,
             mock_get_by_name,
             mock_request):
+        mock_request.context = mock.Mock()
         mock_cluster = mock.MagicMock
         mock_get_by_name.return_value = mock_cluster
 
@@ -89,7 +92,8 @@ class TestApiUtils(base.FunctionalTest):
                                                  'fake-name')
         self.assertEqual(mock_cluster, returned_cluster)
 
-    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=True)
+    @mock.patch.object(
+        uuidutils, 'is_uuid_like', return_value=True, autospec=True)
     def test_get_openstack_resource_by_uuid(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.get.return_value = 'fake_resource_data'
@@ -98,7 +102,8 @@ class TestApiUtils(base.FunctionalTest):
                                                      'fake_resource_type')
         self.assertEqual('fake_resource_data', resource_data)
 
-    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=False)
+    @mock.patch.object(
+        uuidutils, 'is_uuid_like', return_value=False, autospec=True)
     def test_get_openstack_resource_by_name(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.list.return_value = ['fake_resource_data']
@@ -107,7 +112,8 @@ class TestApiUtils(base.FunctionalTest):
                                                      'fake_resource_type')
         self.assertEqual('fake_resource_data', resource_data)
 
-    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=False)
+    @mock.patch.object(
+        uuidutils, 'is_uuid_like', return_value=False, autospec=True)
     def test_get_openstack_resource_non_exist(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.list.return_value = []
@@ -115,7 +121,8 @@ class TestApiUtils(base.FunctionalTest):
                           utils.get_openstack_resource,
                           fake_manager, 'fake_resource', 'fake_resource_type')
 
-    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=False)
+    @mock.patch.object(
+        uuidutils, 'is_uuid_like', return_value=False, autospec=True)
     def test_get_openstack_resource_multi_exist(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.list.return_value = ['fake_resource_data1',
@@ -124,7 +131,7 @@ class TestApiUtils(base.FunctionalTest):
                           utils.get_openstack_resource,
                           fake_manager, 'fake_resource', 'fake_resource_type')
 
-    @mock.patch.object(jsonpatch, 'apply_patch')
+    @mock.patch.object(jsonpatch, 'apply_patch', autospec=True)
     def test_apply_jsonpatch(self, mock_jsonpatch):
         doc = {'cluster_uuid': 'id', 'node_count': 1}
         patch = [{"path": "/node_count", "value": 2, "op": "replace"}]

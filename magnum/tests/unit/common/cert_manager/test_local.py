@@ -65,7 +65,7 @@ class TestLocalManager(base.BaseTestCase):
             if self.private_key_passphrase is None and ext == '.pass':
                 return False
             return True
-        isfile_patcher = mock.patch('os.path.isfile')
+        isfile_patcher = mock.patch('os.path.isfile', autospec=True)
         self.mock_isfile = isfile_patcher.start()
         self.addCleanup(isfile_patcher.stop)
         self.mock_isfile.side_effect = _mock_isfile
@@ -187,7 +187,7 @@ class TestLocalManager(base.BaseTestCase):
     def test_store_cert(self):
         self._store_cert()
 
-    @mock.patch('builtins.open', create=True)
+    @mock.patch('builtins.open', create=True, autospec=True)
     def test_store_cert_with_io_error(self, file_mock):
         file_mock.side_effect = IOError
 

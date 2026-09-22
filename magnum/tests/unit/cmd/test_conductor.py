@@ -22,9 +22,9 @@ from magnum.tests import base
 
 class TestMagnumConductor(base.TestCase):
 
-    @mock.patch('oslo_service.service.launch')
-    @mock.patch.object(conductor, 'rpc_service')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('oslo_service.service.launch', autospec=True)
+    @mock.patch.object(conductor, 'rpc_service', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_conductor(self, mock_prep, mock_rpc, mock_launch):
         conductor.main()
 
@@ -39,9 +39,9 @@ class TestMagnumConductor(base.TestCase):
                                             workers=workers)
         launcher.wait.assert_called_once_with()
 
-    @mock.patch('oslo_service.service.launch')
-    @mock.patch.object(conductor, 'rpc_service')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('oslo_service.service.launch', autospec=True)
+    @mock.patch.object(conductor, 'rpc_service', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_conductor_config_workers(self, mock_prep, mock_rpc, mock_launch):
         fake_workers = 8
         self.config(workers=fake_workers, group='conductor')

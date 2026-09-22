@@ -44,7 +44,7 @@ class db_rec(object):
 
 class TestMagnumServiceController(api_base.FunctionalTest):
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_empty(self, mock_policy):
         mock_policy.return_value = True
         response = self.get_json('/mservices')
@@ -59,9 +59,10 @@ class TestMagnumServiceController(api_base.FunctionalTest):
             reclist.append(rec)
         return reclist
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(objects.MagnumService, 'list')
-    @mock.patch.object(servicegroup.ServiceGroup, 'service_is_up')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(objects.MagnumService, 'list', autospec=True)
+    @mock.patch.object(
+        servicegroup.ServiceGroup, 'service_is_up', autospec=True)
     def test_get_one(self, svc_up, rpc_patcher, mock_policy):
         mock_policy.return_value = True
         rpc_patcher.return_value = self._rpc_api_reply()
@@ -71,9 +72,10 @@ class TestMagnumServiceController(api_base.FunctionalTest):
         self.assertEqual(1, len(response['mservices']))
         self.assertEqual(1, response['mservices'][0]['id'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(objects.MagnumService, 'list')
-    @mock.patch.object(servicegroup.ServiceGroup, 'service_is_up')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(objects.MagnumService, 'list', autospec=True)
+    @mock.patch.object(
+        servicegroup.ServiceGroup, 'service_is_up', autospec=True)
     def test_get_many(self, svc_up, rpc_patcher, mock_policy):
         mock_policy.return_value = True
         svc_num = 5

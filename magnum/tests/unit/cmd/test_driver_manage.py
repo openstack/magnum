@@ -36,37 +36,39 @@ class TestMagnumDriverManage(base.TestCase):
             yield fake_entry, fake_cls
             num_of_entries -= 1
 
-    @mock.patch.object(driver_manage.DriverManager, 'run')
+    @mock.patch.object(driver_manage.DriverManager, 'run', autospec=True)
     @mock.patch('sys.argv', ['foo', 'bar'])
     def test_none_arg(self, mock_run):
         args = None
         driver_manage.main(args)
-        mock_run.assert_called_once_with(['bar'])
+        mock_run.assert_called_once_with(mock.ANY, ['bar'])
 
     # NOTE(hieulq): we fake the entrypoints then we need to mock the cliff
     # produce_output in order to assert with fake value
-    @mock.patch('magnum.cmd.driver_manage.DriverList.produce_output')
-    @mock.patch('magnum.drivers.common.driver.Driver')
+    @mock.patch(
+        'magnum.cmd.driver_manage.DriverList.produce_output', autospec=True)
+    @mock.patch('magnum.drivers.common.driver.Driver', autospec=True)
     def test_correct_arg_with_details_and_path(self, mock_driver,
                                                mock_produce):
         args = ['list-drivers', '-d', '-p']
         mock_driver.load_entry_points.return_value = self._fake_entry(1)
         driver_manage.main(args)
         mock_driver.load_entry_points.assert_called_once_with()
-        mock_produce.assert_called_once_with(mock.ANY, mock.ANY,
+        mock_produce.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY,
                                              [('magnum_test_foo_bar',
                                                'test',
                                                'bar', 'foo', 'fake_path')])
 
     # NOTE(hieulq): we fake the entrypoints then we need to mock the cliff
     # produce_output in order to assert with fake value
-    @mock.patch('magnum.cmd.driver_manage.DriverList.produce_output')
-    @mock.patch('magnum.drivers.common.driver.Driver')
+    @mock.patch(
+        'magnum.cmd.driver_manage.DriverList.produce_output', autospec=True)
+    @mock.patch('magnum.drivers.common.driver.Driver', autospec=True)
     def test_correct_arg_without_details_and_path(self, mock_driver,
                                                   mock_produce):
         args = ['list-drivers']
         mock_driver.load_entry_points.return_value = self._fake_entry(1)
         driver_manage.main(args)
         mock_driver.load_entry_points.assert_called_once_with()
-        mock_produce.assert_called_once_with(mock.ANY, mock.ANY,
+        mock_produce.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY,
                                              [('magnum_test_foo_bar',)])

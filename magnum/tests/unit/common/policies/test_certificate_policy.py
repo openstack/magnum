@@ -32,7 +32,8 @@ class TestCertifiactePolicy(base.PolicyFunctionalTest):
         super(TestCertifiactePolicy, self).setUp()
         self.cluster = obj_utils.create_test_cluster(self.context)
 
-        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        conductor_api_patcher = mock.patch(
+            'magnum.conductor.api.API', autospec=True)
         self.conductor_api_class = conductor_api_patcher.start()
         self.conductor_api = mock.MagicMock()
         self.conductor_api_class.return_value = self.conductor_api

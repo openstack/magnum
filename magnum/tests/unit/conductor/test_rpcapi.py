@@ -64,10 +64,12 @@ class RPCAPITestCase(base.DbTestCase):
             if expected_retval:
                 return expected_retval
 
-        with mock.patch.object(rpcapi._client, "prepare") as mock_prepared:
+        with mock.patch.object(
+                rpcapi._client, "prepare", autospec=True) as mock_prepared:
             mock_prepared.side_effect = _fake_prepare_method
 
-            with mock.patch.object(rpcapi._client, rpc_method) as mock_method:
+            with mock.patch.object(
+                    rpcapi._client, rpc_method, autospec=True) as mock_method:
                 mock_method.side_effect = _fake_rpc_method
                 retval = getattr(rpcapi, method)(**kwargs)
                 self.assertEqual(expected_retval, retval)

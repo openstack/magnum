@@ -27,8 +27,8 @@ class TestK8sScaleManager(base.TestCase):
         super(TestK8sScaleManager, self).setUp()
         self.requests_mock = self.useFixture(fixture.Fixture())
 
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    @mock.patch('magnum.conductor.k8s_api.create_client_files')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid', autospec=True)
+    @mock.patch('magnum.conductor.k8s_api.create_client_files', autospec=True)
     def test_get_hosts_with_container(
             self, mock_create_client_files, mock_get):
         mock_cluster = mock.MagicMock()

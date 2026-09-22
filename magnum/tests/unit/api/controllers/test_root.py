@@ -115,11 +115,11 @@ class TestRootController(api_base.FunctionalTest):
     def test_api_paste_file_not_exist(self):
         cfg.CONF.set_override('api_paste_config', 'non-existent-file',
                               group='api')
-        with mock.patch.object(cfg.CONF, 'find_file') as ff:
+        with mock.patch.object(cfg.CONF, 'find_file', autospec=True) as ff:
             ff.return_value = None
             self.assertRaises(cfg.ConfigFilesNotFoundError, app.load_app)
 
-    @mock.patch('magnum.api.app.deploy')
+    @mock.patch('magnum.api.app.deploy', autospec=True)
     def test_api_paste_file_not_exist_not_abs(self, mock_deploy):
         path = self.get_path(cfg.CONF['api']['api_paste_config'] + 'test')
         cfg.CONF.set_override('api_paste_config', path, group='api')
@@ -230,6 +230,7 @@ class TestV1Routing(api_base.FunctionalTest):
         self._check_version = self.patch_check_version.start()
         self.get_json('/')
         self._check_version.assert_called_once_with(mock.ANY,
+                                                    mock.ANY,
                                                     mock.ANY)
         self.patch_check_version.stop()
 

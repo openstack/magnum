@@ -21,10 +21,10 @@ from magnum.tests import base
 
 class TestMagnumService(base.BaseTestCase):
 
-    @mock.patch.object(logging, 'register_options')
-    @mock.patch.object(logging, 'setup')
-    @mock.patch('magnum.common.config.set_config_defaults')
-    @mock.patch('magnum.common.config.parse_args')
+    @mock.patch.object(logging, 'register_options', autospec=True)
+    @mock.patch.object(logging, 'setup', autospec=True)
+    @mock.patch('magnum.common.config.set_config_defaults', autospec=True)
+    @mock.patch('magnum.common.config.parse_args', autospec=True)
     def test_prepare_service_with_argv_not_none(self, mock_parse, mock_set,
                                                 mock_setup, mock_reg):
         argv = 'foo'
@@ -37,10 +37,10 @@ class TestMagnumService(base.BaseTestCase):
         mock_reg.assert_called_once_with(base.CONF)
         mock_set.assert_called_once_with()
 
-    @mock.patch.object(logging, 'register_options')
-    @mock.patch.object(logging, 'setup')
-    @mock.patch('magnum.common.config.set_config_defaults')
-    @mock.patch('magnum.common.config.parse_args')
+    @mock.patch.object(logging, 'register_options', autospec=True)
+    @mock.patch.object(logging, 'setup', autospec=True)
+    @mock.patch('magnum.common.config.set_config_defaults', autospec=True)
+    @mock.patch('magnum.common.config.parse_args', autospec=True)
     def test_prepare_service_with_argv_none(self, mock_parse, mock_set,
                                             mock_setup, mock_reg):
         argv = None

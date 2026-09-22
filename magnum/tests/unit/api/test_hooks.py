@@ -32,7 +32,7 @@ class TestContextHook(base.BaseTestCase):
         super(TestContextHook, self).setUp()
         self.app = fakes.FakeApp()
 
-    @mock.patch("magnum.common.policy.check_is_admin")
+    @mock.patch("magnum.common.policy.check_is_admin", autospec=True)
     def test_context_hook_before_method(self, m_c):
         state = mock.Mock(request=fakes.FakePecanRequest())
         hook = hooks.ContextHook()
@@ -55,7 +55,7 @@ class TestContextHook(base.BaseTestCase):
                          ctx.user_domain_id)
         self.assertIsNone(ctx.auth_token_info)
 
-    @mock.patch("magnum.common.policy.check_is_admin")
+    @mock.patch("magnum.common.policy.check_is_admin", autospec=True)
     def test_context_hook_before_method_auth_info(self, c_m):
         state = mock.Mock(request=fakes.FakePecanRequest())
         state.request.environ['keystone.token_info'] = 'assert_this'
@@ -81,7 +81,7 @@ class TestNoExceptionTracebackHook(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestNoExceptionTracebackHook, self).setUp()
-        p = mock.patch.object(root.Root, 'convert')
+        p = mock.patch.object(root.Root, 'convert', autospec=True)
         self.root_convert_mock = p.start()
         self.addCleanup(p.stop)
 

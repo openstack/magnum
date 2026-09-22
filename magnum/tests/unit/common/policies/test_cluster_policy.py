@@ -26,7 +26,7 @@ class TestClusterPolicy(base.PolicyFunctionalTest):
         self.cluster = obj_utils.create_test_cluster(
             self.context, name='cluster_example_A', node_count=3
         )
-        p = mock.patch.object(driver.Driver, 'get_driver')
+        p = mock.patch.object(driver.Driver, 'get_driver', autospec=True)
         self.mock_driver_get = p.start()
         self.mock_driver_get.return_value = mock.MagicMock()
         self.addCleanup(p.stop)

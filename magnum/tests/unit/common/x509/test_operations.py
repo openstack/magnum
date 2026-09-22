@@ -23,8 +23,8 @@ class TestX509Operations(base.BaseTestCase):
     def setUp(self):
         super(TestX509Operations, self).setUp()
 
-    @mock.patch.object(serialization, 'NoEncryption')
-    @mock.patch.object(operations, '_load_pem_private_key')
+    @mock.patch.object(serialization, 'NoEncryption', autospec=True)
+    @mock.patch.object(operations, '_load_pem_private_key', autospec=True)
     def test_decrypt_key(self, mock_load_pem_private_key,
                          mock_no_encryption_class):
         mock_private_key = mock.MagicMock()

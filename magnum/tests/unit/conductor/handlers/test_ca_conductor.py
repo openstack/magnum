@@ -23,7 +23,7 @@ class TestSignConductor(base.TestCase):
         super(TestSignConductor, self).setUp()
         self.ca_handler = ca_conductor.Handler()
 
-    @mock.patch.object(ca_conductor, 'cert_manager')
+    @mock.patch.object(ca_conductor, 'cert_manager', autospec=True)
     def test_sign_certificate(self, mock_cert_manager):
         mock_cluster = mock.MagicMock()
         mock_certificate = mock.MagicMock()
@@ -40,7 +40,7 @@ class TestSignConductor(base.TestCase):
         )
         self.assertEqual('fake-pem', actual_cert.pem)
 
-    @mock.patch.object(ca_conductor, 'cert_manager')
+    @mock.patch.object(ca_conductor, 'cert_manager', autospec=True)
     def test_get_ca_certificate(self, mock_cert_manager):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = 'cluster-uuid'

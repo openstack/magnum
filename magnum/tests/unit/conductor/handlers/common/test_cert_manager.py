@@ -32,7 +32,8 @@ class CertManagerTestCase(base.BaseTestCase):
     def setUp(self):
         super(CertManagerTestCase, self).setUp()
 
-        cert_manager_patcher = mock.patch.object(cert_manager, 'cert_manager')
+        cert_manager_patcher = mock.patch.object(
+            cert_manager, 'cert_manager', autospec=True)
         self.cert_manager = cert_manager_patcher.start()
         self.addCleanup(cert_manager_patcher.stop)
 
@@ -42,8 +43,9 @@ class CertManagerTestCase(base.BaseTestCase):
         self.cert_manager_backend.CertManager = mock.MagicMock()
         self.CertManager = self.cert_manager_backend.CertManager
 
-    @mock.patch('magnum.common.x509.operations.generate_ca_certificate')
-    @mock.patch('magnum.common.short_id.generate_id')
+    @mock.patch(
+        'magnum.common.x509.operations.generate_ca_certificate', autospec=True)
+    @mock.patch('magnum.common.short_id.generate_id', autospec=True)
     def test_generate_ca_cert(self, mock_generate_id, mock_generate_ca_cert):
         expected_ca_name = 'ca-name'
         expected_ca_password = 'password'
@@ -69,8 +71,10 @@ class CertManagerTestCase(base.BaseTestCase):
             context=None
         )
 
-    @mock.patch('magnum.common.x509.operations.generate_client_certificate')
-    @mock.patch('magnum.common.short_id.generate_id')
+    @mock.patch(
+        'magnum.common.x509.operations.generate_client_certificate',
+        autospec=True)
+    @mock.patch('magnum.common.short_id.generate_id', autospec=True)
     def test_generate_client_cert(self, mock_generate_id, mock_generate_cert):
         expected_name = 'admin'
         expected_organization_name = 'system:masters'
@@ -138,9 +142,9 @@ class CertManagerTestCase(base.BaseTestCase):
             context=None)
 
     @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_generate_client_cert')
+                '_generate_client_cert', autospec=True)
     @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_generate_ca_cert')
+                '_generate_ca_cert', autospec=True)
     def test_generate_certificates(self, mock_generate_ca_cert,
                                    mock_generate_client_cert):
         expected_ca_name = 'ca-name'
@@ -153,9 +157,9 @@ class CertManagerTestCase(base.BaseTestCase):
                                          mock_generate_client_cert)
 
     @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_generate_client_cert')
+                '_generate_client_cert', autospec=True)
     @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_generate_ca_cert')
+                '_generate_ca_cert', autospec=True)
     def test_generate_certificates_without_name(self, mock_generate_ca_cert,
                                                 mock_generate_client_cert):
         expected_ca_name = 'ca-uuid'
@@ -169,7 +173,7 @@ class CertManagerTestCase(base.BaseTestCase):
                                          mock_generate_client_cert)
 
     @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_get_issuer_name')
+                '_get_issuer_name', autospec=True)
     def test_generate_certificates_with_error(self, mock_get_issuer_name):
         mock_cluster = mock.MagicMock()
         mock_get_issuer_name.side_effect = exception.MagnumException()
@@ -178,7 +182,7 @@ class CertManagerTestCase(base.BaseTestCase):
                           cert_manager.generate_certificates_to_cluster,
                           mock_cluster)
 
-    @mock.patch('magnum.common.x509.operations.sign')
+    @mock.patch('magnum.common.x509.operations.sign', autospec=True)
     def test_sign_node_certificate(self, mock_x509_sign):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = "mock_cluster_uuid"
@@ -200,7 +204,7 @@ class CertManagerTestCase(base.BaseTestCase):
                                                passphrase)
         self.assertEqual(mock.sentinel.signed_cert, cluster_ca_cert)
 
-    @mock.patch('magnum.common.x509.operations.sign')
+    @mock.patch('magnum.common.x509.operations.sign', autospec=True)
     def test_sign_node_certificate_without_cluster_name(self, mock_x509_sign):
         mock_cluster = mock.MagicMock()
         mock_cluster.name = None
@@ -314,7 +318,8 @@ class CertManagerTestCase(base.BaseTestCase):
         self.assertEqual(mock_cert.get_certificate.return_value,
                          cluster_magnum_cert.read())
 
-    @mock.patch('magnum.conductor.handlers.common.cert_manager.LOG')
+    @mock.patch(
+        'magnum.conductor.handlers.common.cert_manager.LOG', autospec=True)
     def test_create_client_files_temp_no_dir(self, mock_logging):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = "mock_cluster_uuid"

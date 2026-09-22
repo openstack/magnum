@@ -38,7 +38,7 @@ class TestQuotaPolicy(base.PolicyFunctionalTest):
             headers=self.member_headers)
         self.assertIn("403 Forbidden", str(exc))
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_no_permission(self, mock_keystone):
         exc = self.assertRaises(
             AppError, self.post_json,
@@ -46,9 +46,9 @@ class TestQuotaPolicy(base.PolicyFunctionalTest):
             headers=self.reader_headers)
         self.assertIn("403 Forbidden", str(exc))
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_update_no_permission(self, mock_keystone):
-        with mock.patch("magnum.common.policy.enforce"):
+        with mock.patch("magnum.common.policy.enforce", autospec=True):
             quota_dict = apiutils.quota_post_data(hard_limit=5)
             self.post_json('/quotas', quota_dict)
         quota_dict['hard_limit'] = 20
@@ -57,9 +57,9 @@ class TestQuotaPolicy(base.PolicyFunctionalTest):
             headers=self.reader_headers)
         self.assertIn("403 Forbidden", str(exc))
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_delete_no_permission(self, mock_keystone):
-        with mock.patch("magnum.common.policy.enforce"):
+        with mock.patch("magnum.common.policy.enforce", autospec=True):
             quota_dict = apiutils.quota_post_data()
             response = self.post_json('/quotas', quota_dict)
         self.assertEqual('application/json', response.content_type)

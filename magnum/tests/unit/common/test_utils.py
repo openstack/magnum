@@ -157,15 +157,15 @@ grep foo
             os.unlink(tmpfilename)
             os.unlink(tmpfilename2)
 
-    @mock.patch.object(processutils, 'execute')
-    @mock.patch.object(os.environ, 'copy', return_value={})
+    @mock.patch.object(processutils, 'execute', autospec=True)
+    @mock.patch.object(os.environ, 'copy', return_value={}, autospec=True)
     def test_execute_use_standard_locale_no_env_variables(self, env_mock,
                                                           execute_mock):
         utils.execute('foo', use_standard_locale=True)
         execute_mock.assert_called_once_with('foo',
                                              env_variables={'LC_ALL': 'C'})
 
-    @mock.patch.object(processutils, 'execute')
+    @mock.patch.object(processutils, 'execute', autospec=True)
     def test_execute_use_standard_locale_with_env_variables(self,
                                                             execute_mock):
         utils.execute('foo', use_standard_locale=True,
@@ -174,7 +174,7 @@ grep foo
                                              env_variables={'LC_ALL': 'C',
                                                             'foo': 'bar'})
 
-    @mock.patch.object(processutils, 'execute')
+    @mock.patch.object(processutils, 'execute', autospec=True)
     def test_execute_not_use_standard_locale(self, execute_mock):
         utils.execute('foo', use_standard_locale=False,
                       env_variables={'foo': 'bar'})
@@ -182,26 +182,30 @@ grep foo
                                              env_variables={'foo': 'bar'})
 
     def test_execute_get_root_helper(self):
-        with mock.patch.object(processutils, 'execute') as execute_mock:
+        with mock.patch.object(
+                processutils, 'execute', autospec=True) as execute_mock:
             helper = utils._get_root_helper()
             utils.execute('foo', run_as_root=True)
             execute_mock.assert_called_once_with('foo', run_as_root=True,
                                                  root_helper=helper)
 
     def test_execute_without_root_helper(self):
-        with mock.patch.object(processutils, 'execute') as execute_mock:
+        with mock.patch.object(
+                processutils, 'execute', autospec=True) as execute_mock:
             utils.execute('foo', run_as_root=False)
             execute_mock.assert_called_once_with('foo', run_as_root=False)
 
     def test_validate_and_normalize_mac(self):
         mac = 'AA:BB:CC:DD:EE:FF'
-        with mock.patch.object(netutils, 'is_valid_mac') as m_mock:
+        with mock.patch.object(
+                netutils, 'is_valid_mac', autospec=True) as m_mock:
             m_mock.return_value = True
             self.assertEqual(mac.lower(),
                              utils.validate_and_normalize_mac(mac))
 
     def test_validate_and_normalize_mac_invalid_format(self):
-        with mock.patch.object(netutils, 'is_valid_mac') as m_mock:
+        with mock.patch.object(
+                netutils, 'is_valid_mac', autospec=True) as m_mock:
             m_mock.return_value = False
             self.assertRaises(exception.InvalidMAC,
                               utils.validate_and_normalize_mac, 'invalid-mac')
@@ -234,13 +238,13 @@ class TempFilesTestCase(base.TestCase):
             dirname = tempdir
         self.assertFalse(os.path.exists(dirname))
 
-    @mock.patch.object(shutil, 'rmtree')
-    @mock.patch.object(tempfile, 'mkdtemp')
+    @mock.patch.object(shutil, 'rmtree', autospec=True)
+    @mock.patch.object(tempfile, 'mkdtemp', autospec=True)
     def test_tempdir_mocked(self, mkdtemp_mock, rmtree_mock):
 
         self.config(tempdir='abc')
         mkdtemp_mock.return_value = 'temp-dir'
-        kwargs = {'a': 'b'}
+        kwargs = {'prefix': 'b'}
 
         with utils.tempdir(**kwargs) as tempdir:
             self.assertEqual('temp-dir', tempdir)
@@ -249,9 +253,9 @@ class TempFilesTestCase(base.TestCase):
         mkdtemp_mock.assert_called_once_with(**kwargs)
         rmtree_mock.assert_called_once_with(tempdir_created)
 
-    @mock.patch.object(utils, 'LOG')
-    @mock.patch.object(shutil, 'rmtree')
-    @mock.patch.object(tempfile, 'mkdtemp')
+    @mock.patch.object(utils, 'LOG', autospec=True)
+    @mock.patch.object(shutil, 'rmtree', autospec=True)
+    @mock.patch.object(tempfile, 'mkdtemp', autospec=True)
     def test_tempdir_mocked_error_on_rmtree(self, mkdtemp_mock, rmtree_mock,
                                             log_mock):
 

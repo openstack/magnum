@@ -407,7 +407,8 @@ class TestObjectSerializer(test_base.TestCase):
             for item in thing2:
                 self.assertIsInstance(item, MyObj)
 
-    @mock.patch('magnum.objects.base.MagnumObject.indirection_api')
+    @mock.patch(
+        'magnum.objects.base.MagnumObject.indirection_api', autospec=True)
     def _test_deserialize_entity_newer(self, obj_version, backported_to,
                                        mock_indirection_api,
                                        my_version='1.6'):

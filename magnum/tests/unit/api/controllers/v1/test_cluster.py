@@ -150,8 +150,8 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_one_by_uuid_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=temp_uuid,
@@ -186,10 +186,10 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertEqual(cluster_list[-1].uuid,
                          response['clusters'][0]['uuid'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
-    @mock.patch("magnum.objects.Cluster.obj_load_attr")
-    @mock.patch("magnum.objects.Cluster.cluster_template")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
+    @mock.patch("magnum.objects.Cluster.obj_load_attr", autospec=True)
+    @mock.patch("magnum.objects.Cluster.cluster_template", autospec=True)
     def test_get_all_with_all_projects(self, mock_context, mock_policy,
                                        mock_load, mock_template):
         for id_ in range(4):
@@ -339,12 +339,13 @@ class TestPatch(api_base.FunctionalTest):
         self.cluster_obj = obj_utils.create_test_cluster(
             self.context, name='cluster_example_A', node_count=3,
             health_status='UNKNOWN', health_status_reason={})
-        p = mock.patch.object(rpcapi.API, 'cluster_update_async')
+        p = mock.patch.object(
+            rpcapi.API, 'cluster_update_async', autospec=False)
         self.mock_cluster_update = p.start()
         self.mock_cluster_update.side_effect = self._sim_rpc_cluster_update
         self.addCleanup(p.stop)
         p = mock.patch.object(
-            attr_validator, 'validate_flavor_root_volume_size')
+            attr_validator, 'validate_flavor_root_volume_size', autospec=True)
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
 
@@ -359,7 +360,7 @@ class TestPatch(api_base.FunctionalTest):
         cluster.save()
         return cluster
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_replace_ok(self, mock_utcnow):
         new_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -382,7 +383,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_replace_health_status_ok(self, mock_utcnow):
         new_health_status = 'HEALTHY'
         new_health_status_reason = {'api': 'ok'}
@@ -418,7 +419,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_replace_ok_by_name(self, mock_utcnow):
         new_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -635,8 +636,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_update_cluster_as_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=temp_uuid)
@@ -654,18 +655,20 @@ class TestPost(api_base.FunctionalTest):
         super(TestPost, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
-        p = mock.patch.object(rpcapi.API, 'cluster_create_async')
+        p = mock.patch.object(
+            rpcapi.API, 'cluster_create_async', autospec=False)
         self.mock_cluster_create = p.start()
         self.mock_cluster_create.side_effect = self._simulate_cluster_create
         self.addCleanup(p.stop)
-        p = mock.patch.object(attr_validator, 'validate_os_resources')
+        p = mock.patch.object(
+            attr_validator, 'validate_os_resources', autospec=True)
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
         p = mock.patch.object(
-            attr_validator, 'validate_flavor_root_volume_size')
+            attr_validator, 'validate_flavor_root_volume_size', autospec=True)
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
-        p = mock.patch.object(driver.Driver, 'get_driver')
+        p = mock.patch.object(driver.Driver, 'get_driver', autospec=True)
         self.mock_driver_get = p.start()
         self.mock_driver_get.return_value = mock.MagicMock()
         self.addCleanup(p.stop)
@@ -1198,7 +1201,8 @@ class TestDelete(api_base.FunctionalTest):
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
         self.cluster = obj_utils.create_test_cluster(self.context)
-        p = mock.patch.object(rpcapi.API, 'cluster_delete_async')
+        p = mock.patch.object(
+            rpcapi.API, 'cluster_delete_async', autospec=False)
         self.mock_cluster_delete = p.start()
         self.mock_cluster_delete.side_effect = self._simulate_cluster_delete
         self.addCleanup(p.stop)
@@ -1243,8 +1247,8 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_delete_cluster_as_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=temp_uuid)
@@ -1258,7 +1262,7 @@ class TestClusterPolicyEnforcement(api_base.FunctionalTest):
     def setUp(self):
         super(TestClusterPolicyEnforcement, self).setUp()
         obj_utils.create_test_cluster_template(self.context)
-        p = mock.patch.object(driver.Driver, 'get_driver')
+        p = mock.patch.object(driver.Driver, 'get_driver', autospec=True)
         self.mock_driver_get = p.start()
         self.mock_driver_get.return_value = mock.MagicMock()
         self.addCleanup(p.stop)
@@ -1312,7 +1316,7 @@ class TestClusterPolicyEnforcement(api_base.FunctionalTest):
             ng.destroy()
 
     def test_policy_disallow_delete(self):
-        p = mock.patch.object(rpcapi.API, 'cluster_delete')
+        p = mock.patch.object(rpcapi.API, 'cluster_delete', autospec=False)
         self.mock_cluster_delete = p.start()
         self.mock_cluster_delete.side_effect = self._simulate_cluster_delete
         self.addCleanup(p.stop)

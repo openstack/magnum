@@ -43,8 +43,8 @@ class OctaviaTest(base.TestCase):
             objects.NodeGroup(self.context, **nodegroups_dict['worker'])
         ]
 
-    @mock.patch("magnum.common.neutron.delete_floatingip")
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch("magnum.common.neutron.delete_floatingip", autospec=True)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_delete_loadbalancers(self, mock_clients, mock_delete_fip):
         lb1 = make_lb(
             id="fake_id_1",
@@ -82,7 +82,7 @@ class OctaviaTest(base.TestCase):
         ]
         mock_octavia_client.delete_load_balancer.assert_has_calls(calls)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_delete_loadbalancers_no_candidate(self, mock_clients):
         mock_octavia_client = mock.MagicMock()
         mock_octavia_client.load_balancers.return_value = []
@@ -95,8 +95,8 @@ class OctaviaTest(base.TestCase):
 
         self.assertFalse(mock_octavia_client.delete_load_balancer.called)
 
-    @mock.patch("magnum.common.neutron.delete_floatingip")
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch("magnum.common.neutron.delete_floatingip", autospec=True)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_delete_loadbalancers_timeout(self, mock_clients, mock_delete_fip):
         # don't wait the full 60 seconds for a unit test
         self.config(pre_delete_lb_timeout=1, group="cluster")

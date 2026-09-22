@@ -26,7 +26,7 @@ class ClientsTest(base.BaseTestCase):
     def setUp(self):
         super(ClientsTest, self).setUp()
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_url_for(self, mock_keystone):
         obj = clients.OpenStackClients(None)
         obj.url_for(service_type='fake_service', interface='fake_endpoint')
@@ -35,7 +35,7 @@ class ClientsTest(base.BaseTestCase):
         mock_endpoint.assert_called_once_with(service_type='fake_service',
                                               interface='fake_endpoint')
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_magnum_url(self, mock_keystone):
         fake_region = 'fake_region'
         fake_endpoint = 'fake_endpoint'
@@ -51,9 +51,9 @@ class ClientsTest(base.BaseTestCase):
                                               service_type='container-infra',
                                               interface=fake_endpoint)
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def _test_clients_glance(self, expected_region_name, mock_url,
                              mock_conn, mock_keystone):
         con = mock.MagicMock()
@@ -69,8 +69,8 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'image_endpoint_override': 'url_from_keystone'})
 
-        mock_keystone.assert_called_once_with()
-        mock_url.assert_called_once_with(service_type='image',
+        mock_keystone.assert_called_once_with(obj)
+        mock_url.assert_called_once_with(obj, service_type='image',
                                          interface='publicURL',
                                          region_name=expected_region_name)
 
@@ -94,9 +94,9 @@ class ClientsTest(base.BaseTestCase):
         obj._glance = None
         self.assertRaises(exception.AuthorizationFailure, obj.glance)
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def test_clients_glance_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
         con.auth_url = "keystone_url"
@@ -113,9 +113,9 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'image_endpoint_override': 'url_from_keystone'})
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def _test_clients_barbican(self, expected_region_name, mock_url,
                                mock_conn, mock_keystone):
         con = mock.MagicMock()
@@ -131,8 +131,8 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'key_manager_endpoint_override': 'url_from_keystone'})
 
-        mock_keystone.assert_called_once_with()
-        mock_url.assert_called_once_with(service_type='key-manager',
+        mock_keystone.assert_called_once_with(obj)
+        mock_url.assert_called_once_with(obj, service_type='key-manager',
                                          interface='publicURL',
                                          region_name=expected_region_name)
 
@@ -157,9 +157,9 @@ class ClientsTest(base.BaseTestCase):
         obj._barbican = None
         self.assertRaises(exception.AuthorizationFailure, obj.barbican)
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def test_clients_barbican_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
         con.auth_url = "keystone_url"
@@ -176,9 +176,9 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'key_manager_endpoint_override': 'url_from_keystone'})
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def _test_clients_nova(self, expected_region_name, mock_url,
                            mock_conn, mock_keystone):
         con = mock.MagicMock()
@@ -194,8 +194,8 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'compute_endpoint_override': 'url_from_keystone'})
 
-        mock_keystone.assert_called_once_with()
-        mock_url.assert_called_once_with(service_type='compute',
+        mock_keystone.assert_called_once_with(obj)
+        mock_url.assert_called_once_with(obj, service_type='compute',
                                          interface='publicURL',
                                          region_name=expected_region_name)
 
@@ -216,9 +216,9 @@ class ClientsTest(base.BaseTestCase):
         obj._nova = None
         self.assertRaises(exception.AuthorizationFailure, obj.nova)
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def test_clients_nova_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
         con.auth_url = "keystone_url"
@@ -235,9 +235,9 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'compute_endpoint_override': 'url_from_keystone'})
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def _test_clients_neutron(self, expected_region_name, mock_url,
                               mock_conn, mock_keystone):
         fake_endpoint_type = 'fake_endpoint_type'
@@ -256,8 +256,8 @@ class ClientsTest(base.BaseTestCase):
             session=keystone.session,
             **{'network_endpoint_override': 'url_from_keystone'})
 
-        mock_keystone.assert_called_once_with()
-        mock_url.assert_called_once_with(service_type='network',
+        mock_keystone.assert_called_once_with(obj)
+        mock_url.assert_called_once_with(obj, service_type='network',
                                          interface=fake_endpoint_type,
                                          region_name=expected_region_name)
 
@@ -279,9 +279,9 @@ class ClientsTest(base.BaseTestCase):
         obj._neutron = None
         self.assertRaises(exception.AuthorizationFailure, obj.neutron)
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
-    @mock.patch.object(sdk_connection, 'Connection')
-    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
+    @mock.patch.object(sdk_connection, 'Connection', autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'url_for', autospec=True)
     def test_clients_neutron_cached(self, mock_url, mock_conn, mock_keystone):
         con = mock.MagicMock()
         con.auth_url = "keystone_url"

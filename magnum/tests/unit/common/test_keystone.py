@@ -26,7 +26,7 @@ from magnum.tests import utils
 CONF = magnum.conf.CONF
 
 
-@mock.patch('magnum.common.keystone.sdk_connection.Connection')
+@mock.patch('magnum.common.keystone.sdk_connection.Connection', autospec=True)
 class KeystoneClientTest(base.TestCase):
 
     def setUp(self):
@@ -59,7 +59,7 @@ class KeystoneClientTest(base.TestCase):
         mock_conn.assert_called_once_with(session=session)
         self.assertIsInstance(auth_plugin, ka_identity.Password)
 
-    @mock.patch('magnum.common.keystone.ka_access')
+    @mock.patch('magnum.common.keystone.ka_access', autospec=True)
     def test_client_with_access_info(self, mock_access, mock_conn):
         self.ctx.auth_token_info = mock.MagicMock()
         ks_client = keystone.KeystoneClientV3(self.ctx)
@@ -71,7 +71,7 @@ class KeystoneClientTest(base.TestCase):
         mock_conn.assert_called_once_with(session=session)
         self.assertIsInstance(auth_plugin, ka_identity.access.AccessInfoPlugin)
 
-    @mock.patch('magnum.common.keystone.ka_v3')
+    @mock.patch('magnum.common.keystone.ka_v3', autospec=True)
     def test_client_with_token(self, mock_v3, mock_conn):
         ks_client = keystone.KeystoneClientV3(self.ctx)
         ks_client.client

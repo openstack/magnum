@@ -62,7 +62,7 @@ class TestProfiler(base.TestCase):
 
                 self.assertTrue(getattr(obj, '__traced__', False), obj)
 
-    @mock.patch.object(profiler_init, 'init_from_conf')
+    @mock.patch.object(profiler_init, 'init_from_conf', autospec=True)
     def test_setup_profiler(self, mock_init):
         self.config(enabled=True,
                     group='profiler')
@@ -75,7 +75,7 @@ class TestProfiler(base.TestCase):
                                           service='foo',
                                           host='localhost')
 
-    @mock.patch.object(profiler_init, 'init_from_conf')
+    @mock.patch.object(profiler_init, 'init_from_conf', autospec=True)
     @mock.patch.object(conf, 'CONF', new=cfg.ConfigOpts())
     def test_setup_profiler_without_osprofiler(self, mock_init):
         profiler.setup('foo', 'localhost')

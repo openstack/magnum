@@ -205,7 +205,7 @@ class TestX509(base.BaseTestCase):
         private_key = operations._load_pem_private_key(private_key)
         self.assertIsInstance(private_key, rsa.RSAPrivateKey)
 
-    @mock.patch('cryptography.x509.load_pem_x509_csr')
+    @mock.patch('cryptography.x509.load_pem_x509_csr', autospec=True)
     def test_sign_with_unicode_csr(self, mock_load_pem):
         ca_key = self._generate_private_key()
         private_key = self._generate_private_key()
@@ -217,7 +217,7 @@ class TestX509(base.BaseTestCase):
         operations.sign(csr, self.issuer_name, ca_key,
                         skip_validation=True)
 
-    @mock.patch('cryptography.x509.load_pem_x509_csr')
+    @mock.patch('cryptography.x509.load_pem_x509_csr', autospec=True)
     def test_sign_empty_chars(self, mock_load_pem):
         ca_key = self._generate_private_key()
         private_key = self._generate_private_key()
@@ -234,7 +234,7 @@ class TestX509(base.BaseTestCase):
                          certificate.strip())
 
     # If a subject key identifier is given in the CSR, ensure it is added
-    @mock.patch('cryptography.x509.load_pem_x509_csr')
+    @mock.patch('cryptography.x509.load_pem_x509_csr', autospec=True)
     def test_sign_subject_key_identifier(self, mock_load_pem):
         ca_key = self._generate_private_key()
         private_key = self._generate_private_key()

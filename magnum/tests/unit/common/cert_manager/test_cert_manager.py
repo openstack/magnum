@@ -39,7 +39,7 @@ class FakeCert(cert_manager_iface.Cert):
 
 
 class TestCert(base.BaseTestCase):
-    @mock.patch.object(cert_manager_iface, 'operations')
+    @mock.patch.object(cert_manager_iface, 'operations', autospec=True)
     def test_get_decrypted_private_key(self, mock_x509_ops):
         mock_x509_ops.decrypt_key.return_value = 'fake-key'
         fake_cert = FakeCert()

@@ -33,26 +33,28 @@ class ConfTestCase(base.TestCase):
                 self.assertIsInstance(opt, cfg.Opt)
 
     def test_list_module_name_invalid_mods(self):
-        with mock.patch('pkgutil.iter_modules') as mock_mods:
+        with mock.patch('pkgutil.iter_modules', autospec=True) as mock_mods:
             mock_mods.return_value = [(None, 'foo', True),
                                       (None, 'opts', False)]
             self.assertEqual([], opts._list_module_names())
 
     def test_list_module_name_valid_mods(self):
-        with mock.patch('pkgutil.iter_modules') as mock_mods:
+        with mock.patch('pkgutil.iter_modules', autospec=True) as mock_mods:
             mock_mods.return_value = [(None, 'foo', False)]
             self.assertEqual(['foo'], opts._list_module_names())
 
     def test_import_mods_no_func(self):
         modules = ['foo', 'bar']
-        with mock.patch('importlib.import_module') as mock_import:
+        with mock.patch(
+                'importlib.import_module', autospec=True) as mock_import:
             mock_import.return_value = mock.sentinel.mods
             self.assertRaises(AttributeError, opts._import_modules, modules)
             mock_import.assert_called_once_with('magnum.conf.foo')
 
     def test_import_mods_valid_func(self):
         modules = ['foo', 'bar']
-        with mock.patch('importlib.import_module') as mock_import:
+        with mock.patch(
+                'importlib.import_module', autospec=True) as mock_import:
             mock_mod = mock.MagicMock()
             mock_import.return_value = mock_mod
             self.assertEqual([mock_mod, mock_mod],

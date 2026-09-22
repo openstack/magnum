@@ -32,9 +32,10 @@ class MagnumServicePeriodicTestCase(base.TestCase):
         self.fake_ms = FakeMS()
         self.fake_ms_refresh = mock_magnum_service_refresh
 
-    @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
-    @mock.patch.object(objects.MagnumService, 'create')
-    @mock.patch.object(objects.MagnumService, 'report_state_up')
+    @mock.patch.object(
+        objects.MagnumService, 'get_by_host_and_binary', autospec=True)
+    @mock.patch.object(objects.MagnumService, 'create', autospec=True)
+    @mock.patch.object(objects.MagnumService, 'report_state_up', autospec=True)
     def test_update_magnum_service_firsttime(self,
                                              mock_ms_refresh,
                                              mock_ms_create,
@@ -48,11 +49,12 @@ class MagnumServicePeriodicTestCase(base.TestCase):
 
         mock_ms_get.assert_called_once_with(mock.ANY, p_task.host,
                                             p_task.binary)
-        mock_ms_create.assert_called_once_with()
-        mock_ms_refresh.assert_called_once_with()
+        mock_ms_create.assert_called_once_with(mock.ANY)
+        mock_ms_refresh.assert_called_once_with(mock.ANY)
 
-    @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
-    @mock.patch.object(objects.MagnumService, 'create')
+    @mock.patch.object(
+        objects.MagnumService, 'get_by_host_and_binary', autospec=True)
+    @mock.patch.object(objects.MagnumService, 'create', autospec=True)
     def test_update_magnum_service_on_restart(self,
                                               mock_ms_create,
                                               mock_ms_get):

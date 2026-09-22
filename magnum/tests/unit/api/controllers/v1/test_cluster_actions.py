@@ -29,7 +29,8 @@ class TestClusterResize(api_base.FunctionalTest):
         super(TestClusterResize, self).setUp()
         self.cluster_obj = obj_utils.create_test_cluster(
             self.context, name='cluster_example_A', node_count=3)
-        p = mock.patch.object(rpcapi.API, 'cluster_resize_async')
+        p = mock.patch.object(
+            rpcapi.API, 'cluster_resize_async', autospec=False)
         self.mock_cluster_resize = p.start()
         self.mock_cluster_resize.side_effect = self._sim_rpc_cluster_resize
         self.addCleanup(p.stop)
@@ -201,7 +202,7 @@ class TestClusterUpgrade(api_base.FunctionalTest):
             uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
             project_id=self.cluster_obj.project_id,
             is_default=False)
-        p = mock.patch.object(rpcapi.API, 'cluster_upgrade')
+        p = mock.patch.object(rpcapi.API, 'cluster_upgrade', autospec=False)
         self.mock_cluster_upgrade = p.start()
         self.mock_cluster_upgrade.side_effect = self._sim_rpc_cluster_upgrade
         self.addCleanup(p.stop)

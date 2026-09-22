@@ -29,13 +29,13 @@ from magnum.tests.unit.api import base
 class TestDNSListType(base.FunctionalTest):
     def test_valid_single_dns(self):
         test_dns = "8.8.8.8"
-        with mock.patch.object(utils, 'validate_dns') as m_mock:
+        with mock.patch.object(utils, 'validate_dns', autospec=True) as m_mock:
             types.DNSListType.validate(test_dns)
             m_mock.assert_called_once_with(test_dns)
 
     def test_valid_multi_dns(self):
         test_dns = "8.8.8.8,114.114.114.114"
-        with mock.patch.object(utils, 'validate_dns') as m_mock:
+        with mock.patch.object(utils, 'validate_dns', autospec=True) as m_mock:
             types.DNSListType.validate(test_dns)
             m_mock.assert_called_once_with(test_dns)
 
@@ -48,7 +48,8 @@ class TestMacAddressType(base.FunctionalTest):
 
     def test_valid_mac_addr(self):
         test_mac = 'aa:bb:cc:11:22:33'
-        with mock.patch.object(utils, 'validate_and_normalize_mac') as m_mock:
+        with mock.patch.object(
+                utils, 'validate_and_normalize_mac', autospec=True) as m_mock:
             types.MacAddressType.validate(test_mac)
             m_mock.assert_called_once_with(test_mac)
 
@@ -58,7 +59,8 @@ class TestMacAddressType(base.FunctionalTest):
 
     def test_frombasetype(self):
         test_mac = 'aa:bb:cc:11:22:33'
-        with mock.patch.object(utils, 'validate_and_normalize_mac') as m_mock:
+        with mock.patch.object(
+                utils, 'validate_and_normalize_mac', autospec=True) as m_mock:
             types.MacAddressType.frombasetype(test_mac)
             m_mock.assert_called_once_with(test_mac)
 
@@ -71,7 +73,8 @@ class TestUuidType(base.FunctionalTest):
 
     def test_valid_uuid(self):
         test_uuid = '1a1a1a1a-2b2b-3c3c-4d4d-5e5e5e5e5e5e'
-        with mock.patch.object(uuidutils, 'is_uuid_like') as uuid_mock:
+        with mock.patch.object(
+                uuidutils, 'is_uuid_like', autospec=True) as uuid_mock:
             types.UuidType.validate(test_uuid)
             uuid_mock.assert_called_once_with(test_uuid)
 

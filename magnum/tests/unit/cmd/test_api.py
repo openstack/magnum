@@ -22,12 +22,12 @@ from magnum.tests import base
 
 # NOTE(hieulq): need to mock MagnumObject, otherwise other test cases
 # will be failed because of setting wrong ovo indirection api
-@mock.patch('magnum.objects.base.MagnumObject')
+@mock.patch('magnum.objects.base.MagnumObject', autospec=True)
 class TestMagnumAPI(base.TestCase):
 
-    @mock.patch('werkzeug.serving.run_simple')
-    @mock.patch.object(api, 'api_app')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('werkzeug.serving.run_simple', autospec=True)
+    @mock.patch.object(api, 'api_app', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_api_http(self, mock_prep, mock_app, mock_run, mock_base):
         api.main()
 
@@ -40,9 +40,9 @@ class TestMagnumAPI(base.TestCase):
                                          app, processes=workers,
                                          ssl_context=None)
 
-    @mock.patch('werkzeug.serving.run_simple')
-    @mock.patch.object(api, 'api_app')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('werkzeug.serving.run_simple', autospec=True)
+    @mock.patch.object(api, 'api_app', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_api_http_config_workers(self, mock_prep, mock_app,
                                      mock_run, mock_base):
         fake_workers = 8
@@ -57,10 +57,10 @@ class TestMagnumAPI(base.TestCase):
                                          app, processes=fake_workers,
                                          ssl_context=None)
 
-    @mock.patch('os.path.exists')
-    @mock.patch('werkzeug.serving.run_simple')
-    @mock.patch.object(api, 'api_app')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('os.path.exists', autospec=True)
+    @mock.patch('werkzeug.serving.run_simple', autospec=True)
+    @mock.patch.object(api, 'api_app', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_api_https_no_cert(self, mock_prep, mock_app, mock_run,
                                mock_exist, mock_base):
         self.config(enabled_ssl=True,
@@ -74,10 +74,10 @@ class TestMagnumAPI(base.TestCase):
         mock_run.assert_not_called()
         mock_exist.assert_called_once_with('tmp_crt')
 
-    @mock.patch('os.path.exists')
-    @mock.patch('werkzeug.serving.run_simple')
-    @mock.patch.object(api, 'api_app')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('os.path.exists', autospec=True)
+    @mock.patch('werkzeug.serving.run_simple', autospec=True)
+    @mock.patch.object(api, 'api_app', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_api_https_no_key(self, mock_prep, mock_app, mock_run,
                               mock_exist, mock_base):
         self.config(enabled_ssl=True,
@@ -93,10 +93,10 @@ class TestMagnumAPI(base.TestCase):
         mock_exist.assert_has_calls([mock.call('tmp_crt'),
                                      mock.call('tmp_key')])
 
-    @mock.patch('os.path.exists')
-    @mock.patch('werkzeug.serving.run_simple')
-    @mock.patch.object(api, 'api_app')
-    @mock.patch('magnum.common.service.prepare_service')
+    @mock.patch('os.path.exists', autospec=True)
+    @mock.patch('werkzeug.serving.run_simple', autospec=True)
+    @mock.patch.object(api, 'api_app', autospec=True)
+    @mock.patch('magnum.common.service.prepare_service', autospec=True)
     def test_api_https(self, mock_prep, mock_app, mock_run,
                        mock_exist, mock_base):
         self.config(enabled_ssl=True,

@@ -280,7 +280,7 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_image,
                           mock_os_cli, 'ubuntu-24.04')
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_validate_os_resources_with_invalid_flavor(self,
                                                        mock_os_cli):
         mock_cluster_template = {'flavor_id': 'test_flavor'}
@@ -296,8 +296,8 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_os_resources,
                           mock_context, mock_cluster_template)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.api.attr_validator.validators')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
+    @mock.patch('magnum.api.attr_validator.validators', autospec=True)
     def test_validate_os_resources_without_validator(self, mock_validators,
                                                      mock_os_cli):
         mock_cluster_template = {}
@@ -305,7 +305,7 @@ class TestAttrValidator(base.BaseTestCase):
         attr_validator.validate_os_resources(mock_context,
                                              mock_cluster_template)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_validate_os_resources_with_valid_fixed_subnet(self,
                                                            os_clients_klass):
         mock_cluster_template = {'fixed_network': 'test_net',
@@ -326,7 +326,7 @@ class TestAttrValidator(base.BaseTestCase):
         attr_validator.validate_os_resources(mock_context,
                                              mock_cluster_template)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_validate_os_resources_with_invalid_fixed_subnet(self,
                                                              os_clients_klass):
         mock_cluster_template = {'fixed_network': 'test_net',
@@ -348,7 +348,7 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_os_resources, mock_context,
                           mock_cluster_template)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_validate_os_resources_with_cluster(self, mock_os_cli):
         mock_cluster_template = {}
         mock_cluster = {

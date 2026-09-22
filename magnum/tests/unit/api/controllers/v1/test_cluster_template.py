@@ -118,8 +118,8 @@ class TestListClusterTemplate(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_one_by_uuid_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster_template(self.context, uuid=temp_uuid,
@@ -139,8 +139,8 @@ class TestListClusterTemplate(api_base.FunctionalTest):
             '/clustertemplates/%s' % temp_uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_one_hidden_admin_succeeds(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster_template(
@@ -184,8 +184,8 @@ class TestListClusterTemplate(api_base.FunctionalTest):
         self.assertEqual(bm_list[-1].uuid,
                          response['clustertemplates'][0]['uuid'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_with_all_projects(self, mock_context, mock_policy):
         for id_ in range(4):
             obj_utils.create_test_cluster_template(
@@ -277,7 +277,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
-        p = mock.patch.object(attr_validator, 'validate_os_resources')
+        p = mock.patch.object(
+            attr_validator, 'validate_os_resources', autospec=True)
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
         self.cluster_template = obj_utils.create_test_cluster_template(
@@ -298,7 +299,7 @@ class TestPatch(api_base.FunctionalTest):
             hidden=False
         )
         p = mock.patch.object(
-            attr_validator, 'validate_flavor_root_volume_size')
+            attr_validator, 'validate_flavor_root_volume_size', autospec=True)
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
 
@@ -343,7 +344,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(200, response.status_int)
 
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_update_public_cluster_template_success(self, mock_policy):
         mock_policy.return_value = True
         response = self.patch_json('/clustertemplates/%s' %
@@ -357,7 +358,7 @@ class TestPatch(api_base.FunctionalTest):
                                  self.cluster_template.uuid)
         self.assertTrue(response['public'])
 
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_update_public_cluster_template_fail(self, mock_policy):
         mock_policy.return_value = False
         self.assertRaises(AppError, self.patch_json,
@@ -365,7 +366,7 @@ class TestPatch(api_base.FunctionalTest):
                           [{'path': '/public', 'value': True,
                             'op': 'replace'}])
 
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_update_cluster_template_with_cluster_allow_update(self,
                                                                mock_policy):
         mock_policy.return_value = True
@@ -383,7 +384,7 @@ class TestPatch(api_base.FunctionalTest):
                                  self.cluster_template.uuid)
         self.assertEqual(response['public'], True)
 
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_update_hidden_cluster_template_success(self, mock_policy):
         mock_policy.return_value = True
         response = self.patch_json('/clustertemplates/%s' %
@@ -397,7 +398,7 @@ class TestPatch(api_base.FunctionalTest):
                                  self.cluster_template.uuid)
         self.assertTrue(response['hidden'])
 
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_update_hidden_cluster_template_fail(self, mock_policy):
         mock_policy.return_value = False
         self.assertRaises(AppError, self.patch_json,
@@ -405,7 +406,7 @@ class TestPatch(api_base.FunctionalTest):
                           [{'path': '/hidden', 'value': True,
                             'op': 'replace'}])
 
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_update_cluster_template_hidden_with_cluster_allow_update(
             self, mock_policy):
         mock_policy.return_value = True
@@ -460,7 +461,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_code)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_replace_singular(self, mock_utcnow):
         name = 'cluster_model_example_B'
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -655,8 +656,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_update_cluster_template_as_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster_template(self.context, uuid=temp_uuid,
@@ -674,20 +675,21 @@ class TestPost(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPost, self).setUp()
-        p = mock.patch.object(attr_validator, 'validate_os_resources')
+        p = mock.patch.object(
+            attr_validator, 'validate_os_resources', autospec=True)
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
         p = mock.patch.object(
-            attr_validator, 'validate_flavor_root_volume_size')
+            attr_validator, 'validate_flavor_root_volume_size', autospec=True)
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
-        p = mock.patch.object(driver.Driver, 'get_driver')
+        p = mock.patch.object(driver.Driver, 'get_driver', autospec=True)
         self.mock_driver_get = p.start()
         self.mock_driver_get.return_value = mock.MagicMock()
         self.addCleanup(p.stop)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_create_cluster_template(self, mock_utcnow,
                                      mock_image_data):
         bdict = apiutils.cluster_template_post_data()
@@ -709,7 +711,7 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_set_project_id_and_user_id(
             self, mock_image_data):
         with mock.patch.object(
@@ -725,7 +727,7 @@ class TestPost(api_base.FunctionalTest):
             self.assertEqual(self.context.user_id,
                              cc_mock.call_args[0][0]['user_id'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_doesnt_contain_id(self,
                                                        mock_image_data):
         with mock.patch.object(
@@ -745,7 +747,8 @@ class TestPost(api_base.FunctionalTest):
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock, \
-            mock.patch('magnum.api.attr_validator.validate_image')\
+            mock.patch(
+                'magnum.api.attr_validator.validate_image', autospec=True)\
                 as mock_image_data:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'ubuntu'}
@@ -800,7 +803,7 @@ class TestPost(api_base.FunctionalTest):
         self._create_model_raises_app_error(apiserver_port=1023)
         self._create_model_raises_app_error(apiserver_port='not an int')
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_labels(self, mock_image_data):
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
@@ -815,7 +818,7 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_without_labels(self, mock_image_data):
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
@@ -830,7 +833,7 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_docker_volume_size(self,
                                                              mock_image_data):
         with mock.patch.object(
@@ -845,7 +848,7 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_overlay(self, mock_image_data):
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
@@ -862,7 +865,7 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def _test_create_cluster_template_network_driver_attr(
             self,
             cluster_template_dict,
@@ -946,7 +949,7 @@ class TestPost(api_base.FunctionalTest):
             expect_errors_flag,
             expect_default_driver_flag)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_volume_driver(self,
                                                         mock_image_data):
         with mock.patch.object(
@@ -961,7 +964,7 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_no_volume_driver(self,
                                                            mock_image_data):
         with mock.patch.object(
@@ -976,8 +979,8 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_create_cluster_template_public_success(self, mock_policy,
                                                     mock_image_data):
         with mock.patch.object(
@@ -996,8 +999,8 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
             self.assertTrue(cc_mock.call_args[0][0]['public'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_create_cluster_template_public_fail(self, mock_policy,
                                                  mock_image_data):
         with mock.patch.object(self.dbapi, 'create_cluster_template',
@@ -1010,8 +1013,8 @@ class TestPost(api_base.FunctionalTest):
             self.assertRaises(AppError, self.post_json, '/clustertemplates',
                               bdict)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_create_cluster_template_public_not_set(self, mock_policy,
                                                     mock_image_data):
         with mock.patch.object(
@@ -1028,8 +1031,8 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
             self.assertFalse(cc_mock.call_args[0][0]['public'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_create_cluster_template_hidden_success(self, mock_policy,
                                                     mock_image_data):
         with mock.patch.object(
@@ -1048,8 +1051,8 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
             self.assertTrue(cc_mock.call_args[0][0]['hidden'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch.object(magnum_policy, 'enforce')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch.object(magnum_policy, 'enforce', autospec=True)
     def test_create_cluster_template_hidden_fail(self, mock_policy,
                                                  mock_image_data):
         with mock.patch.object(self.dbapi, 'create_cluster_template',
@@ -1062,7 +1065,7 @@ class TestPost(api_base.FunctionalTest):
             self.assertRaises(AppError, self.post_json, '/clustertemplates',
                               bdict)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_no_os_distro_image(self,
                                                              mock_image_data):
         mock_image_data.side_effect = exception.OSDistroFieldNotFound('img')
@@ -1072,7 +1075,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(400, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_os_distro_image(self,
                                                           mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1083,7 +1086,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(201, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_image_name(self,
                                                      mock_image_data):
         mock_image = {'name': 'mock_name',
@@ -1095,7 +1098,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(201, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_no_exist_image_name(self,
                                                               mock_image_data):
         mock_image_data.side_effect = exception.ResourceNotFound('test-img')
@@ -1105,7 +1108,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(404, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_multi_image_name(self,
                                                            mock_image_data):
         mock_image_data.side_effect = exception.Conflict('Multiple images')
@@ -1122,7 +1125,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(400, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_without_keypair_id(self,
                                                         mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1132,7 +1135,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/clustertemplates', bdict)
         self.assertEqual(201, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_dns(self,
                                               mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1143,7 +1146,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['dns_nameserver'],
                          response.json['dns_nameserver'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_no_exist_keypair(self,
                                                            mock_image_data):
         self.mock_valid_os_res.side_effect = exception.KeyPairNotFound("Test")
@@ -1154,7 +1157,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(404, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_flavor(self,
                                                  mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1167,7 +1170,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['master_flavor_id'],
                          response.json['master_flavor_id'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_without_flavor(self,
                                                     mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1180,7 +1183,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertIsNone(response.json['flavor_id'])
         self.assertIsNone(response.json['master_flavor_id'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_no_exist_flavor(self,
                                                           mock_image_data):
         self.mock_valid_os_res.side_effect = exception.FlavorNotFound("flavor")
@@ -1191,7 +1194,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(400, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_invalid_flavor(
         self,
         mock_image_data
@@ -1206,7 +1209,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(self.mock_valid_flavor_disk.called)
         self.assertEqual(400, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_external_network(self,
                                                            mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1217,7 +1220,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['external_network_id'],
                          response.json['external_network_id'])
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_no_exist_external_network(
             self, mock_image_data):
         self.mock_valid_os_res.side_effect = exception.ExternalNetworkNotFound(
@@ -1229,7 +1232,7 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(400, response.status_int)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_without_name(self, mock_image_data):
         with mock.patch.object(self.dbapi, 'create_cluster_template',
                                wraps=self.dbapi.create_cluster_template):
@@ -1249,8 +1252,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertRaises(AppError, self.post_json, '/clustertemplates',
                           bdict)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_create_cluster_template_with_multi_dns(self, mock_utcnow,
                                                     mock_image_data):
         bdict = apiutils.cluster_template_post_data(
@@ -1273,7 +1276,7 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_with_driver_name(self, mock_image_data):
         mock_image = {'name': 'mock_name',
                       'os_distro': 'ubuntu',
@@ -1285,7 +1288,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(resp.json['driver'],
                          mock_image.get('magnum_driver'))
 
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_driver_from_user(self, mock_image_data):
         """User-provided driver takes precedence over image magnum_driver."""
         mock_image_data.return_value = {'name': 'mock_name',
@@ -1296,8 +1299,10 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, resp.status_int)
         self.assertEqual('user_driver', resp.json['driver'])
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_default_driver',
+        autospec=True)
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_driver_from_config(
             self, mock_image_data, mock_get_default):
         """Config default_driver used when no user or image driver."""
@@ -1309,8 +1314,10 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, resp.status_int)
         self.assertEqual('conf_driver', resp.json['driver'])
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
-    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_default_driver',
+        autospec=True)
+    @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
     def test_create_cluster_template_driver_none_when_no_drivers(
             self, mock_image_data, mock_get_default):
         """Driver is None when no user, image, or available drivers."""
@@ -1382,8 +1389,8 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_delete_cluster_template_as_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster_template(self.context, uuid=temp_uuid,
@@ -1398,7 +1405,7 @@ class TestClusterTemplatePolicyEnforcement(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestClusterTemplatePolicyEnforcement, self).setUp()
-        p = mock.patch.object(driver.Driver, 'get_driver')
+        p = mock.patch.object(driver.Driver, 'get_driver', autospec=True)
         self.mock_driver_get = p.start()
         self.mock_driver_get.return_value = mock.MagicMock()
         self.addCleanup(p.stop)

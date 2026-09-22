@@ -155,8 +155,8 @@ class TestListNodegroups(NodeGroupControllerTest):
         filters = {'role': 'non-existent'}
         self._test_list_nodegroups(self.cluster.name, filters=filters)
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_as_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=temp_uuid,
@@ -224,8 +224,8 @@ class TestListNodegroups(NodeGroupControllerTest):
         response = self.get_json(url, expect_errors=True)
         self.assertEqual(404, response.status_code)
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_one_as_admin(self, mock_context, mock_policy):
         temp_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=temp_uuid,
@@ -279,13 +279,14 @@ class TestPost(NodeGroupControllerTest):
             self.context)
         self.cluster = obj_utils.create_test_cluster(self.context)
         self.cluster.refresh()
-        p = mock.patch.object(rpcapi.API, 'nodegroup_create_async')
+        p = mock.patch.object(
+            rpcapi.API, 'nodegroup_create_async', autospec=False)
         self.mock_ng_create = p.start()
         self.mock_ng_create.side_effect = self._simulate_nodegroup_create
         self.addCleanup(p.stop)
         self.url = "/clusters/%s/nodegroups" % self.cluster.uuid
         p = mock.patch.object(
-            attr_validator, 'validate_flavor_root_volume_size')
+            attr_validator, 'validate_flavor_root_volume_size', autospec=True)
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
 
@@ -520,14 +521,14 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(409, response.status_int)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_create_master_ng(self, mock_utcnow):
         ng_dict = apiutils.nodegroup_post_data(role='master')
         response = self.post_json(self.url, ng_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_create_ng_same_name(self, mock_utcnow):
         existing_name = self.cluster.default_ng_master.name
         ng_dict = apiutils.nodegroup_post_data(name=existing_name)
@@ -535,7 +536,7 @@ class TestPost(NodeGroupControllerTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(409, response.status_int)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_create_ng_wrong_microversion(self, mock_utcnow):
         headers = {"Openstack-Api-Version": "container-infra 1.8"}
         ng_dict = apiutils.nodegroup_post_data(name="new_ng")
@@ -607,7 +608,8 @@ class TestDelete(NodeGroupControllerTest):
         self.cluster.refresh()
         self.nodegroup = obj_utils.create_test_nodegroup(
             self.context, cluster_id=self.cluster.uuid, is_default=False)
-        p = mock.patch.object(rpcapi.API, 'nodegroup_delete_async')
+        p = mock.patch.object(
+            rpcapi.API, 'nodegroup_delete_async', autospec=False)
         self.mock_ng_delete = p.start()
         self.mock_ng_delete.side_effect = self._simulate_nodegroup_delete
         self.addCleanup(p.stop)
@@ -654,8 +656,8 @@ class TestDelete(NodeGroupControllerTest):
         self.assertEqual('application/json', response.content_type)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_delete_nodegroup_as_admin(self, mock_context, mock_policy):
         cluster_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,
@@ -687,13 +689,14 @@ class TestPatch(NodeGroupControllerTest):
         self.nodegroup = obj_utils.create_test_nodegroup(
             self.context, cluster_id=self.cluster.uuid, is_default=False,
             min_node_count=2, max_node_count=5, node_count=2)
-        p = mock.patch.object(rpcapi.API, 'nodegroup_update_async')
+        p = mock.patch.object(
+            rpcapi.API, 'nodegroup_update_async', autospec=False)
         self.mock_ng_update = p.start()
         self.mock_ng_update.side_effect = self._simulate_nodegroup_update
         self.addCleanup(p.stop)
         self.url = "/clusters/%s/nodegroups/" % self.cluster.uuid
         p = mock.patch.object(
-            attr_validator, 'validate_flavor_root_volume_size')
+            attr_validator, 'validate_flavor_root_volume_size', autospec=True)
         self.mock_valid_flavor_disk = p.start()
         self.addCleanup(p.stop)
 
@@ -701,7 +704,7 @@ class TestPatch(NodeGroupControllerTest):
         nodegroup.save()
         return nodegroup
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_replace_ok(self, mock_utcnow):
         max_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -720,7 +723,7 @@ class TestPatch(NodeGroupControllerTest):
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_replace_ok_by_name(self, mock_utcnow):
         max_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -824,7 +827,7 @@ class TestPatch(NodeGroupControllerTest):
         self.assertEqual(409, response.status_code)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_remove_ok(self, mock_utcnow):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
@@ -841,7 +844,7 @@ class TestPatch(NodeGroupControllerTest):
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
-    @mock.patch('oslo_utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
     def test_remove_min_node_count(self, mock_utcnow):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
@@ -875,8 +878,8 @@ class TestPatch(NodeGroupControllerTest):
         self.assertEqual(400, response.status_code)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_update_nodegroup_as_admin(self, mock_context, mock_policy):
         cluster_uuid = uuidutils.generate_uuid()
         obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,

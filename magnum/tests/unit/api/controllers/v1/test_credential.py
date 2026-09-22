@@ -37,7 +37,7 @@ class TestPatch(CredentialControllerTest):
     def setUp(self):
         super(TestPatch, self).setUp()
         self.cluster = obj_utils.create_test_cluster(self.context)
-        p = mock.patch.object(rpcapi.API, 'credential_rotate')
+        p = mock.patch.object(rpcapi.API, 'credential_rotate', autospec=False)
         self.mock_rotate = p.start()
         self.mock_rotate.side_effect = self._simulate_credential_rotate
         self.addCleanup(p.stop)

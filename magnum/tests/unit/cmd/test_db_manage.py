@@ -31,7 +31,7 @@ class TestMagnumDbManage(base.TestCase):
         clear_conf()
         self.addCleanup(clear_conf)
 
-    @mock.patch('magnum.db.migration.version')
+    @mock.patch('magnum.db.migration.version', autospec=True)
     @mock.patch('sys.argv', ['magnum-db-manage', 'version'])
     def test_db_manage_version(self, mock_version):
         with mock.patch('sys.stdout', new=io.StringIO()) as fakeOutput:
@@ -41,19 +41,19 @@ class TestMagnumDbManage(base.TestCase):
                              fakeOutput.getvalue())
             mock_version.assert_called_once_with()
 
-    @mock.patch('magnum.db.migration.upgrade')
+    @mock.patch('magnum.db.migration.upgrade', autospec=True)
     @mock.patch('sys.argv', ['magnum-db-manage', 'upgrade'])
     def test_db_manage_upgrade(self, mock_upgrade):
         db_manage.main()
         mock_upgrade.assert_called_once_with(base.CONF.command.revision)
 
-    @mock.patch('magnum.db.migration.stamp')
+    @mock.patch('magnum.db.migration.stamp', autospec=True)
     @mock.patch('sys.argv', ['magnum-db-manage', 'stamp', 'foo bar'])
     def test_db_manage_stamp(self, mock_stamp):
         db_manage.main()
         mock_stamp.assert_called_once_with('foo bar')
 
-    @mock.patch('magnum.db.migration.revision')
+    @mock.patch('magnum.db.migration.revision', autospec=True)
     @mock.patch('sys.argv', ['magnum-db-manage', 'revision', '-m', 'foo bar'])
     def test_db_manage_revision(self, mock_revision):
         db_manage.main()

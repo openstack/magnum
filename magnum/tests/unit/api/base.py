@@ -62,7 +62,8 @@ class FunctionalTest(base.DbTestCase):
         # Controller._check_version is needed in some tests,
         # must be mocked in others. Enable the mock when needed.
         self.patch_check_version = mock.patch(
-            'magnum.api.controllers.v1.Controller._check_version')
+            'magnum.api.controllers.v1.Controller._check_version',
+            autospec=True)
 
     def _verify_attrs(self, attrs, response, positive=True):
         if positive is True:

@@ -26,8 +26,8 @@ from magnum.tests import base
 
 class TestRpc(base.TestCase):
     @mock.patch.object(rpc, 'profiler', None)
-    @mock.patch.object(rpc, 'RequestContextSerializer')
-    @mock.patch.object(messaging, 'get_rpc_client')
+    @mock.patch.object(rpc, 'RequestContextSerializer', autospec=True)
+    @mock.patch.object(messaging, 'get_rpc_client', autospec=True)
     def test_get_client(self, mock_get, mock_ser):
         rpc.TRANSPORT = mock.Mock()
         tgt = mock.Mock()
@@ -44,8 +44,8 @@ class TestRpc(base.TestCase):
         self.assertEqual('client', client)
 
     @mock.patch.object(rpc, 'profiler', mock.Mock())
-    @mock.patch.object(rpc, 'ProfilerRequestContextSerializer')
-    @mock.patch.object(messaging, 'get_rpc_client')
+    @mock.patch.object(rpc, 'ProfilerRequestContextSerializer', autospec=True)
+    @mock.patch.object(messaging, 'get_rpc_client', autospec=True)
     def test_get_client_profiler_enabled(self, mock_get, mock_ser):
         rpc.TRANSPORT = mock.Mock()
         tgt = mock.Mock()
@@ -62,8 +62,8 @@ class TestRpc(base.TestCase):
         self.assertEqual('client', client)
 
     @mock.patch.object(rpc, 'profiler', None)
-    @mock.patch.object(rpc, 'RequestContextSerializer')
-    @mock.patch.object(messaging, 'get_rpc_server')
+    @mock.patch.object(rpc, 'RequestContextSerializer', autospec=True)
+    @mock.patch.object(messaging, 'get_rpc_server', autospec=True)
     def test_get_server(self, mock_get, mock_ser):
         rpc.TRANSPORT = mock.Mock()
         ser = mock.Mock()
@@ -80,8 +80,8 @@ class TestRpc(base.TestCase):
         self.assertEqual('server', server)
 
     @mock.patch.object(rpc, 'profiler', mock.Mock())
-    @mock.patch.object(rpc, 'ProfilerRequestContextSerializer')
-    @mock.patch.object(messaging, 'get_rpc_server')
+    @mock.patch.object(rpc, 'ProfilerRequestContextSerializer', autospec=True)
+    @mock.patch.object(messaging, 'get_rpc_server', autospec=True)
     def test_get_server_profiler_enabled(self, mock_get, mock_ser):
         rpc.TRANSPORT = mock.Mock()
         ser = mock.Mock()
@@ -98,7 +98,7 @@ class TestRpc(base.TestCase):
                                          access_policy=access_policy)
         self.assertEqual('server', server)
 
-    @mock.patch.object(messaging, 'TransportURL')
+    @mock.patch.object(messaging, 'TransportURL', autospec=True)
     def test_get_transport_url(self, mock_url):
         conf = mock.Mock()
         rpc.CONF = conf
@@ -109,7 +109,7 @@ class TestRpc(base.TestCase):
         self.assertEqual('foo', url)
         mock_url.parse.assert_called_once_with(conf, 'bar')
 
-    @mock.patch.object(messaging, 'TransportURL')
+    @mock.patch.object(messaging, 'TransportURL', autospec=True)
     def test_get_transport_url_null(self, mock_url):
         conf = mock.Mock()
         rpc.CONF = conf
@@ -157,7 +157,8 @@ class TestRpc(base.TestCase):
         self.assertEqual(0, len(rpc.EXTRA_EXMODS))
 
     def test_serialize_entity(self):
-        with mock.patch.object(jsonutils, 'to_primitive') as mock_prim:
+        with mock.patch.object(
+                jsonutils, 'to_primitive', autospec=True) as mock_prim:
             rpc.JsonPayloadSerializer.serialize_entity('context', 'entity')
 
         mock_prim.assert_called_once_with('entity', convert_instances=True)
@@ -205,7 +206,7 @@ class TestRequestContextSerializer(base.TestCase):
 
         context.to_dict.assert_called_once_with()
 
-    @mock.patch.object(context, 'RequestContext')
+    @mock.patch.object(context, 'RequestContext', autospec=True)
     def test_deserialize_context(self, mock_req):
         self.ser.deserialize_context('context')
 
@@ -217,7 +218,7 @@ class TestProfilerRequestContextSerializer(base.TestCase):
         super(TestProfilerRequestContextSerializer, self).setUp()
         self.ser = rpc.ProfilerRequestContextSerializer(mock.Mock())
 
-    @mock.patch('magnum.common.rpc.profiler')
+    @mock.patch('magnum.common.rpc.profiler', autospec=True)
     def test_serialize_context(self, mock_profiler):
         prof = mock_profiler.get.return_value
         prof.hmac_key = 'swordfish'
@@ -236,7 +237,7 @@ class TestProfilerRequestContextSerializer(base.TestCase):
             }
         }, self.ser.serialize_context(context))
 
-    @mock.patch('magnum.common.rpc.profiler')
+    @mock.patch('magnum.common.rpc.profiler', autospec=True)
     def test_deserialize_context(self, mock_profiler):
         serialized = {'project_id': 'test',
                       'trace_info': {

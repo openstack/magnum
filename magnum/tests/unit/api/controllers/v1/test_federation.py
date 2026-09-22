@@ -182,7 +182,8 @@ class TestListFederation(api_base.FunctionalTest):
 class TestPatch(api_base.FunctionalTest):
     def setUp(self):
         super(TestPatch, self).setUp()
-        p = mock.patch.object(rpcapi.API, 'federation_update_async')
+        p = mock.patch.object(
+            rpcapi.API, 'federation_update_async', autospec=False)
         self.mock_federation_update = p.start()
         self.mock_federation_update.side_effect = \
             self._sim_rpc_federation_update
@@ -274,7 +275,8 @@ class TestPatch(api_base.FunctionalTest):
 class TestPost(api_base.FunctionalTest):
     def setUp(self):
         super(TestPost, self).setUp()
-        p = mock.patch.object(rpcapi.API, 'federation_create_async')
+        p = mock.patch.object(
+            rpcapi.API, 'federation_create_async', autospec=False)
         self.mock_fed_create = p.start()
         self.mock_fed_create.side_effect = self._simulate_federation_create
         self.addCleanup(p.stop)
@@ -373,7 +375,8 @@ class TestDelete(api_base.FunctionalTest):
         self.federation = obj_utils.create_test_federation(
             self.context, name='federation-example',
             uuid=uuidutils.generate_uuid())
-        p = mock.patch.object(rpcapi.API, 'federation_delete_async')
+        p = mock.patch.object(
+            rpcapi.API, 'federation_delete_async', autospec=False)
         self.mock_federation_delete = p.start()
         self.mock_federation_delete.side_effect = \
             self._simulate_federation_delete

@@ -100,7 +100,7 @@ class TestCase(base.BaseTestCase):
             return magnum_context.RequestContext.from_dict(context.to_dict())
 
         p = mock.patch.object(magnum_context, 'make_context',
-                              side_effect=make_context)
+                              side_effect=make_context, autospec=True)
 
         self.global_mocks['magnum.common.context.make_context'] = p
 

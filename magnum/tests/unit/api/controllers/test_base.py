@@ -12,6 +12,7 @@
 
 from unittest import mock
 
+import pecan
 from webob import exc
 
 from magnum.api.controllers import base
@@ -153,7 +154,8 @@ class TestVersion(test_base.TestCase):
         self.a.minor = 0
         self.assertRaises(ValueError, self.a.matches, self.b, self.c)
 
-    @mock.patch('magnum.api.controllers.versions.Version.parse_headers')
+    @mock.patch(
+        'magnum.api.controllers.versions.Version.parse_headers', autospec=True)
     def test_init(self, mock_parse):
         a = mock.Mock()
         b = mock.Mock()
@@ -164,14 +166,16 @@ class TestVersion(test_base.TestCase):
         self.assertEqual(a, v.major)
         self.assertEqual(b, v.minor)
 
-    @mock.patch('magnum.api.controllers.versions.Version.parse_headers')
+    @mock.patch(
+        'magnum.api.controllers.versions.Version.parse_headers', autospec=True)
     def test_repr(self, mock_parse):
         mock_parse.return_value = (123, 456)
         v = versions.Version('test', mock.ANY, mock.ANY)
         result = "%s" % v
         self.assertEqual('123.456', result)
 
-    @mock.patch('magnum.api.controllers.versions.Version.parse_headers')
+    @mock.patch(
+        'magnum.api.controllers.versions.Version.parse_headers', autospec=True)
     def test_repr_with_strings(self, mock_parse):
         mock_parse.return_value = ('abc', 'def')
         v = versions.Version('test', mock.ANY, mock.ANY)
@@ -367,7 +371,7 @@ class TestController(test_base.TestCase):
         result = api2_list[1].func(controller)
         self.assertEqual('API2_1.0_2.0', result)
 
-    @mock.patch('pecan.request')
+    @mock.patch('pecan.request', autospec=pecan.Request)
     def test_controller_get_attribute(self, mock_pecan_request):
 
         class MyController(base.Controller):
@@ -388,7 +392,7 @@ class TestController(test_base.TestCase):
         result = method()
         self.assertEqual('API1_1.2_1.3', result)
 
-    @mock.patch('pecan.request')
+    @mock.patch('pecan.request', autospec=pecan.Request)
     def test_controller_get_attr_version_not_found(self,
                                                    mock_pecan_request):
 

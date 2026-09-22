@@ -33,7 +33,7 @@ HEADERS = {
 
 class TestCertObject(base.TestCase):
 
-    @mock.patch('magnum.api.utils.get_resource')
+    @mock.patch('magnum.api.utils.get_resource', autospec=True)
     def test_cert_init(self, mock_get_resource):
         cert_dict = api_utils.cert_post_data()
         mock_cluster = mock.MagicMock()
@@ -53,7 +53,8 @@ class TestGetCaCertificate(api_base.FunctionalTest):
         super(TestGetCaCertificate, self).setUp()
         self.cluster = obj_utils.create_test_cluster(self.context)
 
-        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        conductor_api_patcher = mock.patch(
+            'magnum.conductor.api.API', autospec=True)
         self.conductor_api_class = conductor_api_patcher.start()
         self.conductor_api = mock.MagicMock()
         self.conductor_api_class.return_value = self.conductor_api
@@ -132,7 +133,8 @@ class TestPost(api_base.FunctionalTest):
         super(TestPost, self).setUp()
         self.cluster = obj_utils.create_test_cluster(self.context)
 
-        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        conductor_api_patcher = mock.patch(
+            'magnum.conductor.api.API', autospec=True)
         self.conductor_api_class = conductor_api_patcher.start()
         self.conductor_api = mock.MagicMock()
         self.conductor_api_class.return_value = self.conductor_api
@@ -187,13 +189,14 @@ class TestRotateCaCertificate(api_base.FunctionalTest):
             self.context, cluster_distro='ubuntu')
         self.cluster = obj_utils.create_test_cluster(self.context)
 
-        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        conductor_api_patcher = mock.patch(
+            'magnum.conductor.api.API', autospec=True)
         self.conductor_api_class = conductor_api_patcher.start()
         self.conductor_api = mock.MagicMock()
         self.conductor_api_class.return_value = self.conductor_api
         self.addCleanup(conductor_api_patcher.stop)
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_rotate_ca_cert(self, mock_policy):
         mock_policy.return_value = True
         fake_cert = api_utils.cert_post_data()
@@ -215,13 +218,14 @@ class TestRotateCaCertificateNonTls(api_base.FunctionalTest):
             self.context, tls_disabled=True)
         self.cluster = obj_utils.create_test_cluster(self.context)
 
-        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        conductor_api_patcher = mock.patch(
+            'magnum.conductor.api.API', autospec=True)
         self.conductor_api_class = conductor_api_patcher.start()
         self.conductor_api = mock.MagicMock()
         self.conductor_api_class.return_value = self.conductor_api
         self.addCleanup(conductor_api_patcher.stop)
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_rotate_ca_cert_non_tls(self, mock_policy):
         mock_policy.return_value = True
         fake_cert = api_utils.cert_post_data()

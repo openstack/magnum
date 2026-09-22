@@ -173,10 +173,12 @@ class PeriodicTestCase(base.TestCase):
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
-    @mock.patch('magnum.objects.Cluster.list')
-    @mock.patch.object(dbapi.Connection, 'destroy_nodegroup')
-    @mock.patch.object(dbapi.Connection, 'destroy_cluster')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver_for_cluster',
+        autospec=True)
+    @mock.patch('magnum.objects.Cluster.list', autospec=True)
+    @mock.patch.object(dbapi.Connection, 'destroy_nodegroup', autospec=True)
+    @mock.patch.object(dbapi.Connection, 'destroy_cluster', autospec=True)
     def test_sync_cluster_status_changes(self, mock_db_destroy,
                                          mock_ng_destroy,
                                          mock_cluster_list,
@@ -202,7 +204,8 @@ class PeriodicTestCase(base.TestCase):
                              self.cluster3.status)
             self.assertEqual('fake_reason_33', self.cluster3.status_reason)
             self.assertEqual(2, mock_ng_destroy.call_count)
-            mock_db_destroy.assert_called_once_with(self.cluster4.uuid)
+            mock_db_destroy.assert_called_once_with(mock.ANY,
+                                                    self.cluster4.uuid)
             self.assertEqual(cluster_status.ROLLBACK_COMPLETE,
                              self.cluster5.status)
             self.assertEqual('fake_reason_55', self.cluster5.status_reason)
@@ -211,8 +214,10 @@ class PeriodicTestCase(base.TestCase):
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
-    @mock.patch('magnum.objects.Cluster.list')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver_for_cluster',
+        autospec=True)
+    @mock.patch('magnum.objects.Cluster.list', autospec=True)
     def test_sync_cluster_status_not_changes(self, mock_cluster_list,
                                              mock_get_driver):
 
@@ -243,10 +248,12 @@ class PeriodicTestCase(base.TestCase):
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
-    @mock.patch('magnum.objects.Cluster.list')
-    @mock.patch.object(dbapi.Connection, 'destroy_cluster')
-    @mock.patch.object(dbapi.Connection, 'destroy_nodegroup')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver_for_cluster',
+        autospec=True)
+    @mock.patch('magnum.objects.Cluster.list', autospec=True)
+    @mock.patch.object(dbapi.Connection, 'destroy_cluster', autospec=True)
+    @mock.patch.object(dbapi.Connection, 'destroy_nodegroup', autospec=True)
     def test_sync_cluster_status_stack_not_found(self, mock_ng_destroy,
                                                  mock_db_destroy,
                                                  mock_cluster_list,
@@ -271,8 +278,8 @@ class PeriodicTestCase(base.TestCase):
                              self.cluster5.status)
             self.assertEqual('Stack 55 not found', self.cluster5.status_reason)
             mock_db_destroy.assert_has_calls([
-                mock.call(self.cluster2.uuid),
-                mock.call(self.cluster4.uuid)
+                mock.call(mock.ANY, self.cluster2.uuid),
+                mock.call(mock.ANY, self.cluster4.uuid)
             ])
             self.assertEqual(2, mock_db_destroy.call_count)
             notifications = fake_notifier.NOTIFICATIONS
@@ -280,10 +287,10 @@ class PeriodicTestCase(base.TestCase):
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
-    @mock.patch('magnum.conductor.monitors.create_monitor')
-    @mock.patch('magnum.objects.Cluster.list')
-    @mock.patch('magnum.common.rpc.get_notifier')
-    @mock.patch('magnum.common.context.make_admin_context')
+    @mock.patch('magnum.conductor.monitors.create_monitor', autospec=True)
+    @mock.patch('magnum.objects.Cluster.list', autospec=True)
+    @mock.patch('magnum.common.rpc.get_notifier', autospec=True)
+    @mock.patch('magnum.common.context.make_admin_context', autospec=True)
     def test_sync_cluster_health_status(self, mock_make_admin_context,
                                         mock_get_notifier, mock_cluster_list,
                                         mock_create_monitor):

@@ -37,8 +37,8 @@ class TestStatsController(api_base.FunctionalTest):
         expected = {u'clusters': 0, u'nodes': 0}
         self.assertEqual(expected, response)
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_admin_get_all_stats(self, mock_context, mock_policy):
         obj_utils.create_test_cluster(self.context,
                                       project_id=123,
@@ -50,8 +50,8 @@ class TestStatsController(api_base.FunctionalTest):
         expected = {u'clusters': 2, u'nodes': 12}
         self.assertEqual(expected, response)
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_admin_get_tenant_stats(self, mock_context, mock_policy):
         obj_utils.create_test_cluster(self.context,
                                       project_id=123,
@@ -65,8 +65,8 @@ class TestStatsController(api_base.FunctionalTest):
         expected = {u'clusters': 1, u'nodes': 6}
         self.assertEqual(expected, response)
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_admin_get_invalid_tenant_stats(self, mock_context, mock_policy):
         obj_utils.create_test_cluster(self.context,
                                       project_id=123,

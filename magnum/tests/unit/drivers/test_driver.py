@@ -25,7 +25,7 @@ class TestGetDefaultDriver(base.TestCase):
         cls = mock.MagicMock()
         return ep, cls
 
-    @mock.patch.object(driver.Driver, 'load_entry_points')
+    @mock.patch.object(driver.Driver, 'load_entry_points', autospec=True)
     def test_get_default_driver_from_config(self, mock_load):
         """Returns CONF.drivers.default_driver"""
         self.config(default_driver='heat-k8s', group='drivers')
@@ -34,7 +34,7 @@ class TestGetDefaultDriver(base.TestCase):
         self.assertEqual('heat-k8s', result)
         mock_load.assert_called_once()
 
-    @mock.patch.object(driver.Driver, 'load_entry_points')
+    @mock.patch.object(driver.Driver, 'load_entry_points', autospec=True)
     def test_get_default_driver_from_config_not_registered(self, mock_load):
         """Raises ClusterDriverNotSupported when driver is absent."""
         self.config(default_driver='typo-driver', group='drivers')
@@ -42,7 +42,7 @@ class TestGetDefaultDriver(base.TestCase):
         self.assertRaises(exception.ClusterDriverNotSupported,
                           driver.Driver.get_default_driver)
 
-    @mock.patch.object(driver.Driver, 'load_entry_points')
+    @mock.patch.object(driver.Driver, 'load_entry_points', autospec=True)
     def test_get_default_driver_first_sorted(self, mock_load):
         """Returns the alphabetically first driver when config is not set."""
         mock_load.return_value = iter([
@@ -53,7 +53,7 @@ class TestGetDefaultDriver(base.TestCase):
         result = driver.Driver.get_default_driver()
         self.assertEqual('alpha_driver', result)
 
-    @mock.patch.object(driver.Driver, 'load_entry_points')
+    @mock.patch.object(driver.Driver, 'load_entry_points', autospec=True)
     def test_get_default_driver_no_drivers(self, mock_load):
         """Returns None when no drivers are available and config is not set."""
         mock_load.return_value = iter([])

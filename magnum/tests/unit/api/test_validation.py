@@ -17,6 +17,7 @@ import importlib
 from unittest import mock
 
 from openstack import exceptions as sdk_exceptions
+import pecan
 
 from magnum.api import validation as v
 from magnum.common import exception
@@ -33,6 +34,7 @@ class TestValidation(base.BaseTestCase):
     def _test_enforce_cluster_type_supported(
             self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type, assert_raised=False):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_cluster_type_supported()
         def test(self, cluster):
@@ -55,10 +57,11 @@ class TestValidation(base.BaseTestCase):
         else:
             self.assertIsNone(test(self, cluster))
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    @mock.patch('magnum.objects.ClusterTemplate.get')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver', autospec=True)
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.objects.Cluster.get_by_uuid', autospec=True)
+    @mock.patch('magnum.objects.ClusterTemplate.get', autospec=True)
     def test_enforce_cluster_type_supported(
             self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, mock_get_driver):
@@ -69,9 +72,9 @@ class TestValidation(base.BaseTestCase):
             mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request, cluster_type)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    @mock.patch('magnum.objects.ClusterTemplate.get')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.objects.Cluster.get_by_uuid', autospec=True)
+    @mock.patch('magnum.objects.ClusterTemplate.get', autospec=True)
     def test_enforce_cluster_type_not_supported(
             self, mock_cluster_template_get, mock_cluster_get_by_uuid,
             mock_pecan_request):
@@ -175,8 +178,8 @@ class TestValidation(base.BaseTestCase):
             assert_raised=True,
         )
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.api.utils.get_resource')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.api.utils.get_resource', autospec=True)
     def _test_enforce_network_driver_types_update(
         self,
         mock_get_resource,
@@ -185,6 +188,8 @@ class TestValidation(base.BaseTestCase):
         validator_allowed_network_drivers=None,
         assert_raised=False,
     ):
+        mock_pecan_request.context = mock.Mock()
+
         @v.enforce_network_driver_types_update()
         def test(self, cluster_template_ident, patch):
             pass
@@ -309,8 +314,8 @@ class TestValidation(base.BaseTestCase):
             server_type='invalid',
             assert_raised=True)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.api.utils.get_resource')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.api.utils.get_resource', autospec=True)
     def _test_enforce_volume_driver_types_update(
             self,
             mock_get_resource,
@@ -318,6 +323,7 @@ class TestValidation(base.BaseTestCase):
             volume_driver_type,
             op,
             assert_raised=False):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_volume_driver_types_update()
         def test(self, cluster_template_ident, patch):
@@ -389,10 +395,11 @@ class TestValidation(base.BaseTestCase):
                 self.assertRaises(exception.InvalidParameterValue,
                                   v.validate_cluster_properties, set([field]))
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_image_not_found(
             self, mock_os_clients, mock_pecan_request):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -409,10 +416,11 @@ class TestValidation(base.BaseTestCase):
         self.assertRaises(exception.ImageNotFound,
                           test, self, cluster_template)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_image_not_found_sdk(
             self, mock_os_clients, mock_pecan_request):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -428,10 +436,11 @@ class TestValidation(base.BaseTestCase):
         self.assertRaises(exception.ImageNotFound,
                           test, self, cluster_template)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_image_forbidden(
             self, mock_os_clients, mock_pecan_request):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -447,10 +456,11 @@ class TestValidation(base.BaseTestCase):
         self.assertRaises(exception.ImageNotAuthorized,
                           test, self, cluster_template)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_image_os_distro_unset(
             self, mock_os_clients, mock_pecan_request):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -466,7 +476,8 @@ class TestValidation(base.BaseTestCase):
         self.assertRaises(exception.OSDistroFieldNotFound,
                           test, self, cluster_template)
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver', autospec=True)
     def test_enforce_driver_supported_user_driver_skips_image(
             self, mock_get_driver):
         """When driver and cluster_distro are set, image is not fetched."""
@@ -487,14 +498,18 @@ class TestValidation(base.BaseTestCase):
         mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
                                                 'user_driver')
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver', autospec=True)
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_default_driver',
+        autospec=True)
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_falls_back_to_default(
             self, mock_os_clients, mock_pecan_request,
             mock_get_default, mock_get_driver):
         """get_default_driver() is used when no driver from image or user."""
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -519,14 +534,18 @@ class TestValidation(base.BaseTestCase):
         mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
                                                 'default_driver')
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver', autospec=True)
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_default_driver',
+        autospec=True)
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_image_driver_skips_default(
             self, mock_os_clients, mock_pecan_request,
             mock_get_default, mock_get_driver):
         """get_default_driver() is not called when image provides a driver."""
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -550,12 +569,14 @@ class TestValidation(base.BaseTestCase):
         mock_get_driver.assert_called_once_with('vm', 'ubuntu', 'kubernetes',
                                                 'image_driver')
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver', autospec=True)
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_user_driver_preserved_without_distro(
             self, mock_os_clients, mock_pecan_request, mock_get_driver):
         """User-supplied driver is not overwritten even when image has one."""
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -580,14 +601,18 @@ class TestValidation(base.BaseTestCase):
                                                 'user_driver')
         self.assertEqual('user_driver', cluster_template.driver)
 
-    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
-    @mock.patch('magnum.drivers.common.driver.Driver.get_default_driver')
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_driver', autospec=True)
+    @mock.patch(
+        'magnum.drivers.common.driver.Driver.get_default_driver',
+        autospec=True)
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_driver_supported_writes_resolved_driver_back(
             self, mock_os_clients, mock_pecan_request,
             mock_get_default, mock_get_driver):
         """Resolved driver is written back to cluster_template.driver."""
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_driver_supported()
         def test(self, cluster_template):
@@ -610,10 +635,11 @@ class TestValidation(base.BaseTestCase):
 
         self.assertEqual('default_driver', cluster_template.driver)
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_valid_project_id_on_create_success(
             self, mock_os_clients, mock_pecan_request):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_valid_project_id_on_create()
         def test(self, quota):
@@ -631,10 +657,11 @@ class TestValidation(base.BaseTestCase):
         mock_os_clients.return_value.keystone.return_value\
             .client.get_project.assert_called_once_with('valid-project-id')
 
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('pecan.request', autospec=pecan.Request)
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_enforce_valid_project_id_on_create_project_not_found(
             self, mock_os_clients, mock_pecan_request):
+        mock_pecan_request.context = mock.Mock()
 
         @v.enforce_valid_project_id_on_create()
         def test(self, quota):

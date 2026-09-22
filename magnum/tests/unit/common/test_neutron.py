@@ -33,7 +33,7 @@ class NeutronTest(base.TestCase):
             objects.NodeGroup(self.context, **nodegroups_dict['worker'])
         ]
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_delete_floatingip(self, mock_clients):
         mock_nclient = mock.MagicMock()
         fake_port_id = "b4518944-c2cf-4c69-a1e3-774041fd5d14"
@@ -54,7 +54,7 @@ class NeutronTest(base.TestCase):
         mock_nclient.ips.assert_called_once_with(port_id=fake_port_id)
         mock_nclient.delete_ip.assert_called_once_with(fake_fip_id)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_delete_floatingip_empty(self, mock_clients):
         mock_nclient = mock.MagicMock()
         fake_port_id = "b4518944-c2cf-4c69-a1e3-774041fd5d14"
@@ -68,7 +68,7 @@ class NeutronTest(base.TestCase):
 
         self.assertFalse(mock_nclient.delete_ip.called)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_delete_floatingip_exception(self, mock_clients):
         mock_nclient = mock.MagicMock()
         fake_port_id = "b4518944-c2cf-4c69-a1e3-774041fd5d14"
@@ -93,7 +93,7 @@ class NeutronTest(base.TestCase):
             self.cluster
         )
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_external_network_id(self, mock_clients):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -111,7 +111,7 @@ class NeutronTest(base.TestCase):
 
         self.assertEqual(fake_id, network_id)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_external_network_id_notfound(self, mock_clients):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -132,7 +132,7 @@ class NeutronTest(base.TestCase):
             "another_network"
         )
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_external_network_id_conflict(self, mock_clients):
         fake_name = "fake_network"
         fake_id_1 = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -157,7 +157,7 @@ class NeutronTest(base.TestCase):
             fake_name
         )
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_fixed_network_name(self, mock_clients):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -175,7 +175,7 @@ class NeutronTest(base.TestCase):
 
         self.assertEqual(fake_name, network_name)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_fixed_network_name_notfound(self, mock_clients):
         fake_name = "fake_network"
         fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -197,7 +197,7 @@ class NeutronTest(base.TestCase):
             another_fake_id
         )
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_fixed_subnet_id(self, mock_clients):
         fake_name = "fake_subnet"
         fake_id = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -215,7 +215,7 @@ class NeutronTest(base.TestCase):
 
         self.assertEqual(fake_id, subnet_id)
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_fixed_subnet_id_notfound(self, mock_clients):
         fake_name = "fake_subnet"
         fake_id = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"
@@ -236,7 +236,7 @@ class NeutronTest(base.TestCase):
             "another_subnet"
         )
 
-    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.common.clients.OpenStackClients', autospec=True)
     def test_get_fixed_subnet_id_conflict(self, mock_clients):
         fake_name = "fake_subnet"
         fake_id_1 = "35ee5da0-1ac0-11e9-84cd-00224d6b7bc1"

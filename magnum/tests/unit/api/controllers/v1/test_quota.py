@@ -39,13 +39,13 @@ class TestQuota(api_base.FunctionalTest):
     def setUp(self):
         super(TestQuota, self).setUp()
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_empty(self, mock_policy):
         mock_policy.return_value = True
         response = self.get_json('/quotas')
         self.assertEqual([], response['quotas'])
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_one(self, mock_policy):
         mock_policy.return_value = True
         quota = obj_utils.create_test_quota(self.context)
@@ -53,7 +53,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(quota.project_id, response['quotas'][0]["project_id"])
         self._verify_attrs(self._quota_attrs, response['quotas'][0])
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_get_one(self, mock_policy):
         mock_policy.return_value = True
         quota = obj_utils.create_test_quota(self.context)
@@ -62,7 +62,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(quota.project_id, response['project_id'])
         self.assertEqual(quota.resource, response['resource'])
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_get_one_no_config_default(self, mock_policy):
         mock_policy.return_value = True
         response = self.get_json(
@@ -73,7 +73,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(CONF.quotas.max_clusters_per_project,
                          response.json['hard_limit'])
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_get_one_with_config_default(self, mock_policy):
         mock_policy.return_value = True
         quota = 15
@@ -94,8 +94,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_admin_all_tenants(self, mock_context, mock_policy):
         mock_context.return_value = self.context
         quota_list = []
@@ -111,8 +111,8 @@ class TestQuota(api_base.FunctionalTest):
         res_proj_ids = [r['project_id'] for r in response['quotas']]
         self.assertEqual(sorted(expected), sorted(res_proj_ids))
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_with_non_admin_context(self, mock_context, mock_policy):
         mock_context.return_value = self.context
         quota_list = []
@@ -125,8 +125,8 @@ class TestQuota(api_base.FunctionalTest):
         response = self.get_json('/quotas?all_tenants=True')
         self.assertEqual(0, len(response['quotas']))
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_admin_not_all_tenants(self, mock_context, mock_policy):
         mock_context.return_value = self.context
         quota_list = []
@@ -141,8 +141,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(1, len(response['quotas']))
         self.assertEqual('proj-id-1', response['quotas'][0]['project_id'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_with_pagination_limit(self, mock_context,
                                            mock_policy):
         mock_context.return_value = self.context
@@ -164,8 +164,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertIn('limit=2', response['next'])
         self.assertIn('marker=%s' % quota_list[1].id, response['next'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_admin_all_with_pagination_marker(self, mock_context,
                                                       mock_policy):
         mock_context.return_value = self.context
@@ -182,8 +182,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(quota_list[-1].project_id,
                          response['quotas'][0]['project_id'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch("magnum.common.context.make_context")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch("magnum.common.context.make_context", autospec=False)
     def test_get_all_admin_all_tenants_false(self, mock_context, mock_policy):
         mock_context.return_value = self.context
         quota_list = []
@@ -198,7 +198,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(1, len(response['quotas']))
         self.assertEqual('proj-id-1', response['quotas'][0]['project_id'])
 
-    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
     def test_get_all_non_admin(self, mock_policy):
         mock_policy.return_value = True
         quota_list = []
@@ -212,8 +212,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(1, len(response['quotas']))
         self.assertEqual('proj-id-2', response['quotas'][0]['project_id'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_quota(self, mock_keystone, mock_policy):
         mock_policy.return_value = True
         quota_dict = apiutils.quota_post_data()
@@ -222,8 +222,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
         self.assertEqual(quota_dict['project_id'], response.json['project_id'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_zero_quota(self, mock_keystone, mock_policy):
         mock_policy.return_value = True
         quota_dict = apiutils.quota_post_data(hard_limit=0)
@@ -233,7 +233,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(quota_dict['project_id'], response.json['project_id'])
         self.assertEqual(quota_dict['hard_limit'], response.json['hard_limit'])
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_quota_project_id_not_found(self, mock_keystone):
         keystone = mock.MagicMock()
         keystone.client.get_project\
@@ -245,7 +245,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_quota_invalid_resource(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         quota_dict['resource'] = 'invalid-res'
@@ -254,7 +254,7 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_quota_invalid_hard_limit(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         quota_dict['hard_limit'] = -10
@@ -263,8 +263,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_create_quota_no_project_id(self, mock_keystone, mock_policy):
         mock_policy.return_value = True
         quota_dict = apiutils.quota_post_data()
@@ -274,8 +274,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_patch_quota(self, mock_keystone, mock_policy):
         mock_policy.return_value = True
         quota_dict = apiutils.quota_post_data(hard_limit=5)
@@ -291,8 +291,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(202, response.status_int)
         self.assertEqual(20, response.json['hard_limit'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_patch_quota_not_found(self, mock_keystone, mock_policy):
         mock_policy.return_value = True
         quota_dict = apiutils.quota_post_data()
@@ -309,8 +309,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch("magnum.common.policy.enforce")
-    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch("magnum.common.policy.enforce", autospec=True)
+    @mock.patch.object(clients.OpenStackClients, 'keystone', autospec=True)
     def test_delete_quota(self, mock_keystone, mock_policy):
         mock_policy.return_value = True
         quota_dict = apiutils.quota_post_data()

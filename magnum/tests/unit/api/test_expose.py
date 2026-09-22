@@ -18,12 +18,12 @@ from magnum.tests import base
 
 class TestExpose(base.BaseTestCase):
 
-    @mock.patch('wsmeext.pecan.wsexpose')
+    @mock.patch('wsmeext.pecan.wsexpose', autospec=True)
     def test_expose_with_rest_content_types(self, mock_pecan):
         self.assertTrue(expose.expose(rest_content_types='json'))
         mock_pecan.assert_called_with(rest_content_types='json')
 
-    @mock.patch('wsmeext.pecan.wsexpose')
+    @mock.patch('wsmeext.pecan.wsexpose', autospec=True)
     def test_expose_without_rest_content_types(self, mock_pecan):
         self.assertTrue(expose.expose())
         mock_pecan.assert_called_once_with(rest_content_types=('json',))

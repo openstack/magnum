@@ -41,7 +41,7 @@ class TestClusterObject(base.DbTestCase):
         self.fake_cluster['health_status'] = 'HEALTHY'
         self.fake_cluster['health_status_reason'] = {}
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid', autospec=True)
     def test_get_by_id(self, mock_cluster_template_get):
         cluster_id = self.fake_cluster['id']
         with mock.patch.object(self.dbapi, 'get_cluster_by_id',
@@ -54,7 +54,7 @@ class TestClusterObject(base.DbTestCase):
             self.assertEqual(cluster.cluster_template_id,
                              cluster.cluster_template.uuid)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid', autospec=True)
     def test_get_by_uuid(self, mock_cluster_template_get):
         uuid = self.fake_cluster['uuid']
         with mock.patch.object(self.dbapi, 'get_cluster_by_uuid',
@@ -67,7 +67,7 @@ class TestClusterObject(base.DbTestCase):
             self.assertEqual(cluster.cluster_template_id,
                              cluster.cluster_template.uuid)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid', autospec=True)
     def test_get_by_name(self, mock_cluster_template_get):
         name = self.fake_cluster['name']
         with mock.patch.object(self.dbapi, 'get_cluster_by_name',
@@ -84,7 +84,7 @@ class TestClusterObject(base.DbTestCase):
         self.assertRaises(exception.InvalidIdentity,
                           objects.Cluster.get, self.context, 'not-a-uuid')
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid', autospec=True)
     def test_list(self, mock_cluster_template_get):
         with mock.patch.object(self.dbapi, 'get_cluster_list',
                                autospec=True) as mock_get_list:
@@ -98,7 +98,7 @@ class TestClusterObject(base.DbTestCase):
             self.assertEqual(clusters[0].cluster_template_id,
                              clusters[0].cluster_template.uuid)
 
-    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid', autospec=True)
     def test_list_all(self, mock_cluster_template_get):
         with mock.patch.object(self.dbapi, 'get_cluster_list',
                                autospec=True) as mock_get_list:
