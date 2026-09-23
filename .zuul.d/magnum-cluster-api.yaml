@@ -13,6 +13,10 @@
       - opendev.org/openstack/octavia
       - opendev.org/openstack/ovn-octavia-provider
       - opendev.org/openstack/python-magnumclient
+    files:
+      - ^magnum/
+    irrelevant-files:
+      - ^magnum/tests/
     vars:
       devstack_plugins:
         barbican: https://github.com/openstack/barbican
