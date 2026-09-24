@@ -14,9 +14,11 @@
       - opendev.org/openstack/ovn-octavia-provider
       - opendev.org/openstack/python-magnumclient
     files:
-      - ^magnum/
+      - ^magnum/.*$
+      - ^tox.ini$
     irrelevant-files:
-      - ^magnum/tests/
+      - ^magnum/tests/.*$
+      - ^tox.ini$
     vars:
       devstack_plugins:
         barbican: https://github.com/openstack/barbican
