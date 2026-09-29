@@ -43,8 +43,7 @@ def upgrade():
         sa.Column('project_id', sa.String(length=255), nullable=True),
         sa.Column('user_id', sa.String(length=255), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_unique_constraint("uniq_x509keypair0uuid",
                                 "x509keypair", ["uuid"])

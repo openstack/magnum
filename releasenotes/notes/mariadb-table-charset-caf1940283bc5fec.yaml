@@ -1,0 +1,17 @@
+---
+fixes:
+  - |
+    Magnum's tables no longer declare an explicit ``UTF8`` character set in
+    their creation migrations, and ``models.table_args()`` no longer passes
+    ``mysql_charset``. All tables now defer to the ``magnum`` database's own
+    default character set and collation, as deployment tools already create
+    it consistently. Previously, some tables declared a bare ``CHARACTER
+    SET`` and others declared none at all. From MariaDB 11.5 a bare
+    ``CHARACTER SET`` stopped resolving to the same collation as the
+    database default (MDEV-25829), so a table that declared the charset and
+    one that did not could end up with different collations. This broke new
+    deployments in the ``nodegroups_v2`` migration, which joins the
+    ``nodegroup`` and ``cluster`` tables, with ``Illegal mix of collations
+    (utf8mb3_general_ci,IMPLICIT) and (utf8mb3_uca1400_ai_ci,IMPLICIT) for
+    operation '='``. Existing deployments are unaffected, because the
+    migrations that create these tables have already run for them.

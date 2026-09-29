@@ -35,6 +35,5 @@ def upgrade():
         sa.Column('bay_uuid', sa.String(length=36), nullable=True),
         sa.Column('conductor_id', sa.String(length=64), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
