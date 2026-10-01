@@ -49,6 +49,7 @@
           MAGNUM_GUEST_IMAGE_URL: "https://github.com/vexxhost/capo-image-elements/releases/download/{{ kube_version_dir }}/ubuntu-24.04-{{ kube_version }}.qcow2"
           MAGNUM_GUEST_IMAGE_EXTRA_PROPERTIES: "--property kube_version={{ kube_version }}"
           OCTAVIA_NODE: standalone
+          MYSQL_SERVICE_NAME: mariadb
           GLANCE_LIMIT_IMAGE_SIZE_TOTAL: 5000
           SERVICE_TIMEOUT: 120
       devstack_local_conf:
