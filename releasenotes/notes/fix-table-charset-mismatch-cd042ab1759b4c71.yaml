@@ -1,0 +1,13 @@
+---
+fixes:
+  - |
+    The ``nodegroup``, ``federation`` and ``magnum_service`` tables were
+    created without an explicit charset, unlike every other magnum table.
+    Deployments where the database itself is created without an explicit
+    charset (for example kolla-ansible) could end up with these tables on
+    a different charset/collation than ``cluster``, causing queries that
+    join ``nodegroup.cluster_id`` against ``cluster.uuid`` to fail with an
+    "Illegal mix of collations" error -- most notably after upgrading to
+    MariaDB 11.6+, where the server's own default charset changed to
+    ``utf8mb4``. A new migration aligns these tables to whatever charset
+    and collation ``cluster`` already uses.
