@@ -38,8 +38,7 @@ def upgrade():
         sa.Column('resource', sa.String(length=255), nullable=True),
         sa.Column('hard_limit', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_unique_constraint(
         "uniq_quotas0project_id0resource",

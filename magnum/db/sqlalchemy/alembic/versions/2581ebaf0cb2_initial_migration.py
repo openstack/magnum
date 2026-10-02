@@ -45,8 +45,7 @@ def upgrade():
         sa.Column('minions_address', sa.Text(), nullable=True),
         sa.Column('stack_id', sa.String(length=255), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_table(
         'baymodel',
@@ -62,8 +61,7 @@ def upgrade():
         sa.Column('dns_nameserver', String(255), nullable=True),
         sa.Column('apiserver_port', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_table(
         'container',
@@ -74,8 +72,7 @@ def upgrade():
         sa.Column('name', sa.String(length=255), nullable=True),
         sa.Column('image_id', sa.String(length=255), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_table(
         'node',
@@ -87,8 +84,7 @@ def upgrade():
         sa.Column('image_id', sa.String(length=255), nullable=True),
         sa.Column('ironic_node_id', sa.String(length=36), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_table(
         'pod',
@@ -103,8 +99,7 @@ def upgrade():
         sa.Column('labels', sa.Text(), nullable=True),
         sa.Column('status', sa.String(length=255), nullable=False),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_table(
         'service',
@@ -119,8 +114,7 @@ def upgrade():
         sa.Column('ip', sa.String(length=36), nullable=True),
         sa.Column('port', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     op.create_table(
         'replicationcontroller',
@@ -134,7 +128,6 @@ def upgrade():
         sa.Column('labels', sa.Text(), nullable=True),
         sa.Column('replicas', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
-        mysql_ENGINE='InnoDB',
-        mysql_DEFAULT_CHARSET='UTF8'
+        mysql_ENGINE='InnoDB'
     )
     # end Alembic commands

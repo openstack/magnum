@@ -36,8 +36,7 @@ CONF = magnum.conf.CONF
 def table_args():
     engine_name = urlparse.urlparse(CONF.database.connection).scheme
     if engine_name == 'mysql':
-        return {'mysql_engine': CONF.database.mysql_engine,
-                'mysql_charset': "utf8"}
+        return {'mysql_engine': CONF.database.mysql_engine}
     return None
 
 
