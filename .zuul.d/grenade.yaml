@@ -5,9 +5,11 @@
     check:
       jobs:
         - magnum-grenade
+        - magnum-grenade-slurp
     gate:
       jobs:
         - magnum-grenade
+        - magnum-grenade-slurp
 
 - job:
     name: magnum-grenade
@@ -83,3 +85,15 @@
       tempest_test_regex: ^magnum_tempest_plugin.tests.api
       tempest_exclude_regex: (test_create_list_sign_delete_clusters|test_create_cluster_with_zero_nodes)
       tox_envlist: all
+
+- job:
+    name: magnum-grenade-slurp
+    parent: magnum-grenade
+    description: |
+      Magnum grenade (upgrade) job testing the SLURP upgrade path, skipping
+      the intervening non-SLURP release.
+    vars:
+      # This is a SLURP release, so test the upgrade from the previous SLURP
+      # release (2026.1), skipping the intervening non-SLURP release
+      # (2026.2). Bump this forward on each new SLURP cycle.
+      grenade_from_branch: stable/2026.1
