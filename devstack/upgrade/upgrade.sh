@@ -26,8 +26,17 @@ set -o errexit
 
 source $TARGET_DEVSTACK_DIR/stackrc
 source $TARGET_RELEASE_DIR/magnum/devstack/lib/magnum
+source $RUN_DIR/mariadb_upgrade.sh
 
 set -o xtrace
+
+# MariaDB engine bump must happen first: magnum-db-manage upgrade below needs
+# a DB already on its final version. Accepted trade-off: by this point other
+# already-upgraded projects (keystone, nova, cinder, barbican, octavia, ...)
+# are live against this same instance and will see a brief connection blip
+# when it restarts -- not something grenade's project ordering lets us avoid
+# cleanly, so it's accepted rather than engineered around.
+upgrade_mariadb_engine
 
 [[ -d $SAVE_DIR/etc.magnum ]] || cp -pr $MAGNUM_CONF_DIR $SAVE_DIR/etc.magnum
 

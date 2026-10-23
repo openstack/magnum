@@ -32,10 +32,45 @@ function destroy {
     :
 }
 
+function _mariadb_version {
+    # Use `mariadb` rather than `mysql`: mariadb.org's mariadb-client package
+    # (installed by the mid-run engine bump) doesn't ship the `mysql` compat
+    # symlink the distro package did, and this runs both before and after
+    # that bump.
+    if command -v mariadb >/dev/null 2>&1; then
+        sudo mariadb -e "select version();" -sN | cut -d '-' -f 1
+    else
+        sudo mysql -e "select version();" -sN | cut -d '-' -f 1
+    fi
+}
+
+function verify {
+    local side=$1
+    local db_version=$(_mariadb_version)
+    if [[ "$side" == "post-upgrade" ]]; then
+        if [[ "$db_version" != 11.8* ]]; then
+            die $LINENO "resources.sh verify post-upgrade: expected MariaDB 11.8.x, got '$db_version'"
+        fi
+        echo "magnum resources verify post-upgrade: MariaDB engine confirmed at $db_version"
+    else
+        echo "magnum resources verify $side: MariaDB engine currently at $db_version"
+    fi
+}
+
+function verify_noapi {
+    echo "magnum resources verify_noapi $1: MariaDB engine currently at $(_mariadb_version)"
+}
+
 # Dispatcher
 case $1 in
     "create")
         create
+        ;;
+    "verify")
+        verify $2
+        ;;
+    "verify_noapi")
+        verify_noapi $2
         ;;
     "destroy")
         destroy
