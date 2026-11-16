@@ -25,6 +25,7 @@ source $GRENADE_DIR/functions
 set -o errexit
 
 source $TARGET_DEVSTACK_DIR/stackrc
+source $TARGET_RELEASE_DIR/magnum/devstack/settings
 source $TARGET_RELEASE_DIR/magnum/devstack/lib/magnum
 source $RUN_DIR/mariadb_upgrade.sh
 
