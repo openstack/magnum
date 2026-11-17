@@ -179,7 +179,13 @@ def validate_master_count(context, cluster):
 
 
 def validate_flavor_root_volume_size(cli, flavor, boot_volume_size):
-    """Validate flavor root volume size."""
+    """Validate flavor root volume size.
+
+    If flavor is None, skip the validation like validate_flavor() does.
+    """
+
+    if flavor is None:
+        return
 
     boot_volume_size = strutils.validate_integer(boot_volume_size,
                                                  "boot_volume_size")
