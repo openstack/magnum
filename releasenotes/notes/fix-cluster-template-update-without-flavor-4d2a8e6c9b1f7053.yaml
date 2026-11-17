@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixed updating cluster templates without ``flavor_id`` or
+    ``master_flavor_id`` failing with "Unable to find flavor None".
