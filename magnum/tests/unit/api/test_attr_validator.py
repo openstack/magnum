@@ -398,6 +398,12 @@ class TestAttrValidator(base.BaseTestCase):
             mock_os_cli, 'test_flavor', boot_volume_size)
         self.assertTrue(mock_nova.flavors.called)
 
+    def test_validate_flavor_root_volume_size_with_no_flavor(self):
+        mock_os_cli = mock.MagicMock()
+        attr_validator.validate_flavor_root_volume_size(
+            mock_os_cli, None, 0)
+        self.assertFalse(mock_os_cli.nova.called)
+
     def test_validate_flavor_root_volume_size_with_invalid_resources(self):
         boot_volume_size = 0
         mock_flavor = mock.MagicMock()
