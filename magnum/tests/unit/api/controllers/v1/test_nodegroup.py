@@ -16,6 +16,7 @@
 import datetime
 from unittest import mock
 
+from oslo_utils import fixture as utils_fixture
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 
@@ -704,11 +705,10 @@ class TestPatch(NodeGroupControllerTest):
         nodegroup.save()
         return nodegroup
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_replace_ok(self, mock_utcnow):
+    def test_replace_ok(self):
         max_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
 
         response = self.patch_json(self.url + self.nodegroup.uuid,
                                    [{'path': '/max_node_count',
@@ -723,11 +723,10 @@ class TestPatch(NodeGroupControllerTest):
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_replace_ok_by_name(self, mock_utcnow):
+    def test_replace_ok_by_name(self):
         max_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
 
         response = self.patch_json(self.url + self.nodegroup.name,
                                    [{'path': '/max_node_count',
@@ -827,10 +826,9 @@ class TestPatch(NodeGroupControllerTest):
         self.assertEqual(409, response.status_code)
         self.assertIsNotNone(response.json['errors'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_remove_ok(self, mock_utcnow):
+    def test_remove_ok(self):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
 
         response = self.patch_json(self.url + self.nodegroup.name,
                                    [{'path': '/max_node_count',
@@ -844,10 +842,9 @@ class TestPatch(NodeGroupControllerTest):
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_remove_min_node_count(self, mock_utcnow):
+    def test_remove_min_node_count(self):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
 
         response = self.patch_json(self.url + self.nodegroup.name,
                                    [{'path': '/min_node_count',

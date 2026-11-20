@@ -15,6 +15,7 @@ from unittest import mock
 from urllib import parse as urlparse
 
 from oslo_config import cfg
+from oslo_utils import fixture as utils_fixture
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from webtest.app import AppError
@@ -461,12 +462,11 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_code)
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_replace_singular(self, mock_utcnow):
+    def test_replace_singular(self):
         name = 'cluster_model_example_B'
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
 
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
         response = self.patch_json('/clustertemplates/%s' %
                                    self.cluster_template.uuid,
                                    [{'path': '/name', 'value': name,
@@ -689,12 +689,10 @@ class TestPost(api_base.FunctionalTest):
         self.addCleanup(p.stop)
 
     @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_create_cluster_template(self, mock_utcnow,
-                                     mock_image_data):
+    def test_create_cluster_template(self, mock_image_data):
         bdict = apiutils.cluster_template_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'ubuntu'}
 
@@ -1253,13 +1251,11 @@ class TestPost(api_base.FunctionalTest):
                           bdict)
 
     @mock.patch('magnum.api.attr_validator.validate_image', autospec=True)
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_create_cluster_template_with_multi_dns(self, mock_utcnow,
-                                                    mock_image_data):
+    def test_create_cluster_template_with_multi_dns(self, mock_image_data):
         bdict = apiutils.cluster_template_post_data(
             dns_nameserver="8.8.8.8,114.114.114.114")
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'ubuntu'}
 

@@ -15,6 +15,7 @@ from unittest import mock
 
 from oslo_config import cfg
 from oslo_serialization import jsonutils
+from oslo_utils import fixture as utils_fixture
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from wsme import types as wtypes
@@ -360,11 +361,10 @@ class TestPatch(api_base.FunctionalTest):
         cluster.save()
         return cluster
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_replace_ok(self, mock_utcnow):
+    def test_replace_ok(self):
         new_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
 
         response = self.patch_json('/clusters/%s' % self.cluster_obj.uuid,
                                    [{'path': '/node_count',
@@ -383,13 +383,12 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_replace_health_status_ok(self, mock_utcnow):
+    def test_replace_health_status_ok(self):
         new_health_status = 'HEALTHY'
         new_health_status_reason = {'api': 'ok'}
         health_status_reason_dumps = jsonutils.dumps(new_health_status_reason)
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
         old_node_count = self.cluster_obj.default_ng_worker.node_count
         db_utils.create_test_nodegroup(cluster_id=self.cluster_obj.uuid,
                                        name='non_default_ng')
@@ -419,11 +418,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
-    @mock.patch('oslo_utils.timeutils.utcnow', autospec=True)
-    def test_replace_ok_by_name(self, mock_utcnow):
+    def test_replace_ok_by_name(self):
         new_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
-        mock_utcnow.return_value = test_time
+        self.useFixture(utils_fixture.TimeFixture(test_time))
 
         response = self.patch_json('/clusters/%s' % self.cluster_obj.name,
                                    [{'path': '/node_count',
